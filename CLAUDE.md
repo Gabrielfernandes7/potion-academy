@@ -40,6 +40,8 @@ src/
   input/touch.ts           # entrada por toque (d-pad e botões em DOM -> jogo)
   textures/                # texturas procedurais (terrain, potions, roo, entities, hud, menu)
   textures/rooGeometry.ts  # constantes do sprite da Roo (sem Phaser, testável)
+  textures/witch.ts        # sprite da Belladona (chefe)
+  sprites.ts + sprites.html # catálogo de todos os sprites (abra /sprites.html no dev)
   scenes/BootScene.ts      # gera texturas e abre o menu
   scenes/MenuScene.ts      # menu: Roo mexendo uma poção no caldeirão (animado)
   scenes/MainScene.ts      # gameplay (câmera deslocada abaixo da HUD)
@@ -48,12 +50,16 @@ src/
   game/rewards.ts          # tabela de drop (rollReward), texturas e brilho dos itens
   game/hudState.ts         # contrato de eventos MainScene <-> HudScene, timerView
   game/shopRules.ts        # estados dos cartões da loja (puro, testável)
+  game/boss.ts             # regras puras do chefe: habilidades, áreas, alvos (testável)
+  game/BossController.ts   # Belladona: movimento, ataques com aviso, dano, fúria, derrota
+  game/balance.ts          # regra de equilíbrio das poções (testável)
   game/events.ts           # eventos globais (TEXTURES_READY)
   game/launcher.ts         # cria o Phaser.Game ao abrir a página; navegação menu/partida
   ui/dom.ts                # helpers de DOM (byId, setShown)
   ui/theme.ts              # lê cores/fontes das variáveis CSS para o canvas
   ui/fonts.ts              # espera as fontes antes de iniciar a partida
   ui/menu.ts               # menu principal em DOM (por cima do canvas)
+  ui/help.ts               # janela "Como jogar" (botão ?)
   ui/overlays.ts           # pausa e game over
   ui/shop.ts               # Caldeirão de Magia (loja)
   styles/main.css          # todo o CSS (tokens em :root)
@@ -73,9 +79,15 @@ tests/                     # testes unitários (lógica pura, storage, toque, fa
 
 ## Game Design Documentation
 
+Sprites: veja `docs/09-sprites.md` (e `/sprites.html`). Equilíbrio: veja `docs/10-equilibrio.md`; ao mudar números, rode `npm run test`.
+
 O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/`. Antes de mudar regras ou nomes, leia `docs/README.md` e os arquivos relevantes. Use sempre os nomes do `docs/04-glossario.md` em textos e telas. Ao criar uma mecânica, siga `docs/08-como-criar-uma-mecanica.md` e registre a decisão em `docs/06-decisoes.md`.
 
 ## Key Technical Patterns
+
+**Fases e reinício**: a `MainScene` recebe `{ stage: 1 }` ou `{ stage: 2, carry }`. **Sempre passe os dados explicitamente** ao reiniciar (`scene.restart({ stage: 1 })`): sem eles o Phaser reaproveita os do reinício anterior e voltaria à fase 2. Na fase 2 não há porta, gemas nem inimigos comuns; `BossController` cuida da Belladona, que só perde vida por `onExplosion()` de poções da jogadora. Todos os tempos do chefe usam o `delta` do jogo (não timers do navegador), então pausam junto.
+
+**Janela de ajuda**: com `isHelpOpen()`, `MainScene.update()` congela tudo (tweens, animações, entrada) e zera as teclas, para nada acontecer ao fechar.
 
 **Scenes**: `MainScene` launches `HudScene`. `scene.restart()` re-runs `MainScene.init()`, which resets all per-run state (hides the pause overlay, clears touch input and picks a new music track). `HudScene` persists across restarts and is stopped together with `Main` when going back to the menu.
 

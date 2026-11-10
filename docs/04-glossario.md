@@ -16,3 +16,8 @@ Use sempre estes nomes, em qualquer tela, texto ou conversa.
 | Muralha | a parede de pedra indestrutível | parede |
 | Porta | a saída, aberta com 3 gemas | saída |
 | Roo | a personagem | canguru, bruxa (na tela) |
+| Belladona | a bruxa chefe da fase 2 | vilã, bruxa má |
+| Fase | cada etapa do jogo (1 laboratório, 2 duelo) | nível |
+| Aviso | a marcação colorida no chão antes de um ataque | sombra, alvo |
+| Furiosa | estado da Belladona com metade da vida ou menos | enraivecida |
+| Ajuda | a janela "Como jogar" (botão ?) | tutorial |
