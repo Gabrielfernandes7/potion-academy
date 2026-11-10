@@ -78,6 +78,16 @@ export const TRACKS: Track[] = [
   },
 ];
 
+// Faixa do duelo contra a Belladona: um pouco mais rápida e tensa, mas ainda macia.
+// Fica fora de TRACKS para não entrar no sorteio das partidas normais.
+export const BOSS_TRACK: Track = {
+  id: 'duelo', name: 'Duelo de Alquimistas', bpm: 84, tonic: 57, scale: [0, 3, 5, 7, 10], style: 'arp', density: 0.9,
+  chords: [
+    { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
+    { root: 3, tones: [0, 4, 7] }, { root: 10, tones: [0, 4, 7] },
+  ],
+};
+
 // Gerador pseudoaleatório com semente (mulberry32): mesma semente, mesma música.
 export function mulberry32(seed: number): () => number {
   let a = seed >>> 0;

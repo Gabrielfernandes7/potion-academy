@@ -9,6 +9,8 @@ export interface GameOverData {
   maxHp: number;
   blocksDestroyed: number;
   timeLeft: number;
+  stage: number;
+  bossDefeated: boolean;
 }
 
 export function setPauseVisible(visible: boolean): void {
@@ -21,7 +23,7 @@ function tile(label: string, value: string): string {
 
 export function showGameOver(d: GameOverData): void {
   const title = byId('go-title');
-  title.textContent = d.won ? 'VITÓRIA!' : 'GAME OVER';
+  title.textContent = d.bossDefeated ? 'BELLADONA DERROTADA!' : (d.won ? 'VITÓRIA!' : 'GAME OVER');
   title.className = d.won ? 'win' : 'lose';
   byId('go-stats').innerHTML = [
     tile('POÇÃO', String(d.coins)),
@@ -29,6 +31,7 @@ export function showGameOver(d: GameOverData): void {
     tile('VIDA', `${d.hp}/${d.maxHp}`),
     tile('BLOCOS', String(d.blocksDestroyed)),
     tile('TEMPO', `${Math.ceil(d.timeLeft / 1000)} s`),
+    tile('FASE', String(d.stage)),
   ].join('');
   setShown('gameover-overlay', true);
 }

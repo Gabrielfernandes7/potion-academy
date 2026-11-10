@@ -12,6 +12,7 @@ import { touch } from './input/touch';
 import { byId } from './ui/dom';
 import { bindMenuButtons, isMenuVisible } from './ui/menu';
 import { isShopOpen, openShop, renderShop } from './ui/shop';
+import { bindHelp } from './ui/help';
 
 function setupLayout(): void {
   const root = document.documentElement;
@@ -57,7 +58,20 @@ function bindTrackName(): void {
 }
 
 function bindButtons(): void {
+  // o botão de som sempre reflete se a música está tocando de fato
+  audio.onPlayingChange = on => setMusicButton(on);
+  // qualquer toque ou tecla retoma o áudio se o navegador o tiver suspendido
+  const wake = (): void => audio.unlock();
+  document.addEventListener('pointerdown', wake, { passive: true });
+  document.addEventListener('keydown', wake);
+
   bindMenuButtons({ play, shop: openShop });
+  bindHelp();
+  // botões do topo não ficam com o foco: senão Espaço/Enter no jogo os apertariam de novo
+  document.addEventListener('click', e => {
+    const chip = (e.target as HTMLElement).closest('.chip-btn');
+    if (chip instanceof HTMLElement && chip.id !== 'help-btn') chip.blur();
+  });
   byId('play-btn').onclick = play;
   byId('shop-back-btn').onclick = showMenu;
   byId('retry-btn').onclick = () => retryGame();

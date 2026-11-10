@@ -18,15 +18,30 @@ export const CONFIG = {
   phaseTime: 90000,
   enemySpawnEvery: 8,
   maxEnemies: 5,
-  maxBombUp: 4,
-  maxFireUp: 4,
-  maxSpeedUp: 3,
+  maxBombUp: 3,
+  maxFireUp: 3,
+  maxSpeedUp: 2,
   timeUpBonus: 15000,
   overtimeDamageInterval: 1200,
   baseMoveDuration: 220,
   sleepAfterMs: 5000,   // parada sem input por este tempo => dorme
   zzzIntervalMs: 1400,  // intervalo entre os 'z' flutuantes
   hudHeight: 56,        // faixa da HUD acima da grade, em px do canvas
+
+  // ---- fase 2: o chefe (Belladona) ----
+  bossHp: 8,
+  bossStageTime: 120000,
+  bossMoveInterval: 1100,
+  bossHitInvuln: 1400,        // proteção do chefe depois de levar um golpe
+  bossFirstCastMs: 2600,      // quanto ela espera antes da primeira habilidade
+  bossCooldownMs: 3400,       // intervalo entre habilidades (vida acima de 50%)
+  bossFuriousCooldownMs: 2300, // intervalo quando a vida chega a 50% ou menos
+  bossTelegraphMs: 1200,      // aviso no chão antes de a poção cair
+  bossRainDrops: 4,
+  bossBlinkHideMs: 700,
+  bossBlockChance: 0.35,      // menos caixotes: a arena é mais aberta
+  bossVictoryBonus: 40,       // POÇÃO ganha ao derrotá-la
+  stageClearHeal: 1,          // vida recuperada ao passar da fase 1 para a 2
 };
 
 // Tamanho interno do canvas: grade + faixa da HUD.
@@ -67,10 +82,10 @@ export interface BombDef {
 }
 
 export const BOMB_TYPES: Record<BombId, BombDef> = {
-  normal: { label: 'Poção de Fogo',  radius: 2, fuse: 2000,     cost: 0,   desc: 'Poção básica. Pequeno raio de explosão.', element: 'fire' },
-  mega:   { label: 'Poção Aqua',     radius: 4, fuse: 2200,     cost: 60,  desc: 'Raio expandido. Poder alquímico da água.', element: 'water' },
-  pierce: { label: 'Poção Telúrica', radius: 3, fuse: 1800,     cost: 90,  desc: 'Atravessa tudo. Poder da terra.', element: 'earth', pierce: true },
-  remote: { label: 'Poção Etérea',   radius: 3, fuse: Infinity, cost: 120, desc: 'Ative com D. Energia arcana do éter.', element: 'air', remote: true },
+  normal: { label: 'Poção de Fogo',  radius: 2, fuse: 2000,     cost: 0,   desc: 'Poção básica: rápida e confiável.', element: 'fire' },
+  mega:   { label: 'Poção Aqua',     radius: 3, fuse: 2400,     cost: 60,  desc: 'Alcance maior, mas o fusível é mais lento.', element: 'water' },
+  pierce: { label: 'Poção Telúrica', radius: 2, fuse: 2200,     cost: 90,  desc: 'Atravessa caixotes e limpa uma fileira.', element: 'earth', pierce: true },
+  remote: { label: 'Poção Etérea',   radius: 2, fuse: Infinity, cost: 120, desc: 'Explode quando você quiser (tecla D).', element: 'air', remote: true },
 };
 
 export const BOMB_ORDER: BombId[] = ['normal', 'mega', 'pierce', 'remote'];

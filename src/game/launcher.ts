@@ -48,16 +48,17 @@ export async function startGame(): Promise<void> {
   hideGameOver();
   setMenuVisible(false);
   if (game.scene.isActive('Main')) {
-    game.scene.getScene('Main').scene.restart();
+    game.scene.getScene('Main').scene.restart({ stage: 1 });
   } else {
     game.scene.stop('Menu');
-    game.scene.start('Main');
+    game.scene.start('Main', { stage: 1 });
   }
 }
 
 export function retryGame(): void {
   hideGameOver();
-  phaserGame?.scene.getScene('Main').scene.restart();
+  // sempre recomeça da fase 1 (dados explícitos: o Phaser guarda os do último reinício)
+  phaserGame?.scene.getScene('Main').scene.restart({ stage: 1 });
 }
 
 // Volta ao menu principal (da pausa, do fim de jogo ou da loja).

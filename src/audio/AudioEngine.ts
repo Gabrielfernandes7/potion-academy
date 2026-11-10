@@ -9,7 +9,7 @@
 // O sfx é ligado pelo primeiro clique em JOGAR/COMEÇAR.
 import type { ElementId } from '../config';
 import {
-  MelodyState, NoteEvent, STEPS_PER_BAR, Track, generateBar, midiToHz, mulberry32, pickNextTrack,
+  BOSS_TRACK, MelodyState, NoteEvent, STEPS_PER_BAR, Track, generateBar, midiToHz, mulberry32, pickNextTrack,
 } from './tracks';
 
 export type SfxName = 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door';
@@ -28,8 +28,10 @@ interface VoiceOptions {
 }
 
 const MUSIC_LEVEL = 0.55;
-const LOOKAHEAD_S = 0.3; // agenda notas com esta antecedência (música estável mesmo com o navegador ocupado)
-const SCHEDULER_MS = 60;
+// Agenda notas com 1 s de antecedência: navegadores aceleram os timers de abas em segundo plano
+// e, com pouca antecedência, a música falhava em silêncio.
+const LOOKAHEAD_S = 1.0;
+const SCHEDULER_MS = 100;
 
 // Estouro da poção por elemento: acorde suave em cascata + um sopro filtrado.
 const BURST: Record<ElementId, { notes: number[]; type: OscillatorType; stagger: number; noiseHz: number }> = {
@@ -65,6 +67,8 @@ export class AudioEngine {
 
   // chamado quando a faixa muda (nome) ou a música para (null); a interface mostra o nome
   onTrackChange: ((name: string | null) => void) | null = null;
+  // chamado quando a música começa (true) ou para (false); a interface mostra o botão de som com isso
+  onPlayingChange: ((playing: boolean) => void) | null = null;
 
   constructor(private readonly makeContext?: () => AudioContext) {}
 
@@ -77,6 +81,8 @@ export class AudioEngine {
         if (!this.makeContext && !Ctor) return false;
         this.ctx = this.makeContext ? this.makeContext() : new (Ctor as typeof AudioContext)();
         this.buildGraph(this.ctx);
+        // o navegador pode suspender o áudio sozinho (troca de aba, economia de energia, ligação)
+        this.ctx.onstatechange = () => this.resumeIfNeeded();
       } catch {
         this.ctx = null;
         return false;
@@ -204,6 +210,12 @@ export class AudioEngine {
   // Cria/retoma o AudioContext. Deve ser chamado dentro de um clique (exigência dos navegadores).
   unlock(): void {
     this.ensureContext();
+    this.resumeIfNeeded();
+  }
+
+  // Se a música deveria estar tocando mas o contexto ficou suspenso, retoma.
+  resumeIfNeeded(): void {
+    if (this.ctx && this.playing && this.ctx.state !== 'running') void this.ctx.resume();
   }
 
   toggleMusic(): boolean {
@@ -228,6 +240,7 @@ export class AudioEngine {
 
   stop(): void {
     this.playing = false;
+    this.onPlayingChange?.(false);
     if (this.switchTimer) {
       clearTimeout(this.switchTimer);
       this.switchTimer = null;
@@ -241,8 +254,9 @@ export class AudioEngine {
   }
 
   // Novo jogo: sorteia outra faixa (e outra semente). Se a música está ligada, troca com fade.
-  nextTrack(): void {
-    this.chooseTrack();
+  // boss: usa a faixa fixa do duelo em vez de sortear.
+  nextTrack(boss = false): void {
+    this.chooseTrack(boss);
     if (!this.enabled) return;
     if (!this.playing) {
       if (!this.ensureContext()) return;
@@ -262,8 +276,8 @@ export class AudioEngine {
     return this.track ? this.track.name : null;
   }
 
-  private chooseTrack(): void {
-    this.track = pickNextTrack(this.track ? this.track.id : null);
+  private chooseTrack(boss = false): void {
+    this.track = boss ? BOSS_TRACK : pickNextTrack(this.track ? this.track.id : null);
     this.seed = Math.floor(Math.random() * 0xffffffff);
   }
 
@@ -287,6 +301,7 @@ export class AudioEngine {
     this.nextTime = ctx.currentTime + 0.1;
     this.fadeMusic(MUSIC_LEVEL, 0.8); // entra devagar
     this.onTrackChange?.(track.name);
+    this.onPlayingChange?.(true);
     this.scheduler = setInterval(() => this.schedule(), SCHEDULER_MS);
     this.schedule();
   }

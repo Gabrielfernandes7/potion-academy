@@ -15,6 +15,8 @@ export interface HudState {
   bombsMax: number;
   timeLeftMs: number;
   selected: BombId;
+  stage: number;
+  boss: { hp: number; maxHp: number; name: string } | null;
 }
 
 export interface TimerView {

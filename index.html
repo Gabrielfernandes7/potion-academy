@@ -13,6 +13,7 @@
     <div class="sound">
       <span id="track-name" class="track-name" aria-live="polite"></span>
       <button class="chip-btn" id="music-btn" type="button" title="Liga e desliga a música" aria-pressed="false">SOM OFF</button>
+      <button class="chip-btn help-btn" id="help-btn" type="button" title="Como jogar (tecla ?)" aria-label="Como jogar">?</button>
     </div>
   </header>
 
@@ -96,6 +97,60 @@
       <button class="big-btn alt" id="shop-back-btn" type="button">VOLTAR</button>
       <button class="big-btn" id="play-btn" type="button">COMEÇAR</button>
     </div>
+  </div>
+</div>
+
+<!-- Como jogar (botão "?") -->
+<div id="help-overlay" class="overlay overlay--help" role="dialog" aria-labelledby="help-title">
+  <div class="panel help">
+    <h2 id="help-title">COMO JOGAR</h2>
+
+    <section>
+      <h3>Objetivo</h3>
+      <p><b>Fase 1:</b> destrua caixotes com poções, pegue as <b>3 gemas</b> e chegue à porta antes do tempo acabar.</p>
+      <p><b>Fase 2:</b> enfrente a bruxa <b>Belladona</b>. Acerte-a com explosões até a vida dela acabar.</p>
+    </section>
+
+    <section>
+      <h3>Teclas</h3>
+      <table class="keys">
+        <thead><tr><th>Ação</th><th>Teclado</th><th>Celular</th></tr></thead>
+        <tbody>
+          <tr><td>Andar</td><td><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></td><td>botões de direção</td></tr>
+          <tr><td>Colocar poção</td><td><kbd>Espaço</kbd></td><td>BOMBA</td></tr>
+          <tr><td>Empurrar a poção</td><td><kbd>X</kbd></td><td>EMPURRAR</td></tr>
+          <tr><td>Explodir poção etérea</td><td><kbd>D</kbd></td><td>DETONAR</td></tr>
+          <tr><td>Escolher frasco</td><td><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></td><td>toque no seletor</td></tr>
+          <tr><td>Pausar</td><td><kbd>Enter</kbd></td><td>PAUSA</td></tr>
+          <tr><td>Recomeçar</td><td><kbd>R</kbd></td><td>botão no fim do jogo</td></tr>
+          <tr><td>Abrir esta ajuda</td><td><kbd>?</kbd> ou <kbd>H</kbd></td><td>botão ?</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h3>Os 4 frascos</h3>
+      <ul class="flasks">
+        <li style="--c:#ff6b6b"><b>1 · Fogo</b> rápida e confiável.</li>
+        <li style="--c:#74b9ff"><b>2 · Aqua</b> alcance maior, fusível mais lento.</li>
+        <li style="--c:#81c784"><b>3 · Telúrica</b> atravessa caixotes.</li>
+        <li style="--c:#c9d6df"><b>4 · Etérea</b> só explode quando você aperta <kbd>D</kbd>.</li>
+      </ul>
+      <p class="note">Frascos 2, 3 e 4 se compram no Caldeirão de Magia com POÇÃO.</p>
+    </section>
+
+    <section>
+      <h3>Dicas</h3>
+      <ul>
+        <li>Fique longe da cruz da explosão: a sua própria poção também machuca.</li>
+        <li>Caixotes e muralhas bloqueiam a explosão. Esconda-se atrás deles.</li>
+        <li>Contra a Belladona, o <b>quadrado colorido</b> no chão mostra onde a poção vai cair. Saia de lá!</li>
+        <li>Parada por alguns segundos, a Roo cochila.</li>
+      </ul>
+    </section>
+
+    <p class="hint">O jogo fica pausado enquanto esta janela está aberta.</p>
+    <button class="big-btn" id="help-close" type="button">FECHAR</button>
   </div>
 </div>
 

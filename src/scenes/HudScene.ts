@@ -43,6 +43,9 @@ export class HudScene extends Phaser.Scene {
   private coins!: ValueWithCaption;
   private gems!: ValueWithCaption;
   private coinIcon!: Img;
+  private gemIcon!: Img;
+  private bossGfx!: Phaser.GameObjects.Graphics;
+  private bossName!: Text;
   private elementText!: Text;
   private blocksValue!: Text;
   private blocksLabel!: Text;
@@ -117,12 +120,16 @@ export class HudScene extends Phaser.Scene {
     );
     this.coins.set('0');
 
-    this.add.image(492, ROW_A, 'pickup_gem').setScale(0.8).setDepth(2);
+    this.gemIcon = this.add.image(492, ROW_A, 'pickup_gem').setScale(0.8).setDepth(2);
     this.gems = new ValueWithCaption(
       this.text(506, ROW_A, '0/3', 18, t.info, true).setDepth(2),
       this.text(0, ROW_A + 1, 'GEMAS', 10, t.textMuted).setDepth(2),
     );
     this.gems.set('0/3');
+
+    // barra de vida da Belladona: ocupa o lugar das gemas na fase do chefe
+    this.bossGfx = this.add.graphics().setDepth(2).setVisible(false);
+    this.bossName = this.text(484, ROW_A - 5, 'BELLADONA', 10, '#9be564').setDepth(2).setVisible(false);
   }
 
   private createRowB(): void {
@@ -186,6 +193,7 @@ export class HudScene extends Phaser.Scene {
     if (this.lastCoins !== null && s.coins > this.lastCoins) this.pulse(this.coinIcon);
     this.lastCoins = s.coins;
     this.gems.set(`${s.gems}/${s.gemsForDoor}`);
+    this.applyBoss(s);
 
     // frascos e blocos (alinhados à direita)
     this.bombsValue.setText(`${s.bombsActive}/${s.bombsMax}`);
@@ -195,6 +203,30 @@ export class HudScene extends Phaser.Scene {
     this.blocksLabel.setX(this.blocksValue.x - this.blocksValue.width - 5);
 
     this.drawSlots(s.selected);
+  }
+
+  // Na fase do chefe, esconde as gemas e mostra a vida dela.
+  private applyBoss(s: HudState): void {
+    const boss = s.boss;
+    this.gemIcon.setVisible(!boss);
+    this.gems.value.setVisible(!boss);
+    this.gems.caption.setVisible(!boss);
+    this.bossGfx.setVisible(!!boss);
+    this.bossName.setVisible(!!boss);
+    this.bossGfx.clear();
+    if (!boss) return;
+    const x = 484;
+    const y = ROW_A + 3;
+    const w = 102;
+    const h = 9;
+    const ratio = Math.max(0, boss.hp / boss.maxHp);
+    this.bossGfx.fillStyle(0x0b2420, 1);
+    this.bossGfx.fillRoundedRect(x, y, w, h, 3);
+    this.bossGfx.fillStyle(ratio <= 0.5 ? 0xd81b60 : 0x76d83a, 1);
+    if (ratio > 0) this.bossGfx.fillRoundedRect(x + 1, y + 1, (w - 2) * ratio, h - 2, 2);
+    this.bossGfx.lineStyle(1, 0x9be564, 0.9);
+    this.bossGfx.strokeRoundedRect(x, y, w, h, 3);
+    this.bossName.setText(boss.name);
   }
 
   private drawSlots(selected: BombId): void {
