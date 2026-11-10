@@ -2,7 +2,7 @@
 // A lógica (estado/consumo) não toca no DOM, então é testável; só bind() usa o DOM.
 
 export type TouchDir = 'up' | 'down' | 'left' | 'right';
-export type TouchAction = 'bomb' | 'push' | 'detonate' | 'pause';
+export type TouchAction = 'bomb' | 'push' | 'detonate' | 'cycle' | 'pause';
 
 const DIRS: TouchDir[] = ['up', 'down', 'left', 'right'];
 

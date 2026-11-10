@@ -6,7 +6,7 @@
 // - update() retorna cedo com a loja aberta e, após gameOver/won, só trata a tecla R.
 import Phaser from 'phaser';
 import {
-  BLOCK, BOMB_TYPES, BombId, CANVAS, CONFIG, DIRS, ELEMENTS, ElementId, EMPTY, ENEMY_TYPES, EnemyKind,
+  BLOCK, BOMB_ORDER, BOMB_TYPES, BombId, CANVAS, CONFIG, DIRS, ELEMENTS, ElementId, EMPTY, ENEMY_TYPES, EnemyKind,
   LAST_STAGE, StageDef, StageTheme, WALL, isImmune, stageDef,
 } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
@@ -310,6 +310,14 @@ export class MainScene extends Phaser.Scene {
   playWalk(): void { this.refreshSprite('walk'); }
 
   // ---------- Bombas e poções ----------
+
+  // Próximo tipo de frasco que a jogadora possui (botão TROCAR no toque; os slots da HUD são pequenos demais para o dedo).
+  cycleBomb(): void {
+    const owned = BOMB_ORDER.filter(t => hasBombType(t));
+    if (owned.length === 0) return;
+    const at = owned.indexOf(this.bombType);
+    this.setBomb(owned[(at + 1) % owned.length]);
+  }
 
   setBomb(type: BombId): void {
     if (!hasBombType(type)) {
@@ -1110,6 +1118,7 @@ export class MainScene extends Phaser.Scene {
     }
 
     if (JD(this.keys.space) || touch.consumeAction('bomb')) this.placeBomb();
+    if (touch.consumeAction('cycle')) this.cycleBomb();
     if (JD(this.keys.x) || touch.consumeAction('push')) this.pushAbility();
     if (JD(this.keys.d) || touch.consumeAction('detonate')) this.detonateRemote();
     if (JD(this.keys.one)) this.setBomb('normal');
