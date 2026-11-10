@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Potion Academy</title>
+</head>
+<body>
+<h1>POTION ACADEMY</h1>
+<div id="hud">
+  <div class="stat">
+    <span>VIDA</span>
+    <div class="hp-bar"><div class="bar-bg"><div class="bar-fill" id="hp-fill" style="width:100%"></div></div></div>
+  </div>
+  <div class="stat timer" id="timer-stat"><span>TEMPO</span><b id="timer">90</b></div>
+  <div class="stat">POÇÃO: <b id="coins">0</b></div>
+  <div class="stat gem">GEMAS: <b id="gems">0/3</b></div>
+  <div class="stat">Blocos: <b id="blocks">0</b></div>
+  <div class="stat">Poções: <b id="bombs">0/2</b></div>
+  <div class="stat element">ALQUIMIA: <b id="element-label">FOGO</b></div>
+  <button class="music-btn" id="music-btn" title="Som">SOM OFF</button>
+</div>
+<div id="game"></div>
+<div class="alchemy-legend"><span style="color:#ff7043">△ Enxofre · Fogo</span><span style="color:#42a5f5">▽ Mercúrio · Água</span><span style="color:#8bc34a">◇ Sal · Terra</span><span style="color:#c9d6df">☿ Éter · Ar</span></div>
+<div id="controls">
+  <span><kbd>↑↓←→</kbd> Mover</span>
+  <span><kbd>Espaço</kbd> Bomba</span>
+  <span><kbd>X</kbd> Habilidade</span>
+  <span><kbd>D</kbd> Detonar remota</span>
+  <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> Bomba</span>
+  <span><kbd>R</kbd> Reiniciar</span>
+</div>
+<div id="shop-overlay" class="overlay show">
+  <h2>CALDEIRÃO DE MAGIA</h2>
+  <div class="coin-line">POÇÃO: <b id="shop-coins">0</b></div>
+  <div class="shop-grid" id="shop-items"></div>
+  <button class="big-btn" id="play-btn">COMEÇAR</button>
+</div>
+<div id="pause-overlay" class="pause-overlay">
+  <h2>PAUSADO</h2>
+  <p>Pressione <kbd>ENTER</kbd> para retomar</p>
+</div>
+<div id="gameover-overlay" class="overlay">
+  <h2 id="go-title">GAME OVER</h2>
+  <div class="coin-line" id="go-stats"></div>
+  <div class="coin-line" id="go-stats2" style="font-size:14px; color:#8d96a5;"></div>
+  <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+    <button class="big-btn" id="retry-btn">TENTAR NOVAMENTE</button>
+    <button class="big-btn alt" id="shop-btn">CALDEIRÃO</button>
+  </div>
+</div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
