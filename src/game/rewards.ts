@@ -1,3 +1,5 @@
+import { POWERUP_COLORS } from '../textures/entities';
+
 // Tabela de drop: o que sai quando um bloco é destruído.
 // Probabilidades acumuladas: roll < limite => tipo.
 
@@ -21,6 +23,15 @@ const REWARD_TABLE: ReadonlyArray<readonly [number, PickupType]> = [
   [0.98, 'speed_up'],
   [1.00, 'time_up'],
 ];
+
+// Brilho suave atrás dos itens que merecem atenção: power-ups e gemas (a gema abre a porta).
+export const PICKUP_HALO: Partial<Record<PickupType, number>> = {
+  gem: 0x4dd0e1,
+  bomb_up: POWERUP_COLORS.bomb_up,
+  fire_up: POWERUP_COLORS.fire_up,
+  speed_up: POWERUP_COLORS.speed_up,
+  time_up: POWERUP_COLORS.time_up,
+};
 
 export const PICKUP_TEXTURE: Record<PickupType, string> = {
   coin: 'pickup_coin',
