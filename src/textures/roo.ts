@@ -16,7 +16,7 @@ import { ROO_HEAD_ROOM, rooTextureHeight } from './rooGeometry';
 export type RooDir = 'down' | 'up' | 'side';
 export type RooPose = 'awake' | 'sleep' | 'stir';
 
-export { ROO_HEAD_ROOM, ROO_STIR_HAND, rooOriginY, rooTextureHeight } from './rooGeometry';
+export { ROO_HEAD_ROOM, rooFootOriginY, rooOriginY, rooStirPoints, rooTextureHeight } from './rooGeometry';
 
 type Pt = readonly [number, number];
 
@@ -216,14 +216,7 @@ export function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose
     g.fillCircle(cx + 2, cy - 21, 1.2);
 
     if (stir) {
-      // braço estendido para a frente (a varinha é desenhada pelo menu)
-      g.lineStyle(5.5, FUR);
-      g.beginPath();
-      g.moveTo(cx + 5, cy + 1);
-      g.lineTo(cx + 14, cy + 4);
-      g.strokePath();
-      g.fillStyle(0xffb066);
-      g.fillCircle(cx + 15.5, cy + 4, 3.4);
+      // pose "mexer": sem braço e sem varinha no sprite; a cena do menu os desenha em movimento
     } else {
       // braço da frente + varinha (em repouso a varinha cai)
       g.fillStyle(FUR);

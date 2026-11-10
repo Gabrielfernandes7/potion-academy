@@ -7,6 +7,7 @@ import { drawRooTextures } from './roo';
 import { drawEntities } from './entities';
 import { drawHudIcons } from './hud';
 import { drawMenuTextures } from './menu';
+import { drawWitchTextures } from './witch';
 import { CONFIG } from '../config';
 
 export function generateTextures(scene: Phaser.Scene): void {
@@ -17,5 +18,6 @@ export function generateTextures(scene: Phaser.Scene): void {
   drawEntities(make);
   drawHudIcons(g);
   drawMenuTextures(g);
+  drawWitchTextures(g, CONFIG.tile);
   g.destroy();
 }

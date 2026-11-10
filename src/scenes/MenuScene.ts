@@ -1,12 +1,15 @@
 // Cena do menu principal: o laboratório, com a Roo mexendo uma poção no caldeirão.
 // O título e os botões são DOM (por cima do canvas, ver #menu em index.html).
 //
-// Composição (coordenadas do canvas): parede e prateleiras no alto, chão embaixo,
-// Roo à esquerda com o braço estendido e a varinha mergulhada no caldeirão à direita.
-// A ponta da varinha percorre uma elipse sobre o líquido; o líquido muda de cor entre os elementos.
+// Movimento da Roo:
+// - o corpo se inclina a partir dos pés no ritmo da varinha e "respira" (leve esticar);
+// - o braço é desenhado pela cena (ombro até a mão), e a mão faz um círculo pequeno em sincronia
+//   com a ponta da varinha, então o braço de fato acompanha o movimento;
+// - de tempos em tempos ela joga um ingrediente (um frasco da prateleira) no caldeirão: ela pula,
+//   mexe mais rápido por um instante e o líquido muda para a cor do elemento do frasco.
 import Phaser from 'phaser';
 import { BOMB_TYPES, CANVAS, CONFIG, ELEMENTS } from '../config';
-import { ROO_STIR_HAND, rooOriginY } from '../textures/roo';
+import { rooFootOriginY, rooStirPoints, rooTextureHeight } from '../textures/rooGeometry';
 
 const W = CANVAS.width;
 const H = CANVAS.height;
@@ -17,7 +20,6 @@ const SHELF_Y = 214;
 const ROO_X = 205;
 const ROO_SCALE = 3.3;
 const FEET_Y = 411;
-const ROO_Y = FEET_Y - 17 * ROO_SCALE; // 17 px da textura entre a origem do sprite e os pés
 
 const CAULDRON_X = 412;
 const RIM_Y = 368;
@@ -27,23 +29,23 @@ const LIQ_H = 32;
 
 const TIP_RX = 38; // raio horizontal do giro da ponta da varinha
 const TIP_RY = 9;
-const STIR_SPEED = 3.4; // rad/s
+const STIR_SPEED = 2.6; // rad/s
+const HAND_RX = 5.5; // a mão faz um círculo pequeno (px da textura)
+const HAND_RY = 3.2;
+const FUR = 0xff9a3a;
 
 type Pt = { x: number; y: number };
 type Gfx = Phaser.GameObjects.Graphics;
+interface ShelfPotion { x: number; y: number; key: string }
 
 const SHELF_LEFT = ['bomb_normal', 'bomb_remote', 'bomb_mega', 'bomb_pierce', 'bomb_normal'];
 const SHELF_RIGHT = ['bomb_pierce', 'bomb_mega', 'bomb_normal', 'bomb_remote', 'bomb_mega'];
+const START_LIQUID = 0x4fdc8a;
 
-// Cor do líquido: parte do verde do caldeirão e passa pelos 4 elementos.
-const LIQUID_COLORS = [
-  0x4fdc8a,
-  ELEMENTS.fire.color,
-  ELEMENTS.water.color,
-  ELEMENTS.earth.color,
-  ELEMENTS.air.color,
-];
-const COLOR_HOLD_MS = 3200;
+function elementOf(textureKey: string): (typeof ELEMENTS)[keyof typeof ELEMENTS] {
+  const id = textureKey.replace('bomb_', '') as keyof typeof BOMB_TYPES;
+  return ELEMENTS[BOMB_TYPES[id].element];
+}
 
 function mixColor(a: number, b: number, t: number): number {
   const ca = Phaser.Display.Color.ValueToColor(a);
@@ -54,13 +56,20 @@ function mixColor(a: number, b: number, t: number): number {
 
 export class MenuScene extends Phaser.Scene {
   private t = 0;
-  private colorMs = 0;
+  private stirAngle = 0;
+  private boost = 0; // 0 a 1: mexe mais rápido logo depois de jogar um ingrediente
+  private tossMs = 0;
+  private liquidFrom = START_LIQUID;
+  private liquidTo = START_LIQUID;
+  private liquidMix = 1;
   private roo!: Phaser.GameObjects.Sprite;
+  private arm!: Gfx;
   private liquid!: Gfx;
   private wand!: Gfx;
   private tip!: Phaser.GameObjects.Image;
   private tipGlow!: Phaser.GameObjects.Image;
   private trail: Pt[] = [];
+  private shelfPotions: ShelfPotion[] = [];
 
   constructor() {
     super('Menu');
@@ -68,8 +77,14 @@ export class MenuScene extends Phaser.Scene {
 
   create(): void {
     this.t = 0;
-    this.colorMs = 0;
+    this.stirAngle = 0;
+    this.boost = 0;
+    this.tossMs = 1800; // o primeiro ingrediente cai logo, para o menu mostrar vida
+    this.liquidFrom = START_LIQUID;
+    this.liquidTo = START_LIQUID;
+    this.liquidMix = 1;
     this.trail = [];
+    this.shelfPotions = [];
     this.buildBackground();
     this.buildTorch();
     this.buildCauldron();
@@ -109,15 +124,15 @@ export class MenuScene extends Phaser.Scene {
     const step = (x1 - x0 - 52) / (potions.length - 1);
     potions.forEach((key, i) => {
       const px = x0 + 26 + i * step;
-      const id = key.replace('bomb_', '') as keyof typeof BOMB_TYPES;
-      const color = ELEMENTS[BOMB_TYPES[id].element].color;
+      const color = elementOf(key).color;
       const glow = this.add.image(px, y - 18, 'menu_puff').setScale(1.3).setTint(color)
         .setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.18).setDepth(2);
       this.tweens.add({
         targets: glow, alpha: { from: 0.12, to: 0.34 }, duration: 1400 + i * 170,
         yoyo: true, repeat: -1, delay: i * 260, ease: 'Sine.easeInOut',
       });
-      this.add.image(px, y - 19, key).setScale(1.25).setDepth(3);
+      this.add.image(px, y - 19, key).setScale(1.1).setDepth(3);
+      this.shelfPotions.push({ x: px, y: y - 19, key });
     });
   }
 
@@ -215,16 +230,32 @@ export class MenuScene extends Phaser.Scene {
     shadow.fillStyle(0x000000, 0.3);
     shadow.fillEllipse(ROO_X, FEET_Y + 4, 104, 17);
 
-    this.roo = this.add.sprite(ROO_X, ROO_Y, 'roo_stir_0')
-      .setOrigin(0.5, rooOriginY(CONFIG.tile))
+    // origem nos pés: ao girar, o corpo se inclina a partir do chão
+    this.roo = this.add.sprite(ROO_X, FEET_Y, 'roo_stir_0')
+      .setOrigin(0.5, rooFootOriginY(CONFIG.tile))
       .setScale(ROO_SCALE)
       .setDepth(8);
     this.roo.anims.play('roo_stir');
 
-    this.wand = this.add.graphics().setDepth(9);
+    this.arm = this.add.graphics().setDepth(9);
+    this.wand = this.add.graphics().setDepth(10);
     this.tip = this.add.image(CAULDRON_X, RIM_Y, 'menu_spark').setVisible(false);
     this.tipGlow = this.add.image(CAULDRON_X, RIM_Y, 'menu_puff').setScale(0.7).setTint(0xffe082)
-      .setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.8).setDepth(10);
+      .setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.8).setDepth(11);
+  }
+
+  // Ponto da textura da Roo -> posição na tela, considerando escala, origem e inclinação.
+  private toWorld(lx: number, ly: number): Pt {
+    const tile = CONFIG.tile;
+    const ox = tile / 2;
+    const oy = rooFootOriginY(tile) * rooTextureHeight(tile);
+    const dx = (lx - ox) * ROO_SCALE;
+    const dy = (ly - oy) * ROO_SCALE;
+    const a = Phaser.Math.DegToRad(this.roo.angle);
+    return {
+      x: this.roo.x + dx * Math.cos(a) - dy * Math.sin(a),
+      y: this.roo.y + dx * Math.sin(a) + dy * Math.cos(a),
+    };
   }
 
   // ---------------------------------------------------------------- efeitos
@@ -253,7 +284,7 @@ export class MenuScene extends Phaser.Scene {
       alpha: { start: 0.16, end: 0 },
       frequency: 340,
       tint: 0xcfd8dc,
-    }).setDepth(11);
+    }).setDepth(12);
 
     // fagulhas na ponta da varinha
     this.add.particles(0, 0, 'menu_spark', {
@@ -266,7 +297,7 @@ export class MenuScene extends Phaser.Scene {
       frequency: 45,
       blendMode: 'ADD',
       tint: [0xffd54f, 0xfff59d, 0xffffff],
-    }).setDepth(10);
+    }).setDepth(11);
 
     // fogo embaixo do caldeirão
     const fireY = RIM_Y + 92;
@@ -285,28 +316,89 @@ export class MenuScene extends Phaser.Scene {
     }).setDepth(3);
   }
 
-  // ---------------------------------------------------------------- animação
+  // ---------------------------------------------------------------- ingrediente
 
-  private liquidColor(): number {
-    const n = LIQUID_COLORS.length;
-    const slot = Math.floor(this.colorMs / COLOR_HOLD_MS) % n;
-    const frac = (this.colorMs % COLOR_HOLD_MS) / COLOR_HOLD_MS;
-    const blend = Phaser.Math.Clamp((frac - 0.6) / 0.4, 0, 1); // segura a cor e troca no fim
-    return mixColor(LIQUID_COLORS[slot], LIQUID_COLORS[(slot + 1) % n], blend);
+  // Um frasco da prateleira voa em arco até o caldeirão.
+  private toss(): void {
+    const src = Phaser.Utils.Array.GetRandom(this.shelfPotions) as ShelfPotion;
+    const element = elementOf(src.key);
+    const ex = CAULDRON_X + Phaser.Math.Between(-18, 18);
+    const ey = RIM_Y - 4;
+    const flask = this.add.image(src.x, src.y, src.key).setScale(1.1).setDepth(13);
+    this.tweens.addCounter({
+      from: 0, to: 1, duration: 1050, ease: 'Sine.easeInOut',
+      onUpdate: tw => {
+        const p = tw.getValue() ?? 0;
+        flask.setPosition(Phaser.Math.Linear(src.x, ex, p), Phaser.Math.Linear(src.y, ey, p) - Math.sin(p * Math.PI) * 95);
+        flask.setRotation(p * 9);
+        flask.setScale(1.1 - 0.5 * p);
+      },
+      onComplete: () => {
+        flask.destroy();
+        this.splash(ex, ey, element.color, element.glow);
+      },
+    });
   }
 
+  // O ingrediente cai: respingo, o líquido muda de cor, a Roo comemora com um pulinho.
+  private splash(x: number, y: number, color: number, glow: number): void {
+    const e = this.add.particles(x, y, 'menu_bubble', {
+      speed: { min: 40, max: 120 },
+      angle: { min: -150, max: -30 },
+      gravityY: 220,
+      lifespan: { min: 500, max: 900 },
+      scale: { start: 1.3, end: 0.2 },
+      alpha: { start: 1, end: 0 },
+      tint: [color, glow, 0xffffff],
+      emitting: false,
+    }).setDepth(12);
+    e.explode(16);
+    this.time.delayedCall(1000, () => e.destroy());
+
+    const flash = this.add.image(x, y, 'menu_puff').setTint(color).setBlendMode(Phaser.BlendModes.ADD)
+      .setScale(0.8).setAlpha(0.9).setDepth(12);
+    this.tweens.add({ targets: flash, scale: 3.2, alpha: 0, duration: 520, onComplete: () => flash.destroy() });
+
+    this.liquidFrom = this.currentLiquid();
+    this.liquidTo = color;
+    this.liquidMix = 0;
+    this.boost = 1;
+    this.tweens.add({ targets: this.roo, y: FEET_Y - 11, duration: 150, yoyo: true, ease: 'Quad.easeOut' });
+  }
+
+  private currentLiquid(): number {
+    const k = Phaser.Math.Easing.Sine.InOut(this.liquidMix);
+    return mixColor(this.liquidFrom, this.liquidTo, k);
+  }
+
+  // ---------------------------------------------------------------- animação
+
   update(_time: number, delta: number): void {
-    this.t += delta / 1000;
-    this.colorMs += delta;
+    const dt = delta / 1000;
+    this.t += dt;
+    this.boost = Math.max(0, this.boost - dt / 1.4);
+    this.stirAngle += dt * STIR_SPEED * (1 + 0.9 * this.boost);
+    this.liquidMix = Math.min(1, this.liquidMix + delta / 900);
+    this.tossMs -= delta;
+    if (this.tossMs <= 0) {
+      this.tossMs = 4600 + Math.random() * 1800;
+      this.toss();
+    }
+    const a = this.stirAngle;
 
-    // Roo balança de leve; a mão acompanha
-    const bob = Math.sin(this.t * 2 * STIR_SPEED * 0.5) * 1.5;
-    this.roo.y = ROO_Y + bob;
-    const handX = this.roo.x + ROO_STIR_HAND.x * ROO_SCALE;
-    const handY = this.roo.y + ROO_STIR_HAND.y * ROO_SCALE;
+    // corpo: inclina a partir dos pés no ritmo da varinha e "respira"
+    this.roo.setAngle(Math.sin(a - 0.5) * 2.4);
+    this.roo.setScale(ROO_SCALE, ROO_SCALE * (1 + 0.012 * Math.sin(2 * a)));
 
-    // ponta da varinha gira sobre o líquido
-    const a = this.t * STIR_SPEED;
+    // ombro e mão (a mão gira em um círculo pequeno, adiantada em relação à ponta)
+    const pts = rooStirPoints(CONFIG.tile);
+    const shoulder = this.toWorld(pts.shoulder.x, pts.shoulder.y);
+    const hand = this.toWorld(
+      pts.hand.x + Math.cos(a - 0.9) * HAND_RX,
+      pts.hand.y + Math.sin(a - 0.9) * HAND_RY,
+    );
+
+    // a ponta da varinha gira sobre o líquido
     const tipX = CAULDRON_X + TIP_RX * Math.cos(a);
     const tipY = RIM_Y + 2 + TIP_RY * Math.sin(a);
     this.tip.setPosition(tipX, tipY);
@@ -314,17 +406,26 @@ export class MenuScene extends Phaser.Scene {
     this.trail.push({ x: tipX, y: tipY });
     if (this.trail.length > 16) this.trail.shift();
 
-    // varinha: do punho até a ponta
+    // braço: do ombro até a mão
+    this.arm.clear();
+    this.arm.lineStyle(5.6 * ROO_SCALE * 0.55, FUR, 1);
+    this.arm.lineBetween(shoulder.x, shoulder.y, hand.x, hand.y);
+    this.arm.fillStyle(FUR, 1);
+    this.arm.fillCircle(shoulder.x, shoulder.y, 3.1 * ROO_SCALE * 0.55);
+    this.arm.fillStyle(0xffb066, 1);
+    this.arm.fillCircle(hand.x, hand.y, 3.4 * ROO_SCALE * 0.6);
+
+    // varinha: da mão até a ponta
     this.wand.clear();
     this.wand.lineStyle(6, 0x4a3822, 1);
-    this.wand.lineBetween(handX, handY, tipX, tipY);
+    this.wand.lineBetween(hand.x, hand.y, tipX, tipY);
     this.wand.lineStyle(3, 0x9b7b4f, 1);
-    this.wand.lineBetween(handX, handY, tipX, tipY);
+    this.wand.lineBetween(hand.x, hand.y, tipX, tipY);
     this.wand.fillStyle(0xffd54f, 1);
     this.wand.fillCircle(tipX, tipY, 3);
 
     // líquido, anéis na superfície e trilha da varinha
-    const color = this.liquidColor();
+    const color = this.currentLiquid();
     const light = mixColor(color, 0xffffff, 0.45);
     const g = this.liquid;
     g.clear();

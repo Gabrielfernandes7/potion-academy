@@ -13,5 +13,16 @@ export function rooTextureHeight(tile: number): number {
   return tile + ROO_HEAD_ROOM;
 }
 
-// Posição da mão na pose 'stir', relativa ao ponto de origem do sprite (em px da textura).
-export const ROO_STIR_HAND = { x: 15.5, y: 5 };
+// Origem nos pés: serve para inclinar o corpo girando em torno do chão (menu).
+export function rooFootOriginY(tile: number): number {
+  const h = rooTextureHeight(tile);
+  return (h - 3) / h;
+}
+
+// Pontos da pose 'stir' em px da textura: ombro e mão em repouso. O braço não está no sprite:
+// a cena do menu o desenha ligando o ombro à mão, que acompanha a varinha.
+export function rooStirPoints(tile: number): { shoulder: { x: number; y: number }; hand: { x: number; y: number } } {
+  const cx = tile / 2;
+  const cy = tile / 2 + 1 + ROO_HEAD_ROOM;
+  return { shoulder: { x: cx + 5, y: cy + 1 }, hand: { x: cx + 15.5, y: cy + 4 } };
+}
