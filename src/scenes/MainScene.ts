@@ -11,8 +11,8 @@ import {
 } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
 import { Bank, hasBombType } from '../storage';
-import { rooOriginY } from '../textures/roo';
-import { PICKUP_HALO, PICKUP_TEXTURE, PickupType, rollReward } from '../game/rewards';
+import { rooOriginY } from '../textures/rooGeometry';
+import { PICKUP_HALO, PICKUP_TEXTURE, PickupType, rollChestCoins, rollReward } from '../game/rewards';
 import type { Bomb, Enemy, Explosion, Facing, Pickup, Player, PowerupCounts, StageData } from '../game/types';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
 import { touch } from '../input/touch';
@@ -569,10 +569,13 @@ export class MainScene extends Phaser.Scene {
     }
     const type = rollReward();
     // na fase do chefe não há porta: gema vira moeda
-    this.spawnPickupSprite(x, y, !this.def.door && type === 'gem' ? 'coin' : type);
+    const final = !this.def.door && type === 'gem' ? 'coin' : type;
+    // o baú já nasce com o valor sorteado pela tabela desta fase
+    const value = final === 'chest' ? rollChestCoins(this.def.chest) : undefined;
+    this.spawnPickupSprite(x, y, final, value);
   }
 
-  spawnPickupSprite(x: number, y: number, type: PickupType): void {
+  spawnPickupSprite(x: number, y: number, type: PickupType, value?: number): void {
     const sprite = this.add.image(
       x * CONFIG.tile + CONFIG.tile / 2,
       y * CONFIG.tile + CONFIG.tile / 2,
@@ -592,14 +595,14 @@ export class MainScene extends Phaser.Scene {
         duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
       });
     }
-    this.pickups.push({ gridX: x, gridY: y, type, sprite, halo });
+    this.pickups.push({ gridX: x, gridY: y, type, value, sprite, halo });
   }
 
   collectPickup(pickup: Pickup): void {
     switch (pickup.type) {
       case 'coin':
-        this.coins += 1;
-        Bank.add(1);
+        this.coins += CONFIG.coinPickupValue;
+        Bank.add(CONFIG.coinPickupValue);
         this.play('pickup');
         break;
       case 'gem':
@@ -607,12 +610,14 @@ export class MainScene extends Phaser.Scene {
         this.play('pickup');
         if (this.gems >= CONFIG.gemsForDoor && !this.doorOpen) this.openDoor();
         break;
-      case 'chest':
-        this.coins += 5;
-        Bank.add(5);
+      case 'chest': {
+        const coins = pickup.value ?? 5;
+        this.coins += coins;
+        Bank.add(coins);
         this.player.hp = Math.min(CONFIG.maxHp, this.player.hp + 1);
         this.play('powerup');
         break;
+      }
       case 'heart':
         this.player.hp = Math.min(CONFIG.maxHp, this.player.hp + 1);
         this.play('pickup');
@@ -667,12 +672,8 @@ export class MainScene extends Phaser.Scene {
     });
     this.cameras.main.flash(220, 100, 200, 100);
     this.play('door');
-    const cx = (CONFIG.cols * CONFIG.tile) / 2;
-    const cy = (CONFIG.rows * CONFIG.tile) / 2;
-    const txt = this.add.text(cx, cy, 'PORTA ABERTA!', {
-      fontFamily: 'monospace', fontSize: '28px', color: '#4caf50', fontStyle: 'bold',
-    }).setOrigin(0.5).setDepth(25);
-    this.tweens.add({ targets: txt, y: cy - 40, alpha: 0, duration: 1500, onComplete: () => txt.destroy() });
+    // o aviso nasce sobre a porta, onde a jogadora precisa ir, e fica mais tempo na tela
+    this.floatingText(this.doorX, this.doorY, 'PORTA ABERTA!', '#4caf50', 16, 1400);
   }
 
   checkWin(): void {
@@ -1268,15 +1269,18 @@ export class MainScene extends Phaser.Scene {
     });
   }
 
-  floatingText(gx: number, gy: number, text: string, color: string): void {
+  // Aviso que sobe e some. Fica parado (hold) antes de subir para dar tempo de ler.
+  floatingText(gx: number, gy: number, text: string, color: string, size = 12, hold = 650): void {
     const t = this.add.text(
       gx * CONFIG.tile + CONFIG.tile / 2,
       gy * CONFIG.tile + CONFIG.tile / 2,
       text,
-      { fontFamily: 'monospace', fontSize: '12px', color, fontStyle: 'bold' },
+      { fontFamily: 'monospace', fontSize: `${size}px`, color, fontStyle: 'bold' },
     ).setOrigin(0.5).setDepth(20);
+    // sobe e some só depois da permanência
     this.tweens.add({
-      targets: t, y: t.y - 20, alpha: 0, duration: 700,
+      targets: t, y: t.y - 24, alpha: 0,
+      duration: 450, delay: hold, ease: 'Quad.easeIn',
       onComplete: () => t.destroy(),
     });
   }

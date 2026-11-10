@@ -5,8 +5,8 @@
 // A cada jogo o motor sorteia uma faixa diferente da anterior E uma semente nova, então até
 // a mesma faixa soa diferente de uma partida para outra.
 
-export type Voice = 'pad' | 'bass' | 'melody' | 'bell';
-export type Style = 'melody' | 'arp' | 'sparse';
+type Voice = 'pad' | 'bass' | 'melody' | 'bell';
+type Style = 'melody' | 'arp' | 'sparse';
 
 export interface NoteEvent {
   step: number; // colcheia dentro do compasso (0 a 7)
@@ -15,7 +15,7 @@ export interface NoteEvent {
   steps: number; // duração em colcheias
 }
 
-export interface Chord {
+interface Chord {
   root: number; // semitons acima da tônica
   tones: number[]; // intervalos a partir da raiz do acorde
 }

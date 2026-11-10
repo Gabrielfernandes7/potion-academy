@@ -1,7 +1,7 @@
 // Regras de exibição da loja (puras, sem DOM, testáveis).
 import { BOMB_TYPES, BombId } from '../config';
 
-export type CardState = 'initial' | 'owned' | 'affordable' | 'locked';
+type CardState = 'initial' | 'owned' | 'affordable' | 'locked';
 
 export interface CardView {
   state: CardState;

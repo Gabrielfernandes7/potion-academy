@@ -34,7 +34,7 @@ const MUSIC_LEVEL = 0.55;
 const LOOKAHEAD_S = 1.0;
 const SCHEDULER_MS = 100;
 
-export class AudioEngine {
+class AudioEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private sfxBus: GainNode | null = null;

@@ -17,7 +17,9 @@ Use sempre estes nomes, em qualquer tela, texto ou conversa.
 | Porta | a saída, aberta com 3 gemas (no jardim, o **portão**) | saída |
 | Roo | a personagem | canguru, bruxa (na tela) |
 | Belladona | a bruxa chefe da fase 3 | vilã, bruxa má |
-| Fase | cada etapa do jogo (1 laboratório, 2 salão dos fantasmas, 3 duelo, 4 jardim) | nível |
+| Fase | cada etapa do jogo, com o nome do ato: 1 O CHAMADO, 2 O CAMINHO, 3 O DUELO, 4 O RETORNO | nível |
+| Frei Anselmo | o monge que pede as escrituras de volta | padre, irmão |
+| Carta | o texto de abertura, antes da primeira fase | mensagem, bilhete |
 | Sapo mago / Fantasma / Flor do mal | os inimigos comuns | criatura, monstro |
 | Neutralizar ("APAGADA") | a água desfazer uma poção de fogo em vapor | apagar, cancelar |
 | Aviso | a marcação colorida no chão antes de um ataque | sombra, alvo |

@@ -23,7 +23,7 @@ export const GARDEN_PALETTE = {
 } as const;
 
 // Razão de contraste WCAG entre duas cores (1 a 21).
-export function luminance(color: number): number {
+function luminance(color: number): number {
   const channel = (c: number): number => {
     const s = c / 255;
     return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);

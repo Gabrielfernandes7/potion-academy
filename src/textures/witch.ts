@@ -8,7 +8,7 @@ import { ROO_HEAD_ROOM, rooTextureHeight } from './rooGeometry';
 
 type Gfx = Phaser.GameObjects.Graphics;
 type Pt = readonly [number, number];
-export type WitchPose = 'idle' | 'cast' | 'hurt';
+type WitchPose = 'idle' | 'cast' | 'hurt';
 
 const ROBE = 0x143d36;
 const ROBE_DARK = 0x0b2420;
@@ -51,7 +51,7 @@ function flask(g: Gfx, x: number, y: number, glow: boolean): void {
   g.fillTriangle(x - 2.6, y + 1.2, x - 4.2, y + 4.2, x + 4.2, y + 4.2);
 }
 
-export function drawWitchFrame(g: Gfx, T: number, frame: number, pose: WitchPose): void {
+function drawWitchFrame(g: Gfx, T: number, frame: number, pose: WitchPose): void {
   g.clear();
   const f = frame % 2;
   const B = rooTextureHeight(T);

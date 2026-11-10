@@ -41,6 +41,16 @@ O manto é desenhado **depois** do corpo, por isso cobre as costas, os ombros e 
 | `witch_cast` | lançando poção: braço levantado, boca aberta, brilho verde |
 | `witch_hurt` | machucada: olhos fechados em X, boca para baixo |
 
+**Frei Anselmo** (`src/textures/anselmo.ts`), monge do mosteiro. Hábito marrom, cordão, capuz e barba branca.
+
+| Chave | Uso |
+|---|---|
+| `anselmo_front_0-1` | de frente; o 1 sobe o capuz 1 px (respiração) |
+| `anselmo_back` | de costas, capuz fechado |
+| `anselmo_side` | perfil, para a direita (sem espelho) |
+
+Ainda não aparece no jogo: entra na história (confissão e cena final).
+
 ## Poções (`src/textures/potions.ts`)
 
 | Chave | Elemento | Formato |

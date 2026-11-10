@@ -72,10 +72,10 @@ export class MapScene extends Phaser.Scene {
 
     // Fases
     this.locations = [
-      { stage: 1, label: 'LABORATÓRIO', x: w * 0.25, y: h * 0.6, r: 40 },
-      { stage: 2, label: 'SALÃO DOS\nFANTASMAS', x: w * 0.75, y: h * 0.6, r: 40 },
-      { stage: 3, label: 'DUELO', x: w * 0.25, y: h * 0.25, r: 40 },
-      { stage: 4, label: 'JARDIM', x: w * 0.75, y: h * 0.25, r: 40 },
+      { stage: 1, label: 'O CHAMADO', x: w * 0.25, y: h * 0.6, r: 40 },
+      { stage: 2, label: 'O CAMINHO', x: w * 0.75, y: h * 0.6, r: 40 },
+      { stage: 3, label: 'O DUELO', x: w * 0.25, y: h * 0.25, r: 40 },
+      { stage: 4, label: 'O RETORNO', x: w * 0.75, y: h * 0.25, r: 40 },
     ];
 
     this.locations.forEach(loc => {

@@ -31,8 +31,8 @@ Antes, a Aqua tinha alcance 4 e a Telúrica e a Etérea alcance 3, então a Aqua
 
 ## Economia (estimativa)
 
-- Uma partida boa rende cerca de **40 POÇÃO** (moedas ≈ 18, baús ≈ 20, inimigos ≈ 3).
-- Liberar tudo custa 60 + 90 + 120 = **270** → 6 a 7 partidas. Vencer a Belladona dá **+40**.
+- Uma partida boa rende cerca de **80 POÇÃO** (moedas ≈ 36, baús ≈ 40, inimigos ≈ 6). Os ganhos estão dobrados desde a inflação; os preços da loja não mudaram.
+- Liberar tudo custa 60 + 90 + 120 = **270** → 3 a 4 partidas. Vencer a Belladona dá **+80**.
 
 ## Chefe
 
@@ -57,7 +57,9 @@ Ficam em `STAGES` e `ENEMY_TYPES` (`src/config.ts`); `tests/stages.test.ts` guar
 | fantasmas no salão | 2 no início, até 4 | mais que 4 fecha o mapa |
 | flores no jardim | 5, fixas | cada flor bloqueia uma casa |
 | `flowerLashCycleMs` / `flowerWarnMs` | 3,2 s / 0,8 s | o aviso não pode ser menor que 0,6 s (justo) |
-| `gardenVictoryBonus` | 30 POÇÃO | prêmio por zerar o jogo |
+| `gardenVictoryBonus` | 60 POÇÃO | prêmio por zerar o jogo |
+| `bossVictoryBonus` | 80 POÇÃO | prêmio por vencer a Belladona |
+| `coinPickupValue` | 2 POÇÃO | valor de cada moeda solta |
 
 Reações entre poções (`src/game/chain.ts`): só o fogo acende outras poções. Isso deixa a água com um papel claro (apaga o fogo) e a terra com outro (estável).
 

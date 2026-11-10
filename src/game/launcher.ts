@@ -13,6 +13,7 @@ import { hideGameOver, setPauseVisible } from '../ui/overlays';
 import { closeShop } from '../ui/shop';
 import { setMenuVisible } from '../ui/menu';
 import { ensureFonts } from '../ui/fonts';
+import { showLetter } from '../ui/letter';
 
 let phaserGame: Phaser.Game | null = null;
 let texturesReady: Promise<void> = Promise.resolve();
@@ -47,7 +48,11 @@ export function textureDataUrl(key: string): string | null {
 }
 
 // Começa (ou reinicia) uma partida a partir do menu, da loja ou do fim de jogo.
+let startingGame = false;
+
 export async function startGame(): Promise<void> {
+  if (startingGame) return; // a carta já está aberta (ex.: Enter repetido)
+  startingGame = true;
   if (!phaserGame) bootGame();
   await texturesReady;
   await ensureFonts(); // a HUD no canvas precisa das fontes já carregadas
@@ -55,6 +60,8 @@ export async function startGame(): Promise<void> {
   closeShop();
   hideGameOver();
   setMenuVisible(false);
+  await showLetter();
+  startingGame = false;
   if (game.scene.isActive('Main')) {
     game.scene.getScene('Main').scene.restart({ stage: 1 });
   } else {

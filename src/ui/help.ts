@@ -5,20 +5,20 @@ export function isHelpOpen(): boolean {
   return isShown('help-overlay');
 }
 
-export function openHelp(): void {
+function openHelp(): void {
   if (isHelpOpen()) return;
   setShown('help-overlay', true);
   byId('help-close').focus({ preventScroll: true });
 }
 
-export function closeHelp(): void {
+function closeHelp(): void {
   if (!isHelpOpen()) return;
   setShown('help-overlay', false);
   // tira o foco do botão: senão Espaço/Enter no jogo reabririam a janela
   (document.activeElement as HTMLElement | null)?.blur();
 }
 
-export function toggleHelp(): void {
+function toggleHelp(): void {
   if (isHelpOpen()) closeHelp();
   else openHelp();
 }

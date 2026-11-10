@@ -1,3 +1,4 @@
+import type { ChestOdd } from '../config';
 import { POWERUP_COLORS } from '../textures/entities';
 
 // Tabela de drop: o que sai quando um bloco é destruído.
@@ -49,4 +50,14 @@ export function rollReward(roll: number = Math.random()): PickupType {
     if (roll < limit) return type;
   }
   return 'time_up';
+}
+
+// Quantas moedas o baú traz, sorteado pela tabela da fase (roll em [0, 1)).
+export function rollChestCoins(table: ReadonlyArray<ChestOdd>, roll: number = Math.random()): number {
+  let acc = 0;
+  for (const odd of table) {
+    acc += odd.chance;
+    if (roll < acc) return odd.coins;
+  }
+  return table[table.length - 1].coins;
 }

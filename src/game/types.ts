@@ -35,6 +35,7 @@ export interface Pickup {
   gridX: number;
   gridY: number;
   type: PickupType;
+  value?: number; // moedas do baú (sorteadas ao nascer)
   sprite: Phaser.GameObjects.Image;
   halo?: Phaser.GameObjects.Image;
 }
@@ -73,7 +74,7 @@ export interface PowerupCounts {
 }
 
 // O que a jogadora leva da fase 1 para a fase 2.
-export interface Carry {
+interface Carry {
   hp: number;
   bombsMax: number;
   fireLevel: number;

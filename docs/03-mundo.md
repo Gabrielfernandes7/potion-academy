@@ -30,6 +30,16 @@ Toda habilidade mostra um aviso no chão por 1,2 s antes de acontecer.
 - **Ponto fraco:** só tira vida dela uma explosão de poção sua que a alcance; depois do golpe ela fica protegida 1,4 s.
 - **Contato:** encostar nela tira 1 de vida.
 
+**Frei Anselmo, o monge** (ainda sem cena no jogo)
+- *Quer:* que as escrituras voltem e circulem entre o povo, e que Roo não as trate como pedra.
+- *Sabe fazer:* escrever cartas, guardar o scriptorium do Mosteiro de São Tomás.
+- *Detalhe:* hábito marrom, cordão com nós, capuz e barba branca. Foi confessor do mestre de Roo e não o deteve.
+- *Frase:* "Roo, filho do Caldeirão: preciso que busques o que eu não posso mais buscar."
+
+**O mestre de Roo** (desaparecido, só como sombra ou silhueta)
+- *Quer:* a pedra filosofal, que nunca encontrou.
+- *Detalhe:* sumiu na última busca. Nas fases 2 e 4 aparece só como eco ou sombra.
+
 ## Poções (as bombas)
 
 | Nome | Elemento | Formato | Alcance | Fusível | Papel |

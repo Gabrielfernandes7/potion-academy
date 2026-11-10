@@ -3,7 +3,7 @@
 // Linha de baixo: seletor de frascos (teclas 1-4 ou toque), elemento atual, BLOCOS e FRASCOS.
 // Recebe o estado da MainScene por evento (HUD_UPDATE) e devolve a escolha de frasco por HUD_SELECT_BOMB.
 import Phaser from 'phaser';
-import { BOMB_ORDER, BOMB_TYPES, CANVAS, CONFIG, ELEMENTS, BombId } from '../config';
+import { BOMB_ORDER, BOMB_TYPES, CANVAS, CONFIG, ELEMENTS, LAST_STAGE, BombId } from '../config';
 import { hasBombType } from '../storage';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState, timerView } from '../game/hudState';
 import { readTheme, Theme } from '../ui/theme';
@@ -36,6 +36,7 @@ class ValueWithCaption {
 export class HudScene extends Phaser.Scene {
   private theme!: Theme;
   private hearts: Img[] = [];
+  private emptyFlask!: Img;
   private lastHp: number | null = null;
   private lastCoins: number | null = null;
   private timerText!: Text;
@@ -111,6 +112,8 @@ export class HudScene extends Phaser.Scene {
     }
 
     this.add.image(266, ROW_A, 'hud_hourglass').setDepth(2);
+    // frasco vazio: só aparece na última fase (lembrança do fim)
+    this.emptyFlask = this.add.image(520, ROW_A, 'hud_flask_empty').setDepth(2).setVisible(false);
     this.timerText = this.text(282, ROW_A, '90', 24, t.info, true).setDepth(2);
 
     this.coinIcon = this.add.image(398, ROW_A, 'pickup_coin').setScale(0.9).setDepth(2);
@@ -161,6 +164,8 @@ export class HudScene extends Phaser.Scene {
 
   private apply(s: HudState): void {
     const t = this.theme;
+
+    this.emptyFlask.setVisible(s.stage === LAST_STAGE);
 
     // vida
     for (let i = 0; i < this.hearts.length; i++) {

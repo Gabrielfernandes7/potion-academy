@@ -15,10 +15,9 @@
 import Phaser from 'phaser';
 import { ROO_HEAD_ROOM, rooTextureHeight } from './rooGeometry';
 
-export type RooDir = 'down' | 'up' | 'side';
-export type RooPose = 'awake' | 'sleep' | 'stir' | 'maestro' | 'read';
+type RooDir = 'down' | 'up' | 'side';
+type RooPose = 'awake' | 'sleep' | 'stir' | 'maestro' | 'read';
 
-export { ROO_HEAD_ROOM, rooFootOriginY, rooOriginY, rooStirPoints, rooTextureHeight } from './rooGeometry';
 
 type Pt = readonly [number, number];
 
@@ -80,7 +79,7 @@ function drawWand(g: Gfx, x0: number, y0: number, x1: number, y1: number): void 
   g.fillCircle(x1, y1 - 1, 1);
 }
 
-export function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPose = 'awake'): void {
+function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPose = 'awake'): void {
   g.clear();
   const sleep = pose === 'sleep';
   const maestro = pose === 'maestro';

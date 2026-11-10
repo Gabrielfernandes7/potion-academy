@@ -76,7 +76,3 @@ export function markStageCompleted(stage: number): void {
     Storage.set(STAGES_KEY, completed);
   }
 }
-
-export function getCompletedStages(): number[] {
-  return Storage.get<number[]>(STAGES_KEY, []);
-}

@@ -29,4 +29,13 @@ export function drawHudIcons(g: Gfx): void {
   g.fillStyle(0x74b9ff, 0.4); g.fillTriangle(2.5, 2, 13.5, 2, 8, 10); g.fillTriangle(8, 10, 2.5, 18, 13.5, 18);
   g.fillStyle(0xf0c674); g.fillTriangle(5, 4, 11, 4, 8, 8); g.fillTriangle(5.5, 18, 10.5, 18, 8, 13.5);
   g.generateTexture('hud_hourglass', 16, 20);
+
+  // frasco vazio (lembrança do fim: sem líquido, rolha de cortiça)
+  g.clear();
+  g.fillStyle(0x8a5a2b); g.fillRect(5, 0, 6, 3);
+  g.fillStyle(0x23282a); g.fillRect(5, 2, 6, 1);
+  g.fillStyle(0xc9d6df, 0.35); g.fillRect(6, 3, 4, 4); g.fillCircle(8, 13, 6.5);
+  g.lineStyle(1.2, 0xc9d6df, 0.95); g.strokeRect(6, 3, 4, 4); g.strokeCircle(8, 13, 6.5);
+  g.fillStyle(0xffffff, 0.6); g.fillRect(4.5, 11, 1.2, 3);
+  g.generateTexture('hud_flask_empty', 16, 20);
 }

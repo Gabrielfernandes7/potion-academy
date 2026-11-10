@@ -12,7 +12,6 @@
 import Phaser from 'phaser';
 import { CONFIG, DIRS, ELEMENTS, EMPTY, ElementId } from '../config';
 import { rooOriginY } from '../textures/rooGeometry';
-import { readTheme } from '../ui/theme';
 import type { MainScene } from '../scenes/MainScene';
 import {
   BOSS_NAME, BossPhase, BossSkill, ELEMENT_POTION_TEXTURE, SKILL_ELEMENT, Tile,
@@ -58,10 +57,9 @@ export class BossController {
       .setOrigin(0.5, rooOriginY(T)).setDepth(9).setScale(0.01);
     this.sprite.anims.play('witch_idle');
     scene.tweens.add({ targets: this.sprite, scale: 1.12, duration: 500, ease: 'Back.easeOut' });
-    this.intro();
   }
 
-  // ------------------------------------------------------------------ interface com a cena
+  // interface com a cena
 
   hudView(): BossHudView {
     return { hp: Math.max(0, this.hp), maxHp: this.maxHp, name: BOSS_NAME };
@@ -102,7 +100,7 @@ export class BossController {
     if (this.cooldownMs <= 0) this.castNext();
   }
 
-  // ------------------------------------------------------------------ tempo e utilidades
+  // tempo e utilidades
 
   private after(ms: number, fn: () => void): void {
     this.timers.push({ ms, fn });
@@ -143,7 +141,7 @@ export class BossController {
 
   private isOpen = (x: number, y: number): boolean => this.scene.getTile(x, y) === EMPTY;
 
-  // ------------------------------------------------------------------ movimento
+  // movimento
 
   private move(): void {
     const player = this.scene.playerTile();
@@ -162,7 +160,7 @@ export class BossController {
     this.scene.tweenSpriteTo(this.sprite, this.gridX, this.gridY, 520, 'Sine.easeInOut');
   }
 
-  // ------------------------------------------------------------------ habilidades
+  // habilidades
 
   private castNext(): void {
     const skill = pickBossSkill(this.phase, this.lastSkill);
@@ -245,7 +243,7 @@ export class BossController {
     });
   }
 
-  // ------------------------------------------------------------------ avisos e explosões
+  // avisos e explosões
 
   // Marca no chão onde a poção vai cair: um quadrado em cada casa da explosão e um anel que encolhe.
   private telegraph(tiles: Tile[], element: ElementId, target: Tile): void {
@@ -296,7 +294,7 @@ export class BossController {
     this.scene.cameras.main.shake(80, 0.004);
   }
 
-  // ------------------------------------------------------------------ dano, fúria e derrota
+  // dano, fúria e derrota
 
   private hit(): void {
     this.hp--;
@@ -356,27 +354,5 @@ export class BossController {
     if (this.aura) this.aura.destroy();
     this.scene.play('door');
     this.after(1500, () => this.scene.onBossDefeated());
-  }
-
-  // ------------------------------------------------------------------ introdução
-
-  private intro(): void {
-    const th = readTheme();
-    const cx = (CONFIG.cols * T) / 2;
-    const cy = (CONFIG.rows * T) / 2 - 20;
-    const make = (y: number, text: string, style: Phaser.Types.GameObjects.Text.TextStyle): Phaser.GameObjects.Text =>
-      this.scene.add.text(cx, y, text, style).setOrigin(0.5).setDepth(30).setAlpha(0);
-    const small = make(cy - 34, 'FASE 2', { fontFamily: th.fontBody, fontSize: '14px', color: '#d9b98a', fontStyle: 'bold' });
-    const big = make(cy, BOSS_NAME, {
-      fontFamily: th.fontDisplay, fontSize: '40px', color: '#9be564', fontStyle: 'bold',
-      stroke: '#0b2420', strokeThickness: 7,
-    });
-    const sub = make(cy + 34, 'A ALQUIMISTA RIVAL', { fontFamily: th.fontBody, fontSize: '13px', color: '#e8dcc0', fontStyle: 'bold' });
-    for (const [i, obj] of [small, big, sub].entries()) {
-      this.scene.tweens.add({
-        targets: obj, alpha: { from: 0, to: 1 }, duration: 350, delay: i * 120, hold: 1500,
-        yoyo: true, onComplete: () => obj.destroy(),
-      });
-    }
   }
 }

@@ -72,3 +72,12 @@ Novas decisões entram no fim.
 - **Motivo:** o jogo tinha um único modo e o celular deitado ficava minúsculo (167 px numa tela de 740).
 - **Consequência:** (1) em pé, os controles de toque ficam sob o jogo; (2) deitado, o jogo vai ao centro e os controles nas laterais, sem sobrepor; (3) em telas grandes o jogo cresce até 1280 px. Telas estreitas escondem o título e o nome da faixa para a barra do topo caber em uma linha.
 
+## Fases com nome de ato, e carta antes da primeira
+- **Motivo:** o nome "Laboratório" dizia o lugar, mas não a história. Os títulos dos atos (O CHAMADO, O CAMINHO, O DUELO, O RETORNO) contam o arco de Roo e aparecem no cartão de entrada e no mapa.
+- **Consequência:** a carta de frei Anselmo abre cada partida nova (`ui/letter.ts`). Ela não reabre ao tentar de novo depois de perder, para não atrasar a volta.
+- **Ficou de fora:** trocar os nomes por lugares, ou a carta em cada fase.
+
+## Ganhos de POÇÃO dobrados (inflação), preços da loja iguais
+- **Motivo:** pedido da autora do jogo, que quer mais inflação de POÇÃO. Os preços ficaram iguais para que as compras fiquem mais baratas em termos relativos.
+- **Consequência:** baús, moedas soltas, moedas de inimigos e os prêmios de chefe (80) e de jardim (60) dobraram. A tabela de chances dos baús não mudou; só os valores.
+- **Ficou de fora:** reajustar os preços da loja. Se a compra ficar barata demais, esse é o próximo ajuste.

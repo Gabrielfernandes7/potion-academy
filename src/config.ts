@@ -32,8 +32,10 @@ export const CONFIG = {
   bossTelegraphMs: 1200,      // aviso no chão antes de a poção cair
   bossRainDrops: 4,
   bossBlinkHideMs: 700,
-  bossVictoryBonus: 40,       // POÇÃO ganha ao derrotá-la
-  gardenVictoryBonus: 30,     // POÇÃO ganha ao cruzar o portão do jardim (fim do jogo)
+  // Ganhos de POÇÃO dobrados (inflação); os preços da loja não mudaram.
+  coinPickupValue: 2,         // POÇÃO de cada moeda solta (antes 1)
+  bossVictoryBonus: 80,       // POÇÃO ganha ao derrotá-la (antes 40)
+  gardenVictoryBonus: 60,     // POÇÃO ganha ao cruzar o portão do jardim, fim do jogo (antes 30)
   stageClearHeal: 1,          // vida recuperada ao passar de uma fase para a seguinte
 
   // ---- flor do mal (jardim) ----
@@ -119,16 +121,20 @@ export function isImmune(kind: EnemyKind, element: ElementId): boolean {
 
 // ---------------------------------------------------------------- fases
 
-export type StageKind = 'lab' | 'crypt' | 'boss' | 'garden';
+type StageKind = 'lab' | 'crypt' | 'boss' | 'garden';
 export type StageTheme = 'stone' | 'crypt' | 'garden';
 
 // Quantos inimigos de um tipo: `start` no início; se houver `every`, mais um a cada N caixotes quebrados, até `max`.
-export interface EnemyRule {
+interface EnemyRule {
   kind: EnemyKind;
   start: number;
   max: number;
   every?: number;
 }
+
+// Quantas moedas um baú pode trazer, com a chance de cada valor (as chances somam 1).
+// Regra: quanto maior a recompensa, menor a chance.
+export interface ChestOdd { chance: number; coins: number }
 
 export interface StageDef {
   kind: StageKind;
@@ -140,24 +146,33 @@ export interface StageDef {
   enemies: EnemyRule[];
   theme: StageTheme;
   track?: string; // faixa de música da fase (a escolha da jogadora na Sala de Música vale mais)
+  chest: ReadonlyArray<ChestOdd>; // sorteio do baú (moedas) nesta fase
 }
+
+// Tabelas de baú: a fase mais avançada tem baús mais generosos, mas ainda raros.
+const CHEST_COMMON: ReadonlyArray<ChestOdd> = [
+  { chance: 0.70, coins: 10 }, { chance: 0.25, coins: 20 }, { chance: 0.04, coins: 40 }, { chance: 0.01, coins: 100 },
+];
+const CHEST_RICH: ReadonlyArray<ChestOdd> = [
+  { chance: 0.55, coins: 10 }, { chance: 0.30, coins: 20 }, { chance: 0.12, coins: 40 }, { chance: 0.03, coins: 100 },
+];
 
 export const STAGES: StageDef[] = [
   {
-    kind: 'lab', name: 'LABORATÓRIO', time: 90000, blockChance: 0.7, door: true, theme: 'stone',
+    kind: 'lab', name: 'O CHAMADO', chest: CHEST_COMMON, time: 90000, blockChance: 0.7, door: true, theme: 'stone',
     enemies: [{ kind: 'frog', start: 2, max: 5, every: 8 }],
   },
   {
-    kind: 'crypt', name: 'SALÃO DOS FANTASMAS', tip: 'Poção Aqua apaga poções de Fogo. Fantasmas atravessam paredes.',
+    kind: 'crypt', name: 'O CAMINHO', chest: CHEST_RICH, tip: 'Poção Aqua apaga poções de Fogo. Fantasmas atravessam paredes.',
     time: 100000, blockChance: 0.6, door: true, theme: 'crypt', track: 'luar',
     enemies: [{ kind: 'ghost', start: 2, max: 4, every: 10 }, { kind: 'frog', start: 1, max: 1 }],
   },
   {
-    kind: 'boss', name: 'DUELO COM A BELLADONA', time: 120000, blockChance: 0.35, door: false, theme: 'stone',
+    kind: 'boss', name: 'O DUELO', chest: CHEST_RICH, time: 120000, blockChance: 0.35, door: false, theme: 'stone',
     enemies: [],
   },
   {
-    kind: 'garden', name: 'JARDIM DO CASTELO', tip: 'As flores do mal resistem à Poção Aqua. Use outra poção.',
+    kind: 'garden', name: 'O RETORNO', chest: CHEST_RICH, tip: 'As flores do mal resistem à Poção Aqua. Use outra poção.',
     time: 100000, blockChance: 0.5, door: true, theme: 'garden', track: 'jardim',
     enemies: [{ kind: 'frog', start: 2, max: 3, every: 10 }, { kind: 'flower', start: 5, max: 5 }],
   },
