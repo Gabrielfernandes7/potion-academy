@@ -1,52 +1,209 @@
-// Áudio sintetizado com WebAudio (sem arquivos externos).
+// Áudio sintetizado com WebAudio (sem arquivos externos), pensado para ser calmo.
+//
+// Cadeia: vozes -> barramento (sfx/música) -> filtro passa-baixa -> compressor suave -> saída,
+// com um reverb (resposta ao impulso gerada em código) para dar espaço e maciez.
+// Efeitos: só senoides/triângulos com ataque lento e cauda longa (nada de onda quadrada/serra).
+// Música: faixas procedurais (ver tracks.ts); cada jogo sorteia faixa e semente novas.
+//
 // Música (enabled/playing) e efeitos (sfx) são flags independentes.
-// O sfx é ligado pelo primeiro clique em COMEÇAR.
+// O sfx é ligado pelo primeiro clique em JOGAR/COMEÇAR.
+import type { ElementId } from '../config';
+import {
+  MelodyState, NoteEvent, STEPS_PER_BAR, Track, generateBar, midiToHz, mulberry32, pickNextTrack,
+} from './tracks';
 
 export type SfxName = 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door';
 
 type WebkitWindow = { webkitAudioContext?: typeof AudioContext };
+type BusName = 'sfx' | 'music';
+
+interface VoiceOptions {
+  gain: number;
+  type?: OscillatorType;
+  attack?: number;
+  bus?: BusName;
+  send?: number; // quanto vai para o reverb (0 a 1)
+  glideTo?: number; // frequência final de um glissando
+  glideTime?: number;
+}
+
+const MUSIC_LEVEL = 0.55;
+const LOOKAHEAD_S = 0.3; // agenda notas com esta antecedência (música estável mesmo com o navegador ocupado)
+const SCHEDULER_MS = 60;
+
+// Estouro da poção por elemento: acorde suave em cascata + um sopro filtrado.
+const BURST: Record<ElementId, { notes: number[]; type: OscillatorType; stagger: number; noiseHz: number }> = {
+  fire: { notes: [196, 294, 392], type: 'triangle', stagger: 0.06, noiseHz: 600 }, // quente e grave
+  water: { notes: [523, 659, 784, 1047], type: 'sine', stagger: 0.045, noiseHz: 1400 }, // cristalino
+  earth: { notes: [131, 196, 247], type: 'sine', stagger: 0.07, noiseHz: 380 }, // profundo
+  air: { notes: [784, 988, 1175], type: 'sine', stagger: 0.05, noiseHz: 2200 }, // arejado
+};
 
 export class AudioEngine {
   private ctx: AudioContext | null = null;
+  private master: GainNode | null = null;
+  private sfxBus: GainNode | null = null;
+  private musicBus: GainNode | null = null;
+  private reverbIn: GainNode | null = null;
+  private noiseBuffer: AudioBuffer | null = null;
+
   playing = false;
   enabled = false;
   sfx = false;
-  private timer: ReturnType<typeof setTimeout> | null = null;
-  private step = 0;
 
-  // Loop calmo, inspirado em Kirby (campo pacífico / hub).
-  // Frequências em Hz; 0 = silêncio.
-  private readonly melody = [
-    392, 440, 494, 523, 587, 523, 494, 440,
-    392, 349, 330, 349, 392, 440, 494, 523,
-    587, 659, 587, 523, 494, 440, 392, 349,
-    330, 349, 392, 0,   392, 440, 523, 0,
-  ];
-  private readonly harmony = [
-    262, 0,   294, 0,   330, 0,   349, 0,
-    262, 0,   247, 0,   262, 0,   294, 0,
-    330, 0,   349, 0,   330, 0,   294, 0,
-    262, 0,   247, 0,   262, 0,   0,   0,
-  ];
-  private readonly bass = [
-    131, 0, 0, 0,  98, 0, 0, 0,
-    110, 0, 0, 0,  131, 0, 0, 0,
-    147, 0, 0, 0,  131, 0, 0, 0,
-    98,  0, 0, 0,  110, 0, 0, 0,
-  ];
+  // música
+  private track: Track | null = null;
+  private seed = 1;
+  private rng: () => number = Math.random;
+  private melody: MelodyState = { idx: 3 };
+  private bar = 0;
+  private step = 0;
+  private barEvents: NoteEvent[] = [];
+  private nextTime = 0;
+  private scheduler: ReturnType<typeof setInterval> | null = null;
+  private switchTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // chamado quando a faixa muda (nome) ou a música para (null); a interface mostra o nome
+  onTrackChange: ((name: string | null) => void) | null = null;
+
+  constructor(private readonly makeContext?: () => AudioContext) {}
+
+  // ------------------------------------------------------------------ infraestrutura
 
   private ensureContext(): boolean {
     if (!this.ctx) {
       try {
         const Ctor = window.AudioContext ?? (window as unknown as WebkitWindow).webkitAudioContext;
-        if (!Ctor) return false;
-        this.ctx = new Ctor();
+        if (!this.makeContext && !Ctor) return false;
+        this.ctx = this.makeContext ? this.makeContext() : new (Ctor as typeof AudioContext)();
+        this.buildGraph(this.ctx);
       } catch {
+        this.ctx = null;
         return false;
       }
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume();
     return true;
+  }
+
+  private buildGraph(ctx: AudioContext): void {
+    const compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -20;
+    compressor.knee.value = 24;
+    compressor.ratio.value = 3;
+    compressor.attack.value = 0.01;
+    compressor.release.value = 0.3;
+    compressor.connect(ctx.destination);
+
+    this.master = ctx.createGain();
+    this.master.gain.value = 1.7; // o compressor logo depois segura os picos
+    this.master.connect(compressor);
+
+    // tira os agudos ásperos de tudo
+    const soften = ctx.createBiquadFilter();
+    soften.type = 'lowpass';
+    soften.frequency.value = 5200;
+    soften.Q.value = 0.4;
+    soften.connect(this.master);
+
+    this.sfxBus = ctx.createGain();
+    this.sfxBus.gain.value = 0.9;
+    this.sfxBus.connect(soften);
+
+    this.musicBus = ctx.createGain();
+    this.musicBus.gain.value = 0.0001;
+    this.musicBus.connect(soften);
+
+    // reverb
+    const convolver = ctx.createConvolver();
+    convolver.buffer = this.makeImpulse(ctx, 2.4, 2.6);
+    const reverbOut = ctx.createGain();
+    reverbOut.gain.value = 0.55;
+    this.reverbIn = ctx.createGain();
+    this.reverbIn.connect(convolver);
+    convolver.connect(reverbOut);
+    reverbOut.connect(soften);
+
+    // ruído branco reaproveitado nos sopros
+    const len = ctx.sampleRate * 2;
+    this.noiseBuffer = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = this.noiseBuffer.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  }
+
+  // resposta ao impulso: ruído estéreo que decai exponencialmente
+  private makeImpulse(ctx: AudioContext, seconds: number, decay: number): AudioBuffer {
+    const len = Math.floor(ctx.sampleRate * seconds);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+    }
+    return buf;
+  }
+
+  // Uma nota: ataque suave, queda exponencial, com envio opcional ao reverb.
+  private voice(freq: number, time: number, dur: number, o: VoiceOptions): void {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    const bus = (o.bus ?? 'sfx') === 'music' ? this.musicBus : this.sfxBus;
+    if (!bus) return;
+    const attack = Math.min(o.attack ?? 0.012, dur * 0.5);
+
+    const osc = ctx.createOscillator();
+    osc.type = o.type ?? 'sine';
+    osc.frequency.setValueAtTime(freq, time);
+    if (o.glideTo) osc.frequency.exponentialRampToValueAtTime(o.glideTo, time + Math.min(dur, o.glideTime ?? 0.15));
+
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, time);
+    env.gain.linearRampToValueAtTime(o.gain, time + attack);
+    env.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+
+    osc.connect(env);
+    env.connect(bus);
+    if (o.send && this.reverbIn) {
+      const send = ctx.createGain();
+      send.gain.value = o.send;
+      env.connect(send);
+      send.connect(this.reverbIn);
+    }
+    osc.start(time);
+    osc.stop(time + dur + 0.05);
+  }
+
+  // Sopro de ruído filtrado: sobe e desce suave (como vento ou borbulhar).
+  private breath(time: number, dur: number, gain: number, fromHz: number, toHz: number, send = 0.3): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.noiseBuffer || !this.sfxBus) return;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseBuffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(fromHz, time);
+    filter.frequency.exponentialRampToValueAtTime(toHz, time + dur);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, time);
+    env.gain.linearRampToValueAtTime(gain, time + dur * 0.25);
+    env.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+    src.connect(filter);
+    filter.connect(env);
+    env.connect(this.sfxBus);
+    if (send > 0 && this.reverbIn) {
+      const s = ctx.createGain();
+      s.gain.value = send;
+      env.connect(s);
+      s.connect(this.reverbIn);
+    }
+    src.start(time, Math.random() * 1.5);
+    src.stop(time + dur + 0.05);
+  }
+
+  // ------------------------------------------------------------------ música
+
+  // Cria/retoma o AudioContext. Deve ser chamado dentro de um clique (exigência dos navegadores).
+  unlock(): void {
+    this.ensureContext();
   }
 
   toggleMusic(): boolean {
@@ -63,93 +220,170 @@ export class AudioEngine {
   start(): void {
     if (this.playing) return;
     if (!this.ensureContext()) return;
+    if (!this.track) this.chooseTrack();
     this.enabled = true;
     this.playing = true;
-    this.step = 0;
-    this.tick();
+    this.beginTrack();
   }
 
   stop(): void {
     this.playing = false;
-    if (this.timer !== null) {
-      clearTimeout(this.timer);
-      this.timer = null;
+    if (this.switchTimer) {
+      clearTimeout(this.switchTimer);
+      this.switchTimer = null;
+    }
+    if (this.scheduler !== null) {
+      clearInterval(this.scheduler);
+      this.scheduler = null;
+    }
+    this.fadeMusic(0, 0.3);
+    this.onTrackChange?.(null);
+  }
+
+  // Novo jogo: sorteia outra faixa (e outra semente). Se a música está ligada, troca com fade.
+  nextTrack(): void {
+    this.chooseTrack();
+    if (!this.enabled) return;
+    if (!this.playing) {
+      if (!this.ensureContext()) return;
+      this.playing = true;
+      this.beginTrack();
+      return;
+    }
+    if (this.switchTimer) clearTimeout(this.switchTimer);
+    this.fadeMusic(0, 0.25);
+    this.switchTimer = setTimeout(() => {
+      this.switchTimer = null;
+      if (this.playing) this.beginTrack();
+    }, 600);
+  }
+
+  get trackName(): string | null {
+    return this.track ? this.track.name : null;
+  }
+
+  private chooseTrack(): void {
+    this.track = pickNextTrack(this.track ? this.track.id : null);
+    this.seed = Math.floor(Math.random() * 0xffffffff);
+  }
+
+  private fadeMusic(target: number, timeConstant: number): void {
+    if (!this.ctx || !this.musicBus) return;
+    const g = this.musicBus.gain;
+    g.cancelScheduledValues(this.ctx.currentTime);
+    g.setTargetAtTime(Math.max(0.0001, target), this.ctx.currentTime, timeConstant);
+  }
+
+  private beginTrack(): void {
+    const ctx = this.ctx;
+    const track = this.track;
+    if (!ctx || !track) return;
+    if (this.scheduler !== null) clearInterval(this.scheduler);
+    this.rng = mulberry32(this.seed);
+    this.melody = { idx: 3 };
+    this.bar = 0;
+    this.step = 0;
+    this.barEvents = [];
+    this.nextTime = ctx.currentTime + 0.1;
+    this.fadeMusic(MUSIC_LEVEL, 0.8); // entra devagar
+    this.onTrackChange?.(track.name);
+    this.scheduler = setInterval(() => this.schedule(), SCHEDULER_MS);
+    this.schedule();
+  }
+
+  private schedule(): void {
+    const ctx = this.ctx;
+    const track = this.track;
+    if (!ctx || !track || !this.playing) return;
+    const stepDur = 60 / track.bpm / 2; // colcheia
+    while (this.nextTime < ctx.currentTime + LOOKAHEAD_S) {
+      const s = this.step % STEPS_PER_BAR;
+      if (s === 0) {
+        this.barEvents = generateBar(track, this.bar, this.rng, this.melody);
+        this.bar++;
+      }
+      for (const ev of this.barEvents) {
+        if (ev.step === s) this.playNote(ev, this.nextTime, stepDur);
+      }
+      this.step++;
+      this.nextTime += stepDur;
     }
   }
 
-  private tick(): void {
-    if (!this.playing || !this.ctx) return;
-    const t = this.ctx.currentTime;
-    // ~72 BPM, colcheias suaves
-    const stepDur = 60 / 72 / 2;
-    const i = this.step % 32;
-    if (this.melody[i]) this.note(this.melody[i], t, stepDur * 2.2, 'sine', 0.022);
-    if (this.harmony[i]) this.note(this.harmony[i], t, stepDur * 2.4, 'triangle', 0.014);
-    if (this.bass[i]) this.note(this.bass[i], t, stepDur * 2.8, 'triangle', 0.028);
-    this.step++;
-    this.timer = setTimeout(() => this.tick(), stepDur * 1000);
+  private playNote(ev: NoteEvent, time: number, stepDur: number): void {
+    const freq = midiToHz(ev.midi);
+    const dur = ev.steps * stepDur;
+    switch (ev.voice) {
+      case 'pad':
+        this.voice(freq, time, dur * 1.05, { gain: 0.011, type: 'triangle', attack: 0.9, bus: 'music', send: 0.5 });
+        break;
+      case 'bass':
+        this.voice(freq, time, dur * 1.1, { gain: 0.03, type: 'sine', attack: 0.06, bus: 'music', send: 0.1 });
+        break;
+      case 'melody':
+        this.voice(freq, time, dur * 1.8, { gain: 0.026, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
+        this.voice(freq * 2, time, dur * 0.9, { gain: 0.005, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
+        break;
+      case 'bell':
+        this.voice(freq, time, 1.9, { gain: 0.02, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
+        this.voice(freq * 2.01, time, 1.0, { gain: 0.006, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
+        break;
+    }
   }
 
-  private note(freq: number, time: number, dur: number, type: OscillatorType, gain: number): void {
-    const ctx = this.ctx;
-    if (!ctx) return;
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = type;
-    osc.frequency.value = freq;
-    g.gain.setValueAtTime(gain, time);
-    g.gain.exponentialRampToValueAtTime(0.001, time + dur);
-    osc.connect(g);
-    g.connect(ctx.destination);
-    osc.start(time);
-    osc.stop(time + dur);
-  }
+  // ------------------------------------------------------------------ efeitos
 
-  private noise(time: number, dur: number, gain: number): void {
-    const ctx = this.ctx;
-    if (!ctx) return;
-    const size = Math.floor(ctx.sampleRate * dur);
-    const buf = ctx.createBuffer(1, size, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < size; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / size);
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(gain, time);
-    g.gain.exponentialRampToValueAtTime(0.001, time + dur);
-    src.connect(g);
-    g.connect(ctx.destination);
-    src.start(time);
-    src.stop(time + dur);
-  }
-
-  play(name: SfxName): void {
+  // variant: elemento da poção (muda o timbre do estouro).
+  play(name: SfxName, variant?: ElementId): void {
     if (!this.sfx || !this.ctx) return;
     const t = this.ctx.currentTime;
     switch (name) {
-      case 'bomb':
-        this.note(220, t, 0.08, 'sine', 0.035);
+      case 'bomb': {
+        // poção pousando: uma gota/bolha suave
+        this.voice(420, t, 0.3, { gain: 0.04, glideTo: 640, glideTime: 0.12, send: 0.4 });
+        this.voice(560, t + 0.08, 0.26, { gain: 0.022, glideTo: 780, glideTime: 0.1, send: 0.4 });
         break;
-      case 'explosion':
-        this.noise(t, 0.35, 0.08);
-        this.note(80, t, 0.2, 'sawtooth', 0.04);
+      }
+      case 'explosion': {
+        const b = BURST[variant ?? 'fire'];
+        // sopro macio, como vapor subindo do frasco
+        this.breath(t, 0.9, 0.03, b.noiseHz, b.noiseHz * 0.4, 0.4);
+        b.notes.forEach((f, i) => {
+          this.voice(f, t + i * b.stagger, 1.5, { gain: 0.03, type: b.type, attack: 0.025, send: 0.55 });
+        });
+        if (variant === 'water') {
+          // bolhinhas
+          this.voice(640, t + 0.12, 0.2, { gain: 0.016, glideTo: 960, glideTime: 0.1, send: 0.5 });
+          this.voice(820, t + 0.2, 0.18, { gain: 0.013, glideTo: 1180, glideTime: 0.09, send: 0.5 });
+        }
         break;
-      case 'pickup':
-        this.note(880, t, 0.07, 'sine', 0.05);
-        this.note(1320, t + 0.05, 0.08, 'sine', 0.04);
+      }
+      case 'pickup': {
+        // sininho
+        this.voice(784, t, 0.55, { gain: 0.034, attack: 0.008, send: 0.5 });
+        this.voice(1175, t + 0.06, 0.65, { gain: 0.02, attack: 0.008, send: 0.5 });
         break;
-      case 'powerup':
-        this.note(660, t, 0.08, 'square', 0.05);
-        this.note(880, t + 0.06, 0.08, 'square', 0.05);
-        this.note(1320, t + 0.12, 0.12, 'square', 0.05);
+      }
+      case 'powerup': {
+        // arpejo ascendente, delicado
+        [523, 659, 784, 1047].forEach((f, i) => {
+          this.voice(f, t + i * 0.085, 0.7, { gain: 0.032, type: i % 2 ? 'triangle' : 'sine', attack: 0.012, send: 0.55 });
+        });
         break;
-      case 'hurt':
-        this.note(110, t, 0.22, 'sawtooth', 0.07);
+      }
+      case 'hurt': {
+        // batida grave e abafada (sem aspereza)
+        this.voice(150, t, 0.34, { gain: 0.06, glideTo: 92, glideTime: 0.3, send: 0.15 });
+        this.breath(t, 0.2, 0.012, 500, 200, 0.1);
         break;
-      case 'door':
-        this.note(660, t, 0.08, 'square', 0.05);
-        this.note(880, t + 0.08, 0.18, 'square', 0.05);
+      }
+      case 'door': {
+        // acorde que "abre" como uma respiração
+        [392, 523, 659].forEach((f, i) => {
+          this.voice(f, t + i * 0.05, 1.3, { gain: 0.028, attack: 0.16, send: 0.6 });
+        });
         break;
+      }
     }
   }
 
@@ -157,33 +391,23 @@ export class AudioEngine {
     if (!this.sfx) return;
     this.stop();
     if (!this.ensureContext() || !this.ctx) return;
-    let time = this.ctx.currentTime + 0.02;
-    const notes: Array<[number, number]> = [
-      [523, 0.10], [659, 0.10], [784, 0.10], [1047, 0.45],
-      [784, 0.12], [1047, 0.6],
-    ];
-    for (const [freq, dur] of notes) {
-      this.note(freq, time, dur, 'square', 0.06);
-      this.note(freq * 1.5, time, dur, 'triangle', 0.03);
-      time += dur * 0.92;
-    }
+    const t = this.ctx.currentTime + 0.05;
+    [523, 659, 784, 1047, 784, 1047].forEach((f, i) => {
+      this.voice(f, t + i * 0.27, 1.4, { gain: 0.042, attack: 0.012, send: 0.6 });
+      this.voice(f * 1.5, t + i * 0.27, 1.0, { gain: 0.012, type: 'triangle', attack: 0.012, send: 0.6 });
+    });
   }
 
   playGameOverMusic(): void {
     if (!this.sfx) return;
     this.stop();
     if (!this.ensureContext() || !this.ctx) return;
-    let time = this.ctx.currentTime + 0.02;
-    const notes: Array<[number, number]> = [
-      [392, 0.30], [349, 0.30], [330, 0.30], [294, 0.30],
-      [262, 0.60], [247, 0.45], [220, 1.40],
-    ];
-    for (const [freq, dur] of notes) {
-      this.note(freq, time, dur, 'square', 0.06);
-      this.note(freq / 2, time, dur, 'triangle', 0.045);
-      this.note(freq * 1.5, time, dur * 0.6, 'sine', 0.02);
-      time += dur * 0.92;
-    }
+    const t = this.ctx.currentTime + 0.05;
+    // frase descendente, melancólica mas macia
+    [392, 349, 330, 262].forEach((f, i) => {
+      this.voice(f, t + i * 0.5, 1.6, { gain: 0.04, attack: 0.05, send: 0.6 });
+      this.voice(f / 2, t + i * 0.5, 1.6, { gain: 0.02, type: 'triangle', attack: 0.08, send: 0.4 });
+    });
   }
 }
 
