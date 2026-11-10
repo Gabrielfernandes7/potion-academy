@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import { CANVAS } from '../config';
 import { readTheme } from '../ui/theme';
 import { isStageCompleted } from '../storage';
+import { setMenuVisible } from '../ui/menu';
 
 interface MapLocation {
   stage: number;
@@ -137,11 +138,18 @@ export class MapScene extends Phaser.Scene {
     });
 
     // Teclado
-    this.input.keyboard?.on('keydown-ESC', () => this.backToMenu());
-    this.input.keyboard?.on('keydown-ONE', () => this.loadStage(1));
-    this.input.keyboard?.on('keydown-TWO', () => this.loadStage(2));
-    this.input.keyboard?.on('keydown-THREE', () => this.loadStage(3));
-    this.input.keyboard?.on('keydown-FOUR', () => this.loadStage(4));
+    // guardados para remover ao sair: senão cada visita soma um atalho a mais
+    const keys: Array<[string, () => void]> = [
+      ['keydown-ESC', () => this.backToMenu()],
+      ['keydown-ONE', () => this.loadStage(1)],
+      ['keydown-TWO', () => this.loadStage(2)],
+      ['keydown-THREE', () => this.loadStage(3)],
+      ['keydown-FOUR', () => this.loadStage(4)],
+    ];
+    for (const [event, fn] of keys) this.input.keyboard?.on(event, fn);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      for (const [event, fn] of keys) this.input.keyboard?.off(event, fn);
+    });
 
     // Dica
     this.add.text(w / 2, h - 80, 'Clique em uma fase ou pressione 1, 2, 3, 4', {
@@ -155,12 +163,15 @@ export class MapScene extends Phaser.Scene {
   private loadStage(stage: number): void {
     const game = this.game;
     game.scene.stop('Map');
+    setMenuVisible(false);
     game.scene.start('Main', { stage });
   }
 
+  // Volta ao menu: a cena do menu e o menu em DOM precisam voltar juntos.
   private backToMenu(): void {
     const game = this.game;
     game.scene.stop('Map');
     game.scene.start('Menu');
+    setMenuVisible(true);
   }
 }
