@@ -6,7 +6,8 @@
 // - update() retorna cedo com a loja aberta e, após gameOver/won, só trata a tecla R.
 import Phaser from 'phaser';
 import {
-  BLOCK, BOMB_TYPES, BombId, CANVAS, CONFIG, DIRS, ELEMENTS, ElementId, EMPTY, WALL,
+  BLOCK, BOMB_TYPES, BombId, CANVAS, CONFIG, DIRS, ELEMENTS, ElementId, EMPTY, ENEMY_TYPES, EnemyKind,
+  LAST_STAGE, StageDef, StageTheme, WALL, isImmune, stageDef,
 } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
 import { Bank, hasBombType } from '../storage';
@@ -18,9 +19,33 @@ import { touch } from '../input/touch';
 import { hideGameOver, setPauseVisible, showGameOver } from '../ui/overlays';
 import { isShopOpen } from '../ui/shop';
 import { isHelpOpen } from '../ui/help';
+import { readTheme } from '../ui/theme';
 import { BossController } from '../game/BossController';
+import { chainOutcome } from '../game/chain';
+import { markStageCompleted } from '../storage';
 
 // Partículas de cada elemento na explosão (cada casa atingida solta um punhado delas).
+// Efeito de quem é atingido, por elemento: o que sobra depois da explosão.
+// fogo: brasas e fumaça subindo; água: respingos que caem; terra: lascas de pedra e poeira;
+// éter: faíscas que giram no ar.
+const HIT_FX: Record<ElementId, {
+  texture: string; speed: { min: number; max: number }; angle: { min: number; max: number };
+  gravity: number; life: { min: number; max: number }; size: number; count: number; tint: number[]; blend: string;
+}> = {
+  fire: { texture: 'menu_spark', speed: { min: 40, max: 110 }, angle: { min: -120, max: -60 }, gravity: -60, life: { min: 500, max: 900 }, size: 1.8, count: 9, tint: [0xff7043, 0xffb74d, 0xffd54f], blend: 'ADD' },
+  water: { texture: 'menu_bubble', speed: { min: 60, max: 140 }, angle: { min: 200, max: 340 }, gravity: 260, life: { min: 450, max: 700 }, size: 1.1, count: 10, tint: [0x4fc3f7, 0xb3e5fc, 0xffffff], blend: 'NORMAL' },
+  earth: { texture: 'menu_spark', speed: { min: 30, max: 100 }, angle: { min: -170, max: -10 }, gravity: 380, life: { min: 400, max: 650 }, size: 1.8, count: 8, tint: [0x8d6e63, 0x6d4c41, 0xa1887f], blend: 'NORMAL' },
+  air: { texture: 'menu_spark', speed: { min: 30, max: 90 }, angle: { min: 0, max: 360 }, gravity: -30, life: { min: 500, max: 900 }, size: 1.5, count: 12, tint: [0xffffff, 0xe0d8ff, 0xb3e5fc], blend: 'ADD' },
+};
+
+// Cor que tinge a Roo ao ser atingida por cada elemento.
+const HIT_TINT: Record<ElementId, number> = {
+  fire: 0xff7043,
+  water: 0x4fc3f7,
+  earth: 0xa1887f,
+  air: 0xe0d8ff,
+};
+
 const EXPLOSION_FX: Record<ElementId, {
   texture: string; speed: { min: number; max: number }; angle: { min: number; max: number };
   gravity: number; life: { min: number; max: number }; size: number; count: number; extra: number[]; blend: string;
@@ -32,6 +57,28 @@ const EXPLOSION_FX: Record<ElementId, {
 };
 
 type MainKeys = Record<'space' | 'x' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
+
+// Aparência de cada fase: texturas do chão, da muralha, do caixote e da porta (e um tom, se houver).
+interface Look {
+  floor1: string; floor2: string; wall: string; block: string; door: [string, string];
+  floorTint?: number; wallTint?: number; blockTint?: number;
+}
+const LOOKS: Record<StageTheme, Look> = {
+  stone: { floor1: 'floor1', floor2: 'floor2', wall: 'wall', block: 'block', door: ['door_closed', 'door_open'] },
+  // salão dos fantasmas: a mesma pedra, mais fria e azulada
+  crypt: {
+    floor1: 'floor1', floor2: 'floor2', wall: 'wall', block: 'block', door: ['door_closed', 'door_open'],
+    floorTint: 0x8f96d4, wallTint: 0x8a88c0, blockTint: 0xb9aadb,
+  },
+  garden: { floor1: 'g_floor1', floor2: 'g_floor2', wall: 'g_wall', block: 'g_block', door: ['gate_closed', 'gate_open'] },
+};
+
+// Movimento de cada inimigo: pulo vertical e horizontal do passo, e o balanço parado (altura e velocidade).
+const MOTION: Record<EnemyKind, { hopV: number; hopH: number; bob: number; bobMs: number }> = {
+  frog: { hopV: 7, hopH: 3, bob: 1.2, bobMs: 260 },
+  ghost: { hopV: 0, hopH: 0, bob: 2.6, bobMs: 420 },
+  flower: { hopV: 0, hopH: 0, bob: 0, bobMs: 500 },
+};
 
 export class MainScene extends Phaser.Scene {
   grid: number[][] = [];
@@ -55,7 +102,9 @@ export class MainScene extends Phaser.Scene {
   timeLeft = 0;
   overtimeDamageTimer = 0;
   blocksDestroyed = 0;
-  nextEnemyThreshold = 0;
+  enemyThresholds = new Map<EnemyKind, number>(); // caixotes quebrados para o próximo inimigo de cada tipo
+  look: Look = LOOKS.stone;
+  lashGfx!: Phaser.GameObjects.Graphics; // avisos dos chicotes das flores do mal
   lastTimerSec: number | null = null;
   powerupsCollected: PowerupCounts = { bomb_up: 0, fire_up: 0, speed_up: 0, time_up: 0 };
   isPaused = false;
@@ -67,13 +116,21 @@ export class MainScene extends Phaser.Scene {
   idleMs = 0;
   isSleeping = false;
   zzzMs = 0;
-  stage = 1; // 1 = laboratório, 2 = duelo com a Belladona
+  stage = 1; // 1 laboratório, 2 salão dos fantasmas, 3 duelo com a Belladona, 4 jardim (ver STAGES em config.ts)
   boss: BossController | null = null;
   transitioning = false; // passando de fase: ignora entrada
   private helpPaused = false;
 
   constructor() {
     super('Main');
+  }
+
+  get def(): StageDef {
+    return stageDef(this.stage);
+  }
+
+  get isBossStage(): boolean {
+    return this.def.kind === 'boss';
   }
 
   init(data?: StageData): void {
@@ -113,20 +170,24 @@ export class MainScene extends Phaser.Scene {
     }
     this.lastDir = { x: 0, y: 0 };
     // sem porta na fase do chefe (-1 nunca coincide com uma casa)
-    this.doorX = this.stage === 2 ? -1 : CONFIG.cols - 2;
-    this.doorY = this.stage === 2 ? -1 : CONFIG.rows - 2;
+    this.doorX = this.def.door ? CONFIG.cols - 2 : -1;
+    this.doorY = this.def.door ? CONFIG.rows - 2 : -1;
     this.doorOpen = false;
-    this.timeLeft = this.stage === 2 ? CONFIG.bossStageTime : CONFIG.phaseTime;
+    this.look = LOOKS[this.def.theme];
+    this.timeLeft = this.def.time;
     this.overtimeDamageTimer = CONFIG.overtimeDamageInterval;
     this.blocksDestroyed = 0;
-    this.nextEnemyThreshold = CONFIG.enemySpawnEvery;
+    this.enemyThresholds = new Map();
+    for (const rule of this.def.enemies) {
+      if (rule.every) this.enemyThresholds.set(rule.kind, rule.every);
+    }
     this.lastTimerSec = null;
     this.idleMs = 0;
     this.isSleeping = false;
     this.zzzMs = 0;
     touch.releaseAll();
     touch.clearJust();
-    audio.nextTrack(this.stage === 2); // cada jogo tem uma música diferente; o duelo tem a sua
+    audio.nextTrack(this.isBossStage, this.def.track); // o duelo e algumas fases têm faixa própria; no resto, sorteia
     this.powerupsCollected = { bomb_up: 0, fire_up: 0, speed_up: 0, time_up: 0 };
     this.isPaused = false;
     this.gemBlocks = new Set();
@@ -138,21 +199,20 @@ export class MainScene extends Phaser.Scene {
   create(): void {
     this.createHeroAnims();
     this.buildGrid();
-    if (this.stage === 1) {
+    if (this.def.door) {
       this.placeDoor();
       this.assignHiddenGems();
-      this.spawnEnemies();
     }
+    this.spawnEnemies();
     this.playerSprite = this.add.sprite(
       this.player.gridX * CONFIG.tile + CONFIG.tile / 2,
       this.player.gridY * CONFIG.tile + CONFIG.tile / 2,
       'roo_down_0',
     ).setOrigin(0.5, rooOriginY(CONFIG.tile)).setDepth(10);
     this.cdGraphics = this.add.graphics().setDepth(15);
-    if (this.stage === 2) {
-      this.boss = new BossController(this);
-      this.cameras.main.fadeIn(600, 8, 14, 12);
-    }
+    this.lashGfx = this.add.graphics().setDepth(4);
+    if (this.isBossStage) this.boss = new BossController(this);
+    if (this.stage > 1) this.cameras.main.fadeIn(600, 8, 14, 12);
     // a grade é desenhada abaixo da faixa da HUD (cena 'Hud', por cima)
     this.cameras.main.setViewport(0, CONFIG.hudHeight, CANVAS.width, CONFIG.rows * CONFIG.tile);
     this.setupInput();
@@ -162,7 +222,35 @@ export class MainScene extends Phaser.Scene {
     });
     this.updateHud();
     this.playIdle();
+    this.showStageBanner();
     if (!this.scene.isActive('Hud')) this.scene.launch('Hud');
+  }
+
+  // Cartão de entrada da fase: número, nome e (se houver) uma dica sobre a novidade dela.
+  showStageBanner(): void {
+    const theme = readTheme();
+    const cx = (CONFIG.cols * CONFIG.tile) / 2;
+    const cy = (CONFIG.rows * CONFIG.tile) / 2;
+    const items: Phaser.GameObjects.GameObject[] = [];
+    const band = this.add.rectangle(cx, cy, CONFIG.cols * CONFIG.tile, 96, 0x000000, 0.62).setDepth(29);
+    items.push(band);
+    items.push(this.add.text(cx, cy - 26, `FASE ${this.stage}`, {
+      fontFamily: theme.fontDisplay, fontSize: '14px', color: theme.textMuted, fontStyle: '700',
+    }).setOrigin(0.5).setDepth(30));
+    items.push(this.add.text(cx, cy - 2, this.def.name, {
+      fontFamily: theme.fontDisplay, fontSize: '24px', color: '#f0c674', fontStyle: '700',
+      stroke: '#000000', strokeThickness: 3,
+    }).setOrigin(0.5).setDepth(30));
+    if (this.def.tip) {
+      items.push(this.add.text(cx, cy + 28, this.def.tip, {
+        fontFamily: theme.fontBody, fontSize: '12px', color: '#e8dcc0',
+        align: 'center', wordWrap: { width: CONFIG.cols * CONFIG.tile - 48 },
+      }).setOrigin(0.5).setDepth(30));
+    }
+    this.tweens.add({
+      targets: items, alpha: 0, delay: 2200, duration: 600,
+      onComplete: () => items.forEach(i => i.destroy()),
+    });
   }
 
   // ---------- Animação do herói ----------
@@ -286,9 +374,13 @@ export class MainScene extends Phaser.Scene {
         const ny = bomb.gridY + dy * r;
         const tile = this.getTile(nx, ny);
         if (tile === null || tile === WALL) break;
-        // reação em cadeia
+        // reação entre poções: fogo acende, água apaga o fogo, terra é imune (ver game/chain.ts)
         const chainBomb = this.bombs.find(b => b !== bomb && b.gridX === nx && b.gridY === ny && !b.detonated);
-        if (chainBomb) this.detonate(chainBomb);
+        if (chainBomb) {
+          const outcome = chainOutcome(bomb.element, chainBomb.element);
+          if (outcome === 'trigger') this.detonate(chainBomb);
+          else if (outcome === 'neutralize') this.neutralizeBomb(chainBomb);
+        }
         tiles.push({ x: nx, y: ny });
         if (tile === BLOCK) {
           this.removeBlock(nx, ny);
@@ -301,7 +393,7 @@ export class MainScene extends Phaser.Scene {
     this.boss?.onExplosion(tiles);
     for (const t of tiles) {
       for (const enemy of this.enemies) {
-        if (enemy.alive && enemy.gridX === t.x && enemy.gridY === t.y) this.killEnemy(enemy);
+        if (enemy.alive && enemy.gridX === t.x && enemy.gridY === t.y) this.hitEnemy(enemy, bomb.element);
       }
       this.spawnExplosion(t.x, t.y, element.color, element.glow, bomb.element);
     }
@@ -311,6 +403,30 @@ export class MainScene extends Phaser.Scene {
     bomb.fx.destroy();
     this.play('explosion', bomb.element);
     this.cameras.main.shake(70, 0.003);
+  }
+
+  // A água apagou uma poção de fogo: ela se desfaz em vapor, sem explodir.
+  neutralizeBomb(bomb: Bomb): void {
+    if (bomb.detonated) return;
+    bomb.detonated = true;
+    const { x, y } = bomb.sprite;
+    this.tweens.killTweensOf(bomb.sprite);
+    bomb.sprite.destroy();
+    bomb.halo.destroy();
+    bomb.fx.destroy();
+    const steam = this.add.particles(x, y, 'menu_puff', {
+      speed: { min: 8, max: 30 },
+      angle: { min: -120, max: -60 },
+      lifespan: { min: 700, max: 1100 },
+      scale: { start: 0.35, end: 1.1 },
+      alpha: { start: 0.55, end: 0 },
+      tint: [0xe3f2fd, 0xb0bec5, 0xffffff],
+      emitting: false,
+    }).setDepth(10);
+    steam.explode(7);
+    this.time.delayedCall(1300, () => steam.destroy());
+    this.floatingText(Math.floor(x / CONFIG.tile), Math.floor(y / CONFIG.tile), 'APAGADA', '#a8e6f5');
+    this.play('fizzle');
   }
 
   pushAbility(): void {
@@ -347,15 +463,18 @@ export class MainScene extends Phaser.Scene {
       for (let x = 0; x < CONFIG.cols; x++) {
         const px = x * CONFIG.tile;
         const py = y * CONFIG.tile;
-        this.add.image(px, py, (x + y) % 2 === 0 ? 'floor1' : 'floor2').setOrigin(0).setDepth(0);
+        const floor = this.add.image(px, py, (x + y) % 2 === 0 ? this.look.floor1 : this.look.floor2).setOrigin(0).setDepth(0);
+        if (this.look.floorTint !== undefined) floor.setTint(this.look.floorTint);
         const isWall = x === 0 || y === 0 || x === CONFIG.cols - 1 || y === CONFIG.rows - 1 ||
                        (x % 2 === 0 && y % 2 === 0);
         if (isWall) {
           this.grid[y][x] = WALL;
-          this.add.image(px, py, 'wall').setOrigin(0).setDepth(1);
-        } else if (Math.random() < (this.stage === 2 ? CONFIG.bossBlockChance : CONFIG.blockChance) && !this.isSpawnSafe(x, y)) {
+          const wall = this.add.image(px, py, this.look.wall).setOrigin(0).setDepth(1);
+          if (this.look.wallTint !== undefined) wall.setTint(this.look.wallTint);
+        } else if (Math.random() < this.def.blockChance && !this.isSpawnSafe(x, y)) {
           this.grid[y][x] = BLOCK;
-          const sprite = this.add.image(px, py, 'block').setOrigin(0).setDepth(2);
+          const sprite = this.add.image(px, py, this.look.block).setOrigin(0).setDepth(2);
+          if (this.look.blockTint !== undefined) sprite.setTint(this.look.blockTint);
           this.blockSprites.set(`${x},${y}`, sprite);
         }
       }
@@ -374,7 +493,7 @@ export class MainScene extends Phaser.Scene {
     this.doorSprite = this.add.image(
       this.doorX * CONFIG.tile + CONFIG.tile / 2,
       this.doorY * CONFIG.tile + CONFIG.tile / 2,
-      'door_closed',
+      this.look.door[0],
     ).setDepth(3);
   }
 
@@ -386,7 +505,7 @@ export class MainScene extends Phaser.Scene {
 
   isSpawnSafe(x: number, y: number): boolean {
     // área livre em L ao redor do spawn, para sempre haver rota de fuga
-    if (this.stage === 2) {
+    if (this.isBossStage) {
       // a Belladona nasce no canto oposto: deixa as casas ao redor dela livres
       const r = CONFIG.rows - 2;
       const c = CONFIG.cols - 2;
@@ -405,9 +524,13 @@ export class MainScene extends Phaser.Scene {
     }
     this.grid[y][x] = EMPTY;
     this.blocksDestroyed++;
-    if (this.stage === 1 && this.blocksDestroyed >= this.nextEnemyThreshold && this.enemies.length < CONFIG.maxEnemies) {
-      this.spawnEnemy();
-      this.nextEnemyThreshold += CONFIG.enemySpawnEvery;
+    for (const rule of this.def.enemies) {
+      const threshold = this.enemyThresholds.get(rule.kind);
+      if (threshold === undefined || !rule.every) continue;
+      if (this.blocksDestroyed >= threshold && this.countEnemies(rule.kind) < rule.max) {
+        this.spawnEnemy(rule.kind);
+        this.enemyThresholds.set(rule.kind, threshold + rule.every);
+      }
     }
     this.updateHud();
   }
@@ -425,6 +548,7 @@ export class MainScene extends Phaser.Scene {
     if (this.getTile(x, y) !== EMPTY) return false;
     if (this.hasBomb(x, y)) return false;
     if (!this.doorOpen && x === this.doorX && y === this.doorY) return false;
+    if (this.enemies.some(e => e.alive && ENEMY_TYPES[e.kind].rooted && e.gridX === x && e.gridY === y)) return false;
     return true;
   }
 
@@ -437,7 +561,7 @@ export class MainScene extends Phaser.Scene {
     }
     const type = rollReward();
     // na fase do chefe não há porta: gema vira moeda
-    this.spawnPickupSprite(x, y, this.stage === 2 && type === 'gem' ? 'coin' : type);
+    this.spawnPickupSprite(x, y, !this.def.door && type === 'gem' ? 'coin' : type);
   }
 
   spawnPickupSprite(x: number, y: number, type: PickupType): void {
@@ -504,7 +628,7 @@ export class MainScene extends Phaser.Scene {
         this.play('powerup');
         break;
       case 'time_up':
-        this.timeLeft = Math.min(this.timeLeft + CONFIG.timeUpBonus, CONFIG.phaseTime * 2);
+        this.timeLeft = Math.min(this.timeLeft + CONFIG.timeUpBonus, this.def.time * 2);
         this.powerupsCollected.time_up++;
         this.floatingText(pickup.gridX, pickup.gridY, '+15s', '#fff59d');
         this.play('powerup');
@@ -528,7 +652,7 @@ export class MainScene extends Phaser.Scene {
 
   openDoor(): void {
     this.doorOpen = true;
-    this.doorSprite.setTexture('door_open');
+    this.doorSprite.setTexture(this.look.door[1]);
     this.tweens.add({
       targets: this.doorSprite, scale: { from: 1, to: 1.15 },
       duration: 400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
@@ -550,16 +674,33 @@ export class MainScene extends Phaser.Scene {
     }
   }
 
-  // Chegou à porta: leva o que conquistou para a fase do chefe.
+  // Chegou à porta. Nas fases intermediárias leva o que conquistou para a seguinte; na última, vence.
   stageClear(): void {
-    if (this.transitioning || this.stage !== 1) return;
+    if (this.transitioning || !this.def.door) return;
     this.transitioning = true;
     this.play('door');
+    if (this.stage >= LAST_STAGE) {
+      // portão do jardim: fim do jogo
+      this.floatingText(this.player.gridX, this.player.gridY, 'JARDIM LIVRE!', '#9be564');
+      this.coins += CONFIG.gardenVictoryBonus;
+      Bank.add(CONFIG.gardenVictoryBonus);
+      this.time.delayedCall(900, () => {
+        this.won = true;
+        this.triggerGameOver();
+      });
+      return;
+    }
     this.floatingText(this.player.gridX, this.player.gridY, 'FASE COMPLETA!', '#9be564');
+    this.advanceStage();
+  }
+
+  // Fade e recomeço da cena na fase seguinte, levando vida, power-ups, moedas e o frasco escolhido.
+  advanceStage(): void {
+    this.lashGfx.clear();
     this.cameras.main.fadeOut(900, 8, 14, 12);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.restart({
-        stage: 2,
+        stage: this.stage + 1,
         carry: {
           hp: Math.min(CONFIG.maxHp, this.player.hp + CONFIG.stageClearHeal),
           bombsMax: this.player.bombsMax,
@@ -572,13 +713,14 @@ export class MainScene extends Phaser.Scene {
     });
   }
 
-  // A Belladona foi derrotada: bônus de POÇÃO e vitória.
+  // A Belladona foi derrotada: bônus de POÇÃO e a Roo segue para o jardim, fora do castelo.
   onBossDefeated(): void {
-    if (this.gameOver) return;
+    if (this.gameOver || this.transitioning) return;
+    this.transitioning = true;
     this.coins += CONFIG.bossVictoryBonus;
     Bank.add(CONFIG.bossVictoryBonus);
-    this.won = true;
-    this.triggerGameOver();
+    this.floatingText(this.player.gridX, this.player.gridY, 'BELLADONA DERROTADA!', '#9be564');
+    this.advanceStage();
   }
 
   // Casa onde a jogadora está de fato (posição do sprite, como o dano).
@@ -590,12 +732,20 @@ export class MainScene extends Phaser.Scene {
   // ---------- Inimigos ----------
 
   spawnEnemies(): void {
-    for (let i = 0; i < CONFIG.enemyCount; i++) this.spawnEnemy();
+    for (const rule of this.def.enemies) {
+      for (let i = 0; i < rule.start; i++) this.spawnEnemy(rule.kind);
+    }
   }
 
-  spawnEnemy(): void {
-    if (this.enemies.length >= CONFIG.maxEnemies) return;
-    for (let attempt = 0; attempt < 60; attempt++) {
+  countEnemies(kind: EnemyKind): number {
+    return this.enemies.filter(e => e.kind === kind).length;
+  }
+
+  spawnEnemy(kind: EnemyKind): void {
+    const rule = this.def.enemies.find(r => r.kind === kind);
+    if (!rule || this.countEnemies(kind) >= rule.max) return;
+    const def = ENEMY_TYPES[kind];
+    for (let attempt = 0; attempt < 80; attempt++) {
       const x = Phaser.Math.Between(1, CONFIG.cols - 2);
       const y = Phaser.Math.Between(1, CONFIG.rows - 2);
       if (this.grid[y][x] !== EMPTY) continue;
@@ -606,38 +756,165 @@ export class MainScene extends Phaser.Scene {
       const sprite = this.add.image(
         x * CONFIG.tile + CONFIG.tile / 2,
         y * CONFIG.tile + CONFIG.tile / 2,
-        'enemy',
+        def.texture,
       ).setDepth(7).setScale(0.01);
+      if (def.rooted) {
+        // a flor balança presa ao chão: o pivô fica perto da base
+        sprite.setOrigin(0.5, 0.88);
+        sprite.y += 0.38 * CONFIG.tile;
+      }
       this.tweens.add({ targets: sprite, scale: 1, duration: 250, ease: 'Back.easeOut' });
-      this.enemies.push({ gridX: x, gridY: y, sprite, moveTimer: CONFIG.enemyMoveInterval, alive: true });
+      this.enemies.push({
+        kind, gridX: x, gridY: y, sprite, moveTimer: def.moveInterval, alive: true,
+        moveT: def.stepMs, fromX: sprite.x, fromY: sprite.y, hopY: false, phase: Math.random() * 1000,
+        lashMs: CONFIG.flowerLashCycleMs * (0.5 + Math.random() * 0.5), fxCooldown: 0,
+      });
       return;
     }
   }
 
-  killEnemy(enemy: Enemy): void {
+  killEnemy(enemy: Enemy, element: ElementId = 'fire'): void {
     enemy.alive = false;
     this.tweens.killTweensOf(enemy.sprite);
+    const px = enemy.sprite.x;
+    const py = enemy.sprite.y;
     enemy.sprite.destroy();
     this.enemies = this.enemies.filter(e => e !== enemy);
+    this.hitFx(px, py, element);
     this.spawnPickupSprite(enemy.gridX, enemy.gridY, 'coin');
     this.cameras.main.shake(60, 0.003);
   }
 
+  // Uma explosão alcançou o inimigo: mata, a menos que ele seja imune ao elemento (flor do mal e a água).
+  hitEnemy(enemy: Enemy, element: ElementId): void {
+    if (!isImmune(enemy.kind, element)) {
+      this.killEnemy(enemy, element);
+      return;
+    }
+    if (enemy.fxCooldown > 0) return;
+    enemy.fxCooldown = 700; // a explosão dura 380 ms; sem isso o aviso se repetiria a cada quadro
+    this.hitFx(enemy.sprite.x, enemy.sprite.y - 6, element);
+    this.floatingText(enemy.gridX, enemy.gridY, 'IMUNE', '#c5e1a5');
+    this.tweens.add({ targets: enemy.sprite, alpha: 0.55, duration: 90, yoyo: true, repeat: 1 });
+  }
+
+  // Efeito de ser atingido por um elemento (inimigo ou Roo): partículas próprias do elemento.
+  hitFx(px: number, py: number, element: ElementId): void {
+    const c = HIT_FX[element];
+    const emitter = this.add.particles(px, py, c.texture, {
+      speed: c.speed,
+      angle: c.angle,
+      gravityY: c.gravity,
+      lifespan: c.life,
+      scale: { start: c.size, end: 0 },
+      alpha: { start: 1, end: 0 },
+      tint: c.tint,
+      blendMode: c.blend,
+      emitting: false,
+    }).setDepth(10);
+    emitter.explode(c.count);
+    this.time.delayedCall(1000, () => emitter.destroy());
+  }
+
   moveEnemy(enemy: Enemy): void {
+    const def = ENEMY_TYPES[enemy.kind];
     const valid: Array<readonly [number, number]> = [];
     for (const [dx, dy] of DIRS) {
       const nx = enemy.gridX + dx;
       const ny = enemy.gridY + dy;
       if (nx === this.doorX && ny === this.doorY) continue;
-      if (!this.isFree(nx, ny)) continue;
+      if (def.passWalls) {
+        // fantasma: atravessa muralhas, caixotes e poções, mas não sai da sala
+        if (nx < 1 || ny < 1 || nx > CONFIG.cols - 2 || ny > CONFIG.rows - 2) continue;
+      } else if (!this.isFree(nx, ny)) {
+        continue;
+      }
       if (this.enemies.some(e => e !== enemy && e.alive && e.gridX === nx && e.gridY === ny)) continue;
       valid.push([dx, dy]);
     }
     if (valid.length === 0) return;
     const [dx, dy] = Phaser.Utils.Array.GetRandom(valid);
+    // o passo é animado em animateEnemy (deslize, pulo e balanço), não por tween
+    enemy.fromX = enemy.sprite.x;
+    enemy.fromY = enemy.sprite.y;
+    enemy.hopY = dy !== 0;
+    enemy.moveT = 0;
     enemy.gridX += dx;
     enemy.gridY += dy;
-    this.tweenSpriteTo(enemy.sprite, enemy.gridX, enemy.gridY, 300, 'Linear');
+  }
+
+  // Passo: desliza até a casa nova (sapo: com um pulinho; fantasma: flutuando); parado, balança de leve.
+  // O fantasma fica meio transparente enquanto está dentro de uma parede ou de um caixote.
+  animateEnemy(enemy: Enemy, delta: number): void {
+    const def = ENEMY_TYPES[enemy.kind];
+    const m = MOTION[enemy.kind];
+    const tx = enemy.gridX * CONFIG.tile + CONFIG.tile / 2;
+    // a flor tem o pivô perto da base: o sprite fica um pouco abaixo do centro da casa
+    const ty = enemy.gridY * CONFIG.tile + CONFIG.tile / 2 + (def.rooted ? 0.38 * CONFIG.tile : 0);
+    if (enemy.moveT < def.stepMs) {
+      enemy.moveT = Math.min(def.stepMs, enemy.moveT + delta);
+      const p = enemy.moveT / def.stepMs;
+      const hop = Math.sin(p * Math.PI) * (enemy.hopY ? m.hopV : m.hopH);
+      enemy.sprite.x = enemy.fromX + (tx - enemy.fromX) * p;
+      enemy.sprite.y = enemy.fromY + (ty - enemy.fromY) * p - hop;
+    } else {
+      enemy.phase += delta;
+      enemy.sprite.x = tx;
+      enemy.sprite.y = ty + Math.sin(enemy.phase / m.bobMs) * m.bob;
+    }
+    if (def.passWalls) {
+      const tile = this.getTile(enemy.gridX, enemy.gridY);
+      enemy.sprite.setAlpha(tile === EMPTY ? 0.92 : 0.45);
+    }
+    if (def.rooted) enemy.sprite.setAngle(Math.sin(enemy.phase / 380) * 4);
+  }
+
+  // Flor do mal: de tempos em tempos avisa no chão e chicoteia as quatro casas ao redor.
+  updateFlower(enemy: Enemy, delta: number): void {
+    enemy.lashMs -= delta;
+    const around: Array<{ x: number; y: number }> = [];
+    for (const [dx, dy] of DIRS) {
+      const x = enemy.gridX + dx;
+      const y = enemy.gridY + dy;
+      const tile = this.getTile(x, y);
+      if (tile !== null && tile !== WALL) around.push({ x, y });
+    }
+    if (enemy.lashMs > CONFIG.flowerWarnMs) return;
+    const T = CONFIG.tile;
+    if (enemy.lashMs > 0) {
+      // aviso: casas se enchem de um rosa pulsante
+      const pulse = 0.25 + 0.2 * Math.sin(enemy.lashMs / 55);
+      for (const c of around) {
+        this.lashGfx.fillStyle(0xd81b60, pulse);
+        this.lashGfx.fillRect(c.x * T + 2, c.y * T + 2, T - 4, T - 4);
+        this.lashGfx.lineStyle(2, 0xff80ab, 0.9);
+        this.lashGfx.strokeRect(c.x * T + 2, c.y * T + 2, T - 4, T - 4);
+      }
+      return;
+    }
+    // chicote
+    const me = this.playerTile();
+    for (const c of around) {
+      this.thornFx(c.x * T + T / 2, c.y * T + T / 2);
+      if (c.x === me.x && c.y === me.y) this.damagePlayer(false, 'earth');
+    }
+    this.tweens.add({ targets: enemy.sprite, scaleX: 1.25, scaleY: 0.85, duration: 90, yoyo: true });
+    enemy.lashMs = CONFIG.flowerLashCycleMs;
+  }
+
+  // Espinhos e folhas que saltam quando a flor chicoteia.
+  thornFx(px: number, py: number): void {
+    const emitter = this.add.particles(px, py, 'menu_spark', {
+      speed: { min: 40, max: 110 },
+      angle: { min: 0, max: 360 },
+      lifespan: { min: 300, max: 520 },
+      scale: { start: 1.8, end: 0 },
+      alpha: { start: 1, end: 0 },
+      tint: [0x66bb6a, 0x2e7d32, 0xad1457],
+      emitting: false,
+    }).setDepth(10);
+    emitter.explode(6);
+    this.time.delayedCall(700, () => emitter.destroy());
   }
 
   // ---------- Explosões e dano ----------
@@ -658,7 +935,7 @@ export class MainScene extends Phaser.Scene {
       onComplete: () => ring.destroy(),
     });
     this.explosionFx(px, py, color, glow, element);
-    this.activeExplosions.push({ x, y, timer: 380, key: `${x},${y}`, hitPlayer: false });
+    this.activeExplosions.push({ x, y, timer: 380, key: `${x},${y}`, hitPlayer: false, element });
   }
 
   // Punhado de partículas do elemento: brasas (fogo), gotas (água), pedriscos (terra), brilhos (éter).
@@ -679,13 +956,14 @@ export class MainScene extends Phaser.Scene {
     this.time.delayedCall(1100, () => emitter.destroy());
   }
 
-  damagePlayer(bypassInvuln = false): void {
+  damagePlayer(bypassInvuln = false, element?: ElementId): void {
     if (!bypassInvuln && this.player.invulnerable > 0) return;
     this.player.hp -= CONFIG.damagePerExplosion;
     this.player.invulnerable = CONFIG.invulnTime;
     this.updateHud();
     this.play('hurt');
-    this.playerSprite.setTint(0xff5252);
+    this.playerSprite.setTint(element ? HIT_TINT[element] : 0xff5252);
+    if (element) this.hitFx(this.playerSprite.x, this.playerSprite.y - 8, element);
     this.tweens.add({
       targets: this.playerSprite, alpha: 0.3,
       duration: 120, yoyo: true, repeat: 5,
@@ -708,7 +986,7 @@ export class MainScene extends Phaser.Scene {
     const blast = this.activeExplosions.find(e => e.key === key && !e.hitPlayer);
     if (blast) {
       blast.hitPlayer = true;
-      this.damagePlayer();
+      this.damagePlayer(false, blast.element);
     }
   }
 
@@ -909,11 +1187,20 @@ export class MainScene extends Phaser.Scene {
   }
 
   updateEnemies(delta: number): void {
+    this.lashGfx.clear();
     for (const enemy of [...this.enemies]) {
       if (!enemy.alive) continue;
-      // chama residual também mata inimigos
-      if (this.activeExplosions.some(e => e.x === enemy.gridX && e.y === enemy.gridY)) {
-        this.killEnemy(enemy);
+      const def = ENEMY_TYPES[enemy.kind];
+      enemy.fxCooldown = Math.max(0, enemy.fxCooldown - delta);
+      // chama residual também atinge inimigos
+      const blast = this.activeExplosions.find(e => e.x === enemy.gridX && e.y === enemy.gridY);
+      if (blast) {
+        this.hitEnemy(enemy, blast.element);
+        if (!enemy.alive) continue;
+      }
+      this.animateEnemy(enemy, delta);
+      if (def.rooted) {
+        this.updateFlower(enemy, delta);
         continue;
       }
       const dist = Phaser.Math.Distance.Between(
@@ -923,7 +1210,7 @@ export class MainScene extends Phaser.Scene {
       enemy.moveTimer -= delta;
       if (enemy.moveTimer <= 0) {
         this.moveEnemy(enemy);
-        enemy.moveTimer = CONFIG.enemyMoveInterval;
+        enemy.moveTimer = def.moveInterval;
       }
     }
   }
@@ -953,8 +1240,13 @@ export class MainScene extends Phaser.Scene {
     this.isPaused = false;
     setPauseVisible(false);
     this.playerSprite.setVisible(false);
-    if (this.won) audio.playWinMusic();
-    else audio.playGameOverMusic();
+    this.lashGfx.clear();
+    if (this.won) {
+      audio.playWinMusic();
+      markStageCompleted(this.stage);
+    } else {
+      audio.playGameOverMusic();
+    }
     showGameOver({
       won: this.won,
       coins: this.coins,
@@ -964,7 +1256,6 @@ export class MainScene extends Phaser.Scene {
       blocksDestroyed: this.blocksDestroyed,
       timeLeft: Math.max(0, this.timeLeft),
       stage: this.stage,
-      bossDefeated: this.won && this.stage === 2,
     });
   }
 

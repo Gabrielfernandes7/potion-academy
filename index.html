@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0d1714">
 <title>Potion Academy</title>
+<meta name="description" content="Potion Academy: um jogo de alquimia em navegador. Lance poções de quatro elementos, quebre caixotes e encare a Belladona.">
+<link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg">
+<!-- Open Graph: para a prévia ao compartilhar o link. og:url e og:image precisam do endereço final do site. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Potion Academy">
+<meta property="og:description" content="Um jogo de alquimia em navegador: poções de quatro elementos, caixotes e uma bruxa chefe.">
+<meta property="og:image" content="%BASE_URL%og-image.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
 <div class="app">
@@ -12,7 +22,8 @@
     <h1 class="logo">POTION ACADEMY</h1>
     <div class="sound">
       <span id="track-name" class="track-name" aria-live="polite"></span>
-      <button class="chip-btn" id="music-btn" type="button" title="Liga e desliga a música" aria-pressed="false">SOM OFF</button>
+      <button class="chip-btn" id="music-btn" type="button" title="Liga e desliga a música" aria-pressed="true">MÚSICA ON</button>
+      <button class="chip-btn" id="sfx-btn" type="button" title="Liga e desliga os efeitos sonoros" aria-pressed="true">EFEITOS ON</button>
       <button class="chip-btn help-btn" id="help-btn" type="button" title="Como jogar (tecla ?)" aria-label="Como jogar">?</button>
     </div>
   </header>
@@ -26,7 +37,9 @@
       </div>
       <div class="menu-actions">
         <button class="big-btn" id="menu-play" type="button">JOGAR</button>
+        <button class="big-btn alt" id="menu-map" type="button">MAPA</button>
         <button class="big-btn alt" id="menu-shop" type="button">CALDEIRÃO</button>
+        <button class="big-btn alt" id="menu-music" type="button">SALA DE MÚSICA</button>
         <p class="menu-hint">Pressione <kbd>Enter</kbd> para jogar</p>
       </div>
     </div>
@@ -48,20 +61,24 @@
   </div>
 
   <div class="legend" aria-label="Elementos">
-    <span style="--c:#ff7043"><b>△</b> Enxofre · Fogo</span>
-    <span style="--c:#42a5f5"><b>▽</b> Mercúrio · Água</span>
-    <span style="--c:#8bc34a"><b>◇</b> Sal · Terra</span>
-    <span style="--c:#c9d6df"><b>☿</b> Éter · Ar</span>
+    <span style="--c:#ff7043"><b>△</b> Fogo </span>
+    <span style="--c:#42a5f5"><b>▽</b> Água </span>
+    <span style="--c:#8bc34a"><b>◇</b> Terra </span>
+    <span style="--c:#c9d6df"><b>☿</b> Ar </span>
   </div>
 
-  <div id="controls">
-    <span><kbd>↑↓←→</kbd> Mover</span>
-    <span><kbd>Espaço</kbd> Bomba</span>
-    <span><kbd>X</kbd> Empurrar</span>
-    <span><kbd>D</kbd> Detonar remota</span>
-    <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> Frasco</span>
-    <span><kbd>Enter</kbd> Pausa</span>
-    <span><kbd>R</kbd> Reiniciar</span>
+</div>
+
+<!-- Sala de Música: a Roo de maestro e a escolha da faixa -->
+<div id="music-overlay" class="overlay" role="dialog" aria-labelledby="music-title">
+  <div class="music-room">
+    <img id="maestro-img" class="maestro-img" alt="A Roo de maestro, regendo a música" />
+    <h2 id="music-title">SALA DE MÚSICA</h2>
+    <p class="music-sub">A faixa escolhida toca no menu e nas partidas.</p>
+    <p class="music-now">ESCOLHIDA: <b id="music-now"></b></p>
+    <div class="music-list" id="music-list"></div>
+    <p class="music-off" id="music-off" hidden>A música está desligada. Ligue MÚSICA no topo para ouvir.</p>
+    <button class="big-btn alt" id="music-back-btn" type="button">VOLTAR</button>
   </div>
 </div>
 
@@ -107,8 +124,9 @@
 
     <section>
       <h3>Objetivo</h3>
-      <p><b>Fase 1:</b> destrua caixotes com poções, pegue as <b>3 gemas</b> e chegue à porta antes do tempo acabar.</p>
-      <p><b>Fase 2:</b> enfrente a bruxa <b>Belladona</b>. Acerte-a com explosões até a vida dela acabar.</p>
+      <p><b>Fases 1 e 2 (laboratório e salão dos fantasmas):</b> destrua caixotes com poções, pegue as <b>3 gemas</b> e chegue à porta antes do tempo acabar.</p>
+      <p><b>Fase 3:</b> enfrente a bruxa <b>Belladona</b>. Acerte-a com explosões até a vida dela acabar.</p>
+      <p><b>Fase 4 (jardim):</b> pegue as 3 gemas e chegue ao portão. Cuidado com as <b>flores do mal</b>.</p>
     </section>
 
     <section>
@@ -140,11 +158,22 @@
     </section>
 
     <section>
+      <h3>Reações entre poções</h3>
+      <ul>
+        <li><b>Fogo acende:</b> a explosão de fogo faz explodir as poções que alcança.</li>
+        <li><b>Água apaga:</b> a explosão de Aqua desfaz uma poção de fogo em vapor, sem explosão. Mas continua machucando.</li>
+        <li><b>Terra é estável:</b> a Telúrica nunca é acesa nem apagada; só explode no tempo dela.</li>
+      </ul>
+    </section>
+
+    <section>
       <h3>Dicas</h3>
       <ul>
         <li>Fique longe da cruz da explosão: a sua própria poção também machuca.</li>
         <li>Caixotes e muralhas bloqueiam a explosão. Esconda-se atrás deles.</li>
         <li>Contra a Belladona, o <b>quadrado colorido</b> no chão mostra onde a poção vai cair. Saia de lá!</li>
+        <li><b>Fantasmas</b> atravessam paredes e caixotes, mas são lentos. Dentro de uma muralha, a explosão não os alcança.</li>
+        <li><b>Flores do mal</b> não se mexem, mas chicoteiam as casas ao redor depois de um aviso rosa. São imunes à Aqua.</li>
         <li>Parada por alguns segundos, a Roo cochila.</li>
       </ul>
     </section>

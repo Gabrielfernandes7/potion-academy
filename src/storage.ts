@@ -6,6 +6,7 @@ import { BOMB_TYPES, BombId } from './config';
 
 const BANK_KEY = 'bombroo_bank';
 const OWNED_KEY = 'bombroo_owned';
+const STAGES_KEY = 'bombroo_stages_completed';
 const START_BANK = 100;
 
 export const Storage = {
@@ -60,4 +61,22 @@ export function buyBombType(t: BombId): boolean {
   owned.push(t);
   Storage.set(OWNED_KEY, owned);
   return true;
+}
+
+// Rastreamento de fases concluídas
+export function isStageCompleted(stage: number): boolean {
+  const completed = Storage.get<number[]>(STAGES_KEY, []);
+  return completed.includes(stage);
+}
+
+export function markStageCompleted(stage: number): void {
+  const completed = Storage.get<number[]>(STAGES_KEY, []);
+  if (!completed.includes(stage)) {
+    completed.push(stage);
+    Storage.set(STAGES_KEY, completed);
+  }
+}
+
+export function getCompletedStages(): number[] {
+  return Storage.get<number[]>(STAGES_KEY, []);
 }
