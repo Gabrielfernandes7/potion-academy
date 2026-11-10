@@ -115,7 +115,10 @@ Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
 
 ## Próximas tarefas
 
-1. **Redesenhar fase 4 (Jardim)**: cores destoam do personagem e da proposta. Aguardando feedback sobre tema (cemitério/biblioteca/laboratório) e paleta de cores.
+0a. **Troca de frasco no toque (feito, não visto no celular):** botão TROCAR FRASCO no painel de toque (`data-touch="cycle"`) percorre as poções possuídas (`MainScene.cycleBomb`). Os slots da HUD continuam clicáveis no desktop.
+0. **Bug do mapa (corrigido, não visto no navegador):** ao voltar do mapa para o menu, os botões DOM sumiam (`MapScene.backToMenu` não reexibia o menu). Também removidos os atalhos de teclado duplicados a cada visita do mapa.
+
+1. **Contraste do jardim (feito, não visto no navegador)**: paleta em `src/textures/gardenPalette.ts` (chão pálido, sebe escura, flor magenta/vinho), testes em `tests/gardenContrast.test.ts` (mínimo 3:1). Pendente: olhar no jogo; contorno escuro na Roo não foi feito; decidir tema (cemitério/biblioteca/laboratório) só se o contraste ainda incomodar.
 2. **Testar mapa no navegador**: verificar se o progresso salva corretamente ao vencer fases.
 3. **Teste de celular**: verificar responsividade do mapa em telas menores.
 
