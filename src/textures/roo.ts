@@ -5,6 +5,8 @@
 // - 'sleep': 2 frames de respiração com olhos fechados e cabeça caída.
 // - 'stir' : 2 frames de lado, braço estendido e sem varinha (a varinha é desenhada pela cena
 //            do menu, que a move sobre o caldeirão).
+// - 'maestro': a pose 'stir' de casaca e cabelo de Beethoven (usada na Sala de Música).
+// - 'read'  : de frente (dir 'down'), lendo; quem olha vê a capa do livro, a Roo vê as páginas; 9 quadros, a folha vira do 1 ao 7.
 //
 // O lado direito é o desenhado; a versão esquerda é um flipX feito em MainScene.
 //
@@ -14,7 +16,7 @@ import Phaser from 'phaser';
 import { ROO_HEAD_ROOM, rooTextureHeight } from './rooGeometry';
 
 export type RooDir = 'down' | 'up' | 'side';
-export type RooPose = 'awake' | 'sleep' | 'stir';
+export type RooPose = 'awake' | 'sleep' | 'stir' | 'maestro' | 'read';
 
 export { ROO_HEAD_ROOM, rooFootOriginY, rooOriginY, rooStirPoints, rooTextureHeight } from './rooGeometry';
 
@@ -81,14 +83,16 @@ function drawWand(g: Gfx, x0: number, y0: number, x1: number, y1: number): void 
 export function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPose = 'awake'): void {
   g.clear();
   const sleep = pose === 'sleep';
-  const stir = pose === 'stir';
-  const still = sleep || stir; // sem balanço de passo
+  const maestro = pose === 'maestro';
+  const reading = pose === 'read'; // parada, com um livro aberto diante do rosto (frames viram a página)
+  const stir = pose === 'stir' || maestro; // maestro é a pose "mexer" de casaca e cabelo de Beethoven
+  const still = sleep || stir || reading; // sem balanço de passo
   const f = frame % 4;
   const B = T + ROO_HEAD_ROOM; // base do quadro (chão)
 
   const walkBob = still ? 0 : [0, 1.2, 0, -1.2][f];
   const droop = sleep ? 1.5 : 0; // cabeça cai um pouco
-  const breath = sleep ? (f % 2 === 1 ? 1.4 : 0) : stir ? (f % 2 === 1 ? 1 : 0) : ((f === 1 || f === 3) ? 1 : 0);
+  const breath = reading ? (frame >= 3 && frame <= 6 ? 1 : 0) : sleep ? (f % 2 === 1 ? 1.4 : 0) : stir ? (f % 2 === 1 ? 1 : 0) : ((f === 1 || f === 3) ? 1 : 0);
   const earTwitch = still ? 0 : (f === 1 ? -1.5 : (f === 3 ? 1 : 0));
   const legPhase = (f === 0 || f === 1) ? 1 : -1;
   const legL = still ? 0 : legPhase * (f % 2 === 0 ? 3.2 : 1.8);
@@ -215,6 +219,8 @@ export function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose
     g.fillStyle(GOLD);
     g.fillCircle(cx + 2, cy - 21, 1.2);
 
+    if (maestro) drawMaestroOutfit();
+
     if (stir) {
       // pose "mexer": sem braço e sem varinha no sprite; a cena do menu os desenha em movimento
     } else {
@@ -225,6 +231,93 @@ export function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose
     }
 
     drawClasp(g, cx + 3.5, cy - 2);
+  }
+
+  // ---------------------------------------------------------------- livro de leitura (de frente)
+  // A Roo lê: as páginas ficam voltadas para ela e quem olha vê a CAPA (roxa, com ornamentos dourados),
+  // sobre o peito e abaixo do queixo. Só a borda das páginas aparece acima da capa. Quadros 1 a 7: a mão
+  // direita puxa a folha, que passa por cima do livro da direita para a esquerda. Quadros 0 e 8: parado.
+  function drawReadingBook(): void {
+    const COVER = 0x6a1b9a;
+    const COVER_DARK = 0x4a148c;
+    const top = cy - 3;
+    const bottom = cy + 9;
+    const flipping = frame > 0 && frame < 8;
+    const theta = (frame / 8) * Math.PI;
+    const w = flipping ? 9.5 * Math.cos(theta) : 9.5; // posição da ponta da folha em relação à lombada
+    const lift = flipping ? Math.sin(theta) * 5.2 : 0; // a folha se curva para cima ao virar
+
+    // borda das páginas, logo acima da capa
+    g.fillStyle(0xfff3d6);
+    g.fillRect(cx - 9.5, top - 2.2, 19, 2.4);
+    g.fillStyle(0xd9c7a0);
+    g.fillRect(cx - 9.5, top - 0.6, 19, 0.7);
+    // folha em voo: aparece só como um arco claro acima da capa
+    if (flipping) {
+      const pts: Array<[number, number]> = [
+        [cx, top + 0.5], [cx + w * 0.3, top - 2 - lift], [cx + w * 0.75, top - 1.5 - lift * 0.85],
+        [cx + w, top - 0.5 - lift * 0.35], [cx + w, top + 0.5],
+      ];
+      fillPoly(g, pts, w >= 0 ? 0xfffaf0 : 0xeadcb8);
+      strokeLine(g, pts.slice(0, 4), 0xc9b48a, 1, 1);
+    }
+
+    // capa de trás: duas metades unidas pela lombada, com acabamento dourado
+    g.fillStyle(COVER_DARK);
+    g.fillRoundedRect(cx - 11.5, top - 0.5, 23, bottom - top + 2, 1.8);
+    g.fillStyle(COVER);
+    g.fillRoundedRect(cx - 11, top, 22, bottom - top + 1, 1.5);
+    g.fillStyle(0x3a0f70);
+    g.fillRect(cx - 0.7, top, 1.4, bottom - top + 1); // lombada
+    g.lineStyle(0.8, GOLD_TRIM, 0.95);
+    g.strokeRect(cx - 10, top + 1, 9, bottom - top - 1);
+    g.strokeRect(cx + 1, top + 1, 9, bottom - top - 1);
+    // losango dourado em cada metade
+    g.fillStyle(GOLD);
+    for (const ox of [-5.5, 5.5]) {
+      g.fillTriangle(cx + ox, cy + 0.2, cx + ox + 2.2, cy + 3, cx + ox, cy + 5.8);
+      g.fillTriangle(cx + ox, cy + 0.2, cx + ox - 2.2, cy + 3, cx + ox, cy + 5.8);
+    }
+
+    // mãos: a esquerda segura a borda; a direita segura a borda e, ao virar, sobe e acompanha a folha
+    g.fillStyle(FUR);
+    g.fillCircle(cx - 11.5, bottom - 1.5, 2.6);
+    const hx = flipping ? cx + w + (w >= 0 ? 1.4 : -1.4) : cx + 11.5;
+    const hy = flipping ? top + 0.5 - lift * 0.4 : bottom - 1.5;
+    g.fillCircle(hx, hy, 2.3);
+  }
+
+  // ---------------------------------------------------------------- traje de maestro (sobre o lado)
+  // Cabelo grisalho e revolto (Beethoven), gravata branca e casaca preta com botões dourados.
+  function drawMaestroOutfit(): void {
+    const COAT = 0x1d1b22;
+    const HAIR = 0xd3cdc4;
+    const HAIR_SHADE = 0x9c958c;
+    // casaca: do colarinho até as abas, por cima do manto
+    fillPoly(g, [
+      [cx - 5, cy - 3], [cx + 4.5, cy - 3], [cx + 5.5, cy + 5], [cx + 1, cy + 7],
+      [cx - 2, cy + 14], [cx - 10, cy + 15], [cx - 8, cy + 4],
+    ], COAT);
+    // peitilho branco e gravata
+    fillPoly(g, [[cx + 0.5, cy - 3], [cx + 4.5, cy - 3], [cx + 3.5, cy + 4]], 0xffffff);
+    g.fillStyle(0xffffff);
+    g.fillEllipse(cx + 2.5, cy - 3.8, 5.5, 2.6);
+    g.fillStyle(0x1a1a1a);
+    g.fillCircle(cx + 2.5, cy - 3.8, 0.8);
+    // botões dourados
+    g.fillStyle(GOLD);
+    g.fillCircle(cx + 2.5, cy + 1.5, 0.9);
+    g.fillCircle(cx + 2.8, cy + 5.5, 0.9);
+    // cabelo: massa grisalha atrás e acima da cabeça, sem tocar os olhos
+    g.fillStyle(HAIR);
+    g.fillEllipse(cx + 0.5, cy - 16, 15, 9);
+    g.fillEllipse(cx - 4, cy - 12, 5.5, 8);
+    g.fillEllipse(cx + 6, cy - 19, 7, 4);
+    g.fillStyle(HAIR_SHADE);
+    g.fillEllipse(cx - 1, cy - 13.5, 8, 2.5);
+    g.fillEllipse(cx + 4, cy - 18.5, 6, 1.6);
+    // a orelha fica por cima do cabelo
+    drawEar(cx - 1, cy - 16, false);
   }
 
   // ---------------------------------------------------------------- de costas
@@ -350,6 +443,18 @@ export function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose
     if (sleep) {
       closedEye(cx - 3.5, cy - 11, 1.8);
       closedEye(cx + 3.5, cy - 11, 1.8);
+    } else if (reading) {
+      // olhando para baixo, para o livro: pupilas descidas, pálpebra caída e olhar que segue a folha
+      const gaze = frame > 0 && frame < 8 ? (Math.cos((frame / 8) * Math.PI) >= 0 ? 0.6 : -0.6) : 0;
+      g.fillStyle(0x1a1a1a);
+      g.fillCircle(cx - 3.5 + gaze, cy - 10.4, 2.2);
+      g.fillCircle(cx + 3.5 + gaze, cy - 10.4, 2.2);
+      g.fillStyle(0xffffff);
+      g.fillCircle(cx - 2.9 + gaze, cy - 10.9, 0.8);
+      g.fillCircle(cx + 4.1 + gaze, cy - 10.9, 0.8);
+      g.fillStyle(0xffa448);
+      g.fillRect(cx - 6, cy - 13.6, 5, 1.2);
+      g.fillRect(cx + 1, cy - 13.6, 5, 1.2);
     } else {
       g.fillStyle(0x1a1a1a);
       g.fillCircle(cx - 3.5, cy - 11, 2.2);
@@ -371,6 +476,11 @@ export function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose
     g.fillCircle(cx - 6.5, cy - 7.5, 2);
     g.fillCircle(cx + 6.5, cy - 7.5, 2);
 
+    if (reading) {
+      drawReadingBook(); // as mãos ficam no livro
+      return;
+    }
+
     // mãos saindo do manto; varinha ao lado (não cobre mais o rosto)
     g.fillStyle(FUR);
     g.fillCircle(cx - 10.5, cy + 7.5, 3);
@@ -387,7 +497,7 @@ export function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose
   }
 }
 
-// Gera as texturas: 12 de caminhada (4 frames x 3 direções), 6 de sono (2 x 3) e 2 de "mexer a poção".
+// Gera as texturas: 12 de caminhada (4 frames x 3 direções), 6 de sono (2 x 3), 2 de "mexer a poção", 2 de maestro e 9 de leitura.
 export function drawRooTextures(g: Gfx, T: number): void {
   const H = rooTextureHeight(T);
   const dirs: RooDir[] = ['down', 'up', 'side'];
@@ -397,6 +507,11 @@ export function drawRooTextures(g: Gfx, T: number): void {
       g.generateTexture(`roo_${dir}_${fi}`, T, H);
     }
   }
+  // leitura: 9 quadros (0 e 8 são páginas paradas; 1 a 7, a página virando)
+  for (let fi = 0; fi < 9; fi++) {
+    drawRooFrame(g, T, fi, 'down', 'read');
+    g.generateTexture(`roo_read_${fi}`, T, H);
+  }
   for (let fi = 0; fi < 2; fi++) {
     for (const dir of dirs) {
       drawRooFrame(g, T, fi, dir, 'sleep');
@@ -404,5 +519,7 @@ export function drawRooTextures(g: Gfx, T: number): void {
     }
     drawRooFrame(g, T, fi, 'side', 'stir');
     g.generateTexture(`roo_stir_${fi}`, T, H);
+    drawRooFrame(g, T, fi, 'side', 'maestro');
+    g.generateTexture(`roo_maestro_${fi}`, T, H);
   }
 }

@@ -3,8 +3,12 @@
 Este arquivo é a memória do projeto entre sessões. Leia antes de começar, e atualize ao terminar cada tarefa.
 Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo, para qualquer pessoa).
 
-Última atualização: 2026-11-10. Último commit: `4d3729a feat(boss): ...`.
-Sessão atual (2026-11-10, parte 3): mapa de seleção de fases após vitória.
+Última atualização: 2026-11-10. Último commit: `21d466a feat(ui): add map scene with stage progress in menu`.
+
+Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
+- Implementado mapa de progresso no menu
+- Rastreamento de fases concluídas no localStorage
+- MapScene mostra fases em ouro (concluídas) vs verde (não concluídas)
 
 ## Como trabalhar neste projeto
 
@@ -100,10 +104,18 @@ Sessão atual (2026-11-10, parte 3): mapa de seleção de fases após vitória.
 - **Testes**: `chain.test.ts` e `stages.test.ts` (61 no total).
 - **Pendências para decidir**: (1) a Poção Aqua precisa ser comprada (60 POÇÃO) para usar a mecânica nova: o salão dos fantasmas não a libera; (2) a história do jogo ainda não existe; (3) nada disso foi jogado de ponta a ponta por uma pessoa: as regras foram verificadas por script no navegador, não por sensação de jogo; (4) o equilíbrio do salão e do jardim (tempos, número de fantasmas e flores) é um palpite.
 
-## Mapa de seleção de fases (sessão de 2026-11-10, parte 3)
+## Mapa de seleção de fases (sessão de 2026-11-10, parte 3) - CONCLUÍDO
 
-- **MapScene.ts** (`scenes/`): nova cena que mostra um mapa visual do castelo com os 4 locais (laboratório, salão, duelo, jardim) como botões clicáveis.
-- **Fluxo**: após vencer a fase 4, o botão "MENU" do game over leva para o mapa (não para o menu principal). Lá, pode escolher qual fase replay (sempre começa do zero, sem checkpoint).
-- **Implementação**: `setGameOutcome(won, stage)` em `MainScene.triggerGameOver()` armazena o resultado; `handleMenuButtonClick()` em `launcher.ts` decide entre `showMap()` ou `showMenu()`. Botão "TENTAR NOVAMENTE" sempre reinicia com `stage: 1` (jogo do começo).
-- **Pendência de teste**: o mapa deve ser visível no navegador quando vencer a fase 4. Verificar: o castelo desenha sem erros, os botões são clicáveis, as teclas 1-4 e ESC funcionam.
+- **MapScene.ts** (`scenes/`): nova cena que mostra um mapa visual do castelo com os 4 locais como botões clicáveis.
+- **Integração no menu**: botão "MAPA" adicionado ao menu principal. Ao clicar, abre a MapScene.
+- **Rastreamento de progresso**: `storage.ts` guarda quais fases foram concluídas. Ao ganhar uma fase, chama `markStageCompleted(stage)`.
+- **Visual do progresso**: fases concluídas em ouro (0x6b5b4f) com símbolo ✓; fases não concluídas em verde (0x3a5a3a).
+- **Fluxo**: Menu → Botão MAPA → MapScene com progresso. Ao clicar em uma fase, começa do zero (sempre `stage: 1, 2, 3 ou 4`).
+- **Commit**: `21d466a feat(ui): add map scene with stage progress in menu`
+
+## Próximas tarefas
+
+1. **Redesenhar fase 4 (Jardim)**: cores destoam do personagem e da proposta. Aguardando feedback sobre tema (cemitério/biblioteca/laboratório) e paleta de cores.
+2. **Testar mapa no navegador**: verificar se o progresso salva corretamente ao vencer fases.
+3. **Teste de celular**: verificar responsividade do mapa em telas menores.
 

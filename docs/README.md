@@ -15,5 +15,6 @@ Cada arquivo responde uma pergunta e cabe em uma tela.
 | [08-como-criar-uma-mecanica.md](08-como-criar-uma-mecanica.md) | Como acrescentar uma regra nova? |
 | [09-sprites.md](09-sprites.md) | Como são os desenhos e como criar um novo? |
 | [10-equilibrio.md](10-equilibrio.md) | Por que os números do jogo são esses? |
+| [11-reutilizar.md](11-reutilizar.md) | Como usar os personagens e o código em outro projeto? |
 
 Regra geral: se uma informação muda, mude no arquivo certo, e não copie em outros lugares.

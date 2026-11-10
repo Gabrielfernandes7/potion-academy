@@ -10,7 +10,7 @@ Cada personagem e item tem uma ficha curta: o que é, o que faz e um detalhe que
 - *Detalhe:* manto roxo com barra dourada, chapéu e varinha. Parada, ela cochila.
 - *Frase:* "Mais uma poção e a porta é minha."
 
-**Belladona, a alquimista rival** (chefe da fase 2)
+**Belladona, a alquimista rival** (chefe da fase 3)
 - *Quer:* o laboratório e as gemas só para ela.
 - *Sabe fazer:* arremessar poções, fazer chover gotas e sumir em névoa.
 - *Detalhe:* roupa verde-escura com detalhes verde-limão, chapéu torto com faixa magenta, cabelo carmim, olhos verde-limão.
@@ -42,6 +42,17 @@ Toda habilidade mostra um aviso no chão por 1,2 s antes de acontecer.
 Cada elemento tem seu efeito na explosão (brasas, gotas, pedriscos ou brilhos) e seu som.
 Veja `10-equilibrio.md` para os motivos desses números.
 
+### Reações entre poções
+
+| Quando a explosão de... | alcança uma poção de... | acontece |
+|---|---|---|
+| fogo | fogo, água ou éter | ela explode junto (corrente) |
+| fogo | terra | nada: a Telúrica é imune |
+| água | fogo | a poção se desfaz em vapor, sem explodir ("APAGADA") |
+| água, terra ou éter | qualquer outra | nada |
+
+A explosão de água que apaga uma poção de fogo continua machucando quem estiver no caminho.
+
 ## Itens que caem dos caixotes
 
 | Item | Efeito | Limite |
@@ -55,17 +66,31 @@ Veja `10-equilibrio.md` para os motivos desses números.
 | +Velocidade | a Roo anda mais rápido | 2 níveis |
 | +Tempo | +15 segundos | |
 
-As gemas são escolhidas no começo da fase 1, então a porta sempre pode ser aberta. Na fase 2 não há gemas nem porta.
+As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a porta sempre pode ser aberta. No duelo (fase 3) não há gemas nem porta.
 
 ## Inimigos
 
-**Criatura alquímica** (só na fase 1)
-- *Faz:* anda sem rumo e tira 1 de vida ao encostar. Morre com uma explosão e deixa uma moeda.
-- *Detalhe:* aparecem mais conforme você quebra caixotes (2 no início, até 5).
+**Sapo mago** (laboratório e jardim)
+- *Faz:* anda sem rumo, com pulinhos, e tira 1 de vida ao encostar. Morre com uma explosão e deixa uma moeda.
+- *Detalhe:* no laboratório aparecem mais conforme você quebra caixotes (2 no início, até 5). No jardim são 2, até 3.
 - *Limite:* não persegue.
+
+**Fantasma** (salão dos fantasmas)
+- *Faz:* flutua sem rumo (um passo a cada 1,5 s), **atravessa muralhas, caixotes e poções** e tira 1 de vida ao encostar. Deixa uma moeda.
+- *Detalhe:* dentro de uma muralha fica meio transparente e a explosão não o alcança. Começam 2, até 4 (mais um a cada 10 caixotes).
+- *Limite:* não persegue nem sai da sala.
+
+**Flor do mal** (jardim)
+- *Faz:* fica fixa e **bloqueia a casa**. A cada 3,2 s mostra um aviso rosa nas 4 casas ao redor e, 0,8 s depois, chicoteia quem estiver ali (1 de vida).
+- *Detalhe:* é **imune à Poção Aqua**. Fogo, Telúrica e Etérea a derrotam. Começam 5 no jardim.
+- *Limite:* não se mexe e não se multiplica.
 
 ## Lugares
 
-- **Laboratório:** a grade de 15 por 13 casas. As muralhas de pedra não quebram. Na fase 2 há menos caixotes (a arena é mais aberta).
+- **Laboratório (fase 1):** a grade de 15 por 13 casas. As muralhas de pedra não quebram.
+- **Salão dos fantasmas (fase 2):** o mesmo tamanho, em pedra azulada e fria.
+- **Arena do duelo (fase 3):** menos caixotes (a arena é mais aberta).
+- **Jardim do castelo (fase 4):** fora do castelo. Grama, sebes no lugar das muralhas, canteiros de flores no lugar dos caixotes e um portão no lugar da porta.
+- **Sala de Música:** a tela onde a Roo de maestro (casaca e cabelo de Beethoven) deixa escolher a música.
 - **Caldeirão de Magia:** a loja.
-- **Menu:** a Roo mexe uma poção no caldeirão e joga ingredientes das prateleiras; o líquido muda de cor.
+- **Menu:** a Roo mexe uma poção no caldeirão. De tempos em tempos ela aponta a varinha para um frasco da prateleira, ele levita e voa guiado por ela até o caldeirão, que reage de um jeito próprio de cada elemento (labareda, respingo, pedras ou redemoinho de névoa). Clicar num frasco da prateleira o chama na hora.

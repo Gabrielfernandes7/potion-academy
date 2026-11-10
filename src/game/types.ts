@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { BombId, ElementId } from '../config';
+import type { BombId, ElementId, EnemyKind } from '../config';
 import type { PickupType } from './rewards';
 
 export type Facing = 'up' | 'down' | 'left' | 'right';
@@ -40,11 +40,20 @@ export interface Pickup {
 }
 
 export interface Enemy {
+  kind: EnemyKind;
   gridX: number;
   gridY: number;
   sprite: Phaser.GameObjects.Image;
   moveTimer: number;
   alive: boolean;
+  // animação do passo: moveT vai de 0 a ENEMY_STEP_MS; depois o sprite só balança (phase)
+  moveT: number;
+  fromX: number;
+  fromY: number;
+  hopY: boolean; // o passo é na vertical: o pulo é maior
+  phase: number;
+  lashMs: number; // flor do mal: tempo até o próximo chicote de espinhos
+  fxCooldown: number; // evita repetir o aviso "IMUNE" a cada quadro enquanto a explosão dura
 }
 
 export interface Explosion {
@@ -53,6 +62,7 @@ export interface Explosion {
   timer: number;
   key: string;
   hitPlayer: boolean;
+  element: ElementId; // de qual poção veio: define o efeito de quem é atingido
 }
 
 export interface PowerupCounts {

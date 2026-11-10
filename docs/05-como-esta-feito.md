@@ -5,6 +5,8 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 | Quero mudar... | Comece em |
 |---|---|
 | um número de equilíbrio (tempo, vida, custos) | `src/config.ts` |
+| as fases (tempo, inimigos, tema) e os tipos de inimigo | `STAGES` e `ENEMY_TYPES` em `src/config.ts` |
+| a reação entre poções (fogo acende, água apaga, terra imune) | `src/game/chain.ts` |
 | as regras de uma explosão, pickup ou inimigo | `src/scenes/MainScene.ts` |
 | o desenho da Roo | `src/textures/roo.ts` |
 | o desenho de poções | `src/textures/potions.ts` |
@@ -32,7 +34,9 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 
 ## Fases
 
-A `MainScene` recebe `{ stage: 1 }` ou `{ stage: 2, carry }` ao reiniciar. Sempre passe os dados de forma explícita: sem eles o Phaser reaproveita os do reinício anterior, e a jogadora voltaria à fase 2 depois de vencer.
+A `MainScene` recebe `{ stage: n }` ou `{ stage: n, carry }` ao reiniciar (n de 1 a 4). Sempre passe os dados de forma explícita: sem eles o Phaser reaproveita os do reinício anterior, e a jogadora voltaria a uma fase avançada depois de perder.
+
+Cada fase é uma entrada em `STAGES` (`src/config.ts`): tempo, chance de caixotes, se tem porta, quais inimigos (`EnemyRule`: quantos no início, máximo e "a cada N caixotes") e o tema visual. Para criar uma fase nova, acrescente uma entrada, um tema em `LOOKS` (`MainScene.ts`) se precisar de arte própria e, se houver inimigo novo, uma entrada em `ENEMY_TYPES` e uma textura. O fluxo (porta leva à fase seguinte, chefe leva ao jardim, portão final vence) está em `stageClear` e `onBossDefeated`.
 
 ## Cuidados
 

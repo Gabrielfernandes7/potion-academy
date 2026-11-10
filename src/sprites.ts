@@ -7,17 +7,52 @@ import './styles/sprites.css';
 import Phaser from 'phaser';
 import { generateTextures } from './textures';
 
-interface Group { title: string; note: string; test: (key: string) => boolean }
+// Cada grupo vira uma pasta em docs/img/sprites/<id>.png (ver docs/09-sprites.md).
+interface Group { id: string; title: string; note: string; test: (key: string) => boolean }
 
 const GROUPS: Group[] = [
-  { title: 'Roo (personagem)', note: 'roo_{down,up,side}_0-3: andar. roo_sleep_*: dormindo. roo_stir_*: mexendo a poção (menu, sem braço).', test: k => k.startsWith('roo_') },
-  { title: 'Belladona (chefe)', note: 'witch_idle_0/1: parada. witch_cast: lançando poção. witch_hurt: machucada.', test: k => k.startsWith('witch_') },
-  { title: 'Poções', note: 'Um formato por elemento: fogo (balão), água (tubo), terra (pote), éter (losango).', test: k => k.startsWith('bomb_') },
-  { title: 'Itens', note: 'Power-ups são fichas redondas com aro colorido; moeda, gema, coração e baú são itens soltos.', test: k => k.startsWith('pickup_') },
-  { title: 'HUD', note: 'Ícones usados na faixa de cima do jogo.', test: k => k.startsWith('hud_') },
-  { title: 'Efeitos do menu e das explosões', note: 'Peças pequenas usadas pelos sistemas de partículas.', test: k => k.startsWith('menu_') },
-  { title: 'Cenário e inimigos', note: 'Chão, muralha, caixote, porta e a criatura alquímica.', test: () => true },
+  { id: 'heroes', title: 'Heróis (a Roo)', note: 'roo_{down,up,side}_0-3: andar. roo_sleep_*: dormindo. roo_stir_*: mexendo a poção (menu, sem braço). roo_maestro_*: maestro de casaca (Sala de Música). roo_read_*: de frente, lendo; vemos a capa do livro e a folha virando por cima (GIF do README).', test: k => k.startsWith('roo_') },
+  { id: 'bosses', title: 'Chefes', note: 'Belladona. witch_idle_0/1: parada. witch_cast: lançando poção. witch_hurt: machucada.', test: k => k.startsWith('witch_') },
+  { id: 'enemies', title: 'Inimigos', note: 'enemy: sapo mago (laboratório e jardim). enemy_ghost: fantasma (salão dos fantasmas; atravessa paredes). enemy_flower: flor do mal (jardim; fixa, imune à água).', test: k => k.startsWith('enemy') },
+  { id: 'objects', title: 'Objetos', note: 'Poções: um formato por elemento: fogo (balão), água (tubo), terra (pote), éter (losango). Itens: power-ups são fichas redondas; moeda, gema, coração e baú são itens soltos.', test: k => k.startsWith('bomb_') || k.startsWith('pickup_') },
+  { id: 'effects', title: 'Efeitos', note: 'Peças pequenas dos sistemas de partículas e a explosão.', test: k => k.startsWith('menu_') || k === 'explosion' },
+  { id: 'scenery', title: 'Cenário', note: 'Castelo: floor, wall, block, door. Jardim: g_floor, g_wall (sebe), g_block (canteiro), gate (portão).', test: k => /^(floor|wall|block|door|g_|gate_)/.test(k) },
+  { id: 'ui', title: 'Interface (HUD)', note: 'Ícones usados na faixa de cima do jogo.', test: k => k.startsWith('hud_') },
+  { id: 'other', title: 'Outros', note: 'Sprites sem grupo definido.', test: () => true },
 ];
+
+// Folha de sprites: todas as texturas numa imagem só (grade), mais um JSON com a posição de cada uma.
+// Formato simples, que qualquer engine ou ferramenta aceita: { "image": ..., "frames": { chave: {x, y, w, h} } }.
+function downloadAtlas(scene: Phaser.Scene): void {
+  const keys = scene.textures.getTextureKeys().filter(k => !k.startsWith('__')).sort();
+  const sources = keys.map(k => scene.textures.get(k).getSourceImage() as HTMLCanvasElement);
+  const cellW = Math.max(...sources.map(s => s.width));
+  const cellH = Math.max(...sources.map(s => s.height));
+  const cols = Math.ceil(Math.sqrt(keys.length));
+  const rows = Math.ceil(keys.length / cols);
+  const canvas = document.createElement('canvas');
+  canvas.width = cols * cellW;
+  canvas.height = rows * cellH;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const frames: Record<string, { x: number; y: number; w: number; h: number }> = {};
+  keys.forEach((k, i) => {
+    const x = (i % cols) * cellW;
+    const y = Math.floor(i / cols) * cellH;
+    const img = sources[i];
+    ctx.drawImage(img, x, y);
+    frames[k] = { x, y, w: img.width, h: img.height };
+  });
+  const save = (href: string, name: string): void => {
+    const a = document.createElement('a');
+    a.href = href;
+    a.download = name;
+    a.click();
+  };
+  save(canvas.toDataURL('image/png'), 'potion-academy-sprites.png');
+  const json = JSON.stringify({ image: 'potion-academy-sprites.png', cell: { w: cellW, h: cellH }, frames }, null, 2);
+  save(URL.createObjectURL(new Blob([json], { type: 'application/json' })), 'potion-academy-sprites.json');
+}
 
 class CatalogScene extends Phaser.Scene {
   constructor() {
@@ -26,6 +61,7 @@ class CatalogScene extends Phaser.Scene {
 
   create(): void {
     generateTextures(this);
+    document.getElementById('atlas-btn')?.addEventListener('click', () => downloadAtlas(this));
     const zoom = Number(new URLSearchParams(location.search).get('zoom')) || 5;
     const keys = this.textures.getTextureKeys().filter(k => !k.startsWith('__')).sort();
     const root = document.getElementById('catalog') as HTMLElement;
@@ -36,6 +72,8 @@ class CatalogScene extends Phaser.Scene {
       if (members.length === 0) continue;
       members.forEach(k => used.add(k));
 
+      const section = document.createElement('section');
+      section.dataset.group = group.id;
       const title = document.createElement('h2');
       title.textContent = `${group.title} (${members.length})`;
       const note = document.createElement('p');
@@ -59,7 +97,8 @@ class CatalogScene extends Phaser.Scene {
         fig.append(canvas, cap);
         grid.appendChild(fig);
       }
-      root.append(title, note, grid);
+      section.append(title, note, grid);
+      root.appendChild(section);
     }
   }
 }

@@ -77,6 +77,10 @@ tests/                     # testes unitários (lógica pura, storage, toque, fa
 - **Glossário** (use estes nomes em toda a UI): **POÇÃO** = moeda; **FRASCOS** = bombas ativas/limite (ex.: "+1 FRASCO"); **GEMAS**; **BLOCOS**; **TEMPO**; **VIDA** (corações). Os 4 tipos continuam "Poção de Fogo/Aqua/Telúrica/Etérea".
 - Sem emojis na UI. Os símbolos alquímicos (△ ▽ ◇ ☿) são glifos do tema e ficam.
 
+## Estado do trabalho
+
+Antes de começar, leia `task.md`: ele lista o que está em aberto, as armadilhas já encontradas e como testar. Atualize-o ao fim de cada tarefa.
+
 ## Game Design Documentation
 
 Sprites: veja `docs/09-sprites.md` (e `/sprites.html`). Equilíbrio: veja `docs/10-equilibrio.md`; ao mudar números, rode `npm run test`.
@@ -99,16 +103,16 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 - *Roo* (`textures/roo.ts`): poses `awake` (walk, 4 frames x 3 directions), `sleep` and `stir` (menu). The texture is `ROO_HEAD_ROOM` px taller than the tile so ears and hat are not clipped; the player sprite therefore uses `setOrigin(0.5, rooOriginY(tile))`. The cape is drawn *after* the body so it covers it (front: two flaps with the pouch showing; back: full cloak; side: hangs from the shoulders). The wand is held at the side, never over the face.
 - *Power-ups* (`textures/entities.ts`): round tokens with a colored rim (`POWERUP_COLORS`) and a symbol. Power-ups and gems get a soft pulsing halo (`PICKUP_HALO`, created in `spawnPickupSprite`, destroyed in `collectPickup`).
 
-**Audio Engine**: `AudioEngine` synthesizes everything with WebAudio, aiming for calm: only sine/triangle voices with slow attacks, a low-pass filter, a generated-impulse reverb and a gentle compressor. Music (`enabled`/`playing`) and sound effects (`sfx`) are independent flags; `audio.unlock()` runs in the first click on JOGAR/COMEÇAR. Effects: `play('bomb'|'explosion'|'pickup'|'powerup'|'hurt'|'door', element?)` (the potion burst changes timbre by element). Win/game-over jingles: `playWinMusic()` / `playGameOverMusic()`.
+**Audio Engine**: `AudioEngine` synthesizes everything with WebAudio, aiming for calm: only sine/triangle voices with slow attacks, a low-pass filter, a generated-impulse reverb and a gentle compressor. Music (`enabled`/`playing`) and sound effects (`sfx`) are independent flags. The player's choice is kept in `audio/prefs.ts` (`bombroo_audio`, default both on) and applied by `main.ts` (`applyMusicPref`/`applySfxPref`); the top bar has MÚSICA and EFEITOS buttons. `audio.unlock()` runs on any pointer or key press. Effects: `play('bomb'|'explosion'|'pickup'|'powerup'|'hurt'|'door', element?)`. The explosion sound depends on the element (`elementSound()`): fire = flame hiss and crackles (sulfur), water = heavy drops (mercury), earth = crystal crackle (salt), air = soft hum of a glowing gas (ether). Win/game-over jingles: `playWinMusic()` / `playGameOverMusic()`.
 - *Music*: `audio/tracks.ts` holds the tracks (key, scale, tempo, chord progression) and `generateBar()`. Every game (`MainScene.init` -> `audio.nextTrack()`) picks a track different from the last and a new random seed, so even the same track varies. The topbar shows the current track name (`audio.onTrackChange`).
 
 **Game Constants**: Tuning lives in `src/config.ts`: `CONFIG`, `ELEMENTS`, `BOMB_TYPES`, `BOMB_ORDER`. Modify these when balancing.
 
 ## Known Gaps / Ideas (not implemented)
 
-- Elements have no gameplay effect. Bombs are limited to 2 at a time (up to 6 with power-ups), and the remote bomb counts toward that limit until detonated. `mega` dominates `normal`.
-- Single level, no progression or high score; shop has only 3 one-time items.
-- Enemies don't chase; only one enemy type.
+- Elements react only through bomb chains (`game/chain.ts`): fire ignites, water neutralizes fire, earth is immune. Fire explosions leave no lasting flames yet. Bombs are limited to 2 at a time (up to 5 with power-ups), and the remote bomb counts toward that limit until detonated.
+- Four stages with an ending (garden gate), but no story text, high score or saved stage progress; shop has only 3 one-time items.
+- Enemies don't chase (frog, ghost, flower). There is no per-stage unlock of potions: the Aqua potion must be bought in the shop to use the new water mechanic.
 - HUD text is drawn in the canvas, so it is pixel-scaled on very large screens.
 - The Phaser bundle is ~1.2 MB (full build); could be trimmed by importing only the used modules.
 - Audio levels were verified with an analyser, not by ear: tune `master`/`MUSIC_LEVEL` in `AudioEngine.ts` if it feels too quiet or loud.

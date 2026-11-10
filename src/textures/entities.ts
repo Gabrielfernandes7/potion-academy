@@ -36,16 +36,94 @@ function heart(g: Gfx, cx: number, cy: number, s: number, fill: number): void {
 }
 
 export function drawEntities(make: MakeFn): void {
+  // Sapo mago (inimigo da fase 1): corpo verde com contorno escuro, olhos saltados, chapéu roxo
+  // com faixa dourada e estrela, e um cajado com orbe. Desenhado em 40 px (T).
   make('enemy', (g, T) => {
-    // Criatura alquímica (espírito da magia)
-    g.fillStyle(0x3f6b5a); g.fillEllipse(T / 2, T / 2 + 4, T - 16, T - 12);
-    g.fillStyle(0x8fc4a6); g.fillEllipse(T / 2, T / 2 + 2, T - 24, T - 20);
-    g.fillStyle(0x23382f); g.fillRect(8, T - 10, 8, 4); g.fillRect(T - 16, T - 10, 8, 4);
-    // olhos
-    g.fillStyle(0xffffff); g.fillCircle(T / 2 - 6, T / 2 - 4, 5); g.fillCircle(T / 2 + 6, T / 2 - 4, 5);
-    g.fillStyle(0x1f3a2c); g.fillCircle(T / 2 - 6, T / 2 - 4, 2.5); g.fillCircle(T / 2 + 6, T / 2 - 4, 2.5);
-    // boca mágica
-    g.fillStyle(0xd6f5e0); g.fillRect(T / 2 - 6, T / 2 + 8, 12, 3);
+    const c = T / 2;
+    const OUT = 0x1b3d1f; // contorno escuro: dá leitura de longe
+    g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 4, 24, 6);
+    // pernas traseiras, com contorno
+    g.fillStyle(OUT); g.fillEllipse(9, T - 7, 9, 6); g.fillEllipse(T - 9, T - 7, 9, 6);
+    g.fillStyle(0x2e7d32); g.fillEllipse(9, T - 7, 7.5, 4.5); g.fillEllipse(T - 9, T - 7, 7.5, 4.5);
+    // corpo: contorno, pele e sombra na lateral
+    g.fillStyle(OUT); g.fillEllipse(c, c + 5, 28, 22);
+    g.fillStyle(0x4caf50); g.fillEllipse(c, c + 5, 26, 20);
+    g.fillStyle(0x388e3c); g.fillEllipse(c + 7, c + 8, 10, 12);
+    // barriga clara
+    g.fillStyle(0xc5e1a5); g.fillEllipse(c, c + 9, 16, 10);
+    // manchinhas
+    g.fillStyle(0x2e7d32); g.fillCircle(11, c + 1, 1.5); g.fillCircle(29, c + 3, 1.5); g.fillCircle(21, c + 12, 1.2);
+    // olhos saltados, com contorno e brilho
+    g.fillStyle(OUT); g.fillCircle(13, 18, 6.5); g.fillCircle(27, 18, 6.5);
+    g.fillStyle(0x7cb342); g.fillCircle(13, 18, 5.5); g.fillCircle(27, 18, 5.5);
+    g.fillStyle(0xffffff); g.fillCircle(13, 17.5, 4); g.fillCircle(27, 17.5, 4);
+    g.fillStyle(0x1b1b1b); g.fillCircle(14, 18, 2); g.fillCircle(28, 18, 2);
+    g.fillStyle(0xffffff); g.fillCircle(12.5, 16.5, 0.9); g.fillCircle(26.5, 16.5, 0.9);
+    // boca com sorriso
+    g.fillStyle(OUT); g.fillRect(14, c + 9, 12, 2);
+    // chapéu de mago: aba, cone, faixa dourada e estrela
+    g.fillStyle(OUT); g.fillEllipse(c, 13, 26, 6);
+    g.fillStyle(0x4a148c); g.fillEllipse(c, 13, 24, 4);
+    g.fillStyle(0x6a1b9a); g.fillTriangle(c, 0, c - 9, 13, c + 9, 13);
+    g.fillStyle(0x4a148c); g.fillTriangle(c + 3, 0, c + 9, 13, c + 4, 13);
+    g.fillStyle(0xffd54f); g.fillRect(c - 8, 11, 16, 2);
+    g.fillStyle(0xffd54f); g.fillCircle(c + 1, 7, 1.8);
+    g.fillStyle(0xffffff, 0.8); g.fillCircle(c - 3, 4, 0.9);
+    // cajado com orbe na mão direita
+    g.fillStyle(OUT); g.fillRect(T - 6, 17, 3.5, 20);
+    g.fillStyle(0x8d6e63); g.fillRect(T - 5.5, 17, 2.5, 20);
+    g.fillStyle(0x4dd0e1); g.fillCircle(T - 4.2, 15, 3);
+    g.fillStyle(0xe0f7fa); g.fillCircle(T - 5, 14, 1);
+  });
+
+  // Fantasma (inimigo de fases avançadas): atravessa obstáculos, mas se move devagar.
+  // Meio transparente, com a barra de baixo ondulada.
+  make('enemy_ghost', (g, T) => {
+    const c = T / 2;
+    g.fillStyle(0x9fa8da, 0.35); g.fillCircle(c, c - 2, T / 2 - 1);
+    g.fillStyle(0xe8eaf6, 0.9); g.fillEllipse(c, 16, 26, 24); g.fillRect(7, 16, 26, 15);
+    // barra ondulada
+    g.fillCircle(9, 31, 4); g.fillCircle(c, 32, 4); g.fillCircle(31, 31, 4);
+    g.fillStyle(0xe8eaf6, 0.9); g.fillRect(9, 26, 22, 6);
+    // olhos e boca
+    g.fillStyle(0x263238); g.fillEllipse(15, 16, 4, 5.5); g.fillEllipse(25, 16, 4, 5.5);
+    g.fillStyle(0xffffff); g.fillCircle(15.8, 14.8, 1); g.fillCircle(25.8, 14.8, 1);
+    g.fillStyle(0x263238); g.fillEllipse(c, 23, 4, 3);
+  });
+
+  // Flor do mal (inimigo do jardim): fixa no chão, pétalas escuras, olhos vermelhos e dentes.
+  make('enemy_flower', (g, T) => {
+    const c = T / 2;
+    const hy = 14; // centro da cabeça
+    g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 4, 22, 5);
+    g.fillStyle(0x4e342e); g.fillEllipse(c, T - 6, 20, 8); // monte de terra
+    // caule com espinhos e duas folhas
+    g.fillStyle(0x1b5e20); g.fillRect(c - 3, hy + 6, 6, T - hy - 12);
+    g.fillStyle(0x2e7d32); g.fillRect(c - 2, hy + 6, 4, T - hy - 12);
+    g.fillStyle(0x1b5e20);
+    g.fillTriangle(c - 3, 26, c - 8, 24, c - 3, 29);
+    g.fillTriangle(c + 3, 30, c + 8, 28, c + 3, 33);
+    g.fillStyle(0x388e3c); g.fillEllipse(c - 9, 30, 11, 5); g.fillEllipse(c + 9, 27, 11, 5);
+    // pétalas (8), alternando dois tons
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      g.fillStyle(0x2a0a2e); g.fillCircle(c + Math.cos(a) * 9, hy + Math.sin(a) * 9, 5.4);
+      g.fillStyle(i % 2 === 0 ? 0xad1457 : 0x7b1fa2); g.fillCircle(c + Math.cos(a) * 9, hy + Math.sin(a) * 9, 4.4);
+    }
+    // miolo escuro com cara brava
+    g.fillStyle(0x2a0a2e); g.fillCircle(c, hy, 7.6);
+    g.fillStyle(0x4a1747); g.fillCircle(c, hy, 6.4);
+    g.fillStyle(0xff1744); g.fillCircle(c - 2.8, hy - 1.6, 1.9); g.fillCircle(c + 2.8, hy - 1.6, 1.9);
+    g.fillStyle(0xffffff); g.fillCircle(c - 2.4, hy - 2, 0.6); g.fillCircle(c + 3.2, hy - 2, 0.6);
+    g.lineStyle(1.3, 0x2a0a2e);
+    g.beginPath(); g.moveTo(c - 5, hy - 4.8); g.lineTo(c - 1, hy - 2.6);
+    g.moveTo(c + 5, hy - 4.8); g.lineTo(c + 1, hy - 2.6); g.strokePath();
+    // boca com dentes
+    g.fillStyle(0x1a0a1a); g.fillRect(c - 3.6, hy + 2.2, 7.2, 2.6);
+    g.fillStyle(0xffffff);
+    g.fillTriangle(c - 3.4, hy + 2.2, c - 1.6, hy + 2.2, c - 2.5, hy + 4.4);
+    g.fillTriangle(c - 0.9, hy + 2.2, c + 0.9, hy + 2.2, c, hy + 4.4);
+    g.fillTriangle(c + 1.6, hy + 2.2, c + 3.4, hy + 2.2, c + 2.5, hy + 4.4);
   });
 
   // ------------------------------------------------------------ itens soltos

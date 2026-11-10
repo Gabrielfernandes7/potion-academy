@@ -43,8 +43,23 @@ Antes, a Aqua tinha alcance 4 e a Telúrica e a Etérea alcance 3, então a Aqua
 | `bossCooldownMs` | 3400 | intervalo entre ataques |
 | `bossFuriousCooldownMs` | 2300 | precisa ser menor que o normal e maior que o aviso |
 | `bossHitInvuln` | 1400 | tempo de proteção depois de um golpe |
-| `bossStageTime` | 120 s | tempo da fase 2 |
-| `bossBlockChance` | 0.35 | menos caixotes = menos esconderijos |
+| `time` do duelo (em `STAGES`) | 120 s | tempo do duelo |
+| `blockChance` do duelo (em `STAGES`) | 0.35 | menos caixotes = menos esconderijos |
+
+## Fases e inimigos
+
+Ficam em `STAGES` e `ENEMY_TYPES` (`src/config.ts`); `tests/stages.test.ts` guarda as regras abaixo.
+
+| Número | Valor | Efeito de mudar |
+|---|---|---|
+| tempo do laboratório / salão / jardim | 90 / 100 / 100 s | o salão e o jardim têm mais perigo, então mais tempo |
+| `moveInterval` do sapo / fantasma | 0,8 / 1,5 s | o fantasma atravessa paredes, então precisa ser bem mais lento |
+| fantasmas no salão | 2 no início, até 4 | mais que 4 fecha o mapa |
+| flores no jardim | 5, fixas | cada flor bloqueia uma casa |
+| `flowerLashCycleMs` / `flowerWarnMs` | 3,2 s / 0,8 s | o aviso não pode ser menor que 0,6 s (justo) |
+| `gardenVictoryBonus` | 30 POÇÃO | prêmio por zerar o jogo |
+
+Reações entre poções (`src/game/chain.ts`): só o fogo acende outras poções. Isso deixa a água com um papel claro (apaga o fogo) e a terra com outro (estável).
 
 ## Como ajustar
 

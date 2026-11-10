@@ -7,13 +7,13 @@ tempo acabe.
 
 ## Em uma frase
 
-Destrua caixotes com poções, pegue 3 gemas, abra a porta e chegue até ela em 90 segundos.
+Destrua caixotes com poções, pegue 3 gemas e abra a porta. Passe pelo laboratório e pelo salão dos fantasmas, vença a bruxa Belladona e cruze o portão do jardim.
 
 ## O que o torna diferente
 
 - **Calmo.** Não há inimigos que perseguem. A música muda a cada partida e os sons são suaves.
-- **Alquímico.** As bombas são poções de quatro elementos (fogo, água, terra e éter).
-  Hoje o elemento muda cor e som, mas ainda não muda a regra. Essa é uma ideia em aberto.
+- **Alquímico.** As bombas são poções de quatro elementos (fogo, água, terra e éter), e eles reagem entre si:
+  o fogo acende outras poções, a água apaga as de fogo e a terra é estável.
 - **Feito à mão, sem imagens prontas.** Todos os desenhos são gerados pelo código.
 
 ## Para quem é
@@ -23,5 +23,6 @@ explorar com calma. Não exige reflexo rápido: a maior parte do desafio é plan
 
 ## Estado atual
 
-Uma fase, sem progressão, sem pontuação máxima e sem fim de história.
-Há um menu, uma loja de poções (o Caldeirão de Magia), e a partida funciona no computador e no celular.
+Quatro fases em sequência (laboratório, salão dos fantasmas, duelo com a Belladona e jardim), com um fim.
+Há um menu, uma loja de poções (o Caldeirão de Magia), uma Sala de Música, e a partida funciona no computador, no tablet e no celular (em pé ou deitado).
+A história ainda não foi escrita.

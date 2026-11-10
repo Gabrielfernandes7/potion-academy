@@ -8,16 +8,10 @@ export const CONFIG = {
   maxHp: 5,
   invulnTime: 1500,
   damagePerExplosion: 1,
-  blockChance: 0.7,
   gemsForDoor: 3,
-  enemyCount: 2,
-  enemyMoveInterval: 800,
   maxBombs: 2,
   pushCd: 3000,
   pushRange: 3,
-  phaseTime: 90000,
-  enemySpawnEvery: 8,
-  maxEnemies: 5,
   maxBombUp: 3,
   maxFireUp: 3,
   maxSpeedUp: 2,
@@ -28,9 +22,8 @@ export const CONFIG = {
   zzzIntervalMs: 1400,  // intervalo entre os 'z' flutuantes
   hudHeight: 56,        // faixa da HUD acima da grade, em px do canvas
 
-  // ---- fase 2: o chefe (Belladona) ----
+  // ---- o chefe (Belladona) ----
   bossHp: 8,
-  bossStageTime: 120000,
   bossMoveInterval: 1100,
   bossHitInvuln: 1400,        // proteção do chefe depois de levar um golpe
   bossFirstCastMs: 2600,      // quanto ela espera antes da primeira habilidade
@@ -39,9 +32,13 @@ export const CONFIG = {
   bossTelegraphMs: 1200,      // aviso no chão antes de a poção cair
   bossRainDrops: 4,
   bossBlinkHideMs: 700,
-  bossBlockChance: 0.35,      // menos caixotes: a arena é mais aberta
   bossVictoryBonus: 40,       // POÇÃO ganha ao derrotá-la
-  stageClearHeal: 1,          // vida recuperada ao passar da fase 1 para a 2
+  gardenVictoryBonus: 30,     // POÇÃO ganha ao cruzar o portão do jardim (fim do jogo)
+  stageClearHeal: 1,          // vida recuperada ao passar de uma fase para a seguinte
+
+  // ---- flor do mal (jardim) ----
+  flowerLashCycleMs: 3200,    // intervalo entre os chicotes de espinhos
+  flowerWarnMs: 800,          // aviso no chão antes de cada chicote
 };
 
 // Tamanho interno do canvas: grade + faixa da HUD.
@@ -95,3 +92,80 @@ export const WALL = 1;
 export const BLOCK = 2;
 
 export const DIRS: ReadonlyArray<readonly [number, number]> = [[0, -1], [0, 1], [-1, 0], [1, 0]];
+
+// ---------------------------------------------------------------- inimigos
+
+export type EnemyKind = 'frog' | 'ghost' | 'flower';
+
+export interface EnemyDef {
+  name: string;
+  texture: string;
+  moveInterval: number; // ms entre passos (Infinity: não se move)
+  stepMs: number; // duração da animação de um passo
+  passWalls: boolean; // atravessa muralhas, caixotes e poções
+  rooted: boolean; // fixo no chão: bloqueia a casa onde está
+  immune: ElementId[]; // explosões destes elementos não o machucam
+}
+
+export const ENEMY_TYPES: Record<EnemyKind, EnemyDef> = {
+  frog:   { name: 'Sapo mago',   texture: 'enemy',        moveInterval: 800,      stepMs: 300, passWalls: false, rooted: false, immune: [] },
+  ghost:  { name: 'Fantasma',    texture: 'enemy_ghost',  moveInterval: 1500,     stepMs: 700, passWalls: true,  rooted: false, immune: [] },
+  flower: { name: 'Flor do mal', texture: 'enemy_flower', moveInterval: Infinity, stepMs: 300, passWalls: false, rooted: true,  immune: ['water'] },
+};
+
+export function isImmune(kind: EnemyKind, element: ElementId): boolean {
+  return ENEMY_TYPES[kind].immune.includes(element);
+}
+
+// ---------------------------------------------------------------- fases
+
+export type StageKind = 'lab' | 'crypt' | 'boss' | 'garden';
+export type StageTheme = 'stone' | 'crypt' | 'garden';
+
+// Quantos inimigos de um tipo: `start` no início; se houver `every`, mais um a cada N caixotes quebrados, até `max`.
+export interface EnemyRule {
+  kind: EnemyKind;
+  start: number;
+  max: number;
+  every?: number;
+}
+
+export interface StageDef {
+  kind: StageKind;
+  name: string;
+  tip?: string; // dica mostrada ao entrar na fase
+  time: number; // ms
+  blockChance: number;
+  door: boolean; // fase de gemas e porta (o chefe não tem porta)
+  enemies: EnemyRule[];
+  theme: StageTheme;
+  track?: string; // faixa de música da fase (a escolha da jogadora na Sala de Música vale mais)
+}
+
+export const STAGES: StageDef[] = [
+  {
+    kind: 'lab', name: 'LABORATÓRIO', time: 90000, blockChance: 0.7, door: true, theme: 'stone',
+    enemies: [{ kind: 'frog', start: 2, max: 5, every: 8 }],
+  },
+  {
+    kind: 'crypt', name: 'SALÃO DOS FANTASMAS', tip: 'Poção Aqua apaga poções de Fogo. Fantasmas atravessam paredes.',
+    time: 100000, blockChance: 0.6, door: true, theme: 'crypt', track: 'luar',
+    enemies: [{ kind: 'ghost', start: 2, max: 4, every: 10 }, { kind: 'frog', start: 1, max: 1 }],
+  },
+  {
+    kind: 'boss', name: 'DUELO COM A BELLADONA', time: 120000, blockChance: 0.35, door: false, theme: 'stone',
+    enemies: [],
+  },
+  {
+    kind: 'garden', name: 'JARDIM DO CASTELO', tip: 'As flores do mal resistem à Poção Aqua. Use outra poção.',
+    time: 100000, blockChance: 0.5, door: true, theme: 'garden', track: 'jardim',
+    enemies: [{ kind: 'frog', start: 2, max: 3, every: 10 }, { kind: 'flower', start: 5, max: 5 }],
+  },
+];
+
+export const LAST_STAGE = STAGES.length;
+
+// Fase de 1 a LAST_STAGE (valores fora do intervalo são ajustados).
+export function stageDef(stage: number): StageDef {
+  return STAGES[Math.min(LAST_STAGE, Math.max(1, Math.floor(stage))) - 1];
+}

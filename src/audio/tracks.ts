@@ -76,6 +76,38 @@ export const TRACKS: Track[] = [
       { root: 5, tones: [0, 4, 7] }, { root: 7, tones: [0, 4, 7] },
     ],
   },
+  // Aurora: harpa aberta e luminosa, em sol maior pentatônico.
+  {
+    id: 'aurora', name: 'Aurora Boreal', bpm: 64, tonic: 58, scale: [0, 2, 4, 7, 9], style: 'arp', density: 0.6,
+    chords: [
+      { root: 0, tones: [0, 4, 7] }, { root: 9, tones: [0, 3, 7] },
+      { root: 5, tones: [0, 4, 7] }, { root: 7, tones: [0, 4, 7] },
+    ],
+  },
+  // Pergaminho: melodia lenta em ré menor, como uma página antiga.
+  {
+    id: 'pergaminho', name: 'Pergaminho Antigo', bpm: 70, tonic: 50, scale: [0, 3, 5, 7, 10], style: 'melody', density: 0.45,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
+      { root: 5, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
+    ],
+  },
+  // Sinos: poucas notas, espaçadas, com o acento de uma torre distante.
+  {
+    id: 'sinos', name: 'Sinos da Torre', bpm: 62, tonic: 67, scale: [0, 2, 4, 7, 9], style: 'sparse', density: 0.25,
+    chords: [
+      { root: 0, tones: [0, 4, 7] }, { root: 5, tones: [0, 4, 7] },
+      { root: 9, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
+    ],
+  },
+  // Sinfonia do Maestro: a faixa mais cheia, em homenagem à Roo de casaca (ver o menu).
+  {
+    id: 'sinfonia', name: 'Sinfonia do Maestro', bpm: 80, tonic: 55, scale: [0, 2, 4, 7, 9], style: 'melody', density: 0.62,
+    chords: [
+      { root: 0, tones: [0, 4, 7] }, { root: 5, tones: [0, 4, 7] },
+      { root: 7, tones: [0, 4, 7] }, { root: 0, tones: [0, 4, 7] },
+    ],
+  },
 ];
 
 // Faixa do duelo contra a Belladona: um pouco mais rápida e tensa, mas ainda macia.

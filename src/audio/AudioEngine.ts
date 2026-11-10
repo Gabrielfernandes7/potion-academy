@@ -2,17 +2,18 @@
 //
 // Cadeia: vozes -> barramento (sfx/música) -> filtro passa-baixa -> compressor suave -> saída,
 // com um reverb (resposta ao impulso gerada em código) para dar espaço e maciez.
-// Efeitos: só senoides/triângulos com ataque lento e cauda longa (nada de onda quadrada/serra).
+// Efeitos: senoides/triângulos com ataque lento, mais grãos de ruído filtrados (chiado, crepitar, gotas).
+// Cada elemento tem um som próprio (ver elementSound).
 // Música: faixas procedurais (ver tracks.ts); cada jogo sorteia faixa e semente novas.
 //
 // Música (enabled/playing) e efeitos (sfx) são flags independentes.
 // O sfx é ligado pelo primeiro clique em JOGAR/COMEÇAR.
 import type { ElementId } from '../config';
 import {
-  BOSS_TRACK, MelodyState, NoteEvent, STEPS_PER_BAR, Track, generateBar, midiToHz, mulberry32, pickNextTrack,
+  BOSS_TRACK, MelodyState, NoteEvent, STEPS_PER_BAR, TRACKS, Track, generateBar, midiToHz, mulberry32, pickNextTrack,
 } from './tracks';
 
-export type SfxName = 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door';
+export type SfxName = 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door' | 'fizzle';
 
 type WebkitWindow = { webkitAudioContext?: typeof AudioContext };
 type BusName = 'sfx' | 'music';
@@ -33,14 +34,6 @@ const MUSIC_LEVEL = 0.55;
 const LOOKAHEAD_S = 1.0;
 const SCHEDULER_MS = 100;
 
-// Estouro da poção por elemento: acorde suave em cascata + um sopro filtrado.
-const BURST: Record<ElementId, { notes: number[]; type: OscillatorType; stagger: number; noiseHz: number }> = {
-  fire: { notes: [196, 294, 392], type: 'triangle', stagger: 0.06, noiseHz: 600 }, // quente e grave
-  water: { notes: [523, 659, 784, 1047], type: 'sine', stagger: 0.045, noiseHz: 1400 }, // cristalino
-  earth: { notes: [131, 196, 247], type: 'sine', stagger: 0.07, noiseHz: 380 }, // profundo
-  air: { notes: [784, 988, 1175], type: 'sine', stagger: 0.05, noiseHz: 2200 }, // arejado
-};
-
 export class AudioEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
@@ -55,6 +48,8 @@ export class AudioEngine {
 
   // música
   private track: Track | null = null;
+  // faixa escolhida no menu (id); null = sorteia a cada jogo
+  private trackChoice: string | null = null;
   private seed = 1;
   private rng: () => number = Math.random;
   private melody: MelodyState = { idx: 3 };
@@ -178,6 +173,81 @@ export class AudioEngine {
     osc.stop(time + dur + 0.05);
   }
 
+  // Grão de ruído filtrado: a base de chiados, crepitares e sopros.
+  private grain(time: number, dur: number, gain: number, type: BiquadFilterType, freq: number, q = 1, send = 0.3): void {
+    const ctx = this.ctx;
+    if (!ctx || !this.noiseBuffer || !this.sfxBus) return;
+    const src = ctx.createBufferSource();
+    src.buffer = this.noiseBuffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = type;
+    filter.frequency.value = freq;
+    filter.Q.value = q;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0.0001, time);
+    env.gain.linearRampToValueAtTime(gain, time + Math.min(0.004, dur * 0.3));
+    env.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+    src.connect(filter);
+    filter.connect(env);
+    env.connect(this.sfxBus);
+    if (send > 0 && this.reverbIn) {
+      const s = ctx.createGain();
+      s.gain.value = send;
+      env.connect(s);
+      s.connect(this.reverbIn);
+    }
+    src.start(time, Math.random() * 1.5);
+    src.stop(time + dur + 0.02);
+  }
+
+  // Crepitar: muitos estalos curtinhos espalhados por um intervalo (cristais, brasas).
+  private crackle(time: number, count: number, span: number, freq: number, gain: number): void {
+    for (let i = 0; i < count; i++) {
+      const t = time + Math.random() * span;
+      const f = freq * (0.8 + Math.random() * 0.4);
+      this.grain(t, 0.012 + Math.random() * 0.02, gain * (0.5 + Math.random() * 0.8), 'bandpass', f, 3, 0.25);
+    }
+  }
+
+  // Gota pesada: um tom curto que cai de altura (metal líquido caindo).
+  // Sons de cada elemento (inspirados em fenômenos reais, não em "sons oficiais" dos elementos):
+  //   fogo  (enxofre queimando): chiado de chama e estalos
+  //   água  (mercúrio líquido):   gotas pesadas caindo em sequência
+  //   terra (sal):                cristais crepitando
+  //   éter  (gás luminoso):       zumbido suave com brilho no ar
+  // Cada elemento tem uma "assinatura" sonora que lembra o que ele é:
+  // - fogo: um rugido que cai (ar aquecido) + um baque grave + estalos de brasa;
+  // - água: um chiado que sobe (respingo) + bolhas que estouram subindo de tom;
+  // - terra: um baque seco + pedra se soltando (ruído agudo curto) + um ronco baixo;
+  // - ar/éter: um vento que cresce devagar + um brilho suave no fim.
+  private elementSound(element: ElementId, t: number): void {
+    switch (element) {
+      case 'fire':
+        this.breath(t, 0.9, 0.08, 1600, 260, 0.3);
+        this.voice(72, t, 0.6, { gain: 0.09, type: 'sine', attack: 0.004, glideTo: 36, glideTime: 0.5, send: 0.2 });
+        this.crackle(t + 0.05, 16, 0.6, 3000, 0.05);
+        break;
+      case 'water':
+        this.breath(t, 0.6, 0.05, 420, 2400, 0.3);
+        [0.08, 0.17, 0.27, 0.38, 0.5, 0.6].forEach((d, i) => {
+          const f = 300 + i * 70 + Math.random() * 40;
+          this.voice(f, t + d, 0.12, { gain: 0.05 * (1 - i * 0.08), type: 'sine', attack: 0.002, glideTo: f * 2.2, glideTime: 0.08, send: 0.3 });
+        });
+        break;
+      case 'earth':
+        this.voice(58, t, 0.5, { gain: 0.12, type: 'sine', attack: 0.003, glideTo: 34, glideTime: 0.3 });
+        this.crackle(t + 0.02, 10, 0.25, 1800, 0.05);
+        this.grain(t, 0.35, 0.05, 'highpass', 3000, 0.7, 0.1);
+        this.breath(t, 0.5, 0.04, 500, 180, 0.1);
+        break;
+      case 'air':
+        this.breath(t, 1.5, 0.05, 300, 2800, 0.8);
+        this.voice(880, t + 0.5, 0.8, { gain: 0.012, type: 'sine', attack: 0.3, send: 0.8 });
+        this.voice(1320, t + 0.6, 0.8, { gain: 0.008, type: 'sine', attack: 0.3, send: 0.8 });
+        break;
+    }
+  }
+
   // Sopro de ruído filtrado: sobe e desce suave (como vento ou borbulhar).
   private breath(time: number, dur: number, gain: number, fromHz: number, toHz: number, send = 0.3): void {
     const ctx = this.ctx;
@@ -255,8 +325,8 @@ export class AudioEngine {
 
   // Novo jogo: sorteia outra faixa (e outra semente). Se a música está ligada, troca com fade.
   // boss: usa a faixa fixa do duelo em vez de sortear.
-  nextTrack(boss = false): void {
-    this.chooseTrack(boss);
+  nextTrack(boss = false, stageTrack?: string): void {
+    this.chooseTrack(boss, stageTrack);
     if (!this.enabled) return;
     if (!this.playing) {
       if (!this.ensureContext()) return;
@@ -272,12 +342,26 @@ export class AudioEngine {
     }, 600);
   }
 
+  // Escolha da jogadora no menu: um id de faixa, ou null para sortear. Se a música está
+  // ligada, troca na hora (com fade), para ela ouvir a faixa ao escolher.
+  setTrackChoice(id: string | null): void {
+    this.trackChoice = id && TRACKS.some(t => t.id === id) ? id : null;
+    this.nextTrack();
+  }
+
+  get trackChoiceId(): string | null {
+    return this.trackChoice;
+  }
+
   get trackName(): string | null {
     return this.track ? this.track.name : null;
   }
 
-  private chooseTrack(boss = false): void {
-    this.track = boss ? BOSS_TRACK : pickNextTrack(this.track ? this.track.id : null);
+  // Prioridade: duelo > escolha da jogadora (Sala de Música) > faixa da fase > sorteio.
+  private chooseTrack(boss = false, stageTrack?: string): void {
+    const wanted = this.trackChoice ?? stageTrack;
+    const chosen = wanted ? TRACKS.find(t => t.id === wanted) : undefined;
+    this.track = boss ? BOSS_TRACK : chosen ?? pickNextTrack(this.track ? this.track.id : null);
     this.seed = Math.floor(Math.random() * 0xffffffff);
   }
 
@@ -359,18 +443,13 @@ export class AudioEngine {
         this.voice(560, t + 0.08, 0.26, { gain: 0.022, glideTo: 780, glideTime: 0.1, send: 0.4 });
         break;
       }
-      case 'explosion': {
-        const b = BURST[variant ?? 'fire'];
-        // sopro macio, como vapor subindo do frasco
-        this.breath(t, 0.9, 0.03, b.noiseHz, b.noiseHz * 0.4, 0.4);
-        b.notes.forEach((f, i) => {
-          this.voice(f, t + i * b.stagger, 1.5, { gain: 0.03, type: b.type, attack: 0.025, send: 0.55 });
-        });
-        if (variant === 'water') {
-          // bolhinhas
-          this.voice(640, t + 0.12, 0.2, { gain: 0.016, glideTo: 960, glideTime: 0.1, send: 0.5 });
-          this.voice(820, t + 0.2, 0.18, { gain: 0.013, glideTo: 1180, glideTime: 0.09, send: 0.5 });
-        }
+      case 'explosion':
+        this.elementSound(variant ?? 'fire', t);
+        break;
+      case 'fizzle': {
+        // poção de fogo apagada pela água: chiado de vapor que some + uma gota
+        this.breath(t, 0.7, 0.06, 3200, 500, 0.4);
+        this.voice(420, t + 0.05, 0.18, { gain: 0.04, type: 'sine', attack: 0.003, glideTo: 180, glideTime: 0.15, send: 0.4 });
         break;
       }
       case 'pickup': {

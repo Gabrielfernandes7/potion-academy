@@ -42,9 +42,10 @@
   --canvas-w: 600;
   --canvas-h: 576;
 
-  /* espaço vertical reservado ao redor do canvas (cabeçalho, legenda, dicas) */
+  /* espaço vertical reservado ao redor do canvas (cabeçalho, legenda, controles de toque) */
   --chrome-h: 200px;
-  --stage-w: min(100%, 960px, calc((100dvh - var(--chrome-h)) * var(--canvas-w) / var(--canvas-h)));
+  /* espaço horizontal que os controles de toque ocupam de cada lado, com o celular deitado */
+  --side-w: 0px;
 }
 
 /* ---------- Base ---------- */
@@ -53,6 +54,9 @@
 html, body { height: 100%; }
 
 body {
+  /* Largura do jogo: cabe na largura, na altura que sobra (descontado o --chrome-h) e nas laterais
+     livres. Fica no body, e não no :root, para enxergar o --chrome-h e o --side-w do modo toque. */
+  --stage-w: min(100%, 1280px, calc((100dvh - var(--chrome-h)) * var(--canvas-w) / var(--canvas-h)), calc(100vw - 2 * var(--side-w)));
   margin: 0;
   min-height: 100dvh;
   background: linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 60%, var(--bg-2) 100%) fixed;
@@ -63,6 +67,8 @@ body {
   user-select: none;
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none; /* o jogo não "puxa" a página no celular */
+  touch-action: manipulation; /* sem zoom por toque duplo */
 }
 
 h1, h2, h3 { font-family: var(--font-display); margin: 0; }
@@ -103,16 +109,16 @@ kbd {
 .topbar,
 #stage,
 .legend,
-#controls,
 #touch-controls {
   width: var(--stage-w);
 }
 
 .topbar {
   display: flex;
+  flex-wrap: wrap; /* em telas estreitas os botões descem para a linha de baixo, em vez de estourar a largura */
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 6px 12px;
 }
 
 .logo {
@@ -160,18 +166,8 @@ kbd {
 
 .legend b { margin-right: 4px; }
 
-#controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px 16px;
-  color: var(--text-muted);
-  font-size: 13px;
-  text-align: center;
-}
-
 /* nome da faixa que está tocando */
-.sound { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.sound { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; min-width: 0; }
 
 .track-name {
   overflow: hidden;
@@ -241,6 +237,81 @@ kbd {
   font-size: clamp(13px, 3.6cqw, 17px);
 }
 
+/* ---------- Sala de Música ---------- */
+.music-room {
+  width: min(92vw, 440px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.music-room h2 {
+  margin: 0;
+  color: var(--gold-bright);
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.12em;
+}
+
+.music-sub { margin: 0; color: var(--text-muted); }
+
+.music-now {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.music-now b { color: var(--text); font-weight: 700; }
+
+.maestro-img {
+  width: 180px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.6));
+}
+
+.music-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.track-btn {
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-s);
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.track-btn:hover { background: var(--panel-raised); }
+.track-btn.on {
+  border-color: var(--gold-bright);
+  background: rgba(217, 164, 65, 0.18);
+  color: var(--gold-bright);
+}
+.track-btn:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+.track-btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+.music-off { margin: 0; color: var(--warn); font-size: 13px; }
+
+/* telas baixas (celular deitado): maestro pequeno e faixas em três colunas, para quase não rolar */
+@media (max-height: 460px) {
+  .music-room { width: min(94vw, 560px); gap: 6px; }
+  .maestro-img { width: 84px; }
+  .music-list { grid-template-columns: repeat(3, 1fr); }
+  .music-room h2 { font-size: 18px; }
+}
+.music-off[hidden] { display: none; }
+
 .menu-hint {
   width: 100%;
   margin: 2px 0 0;
@@ -249,7 +320,8 @@ kbd {
   text-shadow: 0 2px 6px #000;
 }
 
-.in-menu .logo { visibility: hidden; } /* o título grande já está no menu */
+.in-menu .logo { display: none; } /* o título grande já está no menu */
+.in-menu .topbar { justify-content: flex-end; }
 .touch-on.in-menu #touch-controls { display: none; } /* sem d-pad no menu */
 .touch-on .menu-hint { display: none; }
 
@@ -313,9 +385,8 @@ kbd {
 }
 
 .touch-on #touch-controls { display: flex; }
-.touch-on .legend,
-.touch-on #controls { display: none; }
-.touch-on { --chrome-h: 360px; }
+.touch-on .legend { display: none; }
+.touch-on { --chrome-h: 280px; } /* celular em pé: cabeçalho + controles empilhados sob o jogo */
 
 .dpad {
   display: grid;
@@ -353,7 +424,7 @@ kbd {
 
 .actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* as colunas podem encolher abaixo do texto */
   gap: 8px;
   flex: 1;
   min-width: 0;
@@ -361,6 +432,7 @@ kbd {
 }
 
 .act {
+  min-width: 0;
   min-height: 48px;
   padding: 6px 8px;
   border: 2px solid var(--panel-border);
@@ -778,9 +850,92 @@ kbd {
 }
 
 @media (max-width: 480px) {
+  /* o título e o nome da faixa já aparecem em outros lugares: em telas estreitas a barra do topo fica
+     só com os botões, numa linha */
+  .logo,
+  .track-name { display: none; }
+  .topbar { justify-content: center; }
+}
+
+@media (max-width: 420px) {
+  .chip-btn { padding: 5px 10px; font-size: 11px; letter-spacing: 0.05em; }
+  .sound { gap: 6px; }
+}
+
+@media (max-width: 480px) {
   .panel { padding: 22px 16px; }
   .big-btn { padding: 12px 24px; font-size: 15px; }
   .dpad { grid-template-columns: repeat(3, 54px); grid-template-rows: repeat(3, 54px); }
+}
+
+/* celular estreito em pé: direcional menor e botões de ação em uma coluna (cabem ao lado do direcional) */
+@media (max-width: 380px) and (orientation: portrait) {
+  .dpad { grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); gap: 3px; }
+  .actions { grid-template-columns: 1fr; gap: 5px; max-width: none; }
+  .act { min-height: 34px; padding: 4px 6px; font-size: 11px; letter-spacing: 0.04em; }
+  .act.bomb { min-height: 52px; font-size: 15px; }
+  .act.small { min-height: 30px; }
+}
+
+/* ---------- Menu em canvas pequeno ---------- */
+/* #stage é um container: quando o jogo fica pequeno (celular deitado, janelas baixas), os botões do menu
+   encolhem para não esconder a Roo e o caldeirão. */
+@container (max-width: 420px) {
+  .menu .big-btn { min-height: 34px; padding: 5px 14px; font-size: 12px; }
+  .menu-actions { gap: 6px; }
+  .menu-hint { display: none; }
+}
+
+@container (max-width: 330px) {
+  .menu .big-btn { min-height: 30px; padding: 4px 10px; font-size: 11px; letter-spacing: 0.1em; }
+  .menu-tag { display: none; }
+}
+
+/* ---------- Celular e tablet deitados ---------- */
+/* Em pé, os controles ficam sob o jogo. Deitado, a altura é escassa: o jogo vai para o centro, o direcional
+   para a esquerda e os botões para a direita, sem sobrepor o jogo (--side-w reserva as laterais). */
+@media (orientation: landscape) {
+  .touch-on {
+    --chrome-h: 64px;
+    --side-w: 210px;
+  }
+
+  .touch-on .app {
+    gap: 6px;
+    padding: max(6px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 6px max(12px, env(safe-area-inset-left));
+  }
+
+  .touch-on .topbar { width: 100%; }
+
+  .touch-on #touch-controls {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    align-items: flex-end;
+    padding: 0 max(14px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+    pointer-events: none; /* o espaço do meio é do jogo; só o direcional e os botões recebem toque */
+  }
+
+  .touch-on .dpad,
+  .touch-on .actions { pointer-events: auto; }
+}
+
+/* deitado e com pouca altura (celulares): controles menores e laterais mais estreitas */
+@media (orientation: landscape) and (max-height: 430px) {
+  .touch-on {
+    --chrome-h: 56px;
+    --side-w: 176px;
+  }
+
+  .touch-on .logo { font-size: 14px; letter-spacing: 0.16em; }
+  .touch-on .track-name { display: none; }
+  .touch-on .dpad { grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(3, 46px); gap: 3px; }
+  .touch-on .actions { max-width: 156px; gap: 6px; }
+  .touch-on .act { min-height: 38px; padding: 4px 2px; font-size: 10px; letter-spacing: 0.03em; }
+  .touch-on .act.bomb { min-height: 48px; font-size: 14px; }
+  .touch-on .act.small { min-height: 30px; }
 }
 
 /* ---------- Movimento reduzido ---------- */

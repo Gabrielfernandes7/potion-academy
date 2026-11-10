@@ -49,3 +49,26 @@ Novas decisões entram no fim.
 
 ## Catálogo de sprites como página do projeto
 - **Motivo:** o jeito mais seguro de documentar sprites é mostrá-los. `/sprites.html` é gerada pelo próprio código e nunca fica desatualizada.
+
+## Reação entre poções: o fogo acende, a água apaga, a terra é estável
+- **Motivo:** a água era o único elemento sem regra própria. Agora cada um tem um papel: o fogo acende outras poções (corrente), a água neutraliza uma poção de fogo armada (vira vapor, sem explodir) e a terra nunca é acesa nem apagada.
+- **Detalhe:** a explosão de água que apaga uma poção de fogo continua machucando quem estiver no caminho.
+- **Consequência:** antes, qualquer explosão acendia outras poções. Agora só a de fogo acende; água, terra e éter não. A regra mora em `src/game/chain.ts` (uma tabela de 3 linhas) para ser fácil de mudar.
+- **Em aberto:** a explosão de água também poderia apagar as chamas que o fogo deixa no chão. Fica para depois, porque o fogo ainda não deixa chamas duradouras.
+
+## Quatro fases: laboratório, salão dos fantasmas, duelo e jardim
+- **Motivo:** o jogo tinha duas fases e nenhum desfecho depois da Belladona. O salão apresenta o fantasma e a regra da água; o jardim, fora do castelo, é o epílogo.
+- **Consequência:** as fases são dados (`STAGES` em `config.ts`), e a `MainScene` não tem mais `stage === 1` ou `=== 2` espalhados. A Belladona agora é a fase 3: derrotá-la leva ao jardim, e só cruzar o portão do jardim vence o jogo. "Tentar de novo" continua recomeçando da fase 1.
+
+## Fantasma que atravessa paredes, mas é lento
+- **Motivo:** dar um inimigo diferente sem quebrar o tom calmo. Ele não persegue; atravessa muralhas, caixotes e poções, e anda a 1,5 s por passo.
+- **Detalhe:** dentro de uma muralha a explosão não o alcança, então ele é um risco que pede paciência, não reflexo.
+
+## Flor do mal: fixa, com aviso, imune à água
+- **Motivo:** o jardim precisava de um inimigo que obrigasse a trocar de poção. A flor é imune à Aqua (a única poção que só dá "empate" contra ela) e tem um chicote que também segue a regra de ter aviso no chão (0,8 s).
+- **Ficou de fora:** flores que se multiplicam ou perseguem.
+
+## Layout responsivo: três modos
+- **Motivo:** o jogo tinha um único modo e o celular deitado ficava minúsculo (167 px numa tela de 740).
+- **Consequência:** (1) em pé, os controles de toque ficam sob o jogo; (2) deitado, o jogo vai ao centro e os controles nas laterais, sem sobrepor; (3) em telas grandes o jogo cresce até 1280 px. Telas estreitas escondem o título e o nome da faixa para a barra do topo caber em uma linha.
+
