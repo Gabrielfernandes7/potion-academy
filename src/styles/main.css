@@ -123,7 +123,12 @@ kbd {
   text-shadow: 0 2px 6px rgba(217, 164, 65, 0.3);
 }
 
-#stage { display: flex; justify-content: center; }
+#stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  container-type: inline-size; /* permite usar cqw no menu, proporcional ao canvas */
+}
 
 #game {
   width: 100%;
@@ -164,6 +169,89 @@ kbd {
   font-size: 13px;
   text-align: center;
 }
+
+/* nome da faixa que está tocando */
+.sound { display: flex; align-items: center; gap: 10px; min-width: 0; }
+
+.track-name {
+  overflow: hidden;
+  max-width: 46vw;
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track-name:not(:empty)::before { content: 'Tocando: '; font-weight: 400; }
+.track-name.fresh { animation: track-in 0.9s ease-out; }
+
+@keyframes track-in {
+  from { opacity: 0; transform: translateY(-4px); color: var(--gold-bright); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- Menu principal (por cima do canvas) ---------- */
+.menu {
+  position: absolute;
+  inset: 3px;
+  z-index: 2;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(14px, 6cqw, 34px) 16px clamp(12px, 4cqw, 24px);
+  text-align: center;
+  pointer-events: none; /* só os botões recebem cliques; o resto deixa ver a cena */
+}
+
+.menu.show { display: flex; }
+
+.menu-logo {
+  font-size: clamp(20px, 7cqw, 40px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  color: var(--gold);
+  text-shadow: 0 3px 14px rgba(0, 0, 0, 0.85), 0 0 26px rgba(217, 164, 65, 0.4);
+}
+
+.menu-tag {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: clamp(11px, 3.2cqw, 15px);
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px #000;
+}
+
+.menu-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.menu .big-btn {
+  min-height: 42px;
+  padding: 8px clamp(16px, 6cqw, 36px);
+  font-size: clamp(13px, 3.6cqw, 17px);
+}
+
+.menu-hint {
+  width: 100%;
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-shadow: 0 2px 6px #000;
+}
+
+.in-menu .logo { visibility: hidden; } /* o título grande já está no menu */
+.touch-on.in-menu #touch-controls { display: none; } /* sem d-pad no menu */
+.touch-on .menu-hint { display: none; }
 
 /* ---------- Botões ---------- */
 .chip-btn {

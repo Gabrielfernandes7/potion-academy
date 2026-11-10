@@ -6,11 +6,12 @@
 // - update() retorna cedo com a loja aberta e, após gameOver/won, só trata a tecla R.
 import Phaser from 'phaser';
 import {
-  BLOCK, BOMB_TYPES, BombId, CANVAS, CONFIG, DIRS, ELEMENTS, EMPTY, WALL,
+  BLOCK, BOMB_TYPES, BombId, CANVAS, CONFIG, DIRS, ELEMENTS, ElementId, EMPTY, WALL,
 } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
 import { Bank, hasBombType } from '../storage';
-import { PICKUP_TEXTURE, PickupType, rollReward } from '../game/rewards';
+import { rooOriginY } from '../textures/roo';
+import { PICKUP_HALO, PICKUP_TEXTURE, PickupType, rollReward } from '../game/rewards';
 import type { Bomb, Enemy, Explosion, Facing, Pickup, Player, PowerupCounts } from '../game/types';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
 import { touch } from '../input/touch';
@@ -93,6 +94,7 @@ export class MainScene extends Phaser.Scene {
     this.zzzMs = 0;
     touch.releaseAll();
     touch.clearJust();
+    audio.nextTrack(); // cada jogo tem uma música diferente da anterior
     this.powerupsCollected = { bomb_up: 0, fire_up: 0, speed_up: 0, time_up: 0 };
     this.isPaused = false;
     this.gemBlocks = new Set();
@@ -111,7 +113,7 @@ export class MainScene extends Phaser.Scene {
       this.player.gridX * CONFIG.tile + CONFIG.tile / 2,
       this.player.gridY * CONFIG.tile + CONFIG.tile / 2,
       'roo_down_0',
-    ).setDepth(10);
+    ).setOrigin(0.5, rooOriginY(CONFIG.tile)).setDepth(10);
     this.cdGraphics = this.add.graphics().setDepth(15);
     // a grade é desenhada abaixo da faixa da HUD (cena 'Hud', por cima)
     this.cameras.main.setViewport(0, CONFIG.hudHeight, CANVAS.width, CONFIG.rows * CONFIG.tile);
@@ -250,7 +252,7 @@ export class MainScene extends Phaser.Scene {
     }
     this.tweens.killTweensOf(bomb.sprite);
     bomb.sprite.destroy();
-    this.play('explosion');
+    this.play('explosion', bomb.element);
     this.cameras.main.shake(70, 0.003);
   }
 
@@ -383,7 +385,17 @@ export class MainScene extends Phaser.Scene {
       targets: sprite, y: sprite.y - 4,
       duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
     });
-    this.pickups.push({ gridX: x, gridY: y, type, sprite });
+    const haloColor = PICKUP_HALO[type];
+    let halo: Phaser.GameObjects.Image | undefined;
+    if (haloColor !== undefined) {
+      halo = this.add.image(sprite.x, sprite.y, 'menu_puff').setScale(0.95).setTint(haloColor)
+        .setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.3).setDepth(5);
+      this.tweens.add({
+        targets: halo, alpha: { from: 0.18, to: 0.42 }, scale: { from: 0.85, to: 1.05 },
+        duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      });
+    }
+    this.pickups.push({ gridX: x, gridY: y, type, sprite, halo });
   }
 
   collectPickup(pickup: Pickup): void {
@@ -411,7 +423,7 @@ export class MainScene extends Phaser.Scene {
       case 'bomb_up':
         this.player.bombsMax = Math.min(CONFIG.maxBombs + CONFIG.maxBombUp, this.player.bombsMax + 1);
         this.powerupsCollected.bomb_up++;
-        this.floatingText(pickup.gridX, pickup.gridY, '+1 BOMBA', '#b39ddb');
+        this.floatingText(pickup.gridX, pickup.gridY, '+1 FRASCO', '#b39ddb');
         this.play('powerup');
         break;
       case 'fire_up':
@@ -435,6 +447,10 @@ export class MainScene extends Phaser.Scene {
     }
     this.tweens.killTweensOf(pickup.sprite);
     pickup.sprite.destroy();
+    if (pickup.halo) {
+      this.tweens.killTweensOf(pickup.halo);
+      pickup.halo.destroy();
+    }
     this.pickups = this.pickups.filter(p => p !== pickup);
     this.updateHud();
   }
@@ -832,8 +848,8 @@ export class MainScene extends Phaser.Scene {
     });
   }
 
-  play(name: SfxName): void {
-    audio.play(name);
+  play(name: SfxName, variant?: ElementId): void {
+    audio.play(name, variant);
   }
 
   // ---------- Sono ----------

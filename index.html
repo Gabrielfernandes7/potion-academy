@@ -10,10 +10,26 @@
 <div class="app">
   <header class="topbar">
     <h1 class="logo">POTION ACADEMY</h1>
-    <button class="chip-btn" id="music-btn" type="button" title="Liga e desliga a música" aria-pressed="false">SOM OFF</button>
+    <div class="sound">
+      <span id="track-name" class="track-name" aria-live="polite"></span>
+      <button class="chip-btn" id="music-btn" type="button" title="Liga e desliga a música" aria-pressed="false">SOM OFF</button>
+    </div>
   </header>
 
-  <div id="stage"><div id="game"></div></div>
+  <div id="stage">
+    <div id="game"></div>
+    <div id="menu" class="menu show">
+      <div class="menu-title">
+        <h2 class="menu-logo">POTION ACADEMY</h2>
+        <p class="menu-tag">Academia de Alquimia</p>
+      </div>
+      <div class="menu-actions">
+        <button class="big-btn" id="menu-play" type="button">JOGAR</button>
+        <button class="big-btn alt" id="menu-shop" type="button">CALDEIRÃO</button>
+        <p class="menu-hint">Pressione <kbd>Enter</kbd> para jogar</p>
+      </div>
+    </div>
+  </div>
 
   <div id="touch-controls" aria-label="Controles de toque">
     <div class="dpad">
@@ -49,7 +65,7 @@
 </div>
 
 <!-- Caldeirão de Magia (loja) -->
-<div id="shop-overlay" class="overlay show" role="dialog" aria-labelledby="shop-title">
+<div id="shop-overlay" class="overlay" role="dialog" aria-labelledby="shop-title">
   <div class="shop">
     <div class="shop-hero" aria-hidden="true">
       <div class="bubbles"><i></i><i></i><i></i><i></i><i></i></div>
@@ -76,7 +92,10 @@
     </div>
     <div class="shop-grid" id="shop-items"></div>
     <div id="shop-toast" role="status" aria-live="polite"></div>
-    <button class="big-btn" id="play-btn" type="button">COMEÇAR</button>
+    <div class="btn-row">
+      <button class="big-btn alt" id="shop-back-btn" type="button">VOLTAR</button>
+      <button class="big-btn" id="play-btn" type="button">COMEÇAR</button>
+    </div>
   </div>
 </div>
 
@@ -85,7 +104,10 @@
   <div class="panel">
     <h2 id="pause-title">PAUSADO</h2>
     <p class="hint">Pressione <kbd>Enter</kbd> para retomar</p>
-    <button class="big-btn" id="resume-btn" type="button">RETOMAR</button>
+    <div class="btn-row">
+      <button class="big-btn" id="resume-btn" type="button">RETOMAR</button>
+      <button class="big-btn alt" id="pause-menu-btn" type="button">MENU</button>
+    </div>
   </div>
 </div>
 
@@ -98,6 +120,7 @@
     <div class="btn-row">
       <button class="big-btn" id="retry-btn" type="button">TENTAR NOVAMENTE</button>
       <button class="big-btn alt" id="shop-btn" type="button">CALDEIRÃO</button>
+      <button class="big-btn alt" id="menu-btn" type="button">MENU</button>
     </div>
   </div>
 </div>

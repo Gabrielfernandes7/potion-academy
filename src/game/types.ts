@@ -32,6 +32,7 @@ export interface Pickup {
   gridY: number;
   type: PickupType;
   sprite: Phaser.GameObjects.Image;
+  halo?: Phaser.GameObjects.Image;
 }
 
 export interface Enemy {

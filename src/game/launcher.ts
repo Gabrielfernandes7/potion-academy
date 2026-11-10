@@ -1,48 +1,74 @@
-// Criação e reinício do jogo Phaser (o canvas é criado só na primeira vez).
+// Criação do Phaser.Game (uma única vez, ao abrir a página) e navegação entre menu e partida.
+//
+// Cenas: Boot -> Menu (animada, com o título/botões em DOM por cima) -> Main (+ Hud em paralelo).
 import Phaser from 'phaser';
 import { CANVAS } from '../config';
 import { BootScene } from '../scenes/BootScene';
 import { HudScene } from '../scenes/HudScene';
 import { MainScene } from '../scenes/MainScene';
-import { hideGameOver } from '../ui/overlays';
+import { MenuScene } from '../scenes/MenuScene';
+import { TEXTURES_READY } from './events';
+import { hideGameOver, setPauseVisible } from '../ui/overlays';
 import { closeShop } from '../ui/shop';
+import { setMenuVisible } from '../ui/menu';
 import { ensureFonts } from '../ui/fonts';
-import { audio } from '../audio/AudioEngine';
 
 let phaserGame: Phaser.Game | null = null;
+let texturesReady: Promise<void> = Promise.resolve();
 
-function mainScene(): MainScene | null {
-  if (!phaserGame) return null;
-  return phaserGame.scene.getScene('Main') as MainScene;
+export function bootGame(): void {
+  if (phaserGame) return;
+  const game = new Phaser.Game({
+    type: Phaser.AUTO,
+    width: CANVAS.width,
+    height: CANVAS.height,
+    backgroundColor: '#0e1613',
+    pixelArt: true,
+    antialias: false,
+    parent: 'game',
+    audio: { noAudio: true }, // o áudio é todo do AudioEngine (WebAudio próprio)
+    // o canvas se ajusta ao contêiner #game (CSS), em qualquer tela
+    scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
+    scene: [BootScene, MenuScene, MainScene, HudScene],
+  });
+  phaserGame = game;
+  texturesReady = new Promise<void>(resolve => game.events.once(TEXTURES_READY, resolve));
+  setMenuVisible(true);
+  // só em desenvolvimento: permite inspecionar o jogo pelo console/testes (window.__game)
+  if (import.meta.env.DEV) Object.assign(window, { __game: game });
 }
 
+// Começa (ou reinicia) uma partida a partir do menu, da loja ou do fim de jogo.
 export async function startGame(): Promise<void> {
+  if (!phaserGame) bootGame();
+  await texturesReady;
+  await ensureFonts(); // a HUD no canvas precisa das fontes já carregadas
+  const game = phaserGame as Phaser.Game;
   closeShop();
   hideGameOver();
-  if (audio.enabled && !audio.playing) audio.start();
-  if (!phaserGame) {
-    await ensureFonts();
-    phaserGame = new Phaser.Game({
-      type: Phaser.AUTO,
-      width: CANVAS.width,
-      height: CANVAS.height,
-      backgroundColor: '#0e1613',
-      pixelArt: true,
-      antialias: false,
-      parent: 'game',
-      // o canvas se ajusta ao contêiner #game (CSS), em qualquer tela
-      scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-      scene: [BootScene, MainScene, HudScene],
-    });
-    // só em desenvolvimento: permite inspecionar o jogo pelo console/testes (window.__game)
-    if (import.meta.env.DEV) Object.assign(window, { __game: phaserGame });
+  setMenuVisible(false);
+  if (game.scene.isActive('Main')) {
+    game.scene.getScene('Main').scene.restart();
   } else {
-    mainScene()?.scene.restart();
+    game.scene.stop('Menu');
+    game.scene.start('Main');
   }
 }
 
 export function retryGame(): void {
   hideGameOver();
-  if (audio.enabled && !audio.playing) audio.start();
-  mainScene()?.scene.restart();
+  phaserGame?.scene.getScene('Main').scene.restart();
+}
+
+// Volta ao menu principal (da pausa, do fim de jogo ou da loja).
+export function showMenu(): void {
+  const game = phaserGame;
+  if (!game) return;
+  hideGameOver();
+  closeShop();
+  setPauseVisible(false);
+  game.scene.stop('Hud');
+  game.scene.stop('Main');
+  if (!game.scene.isActive('Menu')) game.scene.start('Menu');
+  setMenuVisible(true);
 }

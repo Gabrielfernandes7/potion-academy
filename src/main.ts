@@ -7,10 +7,11 @@ import '@fontsource/nunito/800.css';
 import './styles/main.css';
 import { CANVAS } from './config';
 import { audio } from './audio/AudioEngine';
-import { retryGame, startGame } from './game/launcher';
+import { bootGame, retryGame, showMenu, startGame } from './game/launcher';
 import { touch } from './input/touch';
 import { byId } from './ui/dom';
-import { openShop, renderShop } from './ui/shop';
+import { bindMenuButtons, isMenuVisible } from './ui/menu';
+import { isShopOpen, openShop, renderShop } from './ui/shop';
 
 function setupLayout(): void {
   const root = document.documentElement;
@@ -31,28 +32,56 @@ function setMusicButton(on: boolean): void {
   btn.setAttribute('aria-pressed', String(on));
 }
 
-function bindButtons(): void {
-  byId('play-btn').onclick = () => {
-    // o primeiro clique libera o áudio (exigência dos navegadores)
-    audio.sfx = true;
-    if (!audio.enabled) {
-      audio.enabled = true;
-      audio.start();
-      setMusicButton(true);
-    }
-    void startGame();
-  };
+// O primeiro clique em "JOGAR"/"COMEÇAR" libera o áudio (exigência dos navegadores).
+function play(): void {
+  audio.sfx = true;
+  audio.unlock();
+  if (!audio.enabled) {
+    audio.enabled = true; // a música começa quando a partida inicia (Main.init sorteia a faixa)
+    setMusicButton(true);
+  }
+  void startGame();
+}
 
+// Mostra o nome da faixa que está tocando ao lado do botão de som.
+function bindTrackName(): void {
+  const label = byId('track-name');
+  audio.onTrackChange = name => {
+    label.textContent = name ?? '';
+    label.classList.remove('fresh');
+    if (name) {
+      void label.offsetWidth; // reinicia a animação de entrada
+      label.classList.add('fresh');
+    }
+  };
+}
+
+function bindButtons(): void {
+  bindMenuButtons({ play, shop: openShop });
+  byId('play-btn').onclick = play;
+  byId('shop-back-btn').onclick = showMenu;
   byId('retry-btn').onclick = () => retryGame();
   byId('shop-btn').onclick = () => openShop();
+  byId('menu-btn').onclick = showMenu;
+  byId('pause-menu-btn').onclick = showMenu;
   byId('resume-btn').onclick = () => touch.press('pause'); // consumido pela cena no próximo frame
 
   byId('music-btn').onclick = () => {
     audio.toggleMusic();
     setMusicButton(audio.playing);
   };
+
+  // Enter inicia o jogo, mas só enquanto o menu está na tela (na partida, Enter é pausa)
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && isMenuVisible() && !isShopOpen()) {
+      e.preventDefault();
+      play();
+    }
+  });
 }
 
 setupLayout();
+bindTrackName();
 bindButtons();
 renderShop();
+bootGame();
