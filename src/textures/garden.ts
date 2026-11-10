@@ -1,6 +1,7 @@
 // Texturas do jardim (fase 4): grama, sebe, canteiro de flores e portão.
 // Mesmas regras do cenário do castelo: 40 x 40 px, desenhadas em camadas, sem imagens prontas.
 import type { MakeFn } from './make';
+import { GARDEN_PALETTE as P } from './gardenPalette';
 
 // Pontos fixos (sem sorteio): o desenho é sempre igual, e o catálogo mostra o mesmo que o jogo.
 const BLADES_A: Array<[number, number]> = [[5, 9], [14, 28], [24, 6], [31, 19], [9, 34], [35, 33], [20, 21]];
@@ -17,29 +18,29 @@ export function drawGarden(make: MakeFn): void {
     };
 
   make('g_floor1', (g, T) => {
-    grass(0x4e8a3a, 0x356b2a, 0x6fae52, BLADES_A)(g, T);
+    grass(P.floorBase, P.floorBladeDark, P.floorBladeLight, BLADES_A)(g, T);
     g.fillStyle(0xffffff); g.fillCircle(T * 0.72, T * 0.7, 1.4);
     g.fillStyle(0xffeb3b); g.fillCircle(T * 0.2, T * 0.45, 1.2);
   });
 
   make('g_floor2', (g, T) => {
-    grass(0x477f35, 0x2f6226, 0x65a24c, BLADES_B)(g, T);
+    grass(P.floorBaseAlt, P.floorBladeDark, P.floorBladeLight, BLADES_B)(g, T);
     g.fillStyle(0xf8bbd0); g.fillCircle(T * 0.35, T * 0.82, 1.4);
   });
 
   make('g_wall', (g, T) => {
     // sebe alta e densa, de folhagem em camadas
-    g.fillStyle(0x1b4527); g.fillRect(0, 0, T, T);
+    g.fillStyle(P.hedgeBase); g.fillRect(0, 0, T, T);
     const puffs: Array<[number, number, number]> = [
       [9, 9, 9], [23, 8, 9], [33, 14, 8], [8, 24, 9], [21, 22, 10], [33, 29, 9], [12, 35, 8], [27, 36, 8],
     ];
-    g.fillStyle(0x2e7d32);
+    g.fillStyle(P.hedgeMid);
     for (const [x, y, r] of puffs) g.fillCircle(x, y, r);
-    g.fillStyle(0x388e3c);
+    g.fillStyle(P.hedgeLight);
     for (const [x, y, r] of puffs) g.fillCircle(x - 1.5, y - 1.5, r * 0.62);
-    g.fillStyle(0x66bb6a, 0.8);
+    g.fillStyle(P.hedgeEdge, 0.9);
     for (const [x, y, r] of puffs) g.fillCircle(x - 3, y - 3, r * 0.22);
-    g.fillStyle(0xd81b60); g.fillCircle(30, 20, 1.6); g.fillCircle(14, 30, 1.4);
+    g.fillStyle(0xffb300); g.fillCircle(30, 20, 1.6); g.fillCircle(14, 30, 1.4);
   });
 
   make('g_block', (g, T) => {

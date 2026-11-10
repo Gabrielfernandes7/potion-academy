@@ -4,6 +4,7 @@
 // símbolo no centro; moeda, gema, coração e baú são itens soltos. Assim, de longe, dá para
 // distinguir o que melhora a personagem do que é só recompensa.
 import type { DrawFn, MakeFn } from './make';
+import { GARDEN_PALETTE as P } from './gardenPalette';
 
 type Gfx = Parameters<DrawFn>[0];
 
@@ -98,21 +99,21 @@ export function drawEntities(make: MakeFn): void {
     g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 4, 22, 5);
     g.fillStyle(0x4e342e); g.fillEllipse(c, T - 6, 20, 8); // monte de terra
     // caule com espinhos e duas folhas
-    g.fillStyle(0x1b5e20); g.fillRect(c - 3, hy + 6, 6, T - hy - 12);
-    g.fillStyle(0x2e7d32); g.fillRect(c - 2, hy + 6, 4, T - hy - 12);
-    g.fillStyle(0x1b5e20);
+    g.fillStyle(P.stemDark); g.fillRect(c - 3, hy + 6, 6, T - hy - 12);
+    g.fillStyle(P.stem); g.fillRect(c - 2, hy + 6, 4, T - hy - 12);
+    g.fillStyle(P.stemDark);
     g.fillTriangle(c - 3, 26, c - 8, 24, c - 3, 29);
     g.fillTriangle(c + 3, 30, c + 8, 28, c + 3, 33);
-    g.fillStyle(0x388e3c); g.fillEllipse(c - 9, 30, 11, 5); g.fillEllipse(c + 9, 27, 11, 5);
+    g.fillStyle(P.stem); g.fillEllipse(c - 9, 30, 11, 5); g.fillEllipse(c + 9, 27, 11, 5);
     // pétalas (8), alternando dois tons
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2;
-      g.fillStyle(0x2a0a2e); g.fillCircle(c + Math.cos(a) * 9, hy + Math.sin(a) * 9, 5.4);
-      g.fillStyle(i % 2 === 0 ? 0xad1457 : 0x7b1fa2); g.fillCircle(c + Math.cos(a) * 9, hy + Math.sin(a) * 9, 4.4);
+      g.fillStyle(P.petalOutline); g.fillCircle(c + Math.cos(a) * 9, hy + Math.sin(a) * 9, 5.4);
+      g.fillStyle(i % 2 === 0 ? P.petalA : P.petalB); g.fillCircle(c + Math.cos(a) * 9, hy + Math.sin(a) * 9, 4.4);
     }
     // miolo escuro com cara brava
-    g.fillStyle(0x2a0a2e); g.fillCircle(c, hy, 7.6);
-    g.fillStyle(0x4a1747); g.fillCircle(c, hy, 6.4);
+    g.fillStyle(P.petalOutline); g.fillCircle(c, hy, 7.6);
+    g.fillStyle(P.petalCore); g.fillCircle(c, hy, 6.4);
     g.fillStyle(0xff1744); g.fillCircle(c - 2.8, hy - 1.6, 1.9); g.fillCircle(c + 2.8, hy - 1.6, 1.9);
     g.fillStyle(0xffffff); g.fillCircle(c - 2.4, hy - 2, 0.6); g.fillCircle(c + 3.2, hy - 2, 0.6);
     g.lineStyle(1.3, 0x2a0a2e);
