@@ -15,14 +15,21 @@ export function setPauseVisible(visible: boolean): void {
   setShown('pause-overlay', visible);
 }
 
+function tile(label: string, value: string): string {
+  return `<div class="result-tile"><span class="label">${label}</span><b class="value">${value}</b></div>`;
+}
+
 export function showGameOver(d: GameOverData): void {
   const title = byId('go-title');
   title.textContent = d.won ? 'VITÓRIA!' : 'GAME OVER';
-  title.style.color = d.won ? '#ffd54f' : '#ff5252';
-  byId('go-stats').innerHTML =
-    `POÇÃO: <b>${d.coins}</b> · GEMAS: <b>${d.gems}</b> · VIDA: <b>${d.hp}/${d.maxHp}</b>`;
-  byId('go-stats2').innerHTML =
-    `Blocos destruídos: ${d.blocksDestroyed} · Tempo restante: ${Math.ceil(d.timeLeft / 1000)}s`;
+  title.className = d.won ? 'win' : 'lose';
+  byId('go-stats').innerHTML = [
+    tile('POÇÃO', String(d.coins)),
+    tile('GEMAS', String(d.gems)),
+    tile('VIDA', `${d.hp}/${d.maxHp}`),
+    tile('BLOCOS', String(d.blocksDestroyed)),
+    tile('TEMPO', `${Math.ceil(d.timeLeft / 1000)} s`),
+  ].join('');
   setShown('gameover-overlay', true);
 }
 

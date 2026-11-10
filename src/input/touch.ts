@@ -11,6 +11,7 @@ export class TouchInput {
   private justDirs = new Set<TouchDir>();
   private justActions = new Set<TouchAction>();
   private activity = false;
+  private pendingRelease = new Set<TouchDir>();
 
   press(name: TouchDir | TouchAction): void {
     this.activity = true;
@@ -18,17 +19,24 @@ export class TouchInput {
       const dir = name as TouchDir;
       this.held[dir] = true;
       this.justDirs.add(dir);
+      this.pendingRelease.delete(dir); // tocou de novo: cancela a soltura adiada
     } else {
       this.justActions.add(name as TouchAction);
     }
   }
 
+  // Se o dedo sobe antes de o jogo ler o toque (um frame), a soltura é adiada até o fim
+  // do frame (clearJust), para que o toque rápido ainda valha um passo.
   release(name: TouchDir | TouchAction): void {
-    if ((DIRS as string[]).includes(name)) this.held[name as TouchDir] = false;
+    if (!(DIRS as string[]).includes(name)) return;
+    const dir = name as TouchDir;
+    if (this.justDirs.has(dir)) this.pendingRelease.add(dir);
+    else this.held[dir] = false;
   }
 
   releaseAll(): void {
     for (const d of DIRS) this.held[d] = false;
+    this.pendingRelease.clear();
   }
 
   // "Acabou de apertar": verdadeiro uma única vez por toque.
@@ -40,9 +48,12 @@ export class TouchInput {
     return this.justActions.delete(a);
   }
 
+  // Chamado ao fim de cada frame de entrada.
   clearJust(): void {
     this.justDirs.clear();
     this.justActions.clear();
+    for (const d of this.pendingRelease) this.held[d] = false;
+    this.pendingRelease.clear();
   }
 
   get anyHeld(): boolean {

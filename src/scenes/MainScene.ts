@@ -6,13 +6,14 @@
 // - update() retorna cedo com a loja aberta e, após gameOver/won, só trata a tecla R.
 import Phaser from 'phaser';
 import {
-  BLOCK, BOMB_TYPES, BombId, CONFIG, DIRS, ELEMENTS, EMPTY, WALL,
+  BLOCK, BOMB_TYPES, BombId, CANVAS, CONFIG, DIRS, ELEMENTS, EMPTY, WALL,
 } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
 import { Bank, hasBombType } from '../storage';
 import { PICKUP_TEXTURE, PickupType, rollReward } from '../game/rewards';
 import type { Bomb, Enemy, Explosion, Facing, Pickup, Player, PowerupCounts } from '../game/types';
-import { renderElement, renderHud, renderTimer } from '../ui/hud';
+import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
+import { touch } from '../input/touch';
 import { hideGameOver, setPauseVisible, showGameOver } from '../ui/overlays';
 import { isShopOpen } from '../ui/shop';
 
@@ -90,6 +91,8 @@ export class MainScene extends Phaser.Scene {
     this.idleMs = 0;
     this.isSleeping = false;
     this.zzzMs = 0;
+    touch.releaseAll();
+    touch.clearJust();
     this.powerupsCollected = { bomb_up: 0, fire_up: 0, speed_up: 0, time_up: 0 };
     this.isPaused = false;
     this.gemBlocks = new Set();
@@ -110,9 +113,16 @@ export class MainScene extends Phaser.Scene {
       'roo_down_0',
     ).setDepth(10);
     this.cdGraphics = this.add.graphics().setDepth(15);
+    // a grade é desenhada abaixo da faixa da HUD (cena 'Hud', por cima)
+    this.cameras.main.setViewport(0, CONFIG.hudHeight, CANVAS.width, CONFIG.rows * CONFIG.tile);
     this.setupInput();
+    this.game.events.on(HUD_SELECT_BOMB, this.setBomb, this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.game.events.off(HUD_SELECT_BOMB, this.setBomb, this);
+    });
     this.updateHud();
     this.playIdle();
+    if (!this.scene.isActive('Hud')) this.scene.launch('Hud');
   }
 
   // ---------- Animação do herói ----------
@@ -179,7 +189,7 @@ export class MainScene extends Phaser.Scene {
       return;
     }
     this.bombType = type;
-    renderElement(this.bombType);
+    this.updateHud();
   }
 
   placeBomb(): void {
@@ -444,8 +454,8 @@ export class MainScene extends Phaser.Scene {
     });
     this.cameras.main.flash(220, 100, 200, 100);
     this.play('door');
-    const cx = this.cameras.main.centerX;
-    const cy = this.cameras.main.centerY;
+    const cx = (CONFIG.cols * CONFIG.tile) / 2;
+    const cy = (CONFIG.rows * CONFIG.tile) / 2;
     const txt = this.add.text(cx, cy, 'PORTA ABERTA!', {
       fontFamily: 'monospace', fontSize: '28px', color: '#4caf50', fontStyle: 'bold',
     }).setOrigin(0.5).setDepth(25);
@@ -645,58 +655,83 @@ export class MainScene extends Phaser.Scene {
   handleInput(): void {
     const JD = Phaser.Input.Keyboard.JustDown;
     const c = this.cursors;
-    if (JD(this.keys.enter)) {
+    if (JD(this.keys.enter) || touch.consumeAction('pause')) {
       this.togglePause();
+      touch.clearJust();
       return;
     }
-    if (this.isPaused) return;
-    if (JD(c.up)) this.lastDir = { x: 0, y: -1 };
-    else if (JD(c.down)) this.lastDir = { x: 0, y: 1 };
-    else if (JD(c.left)) this.lastDir = { x: -1, y: 0 };
-    else if (JD(c.right)) this.lastDir = { x: 1, y: 0 };
+    if (this.isPaused) {
+      touch.clearJust();
+      return;
+    }
+
+    // teclado ou toque: ambos alimentam as mesmas regras
+    const justUp = JD(c.up) || touch.consumeDir('up');
+    const justDown = JD(c.down) || touch.consumeDir('down');
+    const justLeft = JD(c.left) || touch.consumeDir('left');
+    const justRight = JD(c.right) || touch.consumeDir('right');
+    const up = c.up.isDown || touch.held.up;
+    const down = c.down.isDown || touch.held.down;
+    const left = c.left.isDown || touch.held.left;
+    const right = c.right.isDown || touch.held.right;
+
+    if (justUp) this.lastDir = { x: 0, y: -1 };
+    else if (justDown) this.lastDir = { x: 0, y: 1 };
+    else if (justLeft) this.lastDir = { x: -1, y: 0 };
+    else if (justRight) this.lastDir = { x: 1, y: 0 };
 
     if (!this.player.moving) {
       const d = this.lastDir;
       const held =
-        (d.x === 0 && d.y === -1 && c.up.isDown) ||
-        (d.x === 0 && d.y === 1 && c.down.isDown) ||
-        (d.x === -1 && d.y === 0 && c.left.isDown) ||
-        (d.x === 1 && d.y === 0 && c.right.isDown);
+        (d.x === 0 && d.y === -1 && up) ||
+        (d.x === 0 && d.y === 1 && down) ||
+        (d.x === -1 && d.y === 0 && left) ||
+        (d.x === 1 && d.y === 0 && right);
       if (held) this.tryMove(d.x, d.y);
-      else if (c.up.isDown) this.tryMove(0, -1);
-      else if (c.down.isDown) this.tryMove(0, 1);
-      else if (c.left.isDown) this.tryMove(-1, 0);
-      else if (c.right.isDown) this.tryMove(1, 0);
+      else if (up) this.tryMove(0, -1);
+      else if (down) this.tryMove(0, 1);
+      else if (left) this.tryMove(-1, 0);
+      else if (right) this.tryMove(1, 0);
     }
 
-    if (JD(this.keys.space)) this.placeBomb();
-    if (JD(this.keys.x)) this.pushAbility();
-    if (JD(this.keys.d)) this.detonateRemote();
+    if (JD(this.keys.space) || touch.consumeAction('bomb')) this.placeBomb();
+    if (JD(this.keys.x) || touch.consumeAction('push')) this.pushAbility();
+    if (JD(this.keys.d) || touch.consumeAction('detonate')) this.detonateRemote();
     if (JD(this.keys.one)) this.setBomb('normal');
     if (JD(this.keys.two)) this.setBomb('mega');
     if (JD(this.keys.three)) this.setBomb('pierce');
     if (JD(this.keys.four)) this.setBomb('remote');
+    touch.clearJust();
   }
 
   // ---------- HUD e tempo ----------
 
-  updateHud(): void {
-    renderHud({
+  // Estado enviado à cena da HUD (também lido por ela ao iniciar).
+  buildHudState(): HudState {
+    return {
       hp: this.player.hp,
+      maxHp: CONFIG.maxHp,
       coins: this.coins,
       gems: this.gems,
+      gemsForDoor: CONFIG.gemsForDoor,
       blocks: this.blockSprites.size,
       bombsActive: this.bombs.length,
       bombsMax: this.player.bombsMax,
-    });
-    renderElement(this.bombType);
+      timeLeftMs: this.timeLeft,
+      selected: this.bombType,
+    };
   }
 
+  updateHud(): void {
+    this.game.events.emit(HUD_UPDATE, this.buildHudState());
+  }
+
+  // O cronômetro só reenvia o estado quando o segundo exibido muda.
   updateTimerHud(): void {
     const sec = Math.max(0, Math.ceil(this.timeLeft / 1000));
     if (sec === this.lastTimerSec) return;
     this.lastTimerSec = sec;
-    renderTimer(this.timeLeft, sec);
+    this.updateHud();
   }
 
   updateTimer(delta: number): void {
@@ -803,13 +838,14 @@ export class MainScene extends Phaser.Scene {
 
   // ---------- Sono ----------
 
-  // Qualquer tecla pressionada conta como atividade.
+  // Qualquer tecla ou toque conta como atividade.
   inputActive(): boolean {
     const c = this.cursors;
     const k = this.keys;
     return c.up.isDown || c.down.isDown || c.left.isDown || c.right.isDown ||
       k.space.isDown || k.x.isDown || k.d.isDown || k.r.isDown ||
-      k.one.isDown || k.two.isDown || k.three.isDown || k.four.isDown;
+      k.one.isDown || k.two.isDown || k.three.isDown || k.four.isDown ||
+      touch.anyHeld || touch.consumeActivity();
   }
 
   updateSleep(delta: number): void {
@@ -849,14 +885,17 @@ export class MainScene extends Phaser.Scene {
       this.playerSprite.x + 9,
       this.playerSprite.y - 14,
       big ? 'Z' : 'z',
-      { fontFamily: 'monospace', fontSize: big ? '12px' : '9px', color: '#bfd8ff', fontStyle: 'bold' },
+      {
+        fontFamily: 'monospace', fontSize: big ? '18px' : '13px', color: '#d6e6ff', fontStyle: 'bold',
+        stroke: '#0e1613', strokeThickness: 3,
+      },
     ).setOrigin(0.5).setDepth(21);
     this.tweens.add({
       targets: z,
       x: z.x + 8,
       y: z.y - 24,
       alpha: 0,
-      duration: 1600,
+      duration: 1900,
       ease: 'Sine.easeOut',
       onComplete: () => z.destroy(),
     });
