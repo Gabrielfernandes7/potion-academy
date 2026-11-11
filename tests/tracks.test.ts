@@ -1,38 +1,29 @@
 import { describe, expect, it } from 'vitest';
 import {
-  STEPS_PER_BAR, TRACKS, generateBar, midiToHz, mulberry32, pickNextTrack,
+  SCENE_TRACKS, STEPS_PER_BAR, TRACKS, generateBar, midiToHz, mulberry32, trackById,
 } from '../src/audio/tracks';
+import { STAGES } from '../src/config';
 
 const pc = (m: number): number => ((m % 12) + 12) % 12;
 
 describe('faixas', () => {
-  it('há faixas suficientes, com ids únicos e andamento calmo', () => {
-    expect(TRACKS.length).toBeGreaterThanOrEqual(5);
+  it('há uma faixa por parte do jogo, com ids únicos e andamento calmo', () => {
+    expect(TRACKS).toHaveLength(6);
     expect(new Set(TRACKS.map(t => t.id)).size).toBe(TRACKS.length);
     for (const t of TRACKS) {
       expect(t.bpm).toBeGreaterThanOrEqual(50);
-      expect(t.bpm).toBeLessThanOrEqual(85);
+      expect(t.bpm).toBeLessThanOrEqual(80);
     }
   });
 
-  it('nunca repete a faixa anterior ao sortear a próxima', () => {
-    const rng = mulberry32(7);
-    let last: string | null = null;
-    for (let i = 0; i < 200; i++) {
-      const next = pickNextTrack(last, rng);
-      expect(next.id).not.toBe(last);
-      last = next.id;
-    }
+  it('cada cena do jogo aponta para uma faixa que existe', () => {
+    for (const id of Object.values(SCENE_TRACKS)) expect(trackById(id), id).toBeDefined();
   });
 
-  it('com várias partidas, todas as faixas aparecem', () => {
-    const seen = new Set<string>();
-    let last: string | null = null;
-    for (let i = 0; i < 100; i++) {
-      last = pickNextTrack(last).id;
-      seen.add(last);
-    }
-    expect(seen.size).toBe(TRACKS.length);
+  it('cada fase tem a faixa da cena correspondente', () => {
+    STAGES.forEach((s, i) => {
+      expect(s.track).toBe(SCENE_TRACKS[`stage${i + 1}` as keyof typeof SCENE_TRACKS]);
+    });
   });
 });
 

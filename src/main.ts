@@ -7,6 +7,8 @@ import '@fontsource/nunito/800.css';
 import './styles/main.css';
 import { CANVAS } from './config';
 import { audio } from './audio/AudioEngine';
+import { SCENE_TRACKS } from './audio/tracks';
+import { bindDiary, isDiaryOpen, openDiary } from './ui/diary';
 import { bootGame, retryGame, showMenu, startGame, textureDataUrl, showMap } from './game/launcher';
 import { loadAudioPrefs, saveAudioPrefs } from './audio/prefs';
 import { touch } from './input/touch';
@@ -53,9 +55,9 @@ function applyMusicPref(on: boolean): void {
   saveAudioPrefs(prefs);
   audio.enabled = on;
   if (!on) audio.stop();
-  else if (!isMenuVisible()) {
+  else {
     audio.unlock();
-    audio.start();
+    audio.playTrack(isMenuVisible() ? SCENE_TRACKS.menu : audio.trackId ?? SCENE_TRACKS.menu);
   }
   setMusicButton(on);
 }
@@ -94,11 +96,19 @@ function bindButtons(): void {
   // o botão mostra a preferência da jogadora, não o estado momentâneo (a música para entre fases)
   audio.onPlayingChange = () => setMusicButton(prefs.music);
   // qualquer toque ou tecla retoma o áudio se o navegador o tiver suspendido
-  const wake = (): void => audio.unlock();
+  const wake = (): void => {
+    audio.unlock();
+    // o menu tem música própria: começa no primeiro toque (o navegador só libera o som com um gesto)
+    if (isMenuVisible() && prefs.music && !audio.playing && !isMusicRoomOpen()) {
+      audio.enabled = true;
+      audio.playTrack(SCENE_TRACKS.menu);
+    }
+  };
   document.addEventListener('pointerdown', wake, { passive: true });
   document.addEventListener('keydown', wake);
 
-  bindMenuButtons({ play, shop: openShop, music: openMusicRoom, map: showMap });
+  bindMenuButtons({ play, shop: openShop, music: openMusicRoom, map: showMap, diary: openDiary });
+  bindDiary();
   byId('music-overlay').addEventListener('keydown', e => { if (e.key === 'Escape') closeMusicRoom(); });
   bindHelp();
   // botões do topo não ficam com o foco: senão Espaço/Enter no jogo os apertariam de novo
@@ -119,7 +129,7 @@ function bindButtons(): void {
 
   // Enter inicia o jogo, mas só enquanto o menu está na tela (na partida, Enter é pausa)
   window.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && isMenuVisible() && !isShopOpen() && !isMusicRoomOpen()) {
+    if (e.key === 'Enter' && isMenuVisible() && !isShopOpen() && !isMusicRoomOpen() && !isDiaryOpen()) {
       e.preventDefault();
       play();
     }

@@ -7,7 +7,7 @@ Um sprite é um desenho do jogo (personagem, item, cenário). **Neste projeto ne
 - **Ao vivo:** com `npm run dev` ligado, abra `http://localhost:5173/sprites.html`. A página gera os mesmos desenhos do jogo, agrupa e rotula. `?zoom=8` amplia mais.
 - **Foto geral:** `docs/img/sprites.png`, com todos os grupos.
 - **Folha para outros projetos:** o botão *Baixar folha de sprites* gera `potion-academy-sprites.png` e um `.json` com a posição de cada desenho. Veja [11-reutilizar.md](11-reutilizar.md).
-- **Fotos por categoria:** `docs/img/sprites/<categoria>.png` (heroes, bosses, enemies, objects, effects, scenery, ui).
+- **Fotos por categoria:** `docs/img/sprites/<categoria>.png` (heroes, bosses, humans, enemies, objects, effects, scenery, ui).
 
 ![Catálogo de sprites](img/sprites.png)
 
@@ -41,15 +41,16 @@ O manto é desenhado **depois** do corpo, por isso cobre as costas, os ombros e 
 | `witch_cast` | lançando poção: braço levantado, boca aberta, brilho verde |
 | `witch_hurt` | machucada: olhos fechados em X, boca para baixo |
 
-**Frei Anselmo** (`src/textures/anselmo.ts`), monge do mosteiro. Hábito marrom, cordão, capuz e barba branca.
+**Frei Anselmo** (`src/textures/anselmo.ts`), monge do mosteiro. Velho gentil: hábito marrom com o capuz abaixado, tonsura com mechas brancas, sobrancelhas e barba brancas, bochechas coradas, cruz de madeira, cordão com nós, mãos juntas, sandálias.
 
 | Chave | Uso |
 |---|---|
-| `anselmo_front_0-1` | de frente; o 1 sobe o capuz 1 px (respiração) |
-| `anselmo_back` | de costas, capuz fechado |
+| `anselmo_front_0-1` | de frente; o 1 sobe a cabeça 1 px (respiração) |
+| `anselmo_back` | de costas, capuz caído nas costas |
 | `anselmo_side` | perfil, para a direita (sem espelho) |
+| `anselmo_retrato` | de frente em 4x (160 x 200), vetorial: carta e cartões de diálogo |
 
-Ainda não aparece no jogo: entra na história (confissão e cena final).
+Aparece na carta (retrato), no portão do jardim quando ele se abre (dois quadros de respiração) e na confissão final. As formas são desenhadas só no lado direito e espelhadas, forma por forma, para manter a ordem das camadas.
 
 ## Poções (`src/textures/potions.ts`)
 

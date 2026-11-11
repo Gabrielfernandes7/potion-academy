@@ -86,3 +86,37 @@ Novas decisões entram no fim.
 - **Motivo:** a Belladona era só um alvo que lança poções. Uma fala curta em cada habilidade, ao ser atingida e na derrota dá personalidade sem mudar a regra.
 - **Consequência:** a fala é uma legenda de 1,7 s acima dela, no máximo uma por vez (`game/bossLines.ts`). Não pausa, não bloqueia e não muda tempos de aviso nem de dano.
 - **Ficou de fora:** diálogos com janela, que interromperiam o ritmo do duelo.
+
+## Uma música para cada parte do jogo (fim do sorteio)
+- **Motivo:** dez faixas sorteadas não contavam a história e cansavam. Agora são seis, todas lentas, em modos antigos e pentatônicas (alaúde, harpa e sinos), para um clima de lareira e mosteiro: Lareira do Caldeirão (menu e carta), Noite no Alambique (fase 1), Ecos no Salão (fase 2), Duelo na Torre (fase 3), Jardim do Mosteiro (fase 4) e Vésperas (confissão e final).
+- **Consequência:** a faixa de cada parte está em `SCENE_TRACKS` (`audio/tracks.ts`) e cada fase aponta a sua em `STAGES[].track`. A semente continua nova a cada vez, então a mesma faixa nunca soa igual. A Sala de Música virou um lugar para ouvir cada parte; não muda o que toca nas fases. A chave `bombroo_track` não é mais lida.
+- **Ficou de fora:** voltar a sortear faixas, ou deixar a jogadora trocar a música de uma fase.
+
+## Frei Anselmo na história: carta, portão e confissão
+- **Motivo:** o monge existia só na carta. A história pede que ele volte no fim, confesse e devolva o frasco vazio (`docs/12-historia.md`).
+- **Consequência:** ele aparece no portão do jardim quando as gemas abrem a porta. Ao cruzar o portão, a cena pausa e seis cartões de diálogo (`ui/dialogue.ts`) fecham a história, antes da tela "Jornada cumprida". Os textos ficam em `game/story.ts`.
+- **Ficou de fora:** Anselmo andando; escolhas de resposta (a pergunta final é do jogador, não do jogo).
+
+## Mapa: pergaminho com caminho e fases seladas
+- **Motivo:** o mapa era um castelo genérico, com rótulos sobrepostos, fases sempre abertas e só o jardim contava como vencido.
+- **Consequência:** `MapScene` desenha o Vale das Fórmulas, com o caminho entre os quatro lugares. Cada fase vencida (1 a 3 ao cruzar a porta ou vencer a Belladona; 4 na confissão) fica marcada e libera a seguinte (`game/mapRules.ts`). A Roo fica na fase à frente; Anselmo, no mosteiro. Quem tinha só o jardim vencido (progresso antigo) tem todas as fases abertas.
+
+## Dano por elemento no chefe
+- **Motivo:** todas as poções tiravam 1 de vida da Belladona, então escolher o elemento não mudava o duelo.
+- **Consequência:** `BOSS_DAMAGE` (`config.ts`): fogo e éter tiram 2; água e terra, 1 (a água alcança mais longe; a terra atravessa caixotes). A vida subiu de 8 para 10. O aviso `-N` mostra o dano. Inimigos comuns continuam morrendo com um golpe.
+- **Ficou de fora:** resistências (ex.: Belladona imune a um elemento) e dano diferente na fúria.
+
+## Baú só dá POÇÃO; cura vem dos corações
+- **Motivo:** a vida chegava cheia a cada fase (cura de +1 no baú, nos corações e ao passar de fase), o que tirava o peso do perigo. `stageClearHeal` já era 0.
+- **Consequência:** o baú não cura mais; só os corações (`rollReward`) devolvem vida. A vida passa de uma fase para a seguinte sem bônus.
+- **Ficou de fora:** cura parcial ao vencer a fase; se o jogo ficar duro demais, o ajuste é subir a chance do coração em `game/rewards.ts`.
+
+## Despedida da Belladona e cena final no Caldeirão
+- **Motivo:** a fala de derrota era uma legenda de 1,7 s, fácil de perder; e a história terminava na confissão, sem voltar ao Caldeirão.
+- **Consequência:** ao cair, a Belladona fala em três cartões (`BELLADONA_CARDS`) antes do jardim. Depois da confissão, `EndScene` mostra a Roo no Caldeirão com o frasco vazio, quatro linhas (`CAULDRON_LINES`), e então a tela "Jornada cumprida".
+- **Ficou de fora:** animação da Roo mexendo a poção no final; Belladona com retrato.
+
+## Pixel art em tudo, inclusive no menu
+- **Motivo:** o jogo é pixel art, no espírito do Super Bomberman 3 e 5. Uma tentativa de deixar a Roo suave no menu (vetor ampliado) foi descartada: o certo é o fundo e os efeitos combinarem com a Roo, e não o contrário.
+- **Consequência:** a Roo do menu usa escala inteira (3x) e não gira. Líquido, braço e varinha do menu são desenhados em baixa resolução e ampliados sem suavização (`pixelLayer` em `MenuScene`). Brilhos (`menu_puff`) e bolhas são feitos de pixels em faixas, sem degradê suave.
+- **Ficou de fora:** os anéis de onda na água do menu e o texto/HUD (fonte vetorial) continuam suaves.

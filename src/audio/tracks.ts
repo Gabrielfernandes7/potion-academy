@@ -2,8 +2,7 @@
 //
 // Cada faixa define tom, escala, andamento e uma progressão de acordes. A cada compasso o
 // gerador produz notas (pad, baixo, melodia, sinos) a partir de um sorteio com semente.
-// A cada jogo o motor sorteia uma faixa diferente da anterior E uma semente nova, então até
-// a mesma faixa soa diferente de uma partida para outra.
+// A faixa é fixa por parte do jogo; a semente é nova a cada vez, então ela nunca soa igual.
 
 type Voice = 'pad' | 'bass' | 'melody' | 'bell';
 type Style = 'melody' | 'arp' | 'sparse';
@@ -33,92 +32,74 @@ export interface Track {
 
 export const STEPS_PER_BAR = 8;
 
+// Uma faixa para cada parte do jogo (nada de sorteio): o clima muda com a história.
+// Tudo em modos antigos (dórico, mixolídio, eólio) e pentatônicas, com andamento lento:
+// soa como alaúde, harpa e sinos de mosteiro, aconchegante e medieval.
 export const TRACKS: Track[] = [
+  // Menu e carta: a lareira do Caldeirão. Maior, lenta, calorosa.
   {
-    id: 'campo', name: 'Campo Calmo', bpm: 72, tonic: 60, scale: [0, 2, 4, 7, 9], style: 'melody', density: 0.5,
-    chords: [
-      { root: 0, tones: [0, 4, 7] }, { root: 9, tones: [0, 3, 7] },
-      { root: 5, tones: [0, 4, 7] }, { root: 7, tones: [0, 4, 7] },
-    ],
-  },
-  {
-    id: 'luar', name: 'Luar de Prata', bpm: 60, tonic: 57, scale: [0, 3, 5, 7, 10], style: 'arp', density: 0.85,
-    chords: [
-      { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
-      { root: 3, tones: [0, 4, 7] }, { root: 10, tones: [0, 4, 7] },
-    ],
-  },
-  {
-    id: 'chuva', name: 'Chuva no Laboratório', bpm: 66, tonic: 62, scale: [0, 2, 3, 7, 9], style: 'sparse', density: 0.3,
-    chords: [
-      { root: 0, tones: [0, 3, 7] }, { root: 5, tones: [0, 4, 7] },
-      { root: 0, tones: [0, 3, 7] }, { root: 10, tones: [0, 4, 7] },
-    ],
-  },
-  {
-    id: 'jardim', name: 'Jardim de Ervas', bpm: 78, tonic: 53, scale: [0, 2, 4, 7, 9], style: 'melody', density: 0.42,
-    chords: [
-      { root: 0, tones: [0, 4, 7] }, { root: 2, tones: [0, 4, 7] },
-      { root: 9, tones: [0, 3, 7] }, { root: 0, tones: [0, 4, 7] },
-    ],
-  },
-  {
-    id: 'cristal', name: 'Cavernas de Cristal', bpm: 56, tonic: 64, scale: [0, 3, 5, 7, 10], style: 'arp', density: 0.7,
-    chords: [
-      { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
-      { root: 3, tones: [0, 4, 7] }, { root: 10, tones: [0, 4, 7] },
-    ],
-  },
-  {
-    id: 'alvorada', name: 'Alvorada', bpm: 68, tonic: 55, scale: [0, 2, 4, 7, 9], style: 'melody', density: 0.38,
-    chords: [
-      { root: 0, tones: [0, 4, 7] }, { root: 9, tones: [0, 3, 7] },
-      { root: 5, tones: [0, 4, 7] }, { root: 7, tones: [0, 4, 7] },
-    ],
-  },
-  // Aurora: harpa aberta e luminosa, em sol maior pentatônico.
-  {
-    id: 'aurora', name: 'Aurora Boreal', bpm: 64, tonic: 58, scale: [0, 2, 4, 7, 9], style: 'arp', density: 0.6,
-    chords: [
-      { root: 0, tones: [0, 4, 7] }, { root: 9, tones: [0, 3, 7] },
-      { root: 5, tones: [0, 4, 7] }, { root: 7, tones: [0, 4, 7] },
-    ],
-  },
-  // Pergaminho: melodia lenta em ré menor, como uma página antiga.
-  {
-    id: 'pergaminho', name: 'Pergaminho Antigo', bpm: 70, tonic: 50, scale: [0, 3, 5, 7, 10], style: 'melody', density: 0.45,
-    chords: [
-      { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
-      { root: 5, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
-    ],
-  },
-  // Sinos: poucas notas, espaçadas, com o acento de uma torre distante.
-  {
-    id: 'sinos', name: 'Sinos da Torre', bpm: 62, tonic: 67, scale: [0, 2, 4, 7, 9], style: 'sparse', density: 0.25,
+    id: 'lareira', name: 'Lareira do Caldeirão', bpm: 62, tonic: 55, scale: [0, 2, 4, 7, 9], style: 'melody', density: 0.4,
     chords: [
       { root: 0, tones: [0, 4, 7] }, { root: 5, tones: [0, 4, 7] },
       { root: 9, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
     ],
   },
-  // Sinfonia do Maestro: a faixa mais cheia, em homenagem à Roo de casaca (ver o menu).
+  // Fase 1, O Chamado: o laboratório à noite, ré dórico, harpa serena.
   {
-    id: 'sinfonia', name: 'Sinfonia do Maestro', bpm: 80, tonic: 55, scale: [0, 2, 4, 7, 9], style: 'melody', density: 0.62,
+    id: 'alambique', name: 'Noite no Alambique', bpm: 66, tonic: 50, scale: [0, 2, 3, 7, 9], style: 'arp', density: 0.5,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 5, tones: [0, 4, 7] },
+      { root: 0, tones: [0, 3, 7] }, { root: 7, tones: [0, 3, 7] },
+    ],
+  },
+  // Fase 2, O Caminho: o salão dos ecos. Sinos esparsos, sem susto.
+  {
+    id: 'ecos', name: 'Ecos no Salão', bpm: 54, tonic: 57, scale: [0, 3, 5, 7, 10], style: 'sparse', density: 0.3,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
+      { root: 5, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
+    ],
+  },
+  // Fase 3, O Duelo: mais firme, mas ainda macia (fora do duelo ninguém a toca).
+  {
+    id: 'duelo', name: 'Duelo na Torre', bpm: 78, tonic: 57, scale: [0, 3, 5, 7, 10], style: 'arp', density: 0.65,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
+      { root: 3, tones: [0, 4, 7] }, { root: 10, tones: [0, 4, 7] },
+    ],
+  },
+  // Fase 4, O Retorno: o jardim do mosteiro ao entardecer, com sinos de longe.
+  {
+    id: 'jardim', name: 'Jardim do Mosteiro', bpm: 68, tonic: 53, scale: [0, 2, 4, 7, 9], style: 'melody', density: 0.38,
+    chords: [
+      { root: 0, tones: [0, 4, 7] }, { root: 2, tones: [0, 4, 7] },
+      { root: 9, tones: [0, 3, 7] }, { root: 0, tones: [0, 4, 7] },
+    ],
+  },
+  // Confissão e final: vésperas, quase só sinos.
+  {
+    id: 'vesperas', name: 'Vésperas', bpm: 58, tonic: 62, scale: [0, 2, 4, 7, 9], style: 'sparse', density: 0.28,
     chords: [
       { root: 0, tones: [0, 4, 7] }, { root: 5, tones: [0, 4, 7] },
-      { root: 7, tones: [0, 4, 7] }, { root: 0, tones: [0, 4, 7] },
+      { root: 9, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
     ],
   },
 ];
 
-// Faixa do duelo contra a Belladona: um pouco mais rápida e tensa, mas ainda macia.
-// Fica fora de TRACKS para não entrar no sorteio das partidas normais.
-export const BOSS_TRACK: Track = {
-  id: 'duelo', name: 'Duelo de Alquimistas', bpm: 84, tonic: 57, scale: [0, 3, 5, 7, 10], style: 'arp', density: 0.7,
-  chords: [
-    { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
-    { root: 3, tones: [0, 4, 7] }, { root: 10, tones: [0, 4, 7] },
-  ],
-};
+// Qual faixa toca em cada parte do jogo.
+export const SCENE_TRACKS = {
+  menu: 'lareira',
+  letter: 'lareira',
+  stage1: 'alambique',
+  stage2: 'ecos',
+  stage3: 'duelo',
+  stage4: 'jardim',
+  ending: 'vesperas',
+} as const;
+
+export function trackById(id: string): Track | undefined {
+  return TRACKS.find(t => t.id === id);
+}
 
 // Gerador pseudoaleatório com semente (mulberry32): mesma semente, mesma música.
 export function mulberry32(seed: number): () => number {
@@ -134,12 +115,6 @@ export function mulberry32(seed: number): () => number {
 
 export function midiToHz(midi: number): number {
   return 440 * Math.pow(2, (midi - 69) / 12);
-}
-
-// Sorteia uma faixa diferente da anterior.
-export function pickNextTrack(lastId: string | null, rng: () => number = Math.random): Track {
-  const pool = TRACKS.filter(t => t.id !== lastId);
-  return pool[Math.min(pool.length - 1, Math.floor(rng() * pool.length))];
 }
 
 // Estado da melodia entre compassos (para ela andar por graus próximos, sem saltos bruscos).

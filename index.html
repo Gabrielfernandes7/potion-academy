@@ -39,6 +39,7 @@
         <button class="big-btn" id="menu-play" type="button">JOGAR</button>
         <button class="big-btn alt" id="menu-map" type="button">MAPA</button>
         <button class="big-btn alt" id="menu-shop" type="button">CALDEIRÃO</button>
+        <button class="big-btn alt" id="menu-diary" type="button">DIÁRIO</button>
         <button class="big-btn alt" id="menu-music" type="button">SALA DE MÚSICA</button>
         <p class="menu-hint">Pressione <kbd>Enter</kbd> para jogar</p>
       </div>
@@ -70,13 +71,13 @@
 
 </div>
 
-<!-- Sala de Música: a Roo de maestro e a escolha da faixa -->
+<!-- Sala de Música: a Roo de maestro e as músicas de cada parte do jogo -->
 <div id="music-overlay" class="overlay" role="dialog" aria-labelledby="music-title">
   <div class="music-room">
     <img id="maestro-img" class="maestro-img" alt="A Roo de maestro, regendo a música" />
     <h2 id="music-title">SALA DE MÚSICA</h2>
-    <p class="music-sub">A faixa escolhida toca no menu e nas partidas.</p>
-    <p class="music-now">ESCOLHIDA: <b id="music-now"></b></p>
+    <p class="music-sub">Cada parte do jogo tem a sua música. Aqui você pode ouvi-las.</p>
+    <p class="music-now">OUVINDO: <b id="music-now"></b></p>
     <div class="music-list" id="music-list"></div>
     <p class="music-off" id="music-off" hidden>A música está desligada. Ligue MÚSICA no topo para ouvir.</p>
     <button class="big-btn alt" id="music-back-btn" type="button">VOLTAR</button>
@@ -121,12 +122,36 @@
 <!-- Carta de frei Anselmo (antes da primeira fase de uma partida nova) -->
 <div id="letter-overlay" class="overlay overlay--letter" role="dialog" aria-labelledby="letter-title">
   <div class="panel letter">
+    <img id="letter-portrait" class="portrait" alt="Frei Anselmo" width="160" height="200" hidden>
     <h2 id="letter-title">A CARTA</h2>
     <p class="letter-text">Roo, filho do Caldeirão: preciso que busques o que eu não posso mais buscar. As escrituras que guardamos foram <b>levadas</b> — não roubadas, mas <b>tomadas</b> por alguém que acredita poder transformá-las em fórmula. Não te peço que creias no que eu creio. Peço que as <b>tragas de volta</b> — e que, ao encontrá-las, não as trates como pedra.</p>
     <p class="letter-sign">— frei Anselmo, Mosteiro de São Tomás</p>
     <p class="letter-note">Dentro do envelope, um frasco vazio, lacrado.</p>
     <div class="btn-row">
       <button class="big-btn" id="letter-btn" type="button">COMEÇAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Diálogo (cartões de conversa, ex.: a confissão de frei Anselmo) -->
+<div id="diary-overlay" class="overlay overlay--letter" role="dialog" aria-labelledby="diary-title">
+  <div class="panel letter">
+    <h2 id="diary-title">DIÁRIO DA ROO</h2>
+    <ul id="diary-list" class="diary-list"></ul>
+    <div class="btn-row">
+      <button class="big-btn" id="diary-close" type="button">FECHAR</button>
+    </div>
+  </div>
+</div>
+
+<div id="dialogue-overlay" class="overlay overlay--letter" role="dialog" aria-labelledby="dialogue-speaker">
+  <div class="panel dialogue">
+    <img id="dialogue-portrait" class="portrait" alt="" width="160" height="200" hidden>
+    <h2 id="dialogue-speaker"></h2>
+    <p class="letter-text" id="dialogue-text"></p>
+    <p class="dialogue-step" id="dialogue-step"></p>
+    <div class="btn-row">
+      <button class="big-btn" id="dialogue-btn" type="button">CONTINUAR</button>
     </div>
   </div>
 </div>
@@ -213,6 +238,7 @@
 <div id="gameover-overlay" class="overlay" role="dialog" aria-labelledby="go-title">
   <div class="panel">
     <h2 id="go-title">GAME OVER</h2>
+    <p class="letter-note" id="go-story" hidden>Roo voltou ao Caldeirão com o frasco vazio. O que você faria com ele?</p>
     <div class="result-grid" id="go-stats"></div>
     <p class="hint">Pressione <kbd>R</kbd> para jogar de novo</p>
     <div class="btn-row">

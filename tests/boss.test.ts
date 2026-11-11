@@ -3,7 +3,7 @@ import { mulberry32 } from '../src/audio/tracks';
 import {
   BossSkill, blastTiles, blinkDestination, cooldownFor, phaseFor, pickBossSkill, rainTargets,
 } from '../src/game/boss';
-import { CONFIG } from '../src/config';
+import { BOSS_DAMAGE, CONFIG } from '../src/config';
 
 describe('fases do chefe', () => {
   it('fica furiosa na metade da vida', () => {
@@ -78,5 +78,17 @@ describe('chuva e teletransporte', () => {
     }
     expect(blinkDestination(player, [{ x: 2, y: 1 }], 8)).toEqual({ x: 2, y: 1 });
     expect(blinkDestination(player, [], 8)).toBeNull();
+  });
+});
+
+describe('dano por elemento no chefe', () => {
+  it('todo elemento causa pelo menos 1 de dano e fogo/éter causam mais que água/terra', () => {
+    for (const el of ['fire', 'water', 'earth', 'air'] as const) expect(BOSS_DAMAGE[el]).toBeGreaterThanOrEqual(1);
+    expect(BOSS_DAMAGE.fire).toBeGreaterThan(BOSS_DAMAGE.water);
+    expect(BOSS_DAMAGE.air).toBeGreaterThan(BOSS_DAMAGE.earth);
+  });
+  it('a vida do chefe é divisível em golpes viáveis para qualquer elemento', () => {
+    expect(CONFIG.bossHp / BOSS_DAMAGE.water).toBeLessThanOrEqual(12);
+    expect(CONFIG.bossHp / BOSS_DAMAGE.fire).toBeGreaterThanOrEqual(3);
   });
 });

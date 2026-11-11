@@ -7,6 +7,7 @@ import { BootScene } from '../scenes/BootScene';
 import { HudScene } from '../scenes/HudScene';
 import { MainScene } from '../scenes/MainScene';
 import { MenuScene } from '../scenes/MenuScene';
+import { EndScene } from '../scenes/EndScene';
 import { MapScene } from '../scenes/MapScene';
 import { TEXTURES_READY } from './events';
 import { hideGameOver, setPauseVisible } from '../ui/overlays';
@@ -14,6 +15,8 @@ import { closeShop } from '../ui/shop';
 import { setMenuVisible } from '../ui/menu';
 import { ensureFonts } from '../ui/fonts';
 import { showLetter } from '../ui/letter';
+import { audio } from '../audio/AudioEngine';
+import { SCENE_TRACKS } from '../audio/tracks';
 
 let phaserGame: Phaser.Game | null = null;
 let texturesReady: Promise<void> = Promise.resolve();
@@ -25,13 +28,14 @@ export function bootGame(): void {
     width: CANVAS.width,
     height: CANVAS.height,
     backgroundColor: '#0e1613',
+    powerPreference: 'high-performance',
     pixelArt: true,
     antialias: false,
     parent: 'game',
     audio: { noAudio: true }, // o áudio é todo do AudioEngine (WebAudio próprio)
     // o canvas se ajusta ao contêiner #game (CSS), em qualquer tela
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-    scene: [BootScene, MenuScene, MainScene, HudScene, MapScene],
+    scene: [BootScene, MenuScene, MainScene, HudScene, MapScene, EndScene],
   });
   phaserGame = game;
   texturesReady = new Promise<void>(resolve => game.events.once(TEXTURES_READY, resolve));
@@ -60,7 +64,7 @@ export async function startGame(): Promise<void> {
   closeShop();
   hideGameOver();
   setMenuVisible(false);
-  await showLetter();
+  await showLetter(textureDataUrl('anselmo_retrato'));
   startingGame = false;
   if (game.scene.isActive('Main')) {
     game.scene.getScene('Main').scene.restart({ stage: 1 });
@@ -85,8 +89,10 @@ export function showMenu(): void {
   setPauseVisible(false);
   game.scene.stop('Hud');
   game.scene.stop('Main');
+  game.scene.stop('End');
   if (!game.scene.isActive('Menu')) game.scene.start('Menu');
   setMenuVisible(true);
+  audio.playTrack(SCENE_TRACKS.menu);
 }
 
 // Mostra o mapa de seleção de fases (do menu).
@@ -99,5 +105,6 @@ export function showMap(): void {
     game.scene.stop('Hud');
     game.scene.stop('Main');
   }
+  game.scene.stop('Menu'); // o menu animado não fica rodando por baixo do mapa
   if (!game.scene.isActive('Map')) game.scene.start('Map');
 }

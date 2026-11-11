@@ -64,7 +64,17 @@ Roo aprende alquimia (mecânicas de poção), magia (elementos) e **fé** — ma
 
 > **A pergunta que o jogo faz, do começo ao fim, é a mesma da carta:** "o que você vai fazer com o que encontrou?" — e a resposta é do jogador, não do Roo.
 
+## Onde a história está no jogo
+
+| Momento | Onde | Como |
+|---|---|---|
+| A carta | antes da fase 1 (`ui/letter.ts`) | retrato de Anselmo e o texto da carta |
+| Cada fase | cartão de entrada | lugar, nome do ato e uma frase de história (`STAGES` em `config.ts`) |
+| O portão | fase 4, ao pegar as 3 gemas | Anselmo aparece no portão |
+| A confissão | ao cruzar o portão (`ENDING_CARDS` em `game/story.ts`) | seis cartões: cópias, confissão, frasco vazio |
+| O fim | tela final "Jornada cumprida" | "o que você faria com o frasco vazio?" |
+
 ## Próximos passos (não implementados)
 
-- Diário do Roo (frases que ele guarda) e falas da Belladona para o `BossController`.
+- Diário do Roo (frases que ele guarda).
 - Companheiros de viagem (boticário cético, criatura transformada).

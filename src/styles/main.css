@@ -1,11 +1,11 @@
-/* ==========================================================================
+/*
    Potion Academy: estilos
    Seções: tokens · base · layout · botões · controles de toque · overlays ·
            caldeirão (loja) · fim de jogo · movimento reduzido
    As cores e fontes em :root também são lidas pelo canvas (ui/theme.ts).
-   ========================================================================== */
+ */
 
-/* ---------- Tokens ---------- */
+/*  Tokens  */
 :root {
   --bg-0: #0d1714;
   --bg-1: #1c1a24;
@@ -48,7 +48,7 @@
   --side-w: 0px;
 }
 
-/* ---------- Base ---------- */
+/*  Base  */
 * { box-sizing: border-box; }
 
 html, body { height: 100%; }
@@ -96,7 +96,7 @@ kbd {
   text-align: center;
 }
 
-/* ---------- Layout ---------- */
+/*  Layout  */
 .app {
   min-height: 100dvh;
   display: flex;
@@ -188,7 +188,7 @@ kbd {
   to { opacity: 1; transform: none; }
 }
 
-/* ---------- Menu principal (por cima do canvas) ---------- */
+/*  Menu principal (por cima do canvas)  */
 .menu {
   position: absolute;
   inset: 3px;
@@ -226,9 +226,20 @@ kbd {
 .menu-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
   gap: 10px;
   pointer-events: auto;
+}
+
+@container (min-width: 480px) {
+  .menu .big-btn.alt {
+    min-height: 34px;
+    padding: 6px clamp(10px, 2.6cqw, 16px);
+    font-size: clamp(11px, 2.4cqw, 13px);
+    letter-spacing: 0.1em;
+    background: rgba(30, 24, 38, 0.82); /* discreto: deixa ver o caldeirão por trás */
+  }
 }
 
 .menu .big-btn {
@@ -237,7 +248,7 @@ kbd {
   font-size: clamp(13px, 3.6cqw, 17px);
 }
 
-/* ---------- Sala de Música ---------- */
+/*  Sala de Música  */
 .music-room {
   width: min(92vw, 440px);
   display: flex;
@@ -325,7 +336,7 @@ kbd {
 .touch-on.in-menu #touch-controls { display: none; } /* sem d-pad no menu */
 .touch-on .menu-hint { display: none; }
 
-/* ---------- Botões ---------- */
+/*  Botões  */
 .chip-btn {
   padding: 6px 14px;
   border: 2px solid var(--panel-border);
@@ -375,7 +386,7 @@ kbd {
 
 .btn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
 
-/* ---------- Controles de toque (visíveis só em telas de toque) ---------- */
+/*  Controles de toque (visíveis só em telas de toque)  */
 #touch-controls {
   display: none;
   align-items: center;
@@ -467,7 +478,7 @@ kbd {
 
 .act.bomb.pressed { background: var(--amber); }
 
-/* ---------- Overlays ---------- */
+/*  Overlays  */
 .overlay {
   position: fixed;
   inset: 0;
@@ -479,7 +490,6 @@ kbd {
   background:
     radial-gradient(ellipse at 50% 30%, rgba(60, 48, 80, 0.35), transparent 60%),
     rgba(8, 11, 10, 0.9);
-  backdrop-filter: blur(3px);
   overflow-y: auto;
 }
 
@@ -509,7 +519,7 @@ kbd {
 
 .hint { margin: 0; color: var(--text-muted); font-size: 14px; }
 
-/* ---------- Caldeirão (loja) ---------- */
+/*  Caldeirão (loja)  */
 .shop {
   display: flex;
   flex-direction: column;
@@ -735,7 +745,7 @@ kbd {
 }
 #shop-toast.show { opacity: 1; }
 
-/* ---------- Como jogar ("?") ---------- */
+/*  Como jogar ("?")  */
 .overlay--help { z-index: 120; padding: 12px; }
 
 .overlay--letter { z-index: 110; padding: 16px; }
@@ -743,6 +753,22 @@ kbd {
 .letter-text { font-style: italic; line-height: 1.6; text-align: left; }
 .letter-sign { text-align: right; color: var(--text-muted); margin-top: 8px; }
 .letter-note { font-size: 0.9em; color: var(--text-muted); }
+.panel.dialogue { max-width: 480px; text-align: center; }
+.panel.dialogue h2 { font-size: clamp(18px, 4.5vw, 24px); letter-spacing: 0.14em; }
+.panel.dialogue .letter-text { min-height: 7.5em; }
+.dialogue-step { margin: 0; font-size: 12px; letter-spacing: 0.2em; color: var(--text-faint); }
+/* retrato de personagem: desenho vetorial 4x, mostrado suave dentro de um medalhão */
+.portrait {
+  width: 132px;
+  height: 132px;
+  object-fit: cover;
+  object-position: 50% 6%; /* mostra o busto: cabeça, barba e a cruz */
+  border: 2px solid var(--panel-border);
+  border-radius: 66px 66px var(--radius-m) var(--radius-m);
+  background: radial-gradient(circle at 50% 30%, rgba(217, 164, 65, 0.28), rgba(0, 0, 0, 0.35));
+}
+.portrait[hidden] { display: none; }
+@media (max-height: 640px) { .portrait { width: 92px; height: 92px; border-radius: 46px 46px var(--radius-m) var(--radius-m); } }
 
 .chip-btn.help-btn {
   display: grid;
@@ -802,7 +828,7 @@ kbd {
 .keys td { padding: 3px 8px; border-bottom: 1px solid rgba(91, 77, 54, 0.35); color: var(--text); }
 .keys td:first-child { color: var(--text-muted); }
 
-/* ---------- Fim de jogo ---------- */
+/*  Fim de jogo  */
 #go-title.win { color: #ffd54f; text-shadow: 0 0 18px rgba(255, 213, 79, 0.4); }
 #go-title.lose { color: var(--danger); text-shadow: 0 0 18px rgba(255, 107, 107, 0.3); }
 
@@ -829,7 +855,7 @@ kbd {
 .result-tile .label { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; color: var(--text-faint); }
 .result-tile .value { font-family: var(--font-display); font-size: 22px; color: var(--gold-bright); }
 
-/* ---------- Telas pequenas ---------- */
+/*  Telas pequenas  */
 @media (max-width: 600px) {
   /* cartão da loja na horizontal: frasco à esquerda, texto à direita */
   .shop-grid { grid-template-columns: 1fr; }
@@ -883,7 +909,7 @@ kbd {
   .act.small { min-height: 30px; }
 }
 
-/* ---------- Menu em canvas pequeno ---------- */
+/*  Menu em canvas pequeno  */
 /* #stage é um container: quando o jogo fica pequeno (celular deitado, janelas baixas), os botões do menu
    encolhem para não esconder a Roo e o caldeirão. */
 @container (max-width: 420px) {
@@ -897,7 +923,7 @@ kbd {
   .menu-tag { display: none; }
 }
 
-/* ---------- Celular e tablet deitados ---------- */
+/*  Celular e tablet deitados  */
 /* Em pé, os controles ficam sob o jogo. Deitado, a altura é escassa: o jogo vai para o centro, o direcional
    para a esquerda e os botões para a direita, sem sobrepor o jogo (--side-w reserva as laterais). */
 @media (orientation: landscape) {
@@ -944,7 +970,7 @@ kbd {
   .touch-on .act.small { min-height: 30px; }
 }
 
-/* ---------- Movimento reduzido ---------- */
+/*  Movimento reduzido  */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
@@ -952,3 +978,9 @@ kbd {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Diário da Roo */
+.diary-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; max-height: 50vh; overflow-y: auto; }
+.diary-entry b { font-family: var(--font-title, inherit); color: var(--gold, #f0c674); }
+.diary-entry p { margin: 2px 0 0; color: var(--text); }
+.diary-entry.locked { opacity: 0.5; }

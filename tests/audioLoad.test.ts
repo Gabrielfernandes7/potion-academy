@@ -3,7 +3,7 @@
 // continuam conectados depois que cada som termina (é isso que causava a lentidão).
 import { describe, expect, it } from 'vitest';
 import { audio, release } from '../src/audio/AudioEngine';
-import { BOSS_TRACK, STEPS_PER_BAR, TRACKS, Track, generateBar, mulberry32, MelodyState } from '../src/audio/tracks';
+import { STEPS_PER_BAR, TRACKS, Track, generateBar, mulberry32, MelodyState } from '../src/audio/tracks';
 
 // ---- contexto falso ----
 class FakeParam {
@@ -72,7 +72,7 @@ function playBarsOn(ctx: FakeContext, track: Track, bars: number): number {
 }
 
 describe('carga: orçamento de notas', () => {
-  const ALL = [...TRACKS, BOSS_TRACK];
+  const ALL = TRACKS;
 
   it('cada faixa fica abaixo de 4 notas por segundo (média de 60 s)', () => {
     for (const track of ALL) {

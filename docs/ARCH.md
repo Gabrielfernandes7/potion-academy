@@ -51,7 +51,7 @@ Navegação em `game/launcher.ts`: `startGame()` (sempre com `{ stage: 1 }` expl
 | `bombroo_bank` | POÇÃO (moedas) |
 | `bombroo_owned` | tipos de bomba comprados |
 | `bombroo_audio` | preferência de música e efeitos |
-| `bombroo_track` | faixa escolhida na sala de música |
+| `bombroo_track` | (antigo) faixa escolhida na sala de música; não é mais lida |
 | `bombroo_stages_completed` | fases vencidas (progresso do mapa) |
 
 O estado de uma partida (vida, bombas, gemas, tempo) vive só na `MainScene` e não é salvo.

@@ -10,7 +10,7 @@
 // O sfx é ligado pelo primeiro clique em JOGAR/COMEÇAR.
 import type { ElementId } from '../config';
 import {
-  BOSS_TRACK, MelodyState, NoteEvent, STEPS_PER_BAR, TRACKS, Track, generateBar, midiToHz, mulberry32, pickNextTrack,
+  MelodyState, NoteEvent, STEPS_PER_BAR, Track, generateBar, midiToHz, mulberry32, trackById,
 } from './tracks';
 
 export type SfxName = 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door' | 'fizzle';
@@ -53,8 +53,6 @@ class AudioEngine {
 
   // música
   private track: Track | null = null;
-  // faixa escolhida no menu (id); null = sorteia a cada jogo
-  private trackChoice: string | null = null;
   private seed = 1;
   private rng: () => number = Math.random;
   private melody: MelodyState = { idx: 3 };
@@ -320,7 +318,7 @@ class AudioEngine {
   start(): void {
     if (this.playing) return;
     if (!this.ensureContext()) return;
-    if (!this.track) this.chooseTrack();
+    if (!this.track) this.chooseTrack('lareira');
     this.enabled = true;
     this.playing = true;
     this.beginTrack();
@@ -341,10 +339,11 @@ class AudioEngine {
     this.onTrackChange?.(null);
   }
 
-  // Novo jogo: sorteia outra faixa (e outra semente). Se a música está ligada, troca com fade.
-  // boss: usa a faixa fixa do duelo em vez de sortear.
-  nextTrack(boss = false, stageTrack?: string): void {
-    this.chooseTrack(boss, stageTrack);
+  // Toca a faixa da parte do jogo em que estamos (menu, fase, final). Se já é a faixa atual e
+  // a música toca, só segue (sem reiniciar). Se a música está ligada, troca com fade.
+  playTrack(id: string): void {
+    if (this.playing && this.track?.id === id) return;
+    this.chooseTrack(id);
     if (!this.enabled) return;
     if (!this.playing) {
       if (!this.ensureContext()) return;
@@ -360,26 +359,16 @@ class AudioEngine {
     }, 600);
   }
 
-  // Escolha da jogadora no menu: um id de faixa, ou null para sortear. Se a música está
-  // ligada, troca na hora (com fade), para ela ouvir a faixa ao escolher.
-  setTrackChoice(id: string | null): void {
-    this.trackChoice = id && TRACKS.some(t => t.id === id) ? id : null;
-    this.nextTrack();
-  }
-
-  get trackChoiceId(): string | null {
-    return this.trackChoice;
-  }
-
   get trackName(): string | null {
     return this.track ? this.track.name : null;
   }
 
-  // Prioridade: duelo > escolha da jogadora (Sala de Música) > faixa da fase > sorteio.
-  private chooseTrack(boss = false, stageTrack?: string): void {
-    const wanted = this.trackChoice ?? stageTrack;
-    const chosen = wanted ? TRACKS.find(t => t.id === wanted) : undefined;
-    this.track = boss ? BOSS_TRACK : chosen ?? pickNextTrack(this.track ? this.track.id : null);
+  get trackId(): string | null {
+    return this.track ? this.track.id : null;
+  }
+
+  private chooseTrack(id: string): void {
+    this.track = trackById(id) ?? trackById('lareira') ?? null;
     this.seed = Math.floor(Math.random() * 0xffffffff);
   }
 

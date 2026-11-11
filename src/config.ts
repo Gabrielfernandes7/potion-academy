@@ -23,7 +23,7 @@ export const CONFIG = {
   hudHeight: 56,        // faixa da HUD acima da grade, em px do canvas
 
   // ---- o chefe (Belladona) ----
-  bossHp: 8,
+  bossHp: 10,                 // com dano por elemento (BOSS_DAMAGE): 5 golpes de fogo/éter ou 10 de água/terra
   bossMoveInterval: 1100,
   bossHitInvuln: 1400,        // proteção do chefe depois de levar um golpe
   bossFirstCastMs: 2600,      // quanto ela espera antes da primeira habilidade
@@ -66,6 +66,10 @@ export const ELEMENTS: Record<ElementId, ElementDef> = {
   earth: { name: 'TERRA', alchemy: 'Sal',      color: 0x81c784, glow: 0xc8e6c9, symbol: '◇', description: 'Energia mineral e natural.' },
   air:   { name: 'ÉTER',  alchemy: 'Éter',     color: 0xc9d6df, glow: 0xeef4f8, symbol: '☿', description: 'Magia arcana pura.' },
 };
+
+// Dano que cada elemento causa à Belladona. Fogo e éter machucam mais; água e terra, menos
+// (a água alcança mais longe, a terra atravessa caixotes). Ver docs/06-decisoes.md.
+export const BOSS_DAMAGE: Record<ElementId, number> = { fire: 2, water: 1, earth: 1, air: 2 };
 
 export type BombId = 'normal' | 'mega' | 'pierce' | 'remote';
 
@@ -138,14 +142,16 @@ export interface ChestOdd { chance: number; coins: number }
 
 export interface StageDef {
   kind: StageKind;
-  name: string;
+  name: string; // nome da fase na história (O CHAMADO...)
+  place: string; // lugar onde ela acontece (aparece no mapa e no cartão de entrada)
+  story: string; // uma frase de história, mostrada ao entrar
   tip?: string; // dica mostrada ao entrar na fase
   time: number; // ms
   blockChance: number;
   door: boolean; // fase de gemas e porta (o chefe não tem porta)
   enemies: EnemyRule[];
   theme: StageTheme;
-  track?: string; // faixa de música da fase (a escolha da jogadora na Sala de Música vale mais)
+  track: string; // faixa de música da fase (ver SCENE_TRACKS em audio/tracks.ts)
   chest: ReadonlyArray<ChestOdd>; // sorteio do baú (moedas) nesta fase
 }
 
@@ -159,20 +165,28 @@ const CHEST_RICH: ReadonlyArray<ChestOdd> = [
 
 export const STAGES: StageDef[] = [
   {
-    kind: 'lab', name: 'O CHAMADO', chest: CHEST_COMMON, time: 90000, blockChance: 0.7, door: true, theme: 'stone',
+    kind: 'lab', name: 'O CHAMADO', place: 'Laboratório do Caldeirão',
+    story: 'Uma carta, um frasco vazio e um monge que pede ajuda. Roo sai do laboratório.',
+    chest: CHEST_COMMON, time: 90000, blockChance: 0.7, door: true, theme: 'stone', track: 'alambique',
     enemies: [{ kind: 'frog', start: 2, max: 5, every: 8 }],
   },
   {
-    kind: 'crypt', name: 'O CAMINHO', chest: CHEST_RICH, tip: 'Poção Aqua apaga poções de Fogo. Fantasmas atravessam paredes.',
-    time: 100000, blockChance: 0.6, door: true, theme: 'crypt', track: 'luar',
+    kind: 'crypt', name: 'O CAMINHO', place: 'Salão dos Ecos',
+    story: 'Vozes do mestre desaparecido ainda ecoam entre as colunas.',
+    chest: CHEST_RICH, tip: 'Poção Aqua apaga poções de Fogo. Fantasmas atravessam paredes.',
+    time: 100000, blockChance: 0.6, door: true, theme: 'crypt', track: 'ecos',
     enemies: [{ kind: 'ghost', start: 2, max: 4, every: 10 }, { kind: 'frog', start: 1, max: 1 }],
   },
   {
-    kind: 'boss', name: 'O DUELO', chest: CHEST_RICH, time: 120000, blockChance: 0.35, door: false, theme: 'stone',
+    kind: 'boss', name: 'O DUELO', place: 'Torre de Belladona',
+    story: 'Belladona quer fazer das escrituras um elixir. Vença-a, sem odiá-la.',
+    chest: CHEST_RICH, time: 120000, blockChance: 0.35, door: false, theme: 'stone', track: 'duelo',
     enemies: [],
   },
   {
-    kind: 'garden', name: 'O RETORNO', chest: CHEST_RICH, tip: 'As flores do mal resistem à Poção Aqua. Use outra poção.',
+    kind: 'garden', name: 'O RETORNO', place: 'Jardim do Mosteiro',
+    story: 'Frei Anselmo espera no portão, entre as ervas do mosteiro.',
+    chest: CHEST_RICH, tip: 'As flores do mal resistem à Poção Aqua. Use outra poção.',
     time: 100000, blockChance: 0.5, door: true, theme: 'garden', track: 'jardim',
     enemies: [{ kind: 'frog', start: 2, max: 3, every: 10 }, { kind: 'flower', start: 5, max: 5 }],
   },

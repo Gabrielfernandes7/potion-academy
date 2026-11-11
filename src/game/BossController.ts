@@ -10,7 +10,7 @@
 //   rain  : (só furiosa) gotas de água caem em casas ao redor de você.
 //   blink : some e reaparece longe, protegida enquanto está escondida.
 import Phaser from 'phaser';
-import { CONFIG, DIRS, ELEMENTS, EMPTY, ElementId } from '../config';
+import { BOSS_DAMAGE, CONFIG, DIRS, ELEMENTS, EMPTY, ElementId } from '../config';
 import { rooOriginY } from '../textures/rooGeometry';
 import { readTheme } from '../ui/theme';
 import { BossLine, pickBossLine } from './bossLines';
@@ -73,10 +73,10 @@ export class BossController {
   }
 
   // Chamado a cada explosão de poção da jogadora, com as casas atingidas.
-  onExplosion(tiles: Tile[]): void {
+  onExplosion(tiles: Tile[], element: ElementId = 'fire'): void {
     if (this.hidden || this.invulnMs > 0 || this.state === 'defeated') return;
     if (!tiles.some(t => t.x === this.gridX && t.y === this.gridY)) return;
-    this.hit();
+    this.hit(BOSS_DAMAGE[element] ?? 1);
   }
 
   update(delta: number): void {
@@ -315,11 +315,11 @@ export class BossController {
 
   // dano, fúria e derrota
 
-  private hit(): void {
-    this.hp--;
+  private hit(damage: number): void {
+    this.hp = Math.max(0, this.hp - damage);
     this.invulnMs = CONFIG.bossHitInvuln;
     if (this.hp > 0) this.say('hurt');
-    this.scene.floatingText(this.gridX, this.gridY, '-1', '#ff80ab');
+    this.scene.floatingText(this.gridX, this.gridY, `-${damage}`, '#ff80ab');
     this.scene.play('pickup');
     this.burst(this.sprite.x, this.sprite.y - 10, 'menu_spark', [0xffd54f, 0xffffff, LIME], 12, 100);
     this.scene.tweens.add({

@@ -22,7 +22,9 @@ function tile(label: string, value: string): string {
 
 export function showGameOver(d: GameOverData): void {
   const title = byId('go-title');
-  title.textContent = d.won ? 'VITÓRIA!' : 'GAME OVER';
+  title.textContent = d.won ? 'JORNADA CUMPRIDA' : 'GAME OVER';
+  const story = byId('go-story');
+  story.hidden = !d.won;
   title.className = d.won ? 'win' : 'lose';
   byId('go-stats').innerHTML = [
     tile('POÇÃO', String(d.coins)),

@@ -1,12 +1,18 @@
 // Sala de Música: overlay DOM (#music-overlay) com a Roo de maestro e a escolha da faixa.
 // Abre pelo botão SALA DE MÚSICA do menu. A faixa escolhida vale para o menu e as partidas.
 import { audio } from '../audio/AudioEngine';
-import { loadTrackChoice, saveTrackChoice } from '../audio/prefs';
-import { TRACKS } from '../audio/tracks';
+import { SCENE_TRACKS, trackById } from '../audio/tracks';
 import { byId, isShown, setShown } from './dom';
 
-// null = sorteada a cada jogo; depois cada faixa, em ordem
-const OPTIONS: (string | null)[] = [null, ...TRACKS.map(t => t.id)];
+// Uma faixa para cada parte do jogo; a Sala só deixa ouvir (não muda o que toca nas fases).
+const PARTS: { id: string; part: string }[] = [
+  { id: 'lareira', part: 'Menu e carta' },
+  { id: 'alambique', part: 'Fase 1 · O Chamado' },
+  { id: 'ecos', part: 'Fase 2 · O Caminho' },
+  { id: 'duelo', part: 'Fase 3 · O Duelo' },
+  { id: 'jardim', part: 'Fase 4 · O Retorno' },
+  { id: 'vesperas', part: 'Confissão e final' },
+];
 const FRAME_MS = 500; // a Roo "rege" trocando de quadro
 
 export interface MusicRoomDeps {
@@ -17,19 +23,18 @@ export interface MusicRoomDeps {
 
 let deps: MusicRoomDeps | null = null;
 let index = 0;
+let heard = false; // já tocou alguma faixa na Sala
 let frameTimer: ReturnType<typeof setInterval> | null = null;
 
-function label(id: string | null): string {
-  if (!id) return 'Sorteada a cada jogo';
-  return TRACKS.find(t => t.id === id)?.name ?? 'Sorteada a cada jogo';
-}
-
 function refresh(): void {
-  byId('music-now').textContent = label(OPTIONS[index]);
+  const cur = PARTS[index];
+  byId('music-now').textContent = heard
+    ? `${trackById(cur.id)?.name ?? ''} (${cur.part})`
+    : 'Escolha uma parte do jogo para ouvir';
   byId('music-off').hidden = deps ? deps.musicOn() : true;
   const list = byId('music-list');
   Array.from(list.children).forEach((btn, i) => {
-    const on = i === index;
+    const on = heard && i === index;
     btn.classList.toggle('on', on);
     btn.setAttribute('aria-pressed', String(on));
   });
@@ -38,14 +43,11 @@ function refresh(): void {
 function choose(i: number): void {
   if (!deps) return;
   index = i;
-  const id = OPTIONS[i];
-  saveTrackChoice(id);
-  audio.setTrackChoice(id); // se a música já toca, troca na hora
+  heard = true;
   if (deps.musicOn()) {
-    // na sala a música ainda não começou: toca a escolha para ela ouvir
     deps.unlock();
     audio.enabled = true;
-    audio.start();
+    audio.playTrack(PARTS[i].id);
   }
   refresh();
 }
@@ -53,11 +55,11 @@ function choose(i: number): void {
 function buildList(): void {
   const list = byId('music-list');
   list.innerHTML = '';
-  OPTIONS.forEach((id, i) => {
+  PARTS.forEach((p, i) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'track-btn';
-    btn.textContent = label(id);
+    btn.textContent = `${p.part}: ${trackById(p.id)?.name ?? ''}`;
     btn.onclick = () => choose(i);
     list.appendChild(btn);
   });
@@ -78,13 +80,12 @@ function startMaestro(): void {
 
 export function initMusicRoom(d: MusicRoomDeps): void {
   deps = d;
-  index = Math.max(0, OPTIONS.indexOf(loadTrackChoice(TRACKS.map(t => t.id))));
-  audio.setTrackChoice(OPTIONS[index]); // a escolha salva vale desde o carregamento
   buildList();
   byId('music-back-btn').onclick = closeMusicRoom;
 }
 
 export function openMusicRoom(): void {
+  heard = false;
   setShown('music-overlay', true);
   refresh();
   startMaestro();
@@ -94,7 +95,7 @@ export function closeMusicRoom(): void {
   setShown('music-overlay', false);
   if (frameTimer) clearInterval(frameTimer);
   frameTimer = null;
-  audio.stop(); // o menu fica em silêncio; a música volta a tocar ao jogar
+  if (deps?.musicOn()) audio.playTrack(SCENE_TRACKS.menu); // volta à música do menu
 }
 
 export function isMusicRoomOpen(): boolean {

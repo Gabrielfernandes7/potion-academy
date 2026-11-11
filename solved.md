@@ -79,3 +79,23 @@ Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
 - **R3, testes sem membros privados:** `AudioEngine` ganhou `attachContext(ctx)` (público) e `playNote` ficou público. `tests/audioLoad.test.ts` não acessa mais membros privados; restam dois `as unknown as` que só convertem o contexto falso para o tipo do navegador.
 - **R4, documentação:** `docs/05-como-esta-feito.md` aponta para `ARCH.md` na parte de arquitetura e atualiza a linha de explosões. `ARCH.md` reflete a extração.
 - **Verificado:** typecheck, 74 testes, build, teste de fumaça (bomba colocada e explodida sem erro) e benchmark de áudio rodam sem erro.
+
+## Desempenho, Phaser local, M4, M5 e P1 (sessão de 2026-11-10, parte 7)
+
+- **Phaser não vem de CDN**: `index.html` só carrega `src/main.ts`; o Phaser 3.90.0 é dependência npm, fixa. Nada a baixar.
+- **Diagnóstico de lentidão** (Chromium sem GPU, via Playwright): 60 fps em todas as fases, 0,4 a 0,8 ms de JS por quadro, sem vazamento de cenas, ouvintes, texturas ou nós de DOM após 6 voltas menu -> partida -> mapa -> menu. A música custa cerca de 5 a 9% de um núcleo (medido antes, `bench.json`).
+- **Mudanças de custo**: `backdrop-filter: blur` removido dos overlays (borra o canvas animado a cada quadro, caro em GPU fraca); `powerPreference: 'high-performance'` e `smoothStep: false` no `Phaser.Game`; Phaser em arquivo próprio (`manualChunks`), então o navegador guarda em cache e só rebaixa o jogo (93 kB) a cada versão.
+- **M4. Dano por elemento no chefe**: `BOSS_DAMAGE` em `config.ts` (fogo 2, éter 2, água 1, terra 1); vida da Belladona 8 -> 10; `onExplosion(tiles, element)`. Decisão em `docs/06-decisoes.md`; testes em `tests/boss.test.ts`.
+- **M5. Diário da Roo**: botão DIÁRIO no menu, `ui/diary.ts`, `game/diary.ts` (5 páginas; uma abre a cada fase vencida). Sem chave nova: usa `bombroo_stages_completed`. Teste em `tests/diary.test.ts`.
+- **P1. Contorno escuro da Roo**: `textures/outline.ts` pinta 1 px escuro em volta dos quadros de caminhada (`roo_{dir}_{0-3}`).
+- Verificado: typecheck, 83 testes, build.
+
+## Final da história, menu e vida (sessão de 2026-11-10, parte 8)
+
+- **Caminhar menos fluido**: causa provável, `fps: { smoothStep: false }` adicionado por mim na parte 7 (tirava a suavização do delta). Removido.
+- **Menu**: pixel art de ponta a ponta (a Roo em escala inteira, sem girar; líquido, braço e varinha em baixa resolução; brilhos e bolhas em pixels em faixas). Botões secundários menores e discretos, que não cobrem mais o caldeirão. A tentativa de Roo HD foi descartada.
+- **Despedida da Belladona** (`BELLADONA_CARDS`): três cartões ao ser derrotada, antes do jardim.
+- **M3. Cena final no Caldeirão** (`scenes/EndScene.ts`, `CAULDRON_LINES`): Roo sozinha com o frasco vazio, depois a tela "Jornada cumprida".
+- **M6. Vida entre fases**: baú não cura mais; `stageClearHeal` já era 0. Decisão em `docs/06-decisoes.md`.
+- **Fotos do catálogo** (`docs/img/sprites.png` e `sprites/*.png`) refeitas, com a nova categoria `humans` (Anselmo).
+- **Jogo de ponta a ponta por script**: fase 3 (derrota) -> despedida -> fase 4 -> portão -> confissão -> cena final -> tela de fim, sem erros. Faltou olhar por uma pessoa.

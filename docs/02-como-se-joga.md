@@ -6,7 +6,7 @@ O jogo tem **quatro fases**:
 
 1. **Laboratório:** pegar **3 gemas** e chegar à **porta** em 90 segundos. A porta só abre com as 3 gemas. Inimigos: sapos magos.
 2. **Salão dos fantasmas:** igual ao laboratório (3 gemas e a porta), em 100 segundos, com **fantasmas** e um sapo.
-3. **Duelo:** derrotar a bruxa **Belladona** (8 de vida) em 120 segundos.
+3. **Duelo:** derrotar a bruxa **Belladona** (10 de vida; fogo e éter tiram 2, água e terra tiram 1) em 120 segundos.
 4. **Jardim:** fora do castelo. Pegar 3 gemas e chegar ao **portão** em 100 segundos, entre sapos magos e **flores do mal**. Cruzar o portão encerra o jogo.
 
 Ao passar de uma fase para a seguinte, a Roo leva a vida (e ganha +1), os power-ups e as moedas.

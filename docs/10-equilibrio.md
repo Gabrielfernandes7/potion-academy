@@ -27,7 +27,7 @@ Antes, a Aqua tinha alcance 4 e a Telúrica e a Etérea alcance 3, então a Aqua
 | +Frasco | até 6 poções | até 5 | com 6 poções a tela enchia de explosões |
 | +Raio | 4 níveis | 3 | alcance 3 + 3 níveis já cobre quase o mapa |
 | +Velocidade | 3 níveis | 2 | com 3 níveis a Roo corria mais que os inimigos o tempo todo |
-| Baú | +2 vida | +1 | curar 2 anulava o perigo da fase |
+| Baú | +2 vida | 0 | só os corações curam; o baú dá POÇÃO |
 
 ## Economia (estimativa)
 
@@ -38,7 +38,8 @@ Antes, a Aqua tinha alcance 4 e a Telúrica e a Etérea alcance 3, então a Aqua
 
 | Número | Valor | Efeito de mudar |
 |---|---|---|
-| `bossHp` | 8 | mais vida = duelo mais longo |
+| `bossHp` | 10 | mais vida = duelo mais longo |
+| `BOSS_DAMAGE` | fogo 2, éter 2, água 1, terra 1 | a poção inicial (fogo) tira 2: o duelo cabe em 5 golpes; água e terra pedem 10 |
 | `bossTelegraphMs` | 1200 | menos que 1000 fica injusto (teste garante o mínimo) |
 | `bossCooldownMs` | 3400 | intervalo entre ataques |
 | `bossFuriousCooldownMs` | 2300 | precisa ser menor que o normal e maior que o aviso |

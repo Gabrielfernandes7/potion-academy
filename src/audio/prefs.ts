@@ -21,15 +21,3 @@ export function loadAudioPrefs(): AudioPrefs {
 export function saveAudioPrefs(prefs: AudioPrefs): void {
   Storage.set(KEY, prefs);
 }
-
-// Faixa escolhida no menu: um id de faixa, ou null para sortear a cada jogo.
-const TRACK_KEY = 'bombroo_track';
-
-export function loadTrackChoice(validIds: string[]): string | null {
-  const saved = Storage.get<unknown>(TRACK_KEY, null);
-  return typeof saved === 'string' && validIds.includes(saved) ? saved : null;
-}
-
-export function saveTrackChoice(id: string | null): void {
-  Storage.set(TRACK_KEY, id);
-}

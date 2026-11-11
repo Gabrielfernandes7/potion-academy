@@ -23,6 +23,9 @@ import { readTheme } from '../ui/theme';
 import { BossController } from '../game/BossController';
 import { BombSystem } from '../game/BombSystem';
 import { markStageCompleted } from '../storage';
+import { SCENE_TRACKS } from '../audio/tracks';
+import { showDialogue } from '../ui/dialogue';
+import { ANSELMO, BELLADONA_CARDS, ENDING_CARDS } from '../game/story';
 
 // Partículas de cada elemento na explosão (cada casa atingida solta um punhado delas).
 // Efeito de quem é atingido, por elemento: o que sobra depois da explosão.
@@ -174,7 +177,7 @@ export class MainScene extends Phaser.Scene {
     this.zzzMs = 0;
     touch.releaseAll();
     touch.clearJust();
-    audio.nextTrack(this.isBossStage, this.def.track); // o duelo e algumas fases têm faixa própria; no resto, sorteia
+    audio.playTrack(this.def.track); // cada fase tem a sua faixa
     this.powerupsCollected = { bomb_up: 0, fire_up: 0, speed_up: 0, time_up: 0 };
     this.isPaused = false;
     this.gemBlocks = new Set();
@@ -214,29 +217,39 @@ export class MainScene extends Phaser.Scene {
     if (!this.scene.isActive('Hud')) this.scene.launch('Hud');
   }
 
-  // Cartão de entrada da fase: número, nome e (se houver) uma dica sobre a novidade dela.
+  // Cartão de entrada da fase: número e lugar, nome, uma frase da história e (se houver) a dica.
   showStageBanner(): void {
     const theme = readTheme();
     const cx = (CONFIG.cols * CONFIG.tile) / 2;
     const cy = (CONFIG.rows * CONFIG.tile) / 2;
+    const textW = CONFIG.cols * CONFIG.tile - 48;
     const items: Phaser.GameObjects.GameObject[] = [];
-    const band = this.add.rectangle(cx, cy, CONFIG.cols * CONFIG.tile, 96, 0x000000, 0.62).setDepth(29);
-    items.push(band);
-    items.push(this.add.text(cx, cy - 26, `FASE ${this.stage}`, {
-      fontFamily: theme.fontDisplay, fontSize: '14px', color: theme.textMuted, fontStyle: '700',
+    const hasTip = !!this.def.tip;
+    const bandH = hasTip ? 150 : 124;
+    items.push(this.add.rectangle(cx, cy, CONFIG.cols * CONFIG.tile, bandH, 0x120d08, 0.78).setDepth(29));
+    let y = cy - bandH / 2 + 22;
+    items.push(this.add.text(cx, y, `FASE ${this.stage} · ${this.def.place.toUpperCase()}`, {
+      fontFamily: theme.fontDisplay, fontSize: '12px', color: theme.textMuted, fontStyle: '700',
     }).setOrigin(0.5).setDepth(30));
-    items.push(this.add.text(cx, cy - 2, this.def.name, {
-      fontFamily: theme.fontDisplay, fontSize: '24px', color: '#f0c674', fontStyle: '700',
+    y += 28;
+    items.push(this.add.text(cx, y, this.def.name, {
+      fontFamily: theme.fontDisplay, fontSize: '26px', color: '#f0c674', fontStyle: '700',
       stroke: '#000000', strokeThickness: 3,
     }).setOrigin(0.5).setDepth(30));
+    y += 22;
+    const story = this.add.text(cx, y, this.def.story, {
+      fontFamily: theme.fontBody, fontSize: '13px', fontStyle: 'italic', color: '#f1e6c9',
+      align: 'center', wordWrap: { width: textW },
+    }).setOrigin(0.5, 0).setDepth(30);
+    items.push(story);
     if (this.def.tip) {
-      items.push(this.add.text(cx, cy + 28, this.def.tip, {
-        fontFamily: theme.fontBody, fontSize: '12px', color: '#e8dcc0',
-        align: 'center', wordWrap: { width: CONFIG.cols * CONFIG.tile - 48 },
-      }).setOrigin(0.5).setDepth(30));
+      items.push(this.add.text(cx, y + story.height + 8, this.def.tip, {
+        fontFamily: theme.fontBody, fontSize: '12px', color: '#c9b98f',
+        align: 'center', wordWrap: { width: textW },
+      }).setOrigin(0.5, 0).setDepth(30));
     }
     this.tweens.add({
-      targets: items, alpha: 0, delay: 2200, duration: 600,
+      targets: items, alpha: 0, delay: 3200, duration: 600,
       onComplete: () => items.forEach(i => i.destroy()),
     });
   }
@@ -471,8 +484,7 @@ export class MainScene extends Phaser.Scene {
         const coins = pickup.value ?? 5;
         this.coins += coins;
         Bank.add(coins);
-        this.player.hp = Math.min(CONFIG.maxHp, this.player.hp + 1);
-        this.play('powerup');
+        this.play('powerup'); // o baú só dá POÇÃO: a cura vem dos corações (ver docs/06-decisoes.md)
         break;
       }
       case 'heart':
@@ -530,7 +542,25 @@ export class MainScene extends Phaser.Scene {
     this.cameras.main.flash(220, 100, 200, 100);
     this.play('door');
     // o aviso nasce sobre a porta, onde a jogadora precisa ir, e fica mais tempo na tela
-    this.floatingText(this.doorX, this.doorY, 'PORTA ABERTA!', '#4caf50', 16, 1400);
+    if (this.def.kind === 'garden') {
+      this.floatingText(this.doorX, this.doorY, 'FREI ANSELMO ESPERA NO PORTÃO', '#f0c674', 12, 1800);
+      this.spawnAnselmoAtGate();
+    } else {
+      this.floatingText(this.doorX, this.doorY, 'PORTA ABERTA!', '#4caf50', 16, 1400);
+    }
+  }
+
+  // Frei Anselmo aparece no portão do jardim quando ele se abre; respira em dois quadros.
+  spawnAnselmoAtGate(): void {
+    const T = CONFIG.tile;
+    const monk = this.add.sprite(this.doorX * T + T / 2, this.doorY * T + T / 2 + 15, 'anselmo_front_0')
+      .setOrigin(0.5, 47 / 50).setDepth(3.5).setAlpha(0);
+    this.tweens.add({ targets: monk, alpha: 1, duration: 700 });
+    let f = 0;
+    this.time.addEvent({
+      delay: 650, loop: true,
+      callback: () => { f = 1 - f; monk.setTexture(f ? 'anselmo_front_1' : 'anselmo_front_0'); },
+    });
   }
 
   checkWin(): void {
@@ -546,18 +576,33 @@ export class MainScene extends Phaser.Scene {
     this.transitioning = true;
     this.play('door');
     if (this.stage >= LAST_STAGE) {
-      // portão do jardim: fim do jogo
-      this.floatingText(this.player.gridX, this.player.gridY, 'JARDIM LIVRE!', '#9be564');
+      // portão do jardim: frei Anselmo espera. A confissão fecha a história.
+      this.floatingText(this.player.gridX, this.player.gridY, 'O PORTÃO SE ABRE', '#9be564');
       this.coins += CONFIG.gardenVictoryBonus;
       Bank.add(CONFIG.gardenVictoryBonus);
-      this.time.delayedCall(900, () => {
-        this.won = true;
-        this.triggerGameOver();
-      });
+      this.time.delayedCall(900, () => { void this.playEnding(); });
       return;
     }
+    markStageCompleted(this.stage);
     this.floatingText(this.player.gridX, this.player.gridY, 'FASE COMPLETA!', '#9be564');
     this.advanceStage();
+  }
+
+  // Final: frei Anselmo confessa e devolve o frasco vazio. A cena fica parada durante a conversa
+  // (nada acontece com a Roo) e só depois aparece a tela de fim.
+  async playEnding(): Promise<void> {
+    audio.playTrack(SCENE_TRACKS.ending);
+    const portrait = this.textures.getBase64('anselmo_retrato') || undefined;
+    this.scene.pause();
+    await showDialogue(ENDING_CARDS.map(c => ({ ...c, portrait: c.speaker === ANSELMO ? portrait : undefined })), 'FIM');
+    // última cena: a Roo de volta ao Caldeirão (a partida segue pausada por baixo);
+    // só depois vem a tela "Jornada cumprida"
+    this.game.events.once('end:done', () => {
+      this.scene.resume();
+      this.won = true;
+      this.triggerGameOver();
+    });
+    this.scene.launch('End');
   }
 
   // Fade e recomeço da cena na fase seguinte, levando vida, power-ups, moedas e o frasco escolhido.
@@ -585,7 +630,16 @@ export class MainScene extends Phaser.Scene {
     this.transitioning = true;
     this.coins += CONFIG.bossVictoryBonus;
     Bank.add(CONFIG.bossVictoryBonus);
+    markStageCompleted(this.stage);
     this.floatingText(this.player.gridX, this.player.gridY, 'BELLADONA DERROTADA!', '#9be564');
+    // espera a queda dela terminar; então ela se despede (cartões) e a Roo segue para o jardim
+    this.time.delayedCall(1600, () => { void this.playBossFarewell(); });
+  }
+
+  async playBossFarewell(): Promise<void> {
+    this.scene.pause();
+    await showDialogue(BELLADONA_CARDS, 'SEGUIR');
+    this.scene.resume();
     this.advanceStage();
   }
 
@@ -1050,7 +1104,7 @@ export class MainScene extends Phaser.Scene {
     this.playerSprite.setVisible(false);
     this.lashGfx.clear();
     if (this.won) {
-      audio.playWinMusic();
+      // sem fanfarra: as "Vésperas" da confissão seguem tocando no fim
       markStageCompleted(this.stage);
     } else {
       audio.playGameOverMusic();

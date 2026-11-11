@@ -53,7 +53,7 @@ Abra `http://localhost:5173` no seu navegador.
 * 🔮 **Quatro Elementos que Reagem entre Si:** o fogo acende outras poções, a água apaga as de fogo e a terra é estável. Cada elemento tem explosão e som próprios.
 * 🗺️ **Quatro Fases:** sapos magos, fantasmas que atravessam paredes, um duelo com chefe e um jardim com flores do mal que resistem à água.
 * 🧙‍♀️ **Chefe com Avisos:** A Belladona lança poções, avisa no chão antes de cada ataque e acelera à medida que perde vida.
-* 🎶 **Trilha Sonora Procedural:** 10 faixas geradas em tempo real via WebAudio, com uma sala dedicada para escolha de trilha.
+* 🎶 **Trilha Sonora Procedural:** 6 faixas geradas em tempo real via WebAudio, uma para cada parte da história, e uma sala para ouvi-las.
 * 🎨 **Assets 100% Procedurais:** Sprites gerados em tempo real, sintetizadores de som e tipografia via `@fontsource`.
 * 📱 **Design Responsivo:** funciona em celular (em pé e deitado, com controles de toque), tablet, computador e telas grandes, sem rolagem.
 

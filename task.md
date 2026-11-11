@@ -3,7 +3,23 @@
 Este arquivo é a memória do projeto entre sessões. Leia antes de começar, e atualize ao terminar cada tarefa.
 Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo, para qualquer pessoa).
 
-Última atualização: 2026-11-10. Último commit: `21d466a feat(ui): add map scene with stage progress in menu`.
+Última atualização: 2026-11-10 (parte 6). Alterações da parte 6 ainda **sem commit**.
+
+## Pendências da sessão de desempenho (2026-11-10, parte 7)
+
+- Ver no navegador, de verdade: contorno escuro da Roo no jardim; dano `-2` na Belladona; página do Diário depois de vencer fases.
+- Lentidão: no meu teste (Chromium sem GPU) o jogo roda a 60 fps e gasta menos de 1 ms por quadro, sem vazamento ao ir e voltar entre menu, partida e mapa. Se ainda ficar lento no seu computador, preciso de: aparelho/navegador, em que tela (menu, fase, loja) e se piora com o tempo.
+- D1 a D4, P4 a P6 e R1 (PickupSystem etc.) ficam para outras sessões: são trabalhos longos ou dependem de decisão/arte.
+
+- Parte 8: conferir no navegador, de verdade: menu em pixel art (Roo, brilhos, líquido), cena final no Caldeirão (`EndScene`), cartões de despedida da Belladona, se a vida entre fases agora pesa (baú não cura mais; se ficar duro, subir a chance do coração em `game/rewards.ts`). Caminhar da Roo: a causa provável da perda de fluidez era `fps.smoothStep: false` que eu tinha posto; foi removido. Se ainda estiver menos fluido, dizer em que tela.
+
+## Sessão parte 6 (feito)
+
+- **Anselmo redesenhado** (`textures/anselmo.ts`): capuz abaixado, tonsura, barba, cruz, mãos juntas, sandálias; mais `anselmo_retrato` (4x, vetorial). Aparece na carta, no portão do jardim e na confissão final. Conferir no navegador: expressão (sobrancelhas, sorriso) e se o retrato recortado no busto agrada.
+- **História**: cartão de entrada de cada fase mostra lugar + frase (`STAGES[].place/story`); confissão em 6 cartões; tela final "Jornada cumprida".
+- **Mapa** (`MapScene.ts`) refeito: pergaminho, caminho, fases seladas até vencer a anterior, Roo na fase atual. Bug corrigido: fases 1 a 3 nunca eram marcadas como vencidas (só a 4).
+- **Música**: de 10 faixas sorteadas para 6, uma por parte (`SCENE_TRACKS`). Menu toca a "Lareira do Caldeirão" a partir do primeiro toque. Sala de Música só serve para ouvir. **Nenhuma faixa foi ouvida**: pedir avaliação do clima (acolhedor/medieval?), andamento e volume.
+- Testes: 78, todos passando; `mapRules.test.ts` novo.
 
 ## Roteiro da história por fases (planejamento, sessão de 2026-11-10, parte 5)
 
@@ -26,11 +42,6 @@ Base: `docs/12-historia.md`. Mapa proposto (o código ainda usa os nomes atuais;
 
 ### Tarefas médias
 
-- M2. Confissão de Anselmo na fase 4: cartões de diálogo, sem NPC andando.
-- M3. Cena final no Caldeirão: Roo sozinha, frasco vazio na HUD, sem a tela de vitória genérica.
-- M4. Dano por elemento no chefe: tabela em `config.ts` e `BossController`. Registrar em `docs/06-decisoes.md` antes.
-- M5. Diário do Roo: frases liberadas por fase, tela no menu, salvas em `storage.ts` com chave nova.
-- M6. Pendência de vida entre fases (`stageClearHeal` ou chance de cura), decisão do usuário.
 
 ### Tarefas difíceis
 
@@ -44,14 +55,13 @@ Base: `docs/12-historia.md`. Mapa proposto (o código ainda usa os nomes atuais;
 Ordem de execução: R2, R1, R3, R4. R5 e R6 ficam para depois do jogo estar fechado. Concluídos: R2, R3, R4 e a primeira parte do R1 (ver `solved.md`).
 
 - R1 (parcial). Feito: `BombSystem`. Falta: `PickupSystem`, `EnemySystem`, `SleepSystem`, uma por vez, com testes das regras que saírem. Também falta tirar a parte pura do `BombSystem` (cálculo dos raios de explosão) para teste.
-- R5. Importar só os módulos do Phaser usados (bundle 1,2 MB). Depois.
+- R5. Importar só os módulos do Phaser usados (bundle 1,2 MB). Depois. (O Phaser já está em arquivo próprio, `phaser-*.js`, com cache; falta só reduzir o tamanho.)
 - R6. Decidir a música: orçamento medido ou reverberação mais curta. Depois.
 
 ## Trilha de personagens (só esta trilha por enquanto)
 
 Escopo: arquivos `src/textures/roo.ts`, `witch.ts`, `rooGeometry.ts`, sprites de inimigos humanos, `sprites.ts` e `docs/09-sprites.md`. Não mexer em regras, fases ou áudio.
 
-- P1. Roo: contorno escuro para contraste no jardim (pendência da parte 2).
 - P2. Belladona: pose de fala (boca aberta) e pose de derrota que não humilhe.
 - P4. Boticário cético (novo, companheiro, difícil de ler a expressão em 40x50).
 - P5. Criatura transformada por Belladona (novo, pode ser o mais difícil).

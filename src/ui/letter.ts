@@ -1,24 +1,21 @@
 // Carta de frei Anselmo: aparece antes da primeira fase de uma partida nova (overlay em DOM).
 import { byId, setShown } from './dom';
+import { onAdvanceKey, setPortrait } from './dialogue';
 
 // Devolve uma promessa que resolve quando a jogadora fecha a carta (botão ou Enter/Espaço).
-export function showLetter(): Promise<void> {
+// `portrait`: retrato de frei Anselmo (data URL), mostrado acima do texto.
+export function showLetter(portrait?: string | null): Promise<void> {
   return new Promise(resolve => {
     const btn = byId('letter-btn');
     const close = (): void => {
       btn.removeEventListener('click', close);
-      window.removeEventListener('keydown', onKey);
+      stopKeys();
       setShown('letter-overlay', false);
       resolve();
     };
-    const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        close();
-      }
-    };
+    const stopKeys = onAdvanceKey(close);
     btn.addEventListener('click', close);
-    window.addEventListener('keydown', onKey);
+    setPortrait('letter-portrait', portrait);
     setShown('letter-overlay', true);
     btn.focus();
   });

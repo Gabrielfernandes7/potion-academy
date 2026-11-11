@@ -93,7 +93,7 @@ export class BombSystem {
       }
     }
     const element = ELEMENTS[bomb.element] ?? ELEMENTS.fire;
-    this.scene.boss?.onExplosion(tiles);
+    this.scene.boss?.onExplosion(tiles, bomb.element);
     for (const t of tiles) {
       for (const enemy of this.scene.enemies) {
         if (enemy.alive && enemy.gridX === t.x && enemy.gridY === t.y) this.scene.hitEnemy(enemy, bomb.element);

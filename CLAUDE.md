@@ -35,8 +35,8 @@ src/
   main.ts                  # layout (vars CSS do canvas, modo toque), botões do DOM, nome da faixa
   config.ts                # CONFIG, CANVAS, ELEMENTS, BOMB_TYPES, BOMB_ORDER (balanceamento)
   storage.ts               # Storage, Bank, owned bombs (localStorage)
-  audio/AudioEngine.ts     # WebAudio: cadeia suave + reverb, efeitos calmos, música por faixas
-  audio/tracks.ts          # faixas procedurais e gerador de compassos (puro, testável)
+  audio/AudioEngine.ts     # WebAudio: cadeia suave + reverb, efeitos calmos, música por faixas (playTrack)
+  audio/tracks.ts          # 6 faixas procedurais (uma por parte do jogo, SCENE_TRACKS) e gerador de compassos (puro)
   input/touch.ts           # entrada por toque (d-pad e botões em DOM -> jogo)
   textures/                # texturas procedurais (terrain, potions, roo, entities, hud, menu)
   textures/rooGeometry.ts  # constantes do sprite da Roo (sem Phaser, testável)
@@ -46,10 +46,13 @@ src/
   scenes/MenuScene.ts      # menu: Roo mexendo uma poção no caldeirão (animado)
   scenes/MainScene.ts      # gameplay (câmera deslocada abaixo da HUD)
   scenes/HudScene.ts       # HUD dentro do canvas (cena paralela, por cima)
+  scenes/EndScene.ts       # cena final no Caldeirão (roda sobre a MainScene pausada)
   game/types.ts            # interfaces de Player, Bomb, Pickup, Enemy, Explosion
   game/rewards.ts          # tabela de drop (rollReward), texturas e brilho dos itens
   game/hudState.ts         # contrato de eventos MainScene <-> HudScene, timerView
   game/shopRules.ts        # estados dos cartões da loja (puro, testável)
+  game/mapRules.ts         # fases liberadas e fase atual no mapa (puro, testável)
+  game/story.ts            # textos da história (cartões da confissão)
   game/boss.ts             # regras puras do chefe: habilidades, áreas, alvos (testável)
   game/BossController.ts   # Belladona: movimento, ataques com aviso, dano, fúria, derrota
   game/balance.ts          # regra de equilíbrio das poções (testável)
@@ -60,8 +63,12 @@ src/
   ui/fonts.ts              # espera as fontes antes de iniciar a partida
   ui/menu.ts               # menu principal em DOM (por cima do canvas)
   ui/help.ts               # janela "Como jogar" (botão ?)
+  ui/dialogue.ts           # cartões de diálogo com retrato (confissão de Anselmo)
+  ui/letter.ts             # carta de Anselmo antes da fase 1
   ui/overlays.ts           # pausa e game over
   ui/shop.ts               # Caldeirão de Magia (loja)
+  ui/diary.ts + game/diary.ts # Diário da Roo (páginas liberadas por fase vencida)
+  textures/outline.ts      # contorno escuro de 1 px em texturas prontas (Roo)
   styles/main.css          # todo o CSS (tokens em :root)
 tests/                     # testes unitários (lógica pura, storage, toque, faixas, geometria)
 ```
@@ -87,6 +94,8 @@ Sprites: veja `docs/09-sprites.md` (e `/sprites.html`). Equilíbrio: veja `docs/
 
 O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/`. Antes de mudar regras ou nomes, leia `docs/README.md` e os arquivos relevantes. Use sempre os nomes do `docs/04-glossario.md` em textos e telas. Ao criar uma mecânica, siga `docs/08-como-criar-uma-mecanica.md` e registre a decisão em `docs/06-decisoes.md`.
 
+**Estilo visual**: pixel art como Super Bomberman 3/5, em tudo (jogo, menu, cenas). Escala inteira, sem girar sprites, sem degradês suaves; elementos desenhados por código vão em baixa resolução e são ampliados sem suavização (ver `pixelLayer` em `MenuScene`).
+
 ## Key Technical Patterns
 
 **Fases e reinício**: a `MainScene` recebe `{ stage: 1 }` ou `{ stage: 2, carry }`. **Sempre passe os dados explicitamente** ao reiniciar (`scene.restart({ stage: 1 })`): sem eles o Phaser reaproveita os do reinício anterior e voltaria à fase 2. Na fase 2 não há porta, gemas nem inimigos comuns; `BossController` cuida da Belladona, que só perde vida por `onExplosion()` de poções da jogadora. Todos os tempos do chefe usam o `delta` do jogo (não timers do navegador), então pausam junto.
@@ -104,14 +113,14 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 - *Power-ups* (`textures/entities.ts`): round tokens with a colored rim (`POWERUP_COLORS`) and a symbol. Power-ups and gems get a soft pulsing halo (`PICKUP_HALO`, created in `spawnPickupSprite`, destroyed in `collectPickup`).
 
 **Audio Engine**: `AudioEngine` synthesizes everything with WebAudio, aiming for calm: only sine/triangle voices with slow attacks, a low-pass filter, a generated-impulse reverb and a gentle compressor. Music (`enabled`/`playing`) and sound effects (`sfx`) are independent flags. The player's choice is kept in `audio/prefs.ts` (`bombroo_audio`, default both on) and applied by `main.ts` (`applyMusicPref`/`applySfxPref`); the top bar has MÚSICA and EFEITOS buttons. `audio.unlock()` runs on any pointer or key press. Effects: `play('bomb'|'explosion'|'pickup'|'powerup'|'hurt'|'door', element?)`. The explosion sound depends on the element (`elementSound()`): fire = flame hiss and crackles (sulfur), water = heavy drops (mercury), earth = crystal crackle (salt), air = soft hum of a glowing gas (ether). Win/game-over jingles: `playWinMusic()` / `playGameOverMusic()`.
-- *Music*: `audio/tracks.ts` holds the tracks (key, scale, tempo, chord progression) and `generateBar()`. Every game (`MainScene.init` -> `audio.nextTrack()`) picks a track different from the last and a new random seed, so even the same track varies. The topbar shows the current track name (`audio.onTrackChange`).
+- *Music*: `audio/tracks.ts` holds six tracks, one per part of the game (`SCENE_TRACKS`: menu/letter, stages 1-4, ending). `audio.playTrack(id)` switches with a fade (no-op if already playing it). Menu starts on the first gesture; `MainScene.init` plays `def.track`; the ending plays `vesperas`. Each play uses a new random seed, so a track never sounds the same twice. The topbar shows the current track name (`audio.onTrackChange`). No random track picking and no player-chosen track: the Music Room only previews.
 
 **Game Constants**: Tuning lives in `src/config.ts`: `CONFIG`, `ELEMENTS`, `BOMB_TYPES`, `BOMB_ORDER`. Modify these when balancing.
 
 ## Known Gaps / Ideas (not implemented)
 
 - Elements react only through bomb chains (`game/chain.ts`): fire ignites, water neutralizes fire, earth is immune. Fire explosions leave no lasting flames yet. Bombs are limited to 2 at a time (up to 5 with power-ups), and the remote bomb counts toward that limit until detonated.
-- Four stages with an ending (garden gate), but no story text, high score or saved stage progress; shop has only 3 one-time items.
+- Four stages with a story ending (Anselmo's confession at the garden gate, `game/story.ts`); stage progress is saved (`bombroo_stages_completed`) and gates the map. No high score; shop has only 3 one-time items.
 - Enemies don't chase (frog, ghost, flower). There is no per-stage unlock of potions: the Aqua potion must be bought in the shop to use the new water mechanic.
 - HUD text is drawn in the canvas, so it is pixel-scaled on very large screens.
 - The Phaser bundle is ~1.2 MB (full build); could be trimmed by importing only the used modules.

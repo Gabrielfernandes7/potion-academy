@@ -20,7 +20,8 @@ const WALL_H = 330; // altura da parede; abaixo dela é chão
 const SHELF_Y = 214;
 
 const ROO_X = 205;
-const ROO_SCALE = 3.3;
+const ROO_SCALE = 3; // escala inteira: todo pixel da Roo tem o mesmo tamanho
+const PIX = 3; // tamanho do pixel das camadas desenhadas por código (líquido, braço, varinha)
 const FEET_Y = 411;
 
 const CAULDRON_X = 412;
@@ -91,12 +92,13 @@ export class MenuScene extends Phaser.Scene {
   private roo!: Phaser.GameObjects.Sprite;
   private arm!: Gfx;
   private liquid!: Gfx;
+  private layers: Array<{ g: Gfx; rt: Phaser.GameObjects.RenderTexture }> = [];
   private wand!: Gfx;
   private tip!: Phaser.GameObjects.Image;
   private tipGlow!: Phaser.GameObjects.Image;
   private trail: Pt[] = [];
   private shelfPotions: ShelfPotion[] = [];
-  private lean = 0; // inclinação extra da Roo (graus), usada nas reações
+  private lean = 0; // recuo da Roo nas reações (vira passos de pixel)
   private aim: Pt | null = null; // para onde a varinha aponta ao chamar um frasco
   private aimBlend = 0; // 0 = mexendo a poção, 1 = apontando
   private busy = false; // há um frasco a caminho do caldeirão
@@ -117,6 +119,7 @@ export class MenuScene extends Phaser.Scene {
     this.liquidMix = 1;
     this.trail = [];
     this.lean = 0;
+    this.layers = [];
     this.aim = null;
     this.aimBlend = 0;
     this.busy = false;
@@ -251,7 +254,29 @@ export class MenuScene extends Phaser.Scene {
     g.fillStyle(0x14161b, 1);
     g.fillEllipse(cx, RIM_Y + 1, LIQ_W + 8, LIQ_H + 6); // interior escuro sob o líquido
 
-    this.liquid = this.add.graphics().setDepth(5);
+    this.liquid = this.pixelLayer(5);
+  }
+
+  // Camada desenhada por código em baixa resolução: o Graphics é desenhado a 1/PIX do tamanho e
+  // ampliado sem suavização, então líquido, braço e varinha têm pixels do mesmo tamanho da Roo.
+  private pixelLayer(depth: number): Gfx {
+    const g = this.make.graphics({}, false);
+    const rt = this.add.renderTexture(0, 0, Math.ceil(W / PIX), Math.ceil(H / PIX)).setOrigin(0).setScale(PIX).setDepth(depth);
+    this.layers.push({ g, rt });
+    return g;
+  }
+
+  // Limpa e prepara a camada para o quadro (coordenadas continuam as do mundo).
+  private beginPixels(g: Gfx): void {
+    g.clear();
+    g.scaleCanvas(1 / PIX, 1 / PIX);
+  }
+
+  private flushPixels(): void {
+    for (const { g, rt } of this.layers) {
+      rt.clear();
+      rt.draw(g);
+    }
   }
 
   // ---------------------------------------------------------------- personagem
@@ -277,8 +302,8 @@ export class MenuScene extends Phaser.Scene {
       .setDepth(8);
     this.roo.anims.play('roo_stir');
 
-    this.arm = this.add.graphics().setDepth(9);
-    this.wand = this.add.graphics().setDepth(10);
+    this.arm = this.pixelLayer(9);
+    this.wand = this.pixelLayer(10);
     this.tip = this.add.image(CAULDRON_X, RIM_Y, 'menu_spark').setVisible(false);
     this.tipGlow = this.add.image(CAULDRON_X, RIM_Y, 'menu_puff').setScale(0.7).setTint(0xffe082)
       .setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.8).setDepth(11);
@@ -496,8 +521,10 @@ export class MenuScene extends Phaser.Scene {
     const a = this.stirAngle;
 
     // corpo: inclina a partir dos pés no ritmo da varinha e "respira"
-    this.roo.setAngle(Math.sin(a - 0.5) * 2.4 + this.lean);
-    this.roo.setScale(ROO_SCALE, ROO_SCALE * (1 + 0.012 * Math.sin(2 * a)));
+    // pixel art não gira: o recuo vira um passo de pixels inteiros para o lado
+    this.roo.setAngle(0);
+    this.roo.x = ROO_X + Math.round((this.lean * 1.5) / ROO_SCALE) * ROO_SCALE;
+    this.roo.setScale(ROO_SCALE);
 
     // ombro e mão (a mão gira em um círculo pequeno, adiantada em relação à ponta)
     const pts = rooStirPoints(CONFIG.tile);
@@ -528,7 +555,7 @@ export class MenuScene extends Phaser.Scene {
     if (this.trail.length > 16) this.trail.shift();
 
     // braço: do ombro até a mão
-    this.arm.clear();
+    this.beginPixels(this.arm);
     this.arm.lineStyle(5.6 * ROO_SCALE * 0.55, FUR, 1);
     this.arm.lineBetween(shoulder.x, shoulder.y, hand.x, hand.y);
     this.arm.fillStyle(FUR, 1);
@@ -537,7 +564,7 @@ export class MenuScene extends Phaser.Scene {
     this.arm.fillCircle(hand.x, hand.y, 3.4 * ROO_SCALE * 0.6);
 
     // varinha: da mão até a ponta
-    this.wand.clear();
+    this.beginPixels(this.wand);
     this.wand.lineStyle(6, 0x4a3822, 1);
     this.wand.lineBetween(hand.x, hand.y, tipX, tipY);
     this.wand.lineStyle(3, 0x9b7b4f, 1);
@@ -550,7 +577,7 @@ export class MenuScene extends Phaser.Scene {
     this.glow.setTint(color).setAlpha(0.16 + 0.3 * this.boost);
     const light = mixColor(color, 0xffffff, 0.45);
     const g = this.liquid;
-    g.clear();
+    this.beginPixels(g);
     g.fillStyle(color, 1);
     g.fillEllipse(CAULDRON_X, RIM_Y + 1, LIQ_W, LIQ_H);
     g.fillStyle(light, 0.4);
@@ -564,5 +591,6 @@ export class MenuScene extends Phaser.Scene {
       g.lineStyle(3, light, (i / this.trail.length) * 0.7);
       g.lineBetween(this.trail[i - 1].x, this.trail[i - 1].y, this.trail[i].x, this.trail[i].y);
     }
+    this.flushPixels();
   }
 }
