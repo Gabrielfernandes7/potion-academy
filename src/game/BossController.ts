@@ -12,6 +12,8 @@
 import Phaser from 'phaser';
 import { CONFIG, DIRS, ELEMENTS, EMPTY, ElementId } from '../config';
 import { rooOriginY } from '../textures/rooGeometry';
+import { readTheme } from '../ui/theme';
+import { BossLine, pickBossLine } from './bossLines';
 import type { MainScene } from '../scenes/MainScene';
 import {
   BOSS_NAME, BossPhase, BossSkill, ELEMENT_POTION_TEXTURE, SKILL_ELEMENT, Tile,
@@ -43,6 +45,7 @@ export class BossController {
   private timers: Timer[] = [];
   private telegraphs = new Set<Phaser.GameObjects.GameObject>();
   private aura: Phaser.GameObjects.Image | null = null;
+  private bubble: Phaser.GameObjects.Text | null = null;
 
   constructor(private readonly scene: MainScene) {
     if (!scene.anims.exists('witch_idle')) {
@@ -101,6 +104,21 @@ export class BossController {
   }
 
   // tempo e utilidades
+
+  // Legenda curta sobre a Belladona. Só uma por vez; some sozinha e não interrompe nada.
+  private say(kind: BossLine): void {
+    this.bubble?.destroy();
+    const theme = readTheme();
+    const t = this.scene.add.text(this.sprite.x, this.sprite.y - 46, pickBossLine(kind), {
+      fontFamily: theme.fontBody, fontSize: '11px', color: '#f1e9d8', fontStyle: 'bold',
+      backgroundColor: '#17110d', padding: { x: 4, y: 2 },
+    }).setOrigin(0.5).setDepth(21);
+    this.bubble = t;
+    this.scene.tweens.add({
+      targets: t, alpha: 0, delay: 1300, duration: 400,
+      onComplete: () => { if (this.bubble === t) this.bubble = null; t.destroy(); },
+    });
+  }
 
   private after(ms: number, fn: () => void): void {
     this.timers.push({ ms, fn });
@@ -166,6 +184,7 @@ export class BossController {
     const skill = pickBossSkill(this.phase, this.lastSkill);
     this.lastSkill = skill;
     this.state = 'casting';
+    this.say(skill);
     if (skill === 'fire') this.castFire(this.phase === 2 ? 2 : 1);
     else if (skill === 'rain') this.castRain();
     else this.castBlink();
@@ -289,7 +308,7 @@ export class BossController {
 
   private explode(tiles: Tile[], element: ElementId): void {
     const el = ELEMENTS[element];
-    for (const t of tiles) this.scene.spawnExplosion(t.x, t.y, el.color, el.glow, element);
+    for (const t of tiles) this.scene.bombSystem.spawnExplosion(t.x, t.y, el.color, el.glow, element);
     this.scene.play('explosion', element);
     this.scene.cameras.main.shake(80, 0.004);
   }
@@ -299,6 +318,7 @@ export class BossController {
   private hit(): void {
     this.hp--;
     this.invulnMs = CONFIG.bossHitInvuln;
+    if (this.hp > 0) this.say('hurt');
     this.scene.floatingText(this.gridX, this.gridY, '-1', '#ff80ab');
     this.scene.play('pickup');
     this.burst(this.sprite.x, this.sprite.y - 10, 'menu_spark', [0xffd54f, 0xffffff, LIME], 12, 100);
@@ -328,6 +348,7 @@ export class BossController {
   }
 
   private furious(): void {
+    this.say('furious');
     this.scene.floatingText(this.gridX, this.gridY - 1, 'FURIOSA!', '#9be564');
     this.scene.cameras.main.flash(260, 60, 140, 40);
     this.aura = this.scene.add.image(this.sprite.x, this.sprite.y - 12, 'menu_puff')
@@ -337,6 +358,7 @@ export class BossController {
 
   private defeat(): void {
     this.state = 'defeated';
+    this.say('defeat');
     this.hidden = false;
     this.timers = [];
     for (const m of this.telegraphs) {

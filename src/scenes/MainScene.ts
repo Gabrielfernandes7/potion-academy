@@ -6,14 +6,14 @@
 // - update() retorna cedo com a loja aberta e, após gameOver/won, só trata a tecla R.
 import Phaser from 'phaser';
 import {
-  BLOCK, BOMB_ORDER, BOMB_TYPES, BombId, CANVAS, CONFIG, DIRS, ELEMENTS, ElementId, EMPTY, ENEMY_TYPES, EnemyKind,
+  BLOCK, BOMB_ORDER, BombId, CANVAS, CONFIG, DIRS, ElementId, EMPTY, ENEMY_TYPES, EnemyKind,
   LAST_STAGE, StageDef, StageTheme, WALL, isImmune, stageDef,
 } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
 import { Bank, hasBombType } from '../storage';
 import { rooOriginY } from '../textures/rooGeometry';
 import { PICKUP_HALO, PICKUP_TEXTURE, PickupType, rollChestCoins, rollReward } from '../game/rewards';
-import type { Bomb, Enemy, Explosion, Facing, Pickup, Player, PowerupCounts, StageData } from '../game/types';
+import type { Enemy, Facing, Pickup, Player, PowerupCounts, StageData } from '../game/types';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
 import { touch } from '../input/touch';
 import { hideGameOver, setPauseVisible, showGameOver } from '../ui/overlays';
@@ -21,7 +21,7 @@ import { isShopOpen } from '../ui/shop';
 import { isHelpOpen } from '../ui/help';
 import { readTheme } from '../ui/theme';
 import { BossController } from '../game/BossController';
-import { chainOutcome } from '../game/chain';
+import { BombSystem } from '../game/BombSystem';
 import { markStageCompleted } from '../storage';
 
 // Partículas de cada elemento na explosão (cada casa atingida solta um punhado delas).
@@ -44,16 +44,6 @@ const HIT_TINT: Record<ElementId, number> = {
   water: 0x4fc3f7,
   earth: 0xa1887f,
   air: 0xe0d8ff,
-};
-
-const EXPLOSION_FX: Record<ElementId, {
-  texture: string; speed: { min: number; max: number }; angle: { min: number; max: number };
-  gravity: number; life: { min: number; max: number }; size: number; count: number; extra: number[]; blend: string;
-}> = {
-  fire: { texture: 'menu_spark', speed: { min: 30, max: 90 }, angle: { min: -130, max: -50 }, gravity: -40, life: { min: 450, max: 900 }, size: 2, count: 7, extra: [0xffd54f], blend: 'ADD' },
-  water: { texture: 'menu_bubble', speed: { min: 20, max: 80 }, angle: { min: 0, max: 360 }, gravity: 120, life: { min: 400, max: 800 }, size: 1.1, count: 8, extra: [0xffffff], blend: 'NORMAL' },
-  earth: { texture: 'menu_spark', speed: { min: 30, max: 90 }, angle: { min: -150, max: -30 }, gravity: 260, life: { min: 400, max: 700 }, size: 1.6, count: 7, extra: [0x8d6e63, 0x6d4c41], blend: 'NORMAL' },
-  air: { texture: 'menu_spark', speed: { min: 20, max: 70 }, angle: { min: 0, max: 360 }, gravity: -10, life: { min: 600, max: 1000 }, size: 1.8, count: 8, extra: [0xffffff, 0xe0d8ff], blend: 'ADD' },
 };
 
 type MainKeys = Record<'space' | 'x' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
@@ -83,8 +73,7 @@ const MOTION: Record<EnemyKind, { hopV: number; hopH: number; bob: number; bobMs
 export class MainScene extends Phaser.Scene {
   grid: number[][] = [];
   blockSprites = new Map<string, Phaser.GameObjects.Image>();
-  bombs: Bomb[] = [];
-  activeExplosions: Explosion[] = [];
+  bombSystem!: BombSystem;
   pickups: Pickup[] = [];
   enemies: Enemy[] = [];
   coins = 0;
@@ -140,8 +129,6 @@ export class MainScene extends Phaser.Scene {
     this.helpPaused = false;
     this.grid = [];
     this.blockSprites = new Map();
-    this.bombs = [];
-    this.activeExplosions = [];
     this.pickups = [];
     this.enemies = [];
     this.coins = 0;
@@ -197,6 +184,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.bombSystem = new BombSystem(this);
     this.createHeroAnims();
     this.buildGrid();
     if (this.def.door) {
@@ -328,138 +316,7 @@ export class MainScene extends Phaser.Scene {
     this.updateHud();
   }
 
-  placeBomb(): void {
-    if (this.bombs.length >= this.player.bombsMax) return;
-    if (this.hasBomb(this.player.gridX, this.player.gridY)) return;
-    const type = BOMB_TYPES[this.bombType];
-    const sprite = this.add.image(
-      this.player.gridX * CONFIG.tile + CONFIG.tile / 2,
-      this.player.gridY * CONFIG.tile + CONFIG.tile / 2,
-      'bomb_' + this.bombType,
-    ).setDepth(5).setScale(0.01);
-    this.tweens.add({ targets: sprite, scale: 1, duration: 150, ease: 'Back.easeOut' });
-    // brilho do elemento + faíscas no pavio; a pulsação acelera perto de explodir (updateBombs)
-    const el = ELEMENTS[type.element];
-    const halo = this.add.image(sprite.x, sprite.y, 'menu_puff').setTint(el.color)
-      .setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.25).setScale(0.85).setDepth(4);
-    const fx = this.add.particles(0, 0, 'menu_spark', {
-      follow: sprite,
-      followOffset: { x: 0, y: -15 },
-      lifespan: 420,
-      speed: { min: 10, max: 38 },
-      angle: { min: -125, max: -55 },
-      scale: { start: 0.9, end: 0 },
-      alpha: { start: 1, end: 0 },
-      frequency: 90,
-      blendMode: 'ADD',
-      tint: [0xffd54f, el.color],
-    }).setDepth(6);
-    this.bombs.push({
-      gridX: this.player.gridX, gridY: this.player.gridY,
-      type: this.bombType, element: type.element, sprite, halo, fx,
-      fuseMs: type.fuse, age: 0,
-      timer: type.fuse, detonated: false,
-    });
-    this.play('bomb');
-    this.updateHud();
-  }
-
-  detonateRemote(): void {
-    for (const b of [...this.bombs]) {
-      if (b.type === 'remote' && !b.detonated) this.detonate(b);
-    }
-  }
-
-  detonate(bomb: Bomb): void {
-    if (bomb.detonated) return;
-    bomb.detonated = true;
-    const type = BOMB_TYPES[bomb.type];
-    const radius = type.radius + this.player.fireLevel;
-    const tiles: Array<{ x: number; y: number }> = [{ x: bomb.gridX, y: bomb.gridY }];
-    for (const [dx, dy] of DIRS) {
-      for (let r = 1; r <= radius; r++) {
-        const nx = bomb.gridX + dx * r;
-        const ny = bomb.gridY + dy * r;
-        const tile = this.getTile(nx, ny);
-        if (tile === null || tile === WALL) break;
-        // reação entre poções: fogo acende, água apaga o fogo, terra é imune (ver game/chain.ts)
-        const chainBomb = this.bombs.find(b => b !== bomb && b.gridX === nx && b.gridY === ny && !b.detonated);
-        if (chainBomb) {
-          const outcome = chainOutcome(bomb.element, chainBomb.element);
-          if (outcome === 'trigger') this.detonate(chainBomb);
-          else if (outcome === 'neutralize') this.neutralizeBomb(chainBomb);
-        }
-        tiles.push({ x: nx, y: ny });
-        if (tile === BLOCK) {
-          this.removeBlock(nx, ny);
-          this.spawnReward(nx, ny);
-          if (!type.pierce) break;
-        }
-      }
-    }
-    const element = ELEMENTS[bomb.element] ?? ELEMENTS.fire;
-    this.boss?.onExplosion(tiles);
-    for (const t of tiles) {
-      for (const enemy of this.enemies) {
-        if (enemy.alive && enemy.gridX === t.x && enemy.gridY === t.y) this.hitEnemy(enemy, bomb.element);
-      }
-      this.spawnExplosion(t.x, t.y, element.color, element.glow, bomb.element);
-    }
-    this.tweens.killTweensOf(bomb.sprite);
-    bomb.sprite.destroy();
-    bomb.halo.destroy();
-    bomb.fx.destroy();
-    this.play('explosion', bomb.element);
-    this.cameras.main.shake(70, 0.003);
-  }
-
   // A água apagou uma poção de fogo: ela se desfaz em vapor, sem explodir.
-  neutralizeBomb(bomb: Bomb): void {
-    if (bomb.detonated) return;
-    bomb.detonated = true;
-    const { x, y } = bomb.sprite;
-    this.tweens.killTweensOf(bomb.sprite);
-    bomb.sprite.destroy();
-    bomb.halo.destroy();
-    bomb.fx.destroy();
-    const steam = this.add.particles(x, y, 'menu_puff', {
-      speed: { min: 8, max: 30 },
-      angle: { min: -120, max: -60 },
-      lifespan: { min: 700, max: 1100 },
-      scale: { start: 0.35, end: 1.1 },
-      alpha: { start: 0.55, end: 0 },
-      tint: [0xe3f2fd, 0xb0bec5, 0xffffff],
-      emitting: false,
-    }).setDepth(10);
-    steam.explode(7);
-    this.time.delayedCall(1300, () => steam.destroy());
-    this.floatingText(Math.floor(x / CONFIG.tile), Math.floor(y / CONFIG.tile), 'APAGADA', '#a8e6f5');
-    this.play('fizzle');
-  }
-
-  pushAbility(): void {
-    if (this.cooldowns.push > 0 || this.player.moving) return;
-    const { gridX, gridY, dir } = this.player;
-    const fx = gridX + dir.x;
-    const fy = gridY + dir.y;
-    const bomb = this.bombs.find(b => b.gridX === fx && b.gridY === fy);
-    if (!bomb) return;
-    let lastX = fx;
-    let lastY = fy;
-    for (let i = 1; i <= CONFIG.pushRange; i++) {
-      const tx = fx + dir.x * i;
-      const ty = fy + dir.y * i;
-      if (!this.isFree(tx, ty)) break;
-      lastX = tx;
-      lastY = ty;
-    }
-    if (lastX === fx && lastY === fy) return;
-    bomb.gridX = lastX;
-    bomb.gridY = lastY;
-    this.tweenSpriteTo(bomb.sprite, lastX, lastY, 200, 'Cubic.easeOut');
-    this.cooldowns.push = CONFIG.pushCd;
-  }
-
   // ---------- Grade, blocos e porta ----------
 
   buildGrid(): void {
@@ -549,7 +406,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   hasBomb(x: number, y: number): boolean {
-    return this.bombs.some(b => b.gridX === x && b.gridY === y);
+    return this.bombSystem.bombs.some(b => b.gridX === x && b.gridY === y);
   }
 
   isFree(x: number, y: number): boolean {
@@ -928,43 +785,7 @@ export class MainScene extends Phaser.Scene {
 
   // ---------- Explosões e dano ----------
 
-  spawnExplosion(x: number, y: number, color: number, glow: number, element: ElementId = 'fire'): void {
-    const px = x * CONFIG.tile + CONFIG.tile / 2;
-    const py = y * CONFIG.tile + CONFIG.tile / 2;
-    const core = this.add.image(px, py, 'menu_puff').setTint(color)
-      .setBlendMode(Phaser.BlendModes.ADD).setDepth(8).setScale(0.9).setAlpha(0.95);
-    const ring = this.add.circle(px, py, 10, color, 0.18)
-      .setStrokeStyle(2, glow, 0.95).setDepth(9);
-    this.tweens.add({
-      targets: core, alpha: 0, scale: 1.9, duration: 420,
-      onComplete: () => core.destroy(),
-    });
-    this.tweens.add({
-      targets: ring, scale: 2.2, alpha: 0, duration: 380,
-      onComplete: () => ring.destroy(),
-    });
-    this.explosionFx(px, py, color, glow, element);
-    this.activeExplosions.push({ x, y, timer: 380, key: `${x},${y}`, hitPlayer: false, element });
-  }
-
   // Punhado de partículas do elemento: brasas (fogo), gotas (água), pedriscos (terra), brilhos (éter).
-  private explosionFx(px: number, py: number, color: number, glow: number, element: ElementId): void {
-    const c = EXPLOSION_FX[element];
-    const emitter = this.add.particles(px, py, c.texture, {
-      speed: c.speed,
-      angle: c.angle,
-      gravityY: c.gravity,
-      lifespan: c.life,
-      scale: { start: c.size, end: 0 },
-      alpha: { start: 1, end: 0 },
-      tint: [color, glow, ...c.extra],
-      blendMode: c.blend,
-      emitting: false,
-    }).setDepth(9);
-    emitter.explode(c.count);
-    this.time.delayedCall(1100, () => emitter.destroy());
-  }
-
   damagePlayer(bypassInvuln = false, element?: ElementId): void {
     if (!bypassInvuln && this.player.invulnerable > 0) return;
     this.player.hp -= CONFIG.damagePerExplosion;
@@ -992,7 +813,7 @@ export class MainScene extends Phaser.Scene {
     if (this.player.invulnerable > 0) return;
     const T = CONFIG.tile;
     const key = `${Math.floor(this.playerSprite.x / T)},${Math.floor(this.playerSprite.y / T)}`;
-    const blast = this.activeExplosions.find(e => e.key === key && !e.hitPlayer);
+    const blast = this.bombSystem.explosions.find(e => e.key === key && !e.hitPlayer);
     if (blast) {
       blast.hitPlayer = true;
       this.damagePlayer(false, blast.element);
@@ -1118,10 +939,10 @@ export class MainScene extends Phaser.Scene {
       else if (right) this.tryMove(1, 0);
     }
 
-    if (JD(this.keys.space) || touch.consumeAction('bomb')) this.placeBomb();
+    if (JD(this.keys.space) || touch.consumeAction('bomb')) this.bombSystem.placeBomb();
     if (touch.consumeAction('cycle')) this.cycleBomb();
-    if (JD(this.keys.x) || touch.consumeAction('push')) this.pushAbility();
-    if (JD(this.keys.d) || touch.consumeAction('detonate')) this.detonateRemote();
+    if (JD(this.keys.x) || touch.consumeAction('push')) this.bombSystem.pushAbility();
+    if (JD(this.keys.d) || touch.consumeAction('detonate')) this.bombSystem.detonateRemote();
     if (JD(this.keys.one)) this.setBomb('normal');
     if (JD(this.keys.two)) this.setBomb('mega');
     if (JD(this.keys.three)) this.setBomb('pierce');
@@ -1140,7 +961,7 @@ export class MainScene extends Phaser.Scene {
       gems: this.gems,
       gemsForDoor: CONFIG.gemsForDoor,
       blocks: this.blockSprites.size,
-      bombsActive: this.bombs.length,
+      bombsActive: this.bombSystem.bombs.length,
       bombsMax: this.player.bombsMax,
       timeLeftMs: this.timeLeft,
       selected: this.bombType,
@@ -1173,29 +994,6 @@ export class MainScene extends Phaser.Scene {
     this.updateTimerHud();
   }
 
-  updateBombs(delta: number): void {
-    for (const bomb of this.bombs) {
-      if (bomb.detonated) continue;
-      bomb.age += delta;
-      bomb.timer -= delta;
-      // pulsa mais rápido e brilha mais conforme o fusível acaba (a etérea pulsa devagar e sempre)
-      const finite = isFinite(bomb.fuseMs);
-      const closeness = finite ? 1 - Math.max(0, bomb.timer / bomb.fuseMs) : 0;
-      const k = Math.sin((bomb.age / 1000) * (finite ? 5 + 16 * closeness : 3));
-      if (bomb.age > 180) bomb.sprite.setScale(1 + 0.07 * k + 0.12 * closeness);
-      bomb.halo.setPosition(bomb.sprite.x, bomb.sprite.y)
-        .setAlpha(0.18 + 0.2 * (0.5 + 0.5 * k) + 0.25 * closeness);
-      if (bomb.timer <= 0) this.detonate(bomb);
-    }
-    const before = this.bombs.length;
-    this.bombs = this.bombs.filter(b => !b.detonated);
-    if (this.bombs.length !== before) this.updateHud();
-  }
-
-  updateExplosions(delta: number): void {
-    this.activeExplosions = this.activeExplosions.filter(e => (e.timer -= delta) > 0);
-  }
-
   updateEnemies(delta: number): void {
     this.lashGfx.clear();
     for (const enemy of [...this.enemies]) {
@@ -1203,7 +1001,7 @@ export class MainScene extends Phaser.Scene {
       const def = ENEMY_TYPES[enemy.kind];
       enemy.fxCooldown = Math.max(0, enemy.fxCooldown - delta);
       // chama residual também atinge inimigos
-      const blast = this.activeExplosions.find(e => e.x === enemy.gridX && e.y === enemy.gridY);
+      const blast = this.bombSystem.explosions.find(e => e.x === enemy.gridX && e.y === enemy.gridY);
       if (blast) {
         this.hitEnemy(enemy, blast.element);
         if (!enemy.alive) continue;
@@ -1399,8 +1197,7 @@ export class MainScene extends Phaser.Scene {
     this.updateTimer(delta);
     this.updateCooldowns(delta);
     this.updateCooldownBar();
-    this.updateBombs(delta);
-    this.updateExplosions(delta);
+    this.bombSystem.update(delta);
     this.updateEnemies(delta);
     this.boss?.update(delta);
     this.checkPlayerHit();

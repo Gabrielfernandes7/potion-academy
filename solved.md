@@ -42,3 +42,40 @@ Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
 - F6. `about/History.mdx` apagado pela autora; a história fica em `docs/12-historia.md`.
 - Inflação de POÇÃO (pedido da autora): baús 5/10/20/50 → 10/20/40/100; moeda solta 1 → 2 (`CONFIG.coinPickupValue`); prêmio da Belladona 40 → 80; prêmio do jardim 30 → 60. Preços da loja iguais. `docs/10-equilibrio.md` atualizado.
 - Verificado: typecheck, 67 testes e build. Não visto no navegador.
+
+## M1. Falas da Belladona (sessão de 2026-11-10, parte 9)
+
+- Legenda curta acima da Belladona nas habilidades, ao ser atingida (se não for a última vida), na fúria e na derrota (`game/bossLines.ts`, `BossController.say`).
+- Não pausa, não bloqueia, uma por vez, some em 1,7 s. Decisão em `docs/06-decisoes.md`.
+- Verificado: testes de falas (`tests/bossLines.test.ts`), typecheck, 69 testes e build. Não visto no duelo.
+
+## Lentidão: nós de áudio que nunca eram liberados (sessão de 2026-11-10, parte 10)
+
+- **Causa (medida):** cada nota (`voice`, `grain`, `breath`) criava nós de ganho (envelope e envio ao reverb) e os deixava conectados ao grafo para sempre. Medido com o navegador de teste: nós conectados vivos chegavam a 503 em 40 s de música, crescendo sem parar.
+- **Correção:** `release()` em `src/audio/AudioEngine.ts` desconecta os nós quando a fonte termina (`onended`).
+- **Depois:** nós vivos estabilizam entre 44 e 62 em 40 s. Resta uma subida leve, a investigar se persistir em partidas longas.
+- **Verificado:** typecheck, 69 testes e build. O FPS na partida ficou em 60 nos dois casos (o teste roda sem GPU real); a melhora que importa é a do grafo de áudio.
+- **Descartado:** partículas (cada emissor é destruído), objetos da cena (voltam ao mesmo número após as explosões) e texturas (geradas uma vez no início).
+
+## Carga de música, testes de carga e documentação de arquitetura (sessão de 2026-11-10, parte 11)
+
+- **Medição:** síntese da música em tempo real custa de 6% a 9% de um núcleo, e a reverberação responde por mais da metade (`scripts/bench-audio.cjs`). O vazamento de nós (parte 10) era bem maior que isso.
+- **Faixas em arquivo: não aplicado.** Ganho estimado de 5% a 9% de CPU. Custo: arquivos de dezenas de MB, e a música deixaria de variar a cada partida (hoje cada jogo sorteia uma semente).
+- **Duelo mais leve:** densidade 0,9 → 0,7 (`BOSS_TRACK` em `src/audio/tracks.ts`). Custo medido caiu de 0,103 para 0,087 de um núcleo.
+- **Testes de carga** em `tests/audioLoad.test.ts`: orçamento de notas (abaixo de 4 por segundo), no máximo 12 vozes ao mesmo tempo, no máximo 6 nós por nota, e nenhum nó ligado depois que os sons acabam. Falam com um contexto de áudio falso.
+- **`release()`** exportada de `AudioEngine.ts` para o teste.
+- **Arquitetura:** `docs/ARCH.md`. Proposta de divisão da `MainScene` em subsistemas (bombas, pickups, inimigos, sono), ainda não aplicada.
+- Verificado: typecheck, 74 testes e build.
+
+## R2. Teste de fumaça (sessão de 2026-11-10, parte 12)
+
+- `scripts/smoke.cjs`: abre o jogo, passa a carta, coloca uma bomba, espera a explosão e falha se houver erro de página ou console.
+- Playwright fica fora do projeto (regra do CLAUDE.md), via variável `PW`.
+- Verificado: passa no servidor de dev; falha quando o servidor não responde.
+
+## Estudo de arquitetura: R1 (parcial), R3 e R4 (sessão de 2026-11-10, parte 13)
+
+- **R1 (parcial), `BombSystem`:** bombas, explosões e empurrão saíram da `MainScene` para `src/game/BombSystem.ts` (221 linhas). A cena caiu de 1.410 para cerca de 1.200 linhas. A cena cria o sistema em `create()`; o chefe chama `bombSystem.spawnExplosion`. Ficou de fora: `PickupSystem`, `EnemySystem` e `SleepSystem`.
+- **R3, testes sem membros privados:** `AudioEngine` ganhou `attachContext(ctx)` (público) e `playNote` ficou público. `tests/audioLoad.test.ts` não acessa mais membros privados; restam dois `as unknown as` que só convertem o contexto falso para o tipo do navegador.
+- **R4, documentação:** `docs/05-como-esta-feito.md` aponta para `ARCH.md` na parte de arquitetura e atualiza a linha de explosões. `ARCH.md` reflete a extração.
+- **Verificado:** typecheck, 74 testes, build, teste de fumaça (bomba colocada e explodida sem erro) e benchmark de áudio rodam sem erro.

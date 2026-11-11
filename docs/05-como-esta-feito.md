@@ -7,7 +7,8 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 | um número de equilíbrio (tempo, vida, custos) | `src/config.ts` |
 | as fases (tempo, inimigos, tema) e os tipos de inimigo | `STAGES` e `ENEMY_TYPES` em `src/config.ts` |
 | a reação entre poções (fogo acende, água apaga, terra imune) | `src/game/chain.ts` |
-| as regras de uma explosão, pickup ou inimigo | `src/scenes/MainScene.ts` |
+| as regras de bombas, poções e explosões | `src/game/BombSystem.ts` |
+| as regras de pickup, inimigo e sono | `src/scenes/MainScene.ts` (serão separadas, ver `ARCH.md`) |
 | o desenho da Roo | `src/textures/roo.ts` |
 | o desenho de poções | `src/textures/potions.ts` |
 | o desenho de itens e inimigos | `src/textures/entities.ts` |
@@ -28,9 +29,7 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 
 ## Peças que se conversam
 
-- `main.ts` liga os botões das telas de texto ao jogo.
-- `launcher.ts` cria o jogo uma vez e troca entre menu e partida.
-- A `MainScene` manda o estado para a `HudScene` por eventos (`game/hudState.ts`).
+Cenas, comunicação entre telas, armazenamento e áudio estão descritos em `ARCH.md` (referência técnica). Este arquivo só diz onde mexer.
 
 ## Fases
 

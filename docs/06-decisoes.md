@@ -81,3 +81,8 @@ Novas decisões entram no fim.
 - **Motivo:** pedido da autora do jogo, que quer mais inflação de POÇÃO. Os preços ficaram iguais para que as compras fiquem mais baratas em termos relativos.
 - **Consequência:** baús, moedas soltas, moedas de inimigos e os prêmios de chefe (80) e de jardim (60) dobraram. A tabela de chances dos baús não mudou; só os valores.
 - **Ficou de fora:** reajustar os preços da loja. Se a compra ficar barata demais, esse é o próximo ajuste.
+
+## Falas curtas da Belladona, sem pausar o jogo
+- **Motivo:** a Belladona era só um alvo que lança poções. Uma fala curta em cada habilidade, ao ser atingida e na derrota dá personalidade sem mudar a regra.
+- **Consequência:** a fala é uma legenda de 1,7 s acima dela, no máximo uma por vez (`game/bossLines.ts`). Não pausa, não bloqueia e não muda tempos de aviso nem de dano.
+- **Ficou de fora:** diálogos com janela, que interromperiam o ritmo do duelo.

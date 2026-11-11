@@ -34,6 +34,11 @@ const MUSIC_LEVEL = 0.55;
 const LOOKAHEAD_S = 1.0;
 const SCHEDULER_MS = 100;
 
+// Solta nós de áudio que já terminaram: desconecta de tudo (o navegador os libera depois).
+export function release(...nodes: Array<AudioNode | undefined>): void {
+  for (const n of nodes) n?.disconnect();
+}
+
 class AudioEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
@@ -85,6 +90,12 @@ class AudioEngine {
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume();
     return true;
+  }
+
+  // Usa um contexto já criado (testes e benchmarks): monta o grafo de áudio nele.
+  attachContext(ctx: AudioContext): void {
+    this.ctx = ctx;
+    this.buildGraph(ctx);
   }
 
   private buildGraph(ctx: AudioContext): void {
@@ -163,12 +174,15 @@ class AudioEngine {
 
     osc.connect(env);
     env.connect(bus);
+    let send: GainNode | undefined;
     if (o.send && this.reverbIn) {
-      const send = ctx.createGain();
+      send = ctx.createGain();
       send.gain.value = o.send;
       env.connect(send);
       send.connect(this.reverbIn);
     }
+    // quando a nota acaba, solta os nós (sem isso o grafo cresce para sempre)
+    osc.onended = () => release(osc, env, send);
     osc.start(time);
     osc.stop(time + dur + 0.05);
   }
@@ -190,12 +204,14 @@ class AudioEngine {
     src.connect(filter);
     filter.connect(env);
     env.connect(this.sfxBus);
+    let s: GainNode | undefined;
     if (send > 0 && this.reverbIn) {
-      const s = ctx.createGain();
+      s = ctx.createGain();
       s.gain.value = send;
       env.connect(s);
       s.connect(this.reverbIn);
     }
+    src.onended = () => release(src, filter, env, s);
     src.start(time, Math.random() * 1.5);
     src.stop(time + dur + 0.02);
   }
@@ -265,12 +281,14 @@ class AudioEngine {
     src.connect(filter);
     filter.connect(env);
     env.connect(this.sfxBus);
+    let s: GainNode | undefined;
     if (send > 0 && this.reverbIn) {
-      const s = ctx.createGain();
+      s = ctx.createGain();
       s.gain.value = send;
       env.connect(s);
       s.connect(this.reverbIn);
     }
+    src.onended = () => release(src, filter, env, s);
     src.start(time, Math.random() * 1.5);
     src.stop(time + dur + 0.05);
   }
@@ -409,7 +427,8 @@ class AudioEngine {
     }
   }
 
-  private playNote(ev: NoteEvent, time: number, stepDur: number): void {
+  // Toca uma nota no tempo dado (chamado pelo agendador; público para testes de carga e benchmarks).
+  playNote(ev: NoteEvent, time: number, stepDur: number): void {
     const freq = midiToHz(ev.midi);
     const dur = ev.steps * stepDur;
     switch (ev.voice) {

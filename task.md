@@ -26,7 +26,6 @@ Base: `docs/12-historia.md`. Mapa proposto (o código ainda usa os nomes atuais;
 
 ### Tarefas médias
 
-- M1. Falas da Belladona: aviso antes da habilidade, fala ao ser atingida e fala da derrota (`BossController.ts`, textos curtos).
 - M2. Confissão de Anselmo na fase 4: cartões de diálogo, sem NPC andando.
 - M3. Cena final no Caldeirão: Roo sozinha, frasco vazio na HUD, sem a tela de vitória genérica.
 - M4. Dano por elemento no chefe: tabela em `config.ts` e `BossController`. Registrar em `docs/06-decisoes.md` antes.
@@ -39,6 +38,14 @@ Base: `docs/12-historia.md`. Mapa proposto (o código ainda usa os nomes atuais;
 - D2. Power-ups por tipo de poção (`fireLevel`, `bombsMax`, `speedUp` hoje são globais). Exige migração em `storage.ts` sem quebrar `bombroo_owned`.
 - D3. Companheiros de viagem (boticário cético, criatura transformada): sprites, seguir a Roo e uma fala própria de cada um.
 - D4. Equilíbrio do puzzle e das fases novas, com teste de pessoas (roteiro em `docs/10-equilibrio.md`).
+
+## Arquitetura (recomendações do estudo de 2026-11-10)
+
+Ordem de execução: R2, R1, R3, R4. R5 e R6 ficam para depois do jogo estar fechado. Concluídos: R2, R3, R4 e a primeira parte do R1 (ver `solved.md`).
+
+- R1 (parcial). Feito: `BombSystem`. Falta: `PickupSystem`, `EnemySystem`, `SleepSystem`, uma por vez, com testes das regras que saírem. Também falta tirar a parte pura do `BombSystem` (cálculo dos raios de explosão) para teste.
+- R5. Importar só os módulos do Phaser usados (bundle 1,2 MB). Depois.
+- R6. Decidir a música: orçamento medido ou reverberação mais curta. Depois.
 
 ## Trilha de personagens (só esta trilha por enquanto)
 

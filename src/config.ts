@@ -36,7 +36,7 @@ export const CONFIG = {
   coinPickupValue: 2,         // POÇÃO de cada moeda solta (antes 1)
   bossVictoryBonus: 80,       // POÇÃO ganha ao derrotá-la (antes 40)
   gardenVictoryBonus: 60,     // POÇÃO ganha ao cruzar o portão do jardim, fim do jogo (antes 30)
-  stageClearHeal: 1,          // vida recuperada ao passar de uma fase para a seguinte
+  stageClearHeal: 0,          // vida recuperada ao passar de uma fase para a seguinte
 
   // ---- flor do mal (jardim) ----
   flowerLashCycleMs: 3200,    // intervalo entre os chicotes de espinhos
