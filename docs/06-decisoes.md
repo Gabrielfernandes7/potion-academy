@@ -88,7 +88,7 @@ Novas decisões entram no fim.
 - **Ficou de fora:** diálogos com janela, que interromperiam o ritmo do duelo.
 
 ## Uma música para cada parte do jogo (fim do sorteio)
-- **Motivo:** dez faixas sorteadas não contavam a história e cansavam. Agora são seis, todas lentas, em modos antigos e pentatônicas (alaúde, harpa e sinos), para um clima de lareira e mosteiro: Lareira do Caldeirão (menu e carta), Noite no Alambique (fase 1), Ecos no Salão (fase 2), Duelo na Torre (fase 3), Jardim do Mosteiro (fase 4) e Vésperas (confissão e final).
+- **Motivo:** dez faixas sorteadas não contavam a história e cansavam. Agora são seis, todas lentas, em modos antigos e pentatônicas (alaúde, harpa e sinos), para um clima de lareira e mosteiro: Nocturno com Flauta (menu e carta), Noite no Alambique (fase 1), Ecos no Salão (fase 2), Duelo na Torre (fase 3), Jardim do Mosteiro (fase 4) e Vésperas (confissão e final).
 - **Consequência:** a faixa de cada parte está em `SCENE_TRACKS` (`audio/tracks.ts`) e cada fase aponta a sua em `STAGES[].track`. A semente continua nova a cada vez, então a mesma faixa nunca soa igual. A Sala de Música virou um lugar para ouvir cada parte; não muda o que toca nas fases. A chave `bombroo_track` não é mais lida.
 - **Ficou de fora:** voltar a sortear faixas, ou deixar a jogadora trocar a música de uma fase.
 

@@ -6,7 +6,7 @@ import { byId, isShown, setShown } from './dom';
 
 // Uma faixa para cada parte do jogo; a Sala só deixa ouvir (não muda o que toca nas fases).
 const PARTS: { id: string; part: string }[] = [
-  { id: 'lareira', part: 'Menu e carta' },
+  { id: 'nocturno', part: 'Menu e carta' },
   { id: 'alambique', part: 'Fase 1 · O Chamado' },
   { id: 'ecos', part: 'Fase 2 · O Caminho' },
   { id: 'duelo', part: 'Fase 3 · O Duelo' },

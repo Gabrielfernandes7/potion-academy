@@ -318,7 +318,7 @@ class AudioEngine {
   start(): void {
     if (this.playing) return;
     if (!this.ensureContext()) return;
-    if (!this.track) this.chooseTrack('lareira');
+    if (!this.track) this.chooseTrack('nocturno');
     this.enabled = true;
     this.playing = true;
     this.beginTrack();
@@ -368,7 +368,7 @@ class AudioEngine {
   }
 
   private chooseTrack(id: string): void {
-    this.track = trackById(id) ?? trackById('lareira') ?? null;
+    this.track = trackById(id) ?? trackById('nocturno') ?? null;
     this.seed = Math.floor(Math.random() * 0xffffffff);
   }
 
@@ -430,6 +430,11 @@ class AudioEngine {
       case 'melody':
         this.voice(freq, time, dur * 1.8, { gain: 0.026, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
         this.voice(freq * 2, time, dur * 0.9, { gain: 0.005, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
+        break;
+      case 'flute':
+        // flauta: tom puro, ataque lento para o sopro entrar, um toque de harmônico e a nota se sustenta
+        this.voice(freq, time, dur * 1.6, { gain: 0.03, type: 'sine', attack: 0.09, bus: 'music', send: 0.35 });
+        this.voice(freq * 2, time, dur * 0.8, { gain: 0.004, type: 'sine', attack: 0.12, bus: 'music', send: 0.3 });
         break;
       case 'bell':
         this.voice(freq, time, 1.9, { gain: 0.02, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });

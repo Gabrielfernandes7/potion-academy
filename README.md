@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <b>Potion Academy</b> é um jogo de alquimia indie desenvolvido para navegador. Jogue com a <b>Roo</b>, uma feiticeira de capa roxa, enquanto ela atravessa quatro fases (o laboratório, o salão dos fantasmas, o duelo com a temível Belladona e o jardim do castelo), lançando poções de quatro elementos e quebrando caixotes.
+  <b>Potion Academy</b> é um jogo de alquimia indie desenvolvido para navegador. Jogue com a <b>Roo</b>, uma bruxa-canguru de capa roxa, enquanto ela atravessa quatro fases (o laboratório, o salão dos fantasmas, o duelo com a temível Belladona e o jardim do castelo), lançando poções de quatro elementos e quebrando caixotes.
 </p>
 
 <p align="center">
@@ -16,6 +16,8 @@
 
 <p align="center">
   <img src="docs/img/roo-lendo.gif" alt="A Roo lendo à luz de velas" width="450">
+  &nbsp;
+  <img src="docs/img/frei-anselmo-lendo.gif" alt="Frei Anselmo lendo a Bíblia no mosteiro" width="320">
 </p>
 
 ---
@@ -28,7 +30,7 @@ Certifique-se de ter o [Node.js](https://nodejs.org/) instalado em sua máquina.
 ### Instalação e Execução
 ```bash
 # Clone o repositório e acesse a pasta
-git clone https://github.com/seu-usuario/potion-academy.git
+git clone https://github.com/Gabrielfernandes7/potion-academy.git
 cd potion-academy
 
 # Instale as dependências
@@ -53,7 +55,8 @@ Abra `http://localhost:5173` no seu navegador.
 * 🔮 **Quatro Elementos que Reagem entre Si:** o fogo acende outras poções, a água apaga as de fogo e a terra é estável. Cada elemento tem explosão e som próprios.
 * 🗺️ **Quatro Fases:** sapos magos, fantasmas que atravessam paredes, um duelo com chefe e um jardim com flores do mal que resistem à água.
 * 🧙‍♀️ **Chefe com Avisos:** A Belladona lança poções, avisa no chão antes de cada ataque e acelera à medida que perde vida.
-* 🎶 **Trilha Sonora Procedural:** 6 faixas geradas em tempo real via WebAudio, uma para cada parte da história, e uma sala para ouvi-las.
+* 🎶 **Trilha Sonora Procedural:** 6 faixas geradas em tempo real via WebAudio, uma para cada parte da história (cada fase tem a sua), e uma sala para ouvi-las.
+* 📜 **História em Passagens:** cartões entre as fases, com pistas do mestre desaparecido, e a confissão final de frei Anselmo.
 * 🎨 **Assets 100% Procedurais:** Sprites gerados em tempo real, sintetizadores de som e tipografia via `@fontsource`.
 * 📱 **Design Responsivo:** funciona em celular (em pé e deitado, com controles de toque), tablet, computador e telas grandes, sem rolagem.
 

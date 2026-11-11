@@ -28,7 +28,7 @@ import { markStageCompleted } from '../storage';
 import { cloneUpgrades, createUpgrades } from '../game/upgrades';
 import { SCENE_TRACKS } from '../audio/tracks';
 import { showDialogue } from '../ui/dialogue';
-import { ANSELMO, BELLADONA_CARDS, ENDING_CARDS } from '../game/story';
+import { ANSELMO, BELLADONA_CARDS, ENDING_CARDS, PASSAGE_CARDS, type StoryCard } from '../game/story';
 
 // Cor que tinge a Roo ao ser atingida por cada elemento.
 const HIT_TINT: Record<ElementId, number> = {
@@ -460,6 +460,20 @@ export class MainScene extends Phaser.Scene {
     }
     markStageCompleted(this.stage);
     this.floatingText(this.player.gridX, this.player.gridY, 'FASE COMPLETA!', '#9be564');
+    void this.playPassage();
+  }
+
+  // Passagem entre fases: a Roo lê ou ouve algo (se a fase tem cartões) e só então segue.
+  playPassage(): void {
+    const cards = PASSAGE_CARDS[this.stage];
+    if (cards) void this.showPassage(cards);
+    else this.advanceStage();
+  }
+
+  async showPassage(cards: StoryCard[]): Promise<void> {
+    this.scene.pause();
+    await showDialogue(cards, 'SEGUIR');
+    this.scene.resume();
     this.advanceStage();
   }
 

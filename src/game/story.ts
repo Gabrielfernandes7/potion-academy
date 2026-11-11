@@ -30,3 +30,20 @@ export const CAULDRON_LINES: string[] = [
   'Lá fora, em algum lugar, as escrituras já eram copiadas.',
   'Por enquanto, bastava mexer a poção, devagar.',
 ];
+
+// Passagens: o que a Roo lê, ouve e entende ao vencer cada fase (chave = fase vencida).
+// Antes da próxima fase, sem pausa de jogo além da conversa. Narração da Roo em primeira pessoa.
+export const ROO = 'Roo';
+export const MESTRE = 'O mestre';
+
+export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
+  1: [
+    { speaker: ROO, text: 'Ao sair do laboratório, encontro no chão uma página rasgada. A letra é do mestre, a mesma das minhas lições.' },
+    { speaker: ROO, text: 'Ele escreveu "a terra é de quem a cultiva", riscou e escreveu de novo. Nunca o vi hesitar diante de uma fórmula.' },
+  ],
+  2: [
+    { speaker: MESTRE, text: '...não é ouro o que procuro, Roo. Diga ao Anselmo que eu...' },
+    { speaker: ROO, text: 'A voz se perde entre as colunas. Anselmo sabia que o mestre tinha ido até aqui? Ou só sabia que eu seguiria os ecos?' },
+    { speaker: BELLADONA, text: 'Você chegou até aqui, e ele também chegou, uma vez. Depois pediu que eu parasse de ler. Eu não parei.' },
+  ],
+};

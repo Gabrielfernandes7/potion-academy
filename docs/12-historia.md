@@ -70,6 +70,7 @@ Roo aprende alquimia (mecânicas de poção), magia (elementos) e **fé** — ma
 |---|---|---|
 | A carta | antes da fase 1 (`ui/letter.ts`) | retrato de Anselmo e o texto da carta |
 | Cada fase | cartão de entrada | lugar, nome do ato e uma frase de história (`STAGES` em `config.ts`) |
+| Passagens | ao vencer a fase 1 e a fase 2, antes da próxima (`PASSAGE_CARDS` em `game/story.ts`) | a página rasgada do mestre; os ecos dele e a voz de Belladona na torre |
 | O portão | fase 4, ao pegar as 3 gemas | Anselmo aparece no portão |
 | A confissão | ao cruzar o portão (`ENDING_CARDS` em `game/story.ts`) | seis cartões: cópias, confissão, frasco vazio |
 | O fim | tela final "Jornada cumprida" | "o que você faria com o frasco vazio?" |

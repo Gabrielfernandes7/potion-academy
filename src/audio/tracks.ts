@@ -4,8 +4,8 @@
 // gerador produz notas (pad, baixo, melodia, sinos) a partir de um sorteio com semente.
 // A faixa é fixa por parte do jogo; a semente é nova a cada vez, então ela nunca soa igual.
 
-type Voice = 'pad' | 'bass' | 'melody' | 'bell';
-type Style = 'melody' | 'arp' | 'sparse';
+type Voice = 'pad' | 'bass' | 'melody' | 'flute' | 'bell';
+type Style = 'melody' | 'arp' | 'sparse' | 'nocturne';
 
 export interface NoteEvent {
   step: number; // colcheia dentro do compasso (0 a 7)
@@ -36,12 +36,14 @@ export const STEPS_PER_BAR = 8;
 // Tudo em modos antigos (dórico, mixolídio, eólio) e pentatônicas, com andamento lento:
 // soa como alaúde, harpa e sinos de mosteiro, aconchegante e medieval.
 export const TRACKS: Track[] = [
-  // Menu e carta: a lareira do Caldeirão. Maior, lenta, calorosa.
+  // Menu e carta (intro): nocturno ao estilo de Chopin, com flauta. Mi bemol maior, acordes
+  // arpejados à esquerda, melodia cantada e ornamentada à direita. Inspirado no gênero, sem citar
+  // nenhuma peça: a melodia é gerada pelo código.
   {
-    id: 'lareira', name: 'Lareira do Caldeirão', bpm: 62, tonic: 55, scale: [0, 2, 4, 7, 9], style: 'melody', density: 0.4,
+    id: 'nocturno', name: 'Nocturno com Flauta', bpm: 60, tonic: 51, scale: [0, 2, 4, 5, 7, 9, 11], style: 'nocturne', density: 0.55,
     chords: [
-      { root: 0, tones: [0, 4, 7] }, { root: 5, tones: [0, 4, 7] },
-      { root: 9, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
+      { root: 0, tones: [0, 4, 7] }, { root: 9, tones: [0, 3, 7] },
+      { root: 8, tones: [0, 4, 7] }, { root: 7, tones: [0, 4, 7] },
     ],
   },
   // Fase 1, O Chamado: o laboratório à noite, ré dórico, harpa serena.
@@ -60,9 +62,9 @@ export const TRACKS: Track[] = [
       { root: 5, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
     ],
   },
-  // Fase 3, O Duelo: mais firme, mas ainda macia (fora do duelo ninguém a toca).
+  // Fase 3, O Duelo: a mais tensa, no teto de andamento e com mais notas; o acorde final não resolve.
   {
-    id: 'duelo', name: 'Duelo na Torre', bpm: 78, tonic: 57, scale: [0, 3, 5, 7, 10], style: 'arp', density: 0.65,
+    id: 'duelo', name: 'Duelo na Torre', bpm: 80, tonic: 57, scale: [0, 3, 5, 7, 10], style: 'arp', density: 0.7,
     chords: [
       { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
       { root: 3, tones: [0, 4, 7] }, { root: 10, tones: [0, 4, 7] },
@@ -88,8 +90,8 @@ export const TRACKS: Track[] = [
 
 // Qual faixa toca em cada parte do jogo.
 export const SCENE_TRACKS = {
-  menu: 'lareira',
-  letter: 'lareira',
+  menu: 'nocturno',
+  letter: 'nocturno',
   stage1: 'alambique',
   stage2: 'ecos',
   stage3: 'duelo',
@@ -164,7 +166,9 @@ export function generateBar(track: Track, barIndex: number, rng: () => number, s
       }
     }
   } else {
-    // melodia: anda por graus próximos; nos tempos fortes prefere notas do acorde
+    // melodia: anda por graus próximos; nos tempos fortes prefere notas do acorde.
+    // No nocturno a melodia é tocada pela flauta.
+    const voice: Voice = track.style === 'nocturne' ? 'flute' : 'melody';
     for (let s = 0; s < STEPS_PER_BAR; s++) {
       const strong = s % 4 === 0;
       const p = strong ? Math.min(0.95, track.density + 0.3) : track.density * 0.7;
@@ -182,7 +186,7 @@ export function generateBar(track: Track, barIndex: number, rng: () => number, s
         const move = [-2, -1, 1, 2][Math.floor(rng() * 4)];
         state.idx = Math.max(0, Math.min(pitches.length - 1, state.idx + move));
       }
-      events.push({ step: s, voice: 'melody', midi: pitches[state.idx], steps: strong ? 3 : 2 });
+      events.push({ step: s, voice, midi: pitches[state.idx], steps: strong ? 3 : 2 });
     }
   }
 

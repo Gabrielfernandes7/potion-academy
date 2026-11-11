@@ -3,7 +3,7 @@
 Este arquivo é a memória do projeto entre sessões. Leia antes de começar, e atualize ao terminar cada tarefa.
 Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo). O histórico do que já foi feito está em `solved.md`.
 
-Última atualização: 2026-11-10 (parte 9). Alterações das partes 6 a 9 ainda **sem commit**.
+Última atualização: 2026-11-11 (parte 10: história em passagens, música por fase, README). Alterações das partes 6 a 10 ainda **sem commit**.
 
 ## Aguardando você (nada aqui eu consigo fechar sozinho)
 
@@ -13,13 +13,19 @@ Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo). O
 - **Belladona nova**: poses `witch_talk` (fala) e `witch_defeat` (vencida, calma, sem girar nem sumir). Ver se a derrota agora tem a dignidade certa.
 - **Power-ups por poção** (`game/upgrades.ts`): `+1 RAIO` e `+1 FRASCO` valem só para a poção escolhida. Jogar e dizer se o limite por poção deixa o jogo fácil demais (alternativa: limitar o total de frascos).
 - Vida entre fases: se ficar duro, subir a chance do coração em `game/rewards.ts`.
-- Músicas (6 faixas, nenhuma ouvida): clima, andamento e volume. Sons dos elementos (fogo, água, terra, éter) também.
+- Músicas (6 faixas, nenhuma ouvida): clima, andamento e volume. Parâmetros de cada uma e o arco da tensão em `docs/13-musica.md`; o duelo foi para 80 BPM. Sons dos elementos (fogo, água, terra, éter) também.
+- Passagens entre fases (`PASSAGE_CARDS`, fases 1 e 2): ver se o ritmo do jogo não quebra e se o texto soa natural em português.
 - Chance dos baús: seu exemplo (5 moedas 1%, 20 moedas 5%) é o inverso da regra implementada (quanto maior o prêmio, menor a chance). Confirmar os números (`CHEST_COMMON`/`CHEST_RICH` em `config.ts`).
 - Lentidão: no meu teste (Chromium sem GPU) são 60 fps e menos de 1 ms por quadro, sem vazamento. Se persistir, preciso de aparelho/navegador, tela e se piora com o tempo.
 - "Som não toca" (relato antigo): causa no seu computador não confirmada. Preciso do navegador, do sistema e de quando o som para.
 - Aparelho de celular real (toque, mapa, layout): só testado por emulação.
 - Equilíbrio com pessoas (roteiro em `docs/10-equilibrio.md`): 5 a 10 partidas, anotar e ajustar (era a D4).
-- Licença do projeto e endereço final do site (`og:image` absoluto).
+- Licença do projeto: **sua decisão** (o README continua sem licença). Endereço final do site (`og:image` absoluto).
+- Regras e recompensas nos documentos: uma fonte oficial (hoje `docs/10-equilibrio.md` e `config.ts`); ainda não conferido ponto a ponto.
+
+**Ideia para depois: Roo com fogo (decisão de desenho, sem código ainda):**
+- Power-up de fogo (`+1 RAIO`) muda a aparência da Roo enquanto o efeito dura.
+- Perguntas em aberto: (1) só o de fogo para testar, ou todos com a sua cor? (2) (a) capa com bordas laranja e vermelhas e chapéu amarelo, ou (b) a Roo inteira com brilho de chama? Recomendação: (a) e começar só pelo fogo, por ser mais legível em 40 px.
 
 **Decisões suas, em segundo plano:**
 - **Boticário**: quem é (Anselmo ou outro?), se é jogável. Minha sugestão: não jogável na primeira versão, personagem de história e da loja. Com isso sai o meta prompt (P4).
