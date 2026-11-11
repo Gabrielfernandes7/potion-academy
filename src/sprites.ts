@@ -12,7 +12,7 @@ interface Group { id: string; title: string; note: string; test: (key: string) =
 
 const GROUPS: Group[] = [
   { id: 'heroes', title: 'Heróis (a Roo)', note: 'roo_{down,up,side}_0-3: andar. roo_sleep_*: dormindo. roo_stir_*: mexendo a poção (menu, sem braço). roo_maestro_*: maestro de casaca (Sala de Música). roo_read_*: de frente, lendo; vemos a capa do livro e a folha virando por cima (GIF do README).', test: k => k.startsWith('roo_') },
-  { id: 'bosses', title: 'Chefes', note: 'Belladona. witch_idle_0/1: parada. witch_cast: lançando poção. witch_hurt: machucada.', test: k => k.startsWith('witch_') },
+  { id: 'bosses', title: 'Chefes', note: 'Belladona. witch_idle_0/1: parada. witch_cast: lançando poção. witch_hurt: machucada. witch_talk_0/1: falando. witch_defeat: vencida, calma, cabeça baixa.', test: k => k.startsWith('witch_') },
   { id: 'humans', title: 'Personagens humanos', note: 'Frei Anselmo (anselmo_front_0/1: de frente, 1 respira; anselmo_back: de costas; anselmo_side: perfil; anselmo_retrato: de frente em 4x, vetorial, usado na carta e na confissão). Aparece na carta, no portão do jardim e na confissão final.', test: k => k.startsWith('anselmo_') },
   { id: 'enemies', title: 'Inimigos', note: 'enemy: sapo mago (laboratório e jardim). enemy_ghost: fantasma (salão dos fantasmas; atravessa paredes). enemy_flower: flor do mal (jardim; fixa, imune à água).', test: k => k.startsWith('enemy') },
   { id: 'objects', title: 'Objetos', note: 'Poções: um formato por elemento: fogo (balão), água (tubo), terra (pote), éter (losango). Itens: power-ups são fichas redondas; moeda, gema, coração e baú são itens soltos.', test: k => k.startsWith('bomb_') || k.startsWith('pickup_') },

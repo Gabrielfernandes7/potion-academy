@@ -56,6 +56,14 @@ export class BossController {
         repeat: -1,
       });
     }
+    if (!scene.anims.exists('witch_talk')) {
+      scene.anims.create({
+        key: 'witch_talk',
+        frames: [{ key: 'witch_talk_0' }, { key: 'witch_talk_1' }],
+        frameRate: 6,
+        repeat: -1,
+      });
+    }
     this.sprite = scene.add.sprite(center(this.gridX), center(this.gridY), 'witch_idle_0')
       .setOrigin(0.5, rooOriginY(T)).setDepth(9).setScale(0.01);
     this.sprite.anims.play('witch_idle');
@@ -114,6 +122,10 @@ export class BossController {
       backgroundColor: '#17110d', padding: { x: 4, y: 2 },
     }).setOrigin(0.5).setDepth(21);
     this.bubble = t;
+    if (this.state === 'idle') {
+      this.setPose('talk');
+      this.after(1300, () => { if (this.state === 'idle') this.setPose('idle'); });
+    }
     this.scene.tweens.add({
       targets: t, alpha: 0, delay: 1300, duration: 400,
       onComplete: () => { if (this.bubble === t) this.bubble = null; t.destroy(); },
@@ -134,13 +146,13 @@ export class BossController {
     }
   }
 
-  private setPose(pose: 'idle' | 'cast' | 'hurt'): void {
-    if (pose === 'idle') {
-      this.sprite.anims.play('witch_idle', true);
+  private setPose(pose: 'idle' | 'cast' | 'hurt' | 'talk' | 'defeat'): void {
+    if (pose === 'idle' || pose === 'talk') {
+      this.sprite.anims.play(pose === 'idle' ? 'witch_idle' : 'witch_talk', true);
       return;
     }
     this.sprite.anims.stop();
-    this.sprite.setTexture(pose === 'cast' ? 'witch_cast' : 'witch_hurt');
+    this.sprite.setTexture({ cast: 'witch_cast', hurt: 'witch_hurt', defeat: 'witch_defeat' }[pose]);
   }
 
   private burst(x: number, y: number, texture: string, tint: number[], count: number, speed = 90): void {
@@ -366,13 +378,11 @@ export class BossController {
       m.destroy();
     }
     this.telegraphs.clear();
-    this.setPose('hurt');
+    this.setPose('defeat');
     this.scene.updateHud();
     this.burst(this.sprite.x, this.sprite.y - 10, 'menu_spark', [LIME, 0xffd54f, 0xffffff, 0xd81b60], 40, 170);
     this.scene.tweens.killTweensOf(this.sprite);
-    this.scene.tweens.add({
-      targets: this.sprite, angle: 540, scale: 0.05, alpha: 0, duration: 1300, ease: 'Cubic.easeIn',
-    });
+    // sem girar nem encolher: ela fica de pé, cabeça baixa, e só se apaga quando a Roo parte
     if (this.aura) this.aura.destroy();
     this.scene.play('door');
     this.after(1500, () => this.scene.onBossDefeated());

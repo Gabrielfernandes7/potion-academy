@@ -2,13 +2,14 @@
 // cabelo carmim e olhos brilhantes. Mesmo tamanho da Roo (tile + folga no topo).
 //
 // Poses:  'idle' (2 frames: balança o manto e o chapéu), 'cast' (braço levantado com a poção),
-//         'hurt' (olhos fechados, sobrancelhas caídas).
+//         'hurt' (olhos fechados, sobrancelhas caídas), 'talk' (2 frames: boca abre e fecha, parada),
+//         'defeat' (vencida, sem humilhação: olhos fechados em calma, cabeça baixa, poção abaixada).
 import Phaser from 'phaser';
 import { ROO_HEAD_ROOM, rooTextureHeight } from './rooGeometry';
 
 type Gfx = Phaser.GameObjects.Graphics;
 type Pt = readonly [number, number];
-type WitchPose = 'idle' | 'cast' | 'hurt';
+type WitchPose = 'idle' | 'cast' | 'hurt' | 'talk' | 'defeat';
 
 const ROBE = 0x143d36;
 const ROBE_DARK = 0x0b2420;
@@ -54,13 +55,15 @@ function flask(g: Gfx, x: number, y: number, glow: boolean): void {
 function drawWitchFrame(g: Gfx, T: number, frame: number, pose: WitchPose): void {
   g.clear();
   const f = frame % 2;
+  const defeat = pose === 'defeat';
   const B = rooTextureHeight(T);
   const cx = T / 2;
-  const sway = f === 0 ? -0.8 : 0.8;
-  const breath = f === 1 ? 0.6 : 0;
-  const cy = T / 2 + 1 + ROO_HEAD_ROOM + (pose === 'hurt' ? 0.8 : 0);
+  const sway = defeat ? 0 : f === 0 ? -0.8 : 0.8;
+  const breath = pose === 'talk' ? 0 : f === 1 ? 0.6 : 0;
+  const cy = T / 2 + 1 + ROO_HEAD_ROOM + (pose === 'hurt' ? 0.8 : defeat ? 1 : 0);
   const casting = pose === 'cast';
   const hurt = pose === 'hurt';
+  const talkOpen = pose === 'talk' && f === 1;
 
   // sombra
   g.fillStyle(0x000000, 0.22);
@@ -129,6 +132,14 @@ function drawWitchFrame(g: Gfx, T: number, frame: number, pose: WitchPose): void
     line(g, [[cx - 1.8, cy - 11], [cx - 4.8, cy - 8.8]], 0x2a0a1a, 1.2);
     line(g, [[cx + 1.8, cy - 11], [cx + 4.8, cy - 8.8]], 0x2a0a1a, 1.2);
     line(g, [[cx + 4.8, cy - 11], [cx + 1.8, cy - 8.8]], 0x2a0a1a, 1.2);
+  } else if (defeat) {
+    // olhos fechados em arco suave e sobrancelhas relaxadas: ela aceita a derrota
+    g.lineStyle(1.2, 0x2a0a1a);
+    for (const ex of [cx - 3.2, cx + 3.2]) {
+      g.beginPath(); g.arc(ex, cy - 10.4, 2, 0.2, Math.PI - 0.2, false); g.strokePath();
+    }
+    line(g, [[cx - 5.6, cy - 12.4], [cx - 1.6, cy - 12]], 0x4a0f2a, 1);
+    line(g, [[cx + 5.6, cy - 12.4], [cx + 1.6, cy - 12]], 0x4a0f2a, 1);
   } else {
     g.fillStyle(0xd9ff66);
     g.fillEllipse(cx - 3.2, cy - 10, 3.8, casting ? 3.6 : 2.6);
@@ -146,8 +157,10 @@ function drawWitchFrame(g: Gfx, T: number, frame: number, pose: WitchPose): void
   // boca
   if (hurt) {
     line(g, [[cx - 2.4, cy - 3.8], [cx, cy - 5], [cx + 2.4, cy - 3.8]], 0x5a1a3a, 1.1);
-  } else if (casting) {
-    g.fillStyle(0x5a1a3a); g.fillEllipse(cx, cy - 4.4, 3.4, 2.8);
+  } else if (defeat) {
+    line(g, [[cx - 2, cy - 4.4], [cx + 2, cy - 4.4]], 0x5a1a3a, 1.1);
+  } else if (casting || talkOpen) {
+    g.fillStyle(0x5a1a3a); g.fillEllipse(cx, cy - 4.4, 3.4, talkOpen ? 2.2 : 2.8);
     g.fillStyle(0xffffff); g.fillRect(cx - 1.2, cy - 5.5, 0.9, 1);
   } else {
     line(g, [[cx - 2.8, cy - 4.8], [cx - 0.5, cy - 3.6], [cx + 1.6, cy - 4], [cx + 3, cy - 5.4]], 0x5a1a3a, 1.1);
@@ -158,7 +171,7 @@ function drawWitchFrame(g: Gfx, T: number, frame: number, pose: WitchPose): void
   g.fillCircle(cx + 4.8, cy - 6.4, 1.5);
 
   // chapéu torto de bruxa
-  const tipDx = f === 0 ? 0.4 : -0.4;
+  const tipDx = defeat ? -1.4 : f === 0 ? 0.4 : -0.4;
   g.fillStyle(ROBE);
   g.fillEllipse(cx, cy - 14.6, 22, 4.6);
   line(g, [[cx - 10.5, cy - 14.2], [cx - 5, cy - 12.6], [cx + 5, cy - 12.6], [cx + 10.5, cy - 14.2]], LIME, 1, 0.9);
@@ -179,4 +192,10 @@ export function drawWitchTextures(g: Gfx, T: number): void {
   g.generateTexture('witch_cast', T, H);
   drawWitchFrame(g, T, 0, 'hurt');
   g.generateTexture('witch_hurt', T, H);
+  for (let fi = 0; fi < 2; fi++) {
+    drawWitchFrame(g, T, fi, 'talk');
+    g.generateTexture(`witch_talk_${fi}`, T, H);
+  }
+  drawWitchFrame(g, T, 0, 'defeat');
+  g.generateTexture('witch_defeat', T, H);
 }

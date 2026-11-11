@@ -40,6 +40,8 @@ O manto é desenhado **depois** do corpo, por isso cobre as costas, os ombros e 
 | `witch_idle_0-1` | parada (o manto e o chapéu balançam) |
 | `witch_cast` | lançando poção: braço levantado, boca aberta, brilho verde |
 | `witch_hurt` | machucada: olhos fechados em X, boca para baixo |
+| `witch_talk_0-1` | falando: a boca abre e fecha (usada quando ela solta uma fala) |
+| `witch_defeat` | vencida: olhos fechados em calma, cabeça baixa, poção abaixada. Sem humilhação: ela não gira nem encolhe |
 
 **Frei Anselmo** (`src/textures/anselmo.ts`), monge do mosteiro. Velho gentil: hábito marrom com o capuz abaixado, tonsura com mechas brancas, sobrancelhas e barba brancas, bochechas coradas, cruz de madeira, cordão com nós, mãos juntas, sandálias.
 
