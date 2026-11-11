@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { BombId, ElementId, EnemyKind } from '../config';
 import type { PickupType } from './rewards';
+import type { Upgrades } from './upgrades';
 
 export type Facing = 'up' | 'down' | 'left' | 'right';
 
@@ -12,8 +13,7 @@ export interface Player {
   moving: boolean;
   hp: number;
   invulnerable: number;
-  bombsMax: number;
-  fireLevel: number;
+  upgrades: Upgrades; // alcance e frascos por poção
   speedUp: number;
 }
 
@@ -76,8 +76,7 @@ export interface PowerupCounts {
 // O que a jogadora leva da fase 1 para a fase 2.
 interface Carry {
   hp: number;
-  bombsMax: number;
-  fireLevel: number;
+  upgrades: Upgrades;
   speedUp: number;
   coins: number;
   bombType: import('../config').BombId;

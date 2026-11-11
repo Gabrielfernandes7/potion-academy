@@ -2,8 +2,10 @@
 // A cena (MainScene) guarda o estado da partida e chama este sistema; as regras de reação
 // entre poções ficam em game/chain.ts. Ver docs/ARCH.md.
 import Phaser from 'phaser';
-import { BLOCK, BOMB_TYPES, CONFIG, DIRS, ELEMENTS, ElementId, WALL } from '../config';
+import { BLOCK, BOMB_TYPES, CONFIG, ELEMENTS, ElementId } from '../config';
 import { chainOutcome } from './chain';
+import { walkBlast } from './blast';
+import { blastRadius, canPlace } from './upgrades';
 import type { Bomb, Explosion } from './types';
 import type { MainScene } from '../scenes/MainScene';
 
@@ -24,7 +26,7 @@ export class BombSystem {
   constructor(private readonly scene: MainScene) {}
 
   placeBomb(): void {
-    if (this.bombs.length >= this.scene.player.bombsMax) return;
+    if (!canPlace(this.scene.player.upgrades, this.scene.bombType, this.bombs.map(b => b.type))) return;
     if (this.scene.hasBomb(this.scene.player.gridX, this.scene.player.gridY)) return;
     const type = BOMB_TYPES[this.scene.bombType];
     const sprite = this.scene.add.image(
@@ -69,34 +71,29 @@ export class BombSystem {
     if (bomb.detonated) return;
     bomb.detonated = true;
     const type = BOMB_TYPES[bomb.type];
-    const radius = type.radius + this.scene.player.fireLevel;
-    const tiles: Array<{ x: number; y: number }> = [{ x: bomb.gridX, y: bomb.gridY }];
-    for (const [dx, dy] of DIRS) {
-      for (let r = 1; r <= radius; r++) {
-        const nx = bomb.gridX + dx * r;
-        const ny = bomb.gridY + dy * r;
-        const tile = this.scene.getTile(nx, ny);
-        if (tile === null || tile === WALL) break;
+    const radius = blastRadius(this.scene.player.upgrades, bomb.type, type.radius);
+    const tiles: Array<{ x: number; y: number }> = [];
+    for (const t of walkBlast(bomb.gridX, bomb.gridY, radius, !!type.pierce, (x, y) => this.scene.getTile(x, y))) {
+      if (!t.origin) {
         // reação entre poções: fogo acende, água apaga o fogo, terra é imune (ver game/chain.ts)
-        const chainBomb = this.bombs.find(b => b !== bomb && b.gridX === nx && b.gridY === ny && !b.detonated);
+        const chainBomb = this.bombs.find(b => b !== bomb && b.gridX === t.x && b.gridY === t.y && !b.detonated);
         if (chainBomb) {
           const outcome = chainOutcome(bomb.element, chainBomb.element);
           if (outcome === 'trigger') this.detonate(chainBomb);
           else if (outcome === 'neutralize') this.neutralizeBomb(chainBomb);
         }
-        tiles.push({ x: nx, y: ny });
-        if (tile === BLOCK) {
-          this.scene.removeBlock(nx, ny);
-          this.scene.spawnReward(nx, ny);
-          if (!type.pierce) break;
-        }
+      }
+      tiles.push({ x: t.x, y: t.y });
+      if (t.tile === BLOCK && !t.origin) {
+        this.scene.removeBlock(t.x, t.y);
+        this.scene.pickupSystem.spawnReward(t.x, t.y);
       }
     }
     const element = ELEMENTS[bomb.element] ?? ELEMENTS.fire;
     this.scene.boss?.onExplosion(tiles, bomb.element);
     for (const t of tiles) {
-      for (const enemy of this.scene.enemies) {
-        if (enemy.alive && enemy.gridX === t.x && enemy.gridY === t.y) this.scene.hitEnemy(enemy, bomb.element);
+      for (const enemy of this.scene.enemySystem.enemies) {
+        if (enemy.alive && enemy.gridX === t.x && enemy.gridY === t.y) this.scene.enemySystem.hitEnemy(enemy, bomb.element);
       }
       this.spawnExplosion(t.x, t.y, element.color, element.glow, bomb.element);
     }

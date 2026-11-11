@@ -6,14 +6,13 @@
 // - update() retorna cedo com a loja aberta e, após gameOver/won, só trata a tecla R.
 import Phaser from 'phaser';
 import {
-  BLOCK, BOMB_ORDER, BombId, CANVAS, CONFIG, DIRS, ElementId, EMPTY, ENEMY_TYPES, EnemyKind,
-  LAST_STAGE, StageDef, StageTheme, WALL, isImmune, stageDef,
+  BLOCK, BOMB_ORDER, BombId, CANVAS, CONFIG, ElementId, EMPTY, ENEMY_TYPES, EnemyKind,
+  LAST_STAGE, StageDef, StageTheme, WALL, stageDef,
 } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
 import { Bank, hasBombType } from '../storage';
 import { rooOriginY } from '../textures/rooGeometry';
-import { PICKUP_HALO, PICKUP_TEXTURE, PickupType, rollChestCoins, rollReward } from '../game/rewards';
-import type { Enemy, Facing, Pickup, Player, PowerupCounts, StageData } from '../game/types';
+import type { Facing, Player, PowerupCounts, StageData } from '../game/types';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
 import { touch } from '../input/touch';
 import { hideGameOver, setPauseVisible, showGameOver } from '../ui/overlays';
@@ -22,24 +21,14 @@ import { isHelpOpen } from '../ui/help';
 import { readTheme } from '../ui/theme';
 import { BossController } from '../game/BossController';
 import { BombSystem } from '../game/BombSystem';
+import { PickupSystem } from '../game/PickupSystem';
+import { EnemySystem } from '../game/EnemySystem';
+import { SleepSystem } from '../game/SleepSystem';
 import { markStageCompleted } from '../storage';
+import { cloneUpgrades, createUpgrades } from '../game/upgrades';
 import { SCENE_TRACKS } from '../audio/tracks';
 import { showDialogue } from '../ui/dialogue';
 import { ANSELMO, BELLADONA_CARDS, ENDING_CARDS } from '../game/story';
-
-// Partículas de cada elemento na explosão (cada casa atingida solta um punhado delas).
-// Efeito de quem é atingido, por elemento: o que sobra depois da explosão.
-// fogo: brasas e fumaça subindo; água: respingos que caem; terra: lascas de pedra e poeira;
-// éter: faíscas que giram no ar.
-const HIT_FX: Record<ElementId, {
-  texture: string; speed: { min: number; max: number }; angle: { min: number; max: number };
-  gravity: number; life: { min: number; max: number }; size: number; count: number; tint: number[]; blend: string;
-}> = {
-  fire: { texture: 'menu_spark', speed: { min: 40, max: 110 }, angle: { min: -120, max: -60 }, gravity: -60, life: { min: 500, max: 900 }, size: 1.8, count: 9, tint: [0xff7043, 0xffb74d, 0xffd54f], blend: 'ADD' },
-  water: { texture: 'menu_bubble', speed: { min: 60, max: 140 }, angle: { min: 200, max: 340 }, gravity: 260, life: { min: 450, max: 700 }, size: 1.1, count: 10, tint: [0x4fc3f7, 0xb3e5fc, 0xffffff], blend: 'NORMAL' },
-  earth: { texture: 'menu_spark', speed: { min: 30, max: 100 }, angle: { min: -170, max: -10 }, gravity: 380, life: { min: 400, max: 650 }, size: 1.8, count: 8, tint: [0x8d6e63, 0x6d4c41, 0xa1887f], blend: 'NORMAL' },
-  air: { texture: 'menu_spark', speed: { min: 30, max: 90 }, angle: { min: 0, max: 360 }, gravity: -30, life: { min: 500, max: 900 }, size: 1.5, count: 12, tint: [0xffffff, 0xe0d8ff, 0xb3e5fc], blend: 'ADD' },
-};
 
 // Cor que tinge a Roo ao ser atingida por cada elemento.
 const HIT_TINT: Record<ElementId, number> = {
@@ -66,19 +55,13 @@ const LOOKS: Record<StageTheme, Look> = {
   garden: { floor1: 'g_floor1', floor2: 'g_floor2', wall: 'g_wall', block: 'g_block', door: ['gate_closed', 'gate_open'] },
 };
 
-// Movimento de cada inimigo: pulo vertical e horizontal do passo, e o balanço parado (altura e velocidade).
-const MOTION: Record<EnemyKind, { hopV: number; hopH: number; bob: number; bobMs: number }> = {
-  frog: { hopV: 7, hopH: 3, bob: 1.2, bobMs: 260 },
-  ghost: { hopV: 0, hopH: 0, bob: 2.6, bobMs: 420 },
-  flower: { hopV: 0, hopH: 0, bob: 0, bobMs: 500 },
-};
-
 export class MainScene extends Phaser.Scene {
   grid: number[][] = [];
   blockSprites = new Map<string, Phaser.GameObjects.Image>();
   bombSystem!: BombSystem;
-  pickups: Pickup[] = [];
-  enemies: Enemy[] = [];
+  pickupSystem!: PickupSystem;
+  enemySystem!: EnemySystem;
+  sleepSystem!: SleepSystem;
   coins = 0;
   gems = 0;
   bombType: BombId = 'normal';
@@ -96,7 +79,6 @@ export class MainScene extends Phaser.Scene {
   blocksDestroyed = 0;
   enemyThresholds = new Map<EnemyKind, number>(); // caixotes quebrados para o próximo inimigo de cada tipo
   look: Look = LOOKS.stone;
-  lashGfx!: Phaser.GameObjects.Graphics; // avisos dos chicotes das flores do mal
   lastTimerSec: number | null = null;
   powerupsCollected: PowerupCounts = { bomb_up: 0, fire_up: 0, speed_up: 0, time_up: 0 };
   isPaused = false;
@@ -105,9 +87,6 @@ export class MainScene extends Phaser.Scene {
   cdGraphics!: Phaser.GameObjects.Graphics;
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   keys!: MainKeys;
-  idleMs = 0;
-  isSleeping = false;
-  zzzMs = 0;
   stage = 1; // 1 laboratório, 2 salão dos fantasmas, 3 duelo com a Belladona, 4 jardim (ver STAGES em config.ts)
   boss: BossController | null = null;
   transitioning = false; // passando de fase: ignora entrada
@@ -132,28 +111,25 @@ export class MainScene extends Phaser.Scene {
     this.helpPaused = false;
     this.grid = [];
     this.blockSprites = new Map();
-    this.pickups = [];
-    this.enemies = [];
     this.coins = 0;
     this.gems = 0;
     this.bombType = 'normal';
     this.cooldowns = { push: 0 };
     this.gameOver = false;
     this.won = false;
+    this.moveCarry = 0;
     this.player = {
       gridX: 1, gridY: 1,
       dir: { x: 0, y: 1 }, facing: 'down', moving: false,
       hp: CONFIG.maxHp, invulnerable: 0,
-      bombsMax: CONFIG.maxBombs,
-      fireLevel: 0,
+      upgrades: createUpgrades(),
       speedUp: 0,
     };
     if (data?.carry) {
       // o que ela conquistou na fase 1 continua na fase 2
       const c = data.carry;
       this.player.hp = c.hp;
-      this.player.bombsMax = c.bombsMax;
-      this.player.fireLevel = c.fireLevel;
+      this.player.upgrades = cloneUpgrades(c.upgrades);
       this.player.speedUp = c.speedUp;
       this.coins = c.coins;
       this.bombType = c.bombType;
@@ -172,9 +148,6 @@ export class MainScene extends Phaser.Scene {
       if (rule.every) this.enemyThresholds.set(rule.kind, rule.every);
     }
     this.lastTimerSec = null;
-    this.idleMs = 0;
-    this.isSleeping = false;
-    this.zzzMs = 0;
     touch.releaseAll();
     touch.clearJust();
     audio.playTrack(this.def.track); // cada fase tem a sua faixa
@@ -188,20 +161,23 @@ export class MainScene extends Phaser.Scene {
 
   create(): void {
     this.bombSystem = new BombSystem(this);
+    this.pickupSystem = new PickupSystem(this);
+    this.enemySystem = new EnemySystem(this);
+    this.sleepSystem = new SleepSystem(this);
     this.createHeroAnims();
     this.buildGrid();
     if (this.def.door) {
       this.placeDoor();
       this.assignHiddenGems();
     }
-    this.spawnEnemies();
+    this.enemySystem.spawnEnemies();
     this.playerSprite = this.add.sprite(
       this.player.gridX * CONFIG.tile + CONFIG.tile / 2,
       this.player.gridY * CONFIG.tile + CONFIG.tile / 2,
       'roo_down_0',
     ).setOrigin(0.5, rooOriginY(CONFIG.tile)).setDepth(10);
     this.cdGraphics = this.add.graphics().setDepth(15);
-    this.lashGfx = this.add.graphics().setDepth(4);
+    this.enemySystem.createLashGfx();
     if (this.isBossStage) this.boss = new BossController(this);
     if (this.stage > 1) this.cameras.main.fadeIn(600, 8, 14, 12);
     // a grade é desenhada abaixo da faixa da HUD (cena 'Hud', por cima)
@@ -301,6 +277,7 @@ export class MainScene extends Phaser.Scene {
   refreshSprite(mode: 'walk' | 'idle' | 'sleep'): void {
     const f: Facing = this.player.facing;
     const direction = this.spriteDirection();
+    if (mode !== 'walk') this.playerSprite.anims.timeScale = 1;
     const animationKey = mode === 'sleep' ? 'roo_sleep_' + direction : (mode === 'walk' ? 'roo_walk_' : 'roo_idle_') + direction;
     if (this.anims.exists(animationKey)) this.playerSprite.anims.play(animationKey, true);
     else this.playerSprite.setTexture('roo_' + direction + '_' + (mode === 'walk' ? 0 : 1));
@@ -405,8 +382,8 @@ export class MainScene extends Phaser.Scene {
     for (const rule of this.def.enemies) {
       const threshold = this.enemyThresholds.get(rule.kind);
       if (threshold === undefined || !rule.every) continue;
-      if (this.blocksDestroyed >= threshold && this.countEnemies(rule.kind) < rule.max) {
-        this.spawnEnemy(rule.kind);
+      if (this.blocksDestroyed >= threshold && this.enemySystem.countEnemies(rule.kind) < rule.max) {
+        this.enemySystem.spawnEnemy(rule.kind);
         this.enemyThresholds.set(rule.kind, threshold + rule.every);
       }
     }
@@ -426,110 +403,8 @@ export class MainScene extends Phaser.Scene {
     if (this.getTile(x, y) !== EMPTY) return false;
     if (this.hasBomb(x, y)) return false;
     if (!this.doorOpen && x === this.doorX && y === this.doorY) return false;
-    if (this.enemies.some(e => e.alive && ENEMY_TYPES[e.kind].rooted && e.gridX === x && e.gridY === y)) return false;
+    if (this.enemySystem.enemies.some(e => e.alive && ENEMY_TYPES[e.kind].rooted && e.gridX === x && e.gridY === y)) return false;
     return true;
-  }
-
-  // ---------- Itens ----------
-
-  spawnReward(x: number, y: number): void {
-    if (this.gemBlocks.has(`${x},${y}`)) {
-      this.spawnPickupSprite(x, y, 'gem');
-      return;
-    }
-    const type = rollReward();
-    // na fase do chefe não há porta: gema vira moeda
-    const final = !this.def.door && type === 'gem' ? 'coin' : type;
-    // o baú já nasce com o valor sorteado pela tabela desta fase
-    const value = final === 'chest' ? rollChestCoins(this.def.chest) : undefined;
-    this.spawnPickupSprite(x, y, final, value);
-  }
-
-  spawnPickupSprite(x: number, y: number, type: PickupType, value?: number): void {
-    const sprite = this.add.image(
-      x * CONFIG.tile + CONFIG.tile / 2,
-      y * CONFIG.tile + CONFIG.tile / 2,
-      PICKUP_TEXTURE[type],
-    ).setDepth(6);
-    this.tweens.add({
-      targets: sprite, y: sprite.y - 4,
-      duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-    });
-    const haloColor = PICKUP_HALO[type];
-    let halo: Phaser.GameObjects.Image | undefined;
-    if (haloColor !== undefined) {
-      halo = this.add.image(sprite.x, sprite.y, 'menu_puff').setScale(0.95).setTint(haloColor)
-        .setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.3).setDepth(5);
-      this.tweens.add({
-        targets: halo, alpha: { from: 0.18, to: 0.42 }, scale: { from: 0.85, to: 1.05 },
-        duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-      });
-    }
-    this.pickups.push({ gridX: x, gridY: y, type, value, sprite, halo });
-  }
-
-  collectPickup(pickup: Pickup): void {
-    switch (pickup.type) {
-      case 'coin':
-        this.coins += CONFIG.coinPickupValue;
-        Bank.add(CONFIG.coinPickupValue);
-        this.play('pickup');
-        break;
-      case 'gem':
-        this.gems += 1;
-        this.play('pickup');
-        if (this.gems >= CONFIG.gemsForDoor && !this.doorOpen) this.openDoor();
-        break;
-      case 'chest': {
-        const coins = pickup.value ?? 5;
-        this.coins += coins;
-        Bank.add(coins);
-        this.play('powerup'); // o baú só dá POÇÃO: a cura vem dos corações (ver docs/06-decisoes.md)
-        break;
-      }
-      case 'heart':
-        this.player.hp = Math.min(CONFIG.maxHp, this.player.hp + 1);
-        this.play('pickup');
-        break;
-      case 'bomb_up':
-        this.player.bombsMax = Math.min(CONFIG.maxBombs + CONFIG.maxBombUp, this.player.bombsMax + 1);
-        this.powerupsCollected.bomb_up++;
-        this.floatingText(pickup.gridX, pickup.gridY, '+1 FRASCO', '#b39ddb');
-        this.play('powerup');
-        break;
-      case 'fire_up':
-        this.player.fireLevel = Math.min(CONFIG.maxFireUp, this.player.fireLevel + 1);
-        this.powerupsCollected.fire_up++;
-        this.floatingText(pickup.gridX, pickup.gridY, '+1 RAIO', '#ff8a65');
-        this.play('powerup');
-        break;
-      case 'speed_up':
-        this.player.speedUp = Math.min(CONFIG.maxSpeedUp, this.player.speedUp + 1);
-        this.powerupsCollected.speed_up++;
-        this.floatingText(pickup.gridX, pickup.gridY, '+VELOCIDADE', '#4dd0e1');
-        this.play('powerup');
-        break;
-      case 'time_up':
-        this.timeLeft = Math.min(this.timeLeft + CONFIG.timeUpBonus, this.def.time * 2);
-        this.powerupsCollected.time_up++;
-        this.floatingText(pickup.gridX, pickup.gridY, '+15s', '#fff59d');
-        this.play('powerup');
-        break;
-    }
-    this.tweens.killTweensOf(pickup.sprite);
-    pickup.sprite.destroy();
-    if (pickup.halo) {
-      this.tweens.killTweensOf(pickup.halo);
-      pickup.halo.destroy();
-    }
-    this.pickups = this.pickups.filter(p => p !== pickup);
-    this.updateHud();
-  }
-
-  checkPickups(): void {
-    if (this.gameOver || this.won) return;
-    const found = this.pickups.find(p => p.gridX === this.player.gridX && p.gridY === this.player.gridY);
-    if (found) this.collectPickup(found);
   }
 
   openDoor(): void {
@@ -607,15 +482,14 @@ export class MainScene extends Phaser.Scene {
 
   // Fade e recomeço da cena na fase seguinte, levando vida, power-ups, moedas e o frasco escolhido.
   advanceStage(): void {
-    this.lashGfx.clear();
+    this.enemySystem.clearLash();
     this.cameras.main.fadeOut(900, 8, 14, 12);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.restart({
         stage: this.stage + 1,
         carry: {
           hp: Math.min(CONFIG.maxHp, this.player.hp + CONFIG.stageClearHeal),
-          bombsMax: this.player.bombsMax,
-          fireLevel: this.player.fireLevel,
+          upgrades: this.player.upgrades,
           speedUp: this.player.speedUp,
           coins: this.coins,
           bombType: this.bombType,
@@ -649,194 +523,6 @@ export class MainScene extends Phaser.Scene {
     return { x: Math.floor(this.playerSprite.x / T), y: Math.floor(this.playerSprite.y / T) };
   }
 
-  // ---------- Inimigos ----------
-
-  spawnEnemies(): void {
-    for (const rule of this.def.enemies) {
-      for (let i = 0; i < rule.start; i++) this.spawnEnemy(rule.kind);
-    }
-  }
-
-  countEnemies(kind: EnemyKind): number {
-    return this.enemies.filter(e => e.kind === kind).length;
-  }
-
-  spawnEnemy(kind: EnemyKind): void {
-    const rule = this.def.enemies.find(r => r.kind === kind);
-    if (!rule || this.countEnemies(kind) >= rule.max) return;
-    const def = ENEMY_TYPES[kind];
-    for (let attempt = 0; attempt < 80; attempt++) {
-      const x = Phaser.Math.Between(1, CONFIG.cols - 2);
-      const y = Phaser.Math.Between(1, CONFIG.rows - 2);
-      if (this.grid[y][x] !== EMPTY) continue;
-      if (x === this.doorX && y === this.doorY) continue;
-      if (Math.abs(x - this.player.gridX) + Math.abs(y - this.player.gridY) < 5) continue;
-      if (this.enemies.some(e => e.gridX === x && e.gridY === y)) continue;
-      if (this.hasBomb(x, y)) continue;
-      const sprite = this.add.image(
-        x * CONFIG.tile + CONFIG.tile / 2,
-        y * CONFIG.tile + CONFIG.tile / 2,
-        def.texture,
-      ).setDepth(7).setScale(0.01);
-      if (def.rooted) {
-        // a flor balança presa ao chão: o pivô fica perto da base
-        sprite.setOrigin(0.5, 0.88);
-        sprite.y += 0.38 * CONFIG.tile;
-      }
-      this.tweens.add({ targets: sprite, scale: 1, duration: 250, ease: 'Back.easeOut' });
-      this.enemies.push({
-        kind, gridX: x, gridY: y, sprite, moveTimer: def.moveInterval, alive: true,
-        moveT: def.stepMs, fromX: sprite.x, fromY: sprite.y, hopY: false, phase: Math.random() * 1000,
-        lashMs: CONFIG.flowerLashCycleMs * (0.5 + Math.random() * 0.5), fxCooldown: 0,
-      });
-      return;
-    }
-  }
-
-  killEnemy(enemy: Enemy, element: ElementId = 'fire'): void {
-    enemy.alive = false;
-    this.tweens.killTweensOf(enemy.sprite);
-    const px = enemy.sprite.x;
-    const py = enemy.sprite.y;
-    enemy.sprite.destroy();
-    this.enemies = this.enemies.filter(e => e !== enemy);
-    this.hitFx(px, py, element);
-    this.spawnPickupSprite(enemy.gridX, enemy.gridY, 'coin');
-    this.cameras.main.shake(60, 0.003);
-  }
-
-  // Uma explosão alcançou o inimigo: mata, a menos que ele seja imune ao elemento (flor do mal e a água).
-  hitEnemy(enemy: Enemy, element: ElementId): void {
-    if (!isImmune(enemy.kind, element)) {
-      this.killEnemy(enemy, element);
-      return;
-    }
-    if (enemy.fxCooldown > 0) return;
-    enemy.fxCooldown = 700; // a explosão dura 380 ms; sem isso o aviso se repetiria a cada quadro
-    this.hitFx(enemy.sprite.x, enemy.sprite.y - 6, element);
-    this.floatingText(enemy.gridX, enemy.gridY, 'IMUNE', '#c5e1a5');
-    this.tweens.add({ targets: enemy.sprite, alpha: 0.55, duration: 90, yoyo: true, repeat: 1 });
-  }
-
-  // Efeito de ser atingido por um elemento (inimigo ou Roo): partículas próprias do elemento.
-  hitFx(px: number, py: number, element: ElementId): void {
-    const c = HIT_FX[element];
-    const emitter = this.add.particles(px, py, c.texture, {
-      speed: c.speed,
-      angle: c.angle,
-      gravityY: c.gravity,
-      lifespan: c.life,
-      scale: { start: c.size, end: 0 },
-      alpha: { start: 1, end: 0 },
-      tint: c.tint,
-      blendMode: c.blend,
-      emitting: false,
-    }).setDepth(10);
-    emitter.explode(c.count);
-    this.time.delayedCall(1000, () => emitter.destroy());
-  }
-
-  moveEnemy(enemy: Enemy): void {
-    const def = ENEMY_TYPES[enemy.kind];
-    const valid: Array<readonly [number, number]> = [];
-    for (const [dx, dy] of DIRS) {
-      const nx = enemy.gridX + dx;
-      const ny = enemy.gridY + dy;
-      if (nx === this.doorX && ny === this.doorY) continue;
-      if (def.passWalls) {
-        // fantasma: atravessa muralhas, caixotes e poções, mas não sai da sala
-        if (nx < 1 || ny < 1 || nx > CONFIG.cols - 2 || ny > CONFIG.rows - 2) continue;
-      } else if (!this.isFree(nx, ny)) {
-        continue;
-      }
-      if (this.enemies.some(e => e !== enemy && e.alive && e.gridX === nx && e.gridY === ny)) continue;
-      valid.push([dx, dy]);
-    }
-    if (valid.length === 0) return;
-    const [dx, dy] = Phaser.Utils.Array.GetRandom(valid);
-    // o passo é animado em animateEnemy (deslize, pulo e balanço), não por tween
-    enemy.fromX = enemy.sprite.x;
-    enemy.fromY = enemy.sprite.y;
-    enemy.hopY = dy !== 0;
-    enemy.moveT = 0;
-    enemy.gridX += dx;
-    enemy.gridY += dy;
-  }
-
-  // Passo: desliza até a casa nova (sapo: com um pulinho; fantasma: flutuando); parado, balança de leve.
-  // O fantasma fica meio transparente enquanto está dentro de uma parede ou de um caixote.
-  animateEnemy(enemy: Enemy, delta: number): void {
-    const def = ENEMY_TYPES[enemy.kind];
-    const m = MOTION[enemy.kind];
-    const tx = enemy.gridX * CONFIG.tile + CONFIG.tile / 2;
-    // a flor tem o pivô perto da base: o sprite fica um pouco abaixo do centro da casa
-    const ty = enemy.gridY * CONFIG.tile + CONFIG.tile / 2 + (def.rooted ? 0.38 * CONFIG.tile : 0);
-    if (enemy.moveT < def.stepMs) {
-      enemy.moveT = Math.min(def.stepMs, enemy.moveT + delta);
-      const p = enemy.moveT / def.stepMs;
-      const hop = Math.sin(p * Math.PI) * (enemy.hopY ? m.hopV : m.hopH);
-      enemy.sprite.x = enemy.fromX + (tx - enemy.fromX) * p;
-      enemy.sprite.y = enemy.fromY + (ty - enemy.fromY) * p - hop;
-    } else {
-      enemy.phase += delta;
-      enemy.sprite.x = tx;
-      enemy.sprite.y = ty + Math.sin(enemy.phase / m.bobMs) * m.bob;
-    }
-    if (def.passWalls) {
-      const tile = this.getTile(enemy.gridX, enemy.gridY);
-      enemy.sprite.setAlpha(tile === EMPTY ? 0.92 : 0.45);
-    }
-    if (def.rooted) enemy.sprite.setAngle(Math.sin(enemy.phase / 380) * 4);
-  }
-
-  // Flor do mal: de tempos em tempos avisa no chão e chicoteia as quatro casas ao redor.
-  updateFlower(enemy: Enemy, delta: number): void {
-    enemy.lashMs -= delta;
-    const around: Array<{ x: number; y: number }> = [];
-    for (const [dx, dy] of DIRS) {
-      const x = enemy.gridX + dx;
-      const y = enemy.gridY + dy;
-      const tile = this.getTile(x, y);
-      if (tile !== null && tile !== WALL) around.push({ x, y });
-    }
-    if (enemy.lashMs > CONFIG.flowerWarnMs) return;
-    const T = CONFIG.tile;
-    if (enemy.lashMs > 0) {
-      // aviso: casas se enchem de um rosa pulsante
-      const pulse = 0.25 + 0.2 * Math.sin(enemy.lashMs / 55);
-      for (const c of around) {
-        this.lashGfx.fillStyle(0xd81b60, pulse);
-        this.lashGfx.fillRect(c.x * T + 2, c.y * T + 2, T - 4, T - 4);
-        this.lashGfx.lineStyle(2, 0xff80ab, 0.9);
-        this.lashGfx.strokeRect(c.x * T + 2, c.y * T + 2, T - 4, T - 4);
-      }
-      return;
-    }
-    // chicote
-    const me = this.playerTile();
-    for (const c of around) {
-      this.thornFx(c.x * T + T / 2, c.y * T + T / 2);
-      if (c.x === me.x && c.y === me.y) this.damagePlayer(false, 'earth');
-    }
-    this.tweens.add({ targets: enemy.sprite, scaleX: 1.25, scaleY: 0.85, duration: 90, yoyo: true });
-    enemy.lashMs = CONFIG.flowerLashCycleMs;
-  }
-
-  // Espinhos e folhas que saltam quando a flor chicoteia.
-  thornFx(px: number, py: number): void {
-    const emitter = this.add.particles(px, py, 'menu_spark', {
-      speed: { min: 40, max: 110 },
-      angle: { min: 0, max: 360 },
-      lifespan: { min: 300, max: 520 },
-      scale: { start: 1.8, end: 0 },
-      alpha: { start: 1, end: 0 },
-      tint: [0x66bb6a, 0x2e7d32, 0xad1457],
-      emitting: false,
-    }).setDepth(10);
-    emitter.explode(6);
-    this.time.delayedCall(700, () => emitter.destroy());
-  }
-
   // ---------- Explosões e dano ----------
 
   // Punhado de partículas do elemento: brasas (fogo), gotas (água), pedriscos (terra), brilhos (éter).
@@ -847,7 +533,7 @@ export class MainScene extends Phaser.Scene {
     this.updateHud();
     this.play('hurt');
     this.playerSprite.setTint(element ? HIT_TINT[element] : 0xff5252);
-    if (element) this.hitFx(this.playerSprite.x, this.playerSprite.y - 8, element);
+    if (element) this.enemySystem.hitFx(this.playerSprite.x, this.playerSprite.y - 8, element);
     this.tweens.add({
       targets: this.playerSprite, alpha: 0.3,
       duration: 120, yoyo: true, repeat: 5,
@@ -898,17 +584,42 @@ export class MainScene extends Phaser.Scene {
     });
   }
 
-  movePlayerTo(nx: number, ny: number, duration: number, ease: string): void {
+  // Movimento da Roo feito à mão (não por tween): o tempo que sobra ao chegar numa casa
+  // (`moveCarry`) vai para o passo seguinte, então andar em linha reta tem velocidade constante,
+  // sem a pausa de ~1 quadro entre casas que fazia parecer pulo de bloco em bloco.
+  private moveFrom = { x: 0, y: 0 };
+  private moveTo = { x: 0, y: 0 };
+  private moveElapsed = 0;
+  private moveLength = 220;
+  private moveCarry = 0;
+
+  movePlayerTo(nx: number, ny: number, duration: number): void {
     this.player.gridX = nx;
     this.player.gridY = ny;
     this.player.moving = true;
+    this.moveFrom = { x: this.playerSprite.x, y: this.playerSprite.y };
+    this.moveTo = { x: nx * CONFIG.tile + CONFIG.tile / 2, y: ny * CONFIG.tile + CONFIG.tile / 2 };
+    this.moveLength = duration;
+    this.moveElapsed = this.moveCarry;
+    this.moveCarry = 0;
     this.playWalk();
-    this.tweenSpriteTo(this.playerSprite, nx, ny, duration, ease, () => {
-      this.player.moving = false;
-      this.playIdle();
-      this.checkPickups();
-      this.checkWin();
-    });
+    // um ciclo de 4 quadros a cada 2 casas (passo esquerdo + direito), sincronizado com o passo
+    this.playerSprite.anims.timeScale = 4 / (2 * (duration / 1000)) / 12;
+  }
+
+  // Avança o passo atual; ao chegar, guarda o excedente de tempo e libera o próximo passo.
+  private stepPlayerMove(delta: number): void {
+    if (!this.player.moving) return;
+    this.moveElapsed += delta;
+    const t = Math.min(1, this.moveElapsed / this.moveLength);
+    this.playerSprite.x = this.moveFrom.x + (this.moveTo.x - this.moveFrom.x) * t;
+    this.playerSprite.y = this.moveFrom.y + (this.moveTo.y - this.moveFrom.y) * t;
+    if (t < 1) return;
+    // sem playIdle aqui: se a tecla segue pressionada, o próximo passo continua o mesmo ciclo
+    this.moveCarry = Math.min(this.moveElapsed - this.moveLength, 34);
+    this.player.moving = false;
+    this.pickupSystem.checkPickups();
+    this.checkWin();
   }
 
   tryMove(dx: number, dy: number): void {
@@ -924,7 +635,7 @@ export class MainScene extends Phaser.Scene {
       this.playIdle();
       return;
     }
-    this.movePlayerTo(nx, ny, this.moveDuration(), 'Linear');
+    this.movePlayerTo(nx, ny, this.moveDuration());
   }
 
   setupInput(): void {
@@ -1015,8 +726,8 @@ export class MainScene extends Phaser.Scene {
       gems: this.gems,
       gemsForDoor: CONFIG.gemsForDoor,
       blocks: this.blockSprites.size,
-      bombsActive: this.bombSystem.bombs.length,
-      bombsMax: this.player.bombsMax,
+      bombsMax: this.player.upgrades[this.bombType].bombsMax,
+      bombsActive: this.bombSystem.bombs.filter(b => b.type === this.bombType).length,
       timeLeftMs: this.timeLeft,
       selected: this.bombType,
       stage: this.stage,
@@ -1048,35 +759,6 @@ export class MainScene extends Phaser.Scene {
     this.updateTimerHud();
   }
 
-  updateEnemies(delta: number): void {
-    this.lashGfx.clear();
-    for (const enemy of [...this.enemies]) {
-      if (!enemy.alive) continue;
-      const def = ENEMY_TYPES[enemy.kind];
-      enemy.fxCooldown = Math.max(0, enemy.fxCooldown - delta);
-      // chama residual também atinge inimigos
-      const blast = this.bombSystem.explosions.find(e => e.x === enemy.gridX && e.y === enemy.gridY);
-      if (blast) {
-        this.hitEnemy(enemy, blast.element);
-        if (!enemy.alive) continue;
-      }
-      this.animateEnemy(enemy, delta);
-      if (def.rooted) {
-        this.updateFlower(enemy, delta);
-        continue;
-      }
-      const dist = Phaser.Math.Distance.Between(
-        enemy.sprite.x, enemy.sprite.y, this.playerSprite.x, this.playerSprite.y,
-      );
-      if (dist < CONFIG.tile * 0.6) this.damagePlayer();
-      enemy.moveTimer -= delta;
-      if (enemy.moveTimer <= 0) {
-        this.moveEnemy(enemy);
-        enemy.moveTimer = def.moveInterval;
-      }
-    }
-  }
-
   updateCooldowns(delta: number): void {
     this.cooldowns.push = Math.max(0, this.cooldowns.push - delta);
     this.player.invulnerable = Math.max(0, this.player.invulnerable - delta);
@@ -1102,7 +784,7 @@ export class MainScene extends Phaser.Scene {
     this.isPaused = false;
     setPauseVisible(false);
     this.playerSprite.setVisible(false);
-    this.lashGfx.clear();
+    this.enemySystem.clearLash();
     if (this.won) {
       // sem fanfarra: as "Vésperas" da confissão seguem tocando no fim
       markStageCompleted(this.stage);
@@ -1139,71 +821,6 @@ export class MainScene extends Phaser.Scene {
 
   play(name: SfxName, variant?: ElementId): void {
     audio.play(name, variant);
-  }
-
-  // ---------- Sono ----------
-
-  // Qualquer tecla ou toque conta como atividade.
-  inputActive(): boolean {
-    const c = this.cursors;
-    const k = this.keys;
-    return c.up.isDown || c.down.isDown || c.left.isDown || c.right.isDown ||
-      k.space.isDown || k.x.isDown || k.d.isDown || k.r.isDown ||
-      k.one.isDown || k.two.isDown || k.three.isDown || k.four.isDown ||
-      touch.anyHeld || touch.consumeActivity();
-  }
-
-  updateSleep(delta: number): void {
-    if (this.player.moving || this.inputActive()) {
-      this.idleMs = 0;
-      if (this.isSleeping) this.wake();
-      return;
-    }
-    this.idleMs += delta;
-    if (!this.isSleeping) {
-      if (this.idleMs >= CONFIG.sleepAfterMs) this.startSleep();
-      return;
-    }
-    this.zzzMs += delta;
-    if (this.zzzMs >= CONFIG.zzzIntervalMs) {
-      this.zzzMs = 0;
-      this.spawnZzz();
-    }
-  }
-
-  startSleep(): void {
-    this.isSleeping = true;
-    this.zzzMs = CONFIG.zzzIntervalMs; // o primeiro 'z' sai na hora
-    this.refreshSprite('sleep');
-  }
-
-  wake(): void {
-    this.isSleeping = false;
-    this.zzzMs = 0;
-    // se o jogador começou a andar neste frame, mantém a animação de caminhada
-    this.refreshSprite(this.player.moving ? 'walk' : 'idle');
-  }
-
-  spawnZzz(): void {
-    const big = Math.random() < 0.5;
-    const z = this.add.text(
-      this.playerSprite.x + 9,
-      this.playerSprite.y - 14,
-      big ? 'Z' : 'z',
-      {
-        fontFamily: 'monospace', fontSize: big ? '18px' : '13px', color: '#d6e6ff', fontStyle: 'bold',
-        stroke: '#0e1613', strokeThickness: 3,
-      },
-    ).setOrigin(0.5).setDepth(21);
-    this.tweens.add({
-      targets: z,
-      x: z.x + 8,
-      y: z.y - 24,
-      alpha: 0,
-      duration: 1900,
-      ease: 'Sine.easeOut',
-      onComplete: () => z.destroy(),
-    });
   }
 
   // ---------- Janela de ajuda ----------
@@ -1244,18 +861,25 @@ export class MainScene extends Phaser.Scene {
       this.scene.restart({ stage: 1 } satisfies StageData);
       return;
     }
+    if (!this.isPaused) this.stepPlayerMove(delta);
     if (this.gameOver || this.won || this.transitioning) return;
     this.handleInput();
+    // se não começou outro passo neste quadro, o tempo sobrando não vale
+    if (!this.player.moving) this.moveCarry = 0;
+    if (!this.player.moving && this.playerSprite.anims.currentAnim?.key.startsWith('roo_walk_')) {
+      this.playerSprite.anims.timeScale = 1;
+      this.playIdle();
+    }
     if (this.isPaused) return;
-    this.updateSleep(delta);
+    this.sleepSystem.update(delta);
     this.updateTimer(delta);
     this.updateCooldowns(delta);
     this.updateCooldownBar();
     this.bombSystem.update(delta);
-    this.updateEnemies(delta);
+    this.enemySystem.update(delta);
     this.boss?.update(delta);
     this.checkPlayerHit();
     if (this.gameOver) return;
-    this.checkPickups();
+    this.pickupSystem.checkPickups();
   }
 }
