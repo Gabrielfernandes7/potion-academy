@@ -7,7 +7,9 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 | um número de equilíbrio (tempo, vida, custos) | `src/config.ts` |
 | as fases (tempo, inimigos, tema) e os tipos de inimigo | `STAGES` e `ENEMY_TYPES` em `src/config.ts` |
 | a reação entre poções (fogo acende, água apaga, terra imune) | `src/game/chain.ts` |
-| as regras de bombas, poções e explosões | `src/game/BombSystem.ts` |
+| as regras de bombas, poções e explosões | `src/game/BombSystem.ts` (alcance puro em `blast.ts`) |
+| power-ups por poção (alcance, frascos) | `src/game/upgrades.ts` |
+| itens do chão, inimigos, sono da Roo | `src/game/PickupSystem.ts`, `EnemySystem.ts`, `SleepSystem.ts` |
 | as regras de pickup, inimigo e sono | `src/scenes/MainScene.ts` (serão separadas, ver `ARCH.md`) |
 | o desenho da Roo | `src/textures/roo.ts` |
 | o desenho de poções | `src/textures/potions.ts` |

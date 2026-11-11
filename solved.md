@@ -99,3 +99,14 @@ Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
 - **M6. Vida entre fases**: baú não cura mais; `stageClearHeal` já era 0. Decisão em `docs/06-decisoes.md`.
 - **Fotos do catálogo** (`docs/img/sprites.png` e `sprites/*.png`) refeitas, com a nova categoria `humans` (Anselmo).
 - **Jogo de ponta a ponta por script**: fase 3 (derrota) -> despedida -> fase 4 -> portão -> confissão -> cena final -> tela de fim, sem erros. Faltou olhar por uma pessoa.
+
+
+## Sessão de 2026-11-10, parte 9
+
+- **Caminhada da Roo**: a causa era o código, não os sprites. Cada casa (220 ms) reiniciava a animação (`playIdle` + `playWalk`) e o ciclo de 12 fps não cabia na casa. Agora o passo é manual (`stepPlayerMove`) com o tempo que sobra levado ao passo seguinte, e o ciclo de 4 quadros dura 2 casas e acompanha a velocidade. Medido por script: 3,03 px por quadro, constante, sem quadro de parada entre casas.
+- **D2. Power-ups por poção** (`game/upgrades.ts`, testes em `tests/upgrades.test.ts`): alcance e número de frascos valem só para a poção escolhida; a HUD mostra ativos/limite da poção escolhida; velocidade segue global. Não precisou migrar `storage.ts` (nada disso é salvo). Decisão em `docs/06-decisoes.md`.
+- **P2. Belladona**: `witch_talk_0/1` (fala, usada quando ela solta uma fala) e `witch_defeat` (vencida, olhos fechados em calma, cabeça baixa). Ela não gira nem encolhe mais ao cair.
+- **R1 completo**: `PickupSystem`, `EnemySystem`, `SleepSystem` e as regras puras (`pickupRules`, `enemyRules`, `sleepRules`, `blast`) fora da `MainScene` (de 1298 para ~885 linhas). Testes novos: `systemRules`, `blast`, `upgrades` (100 no total).
+- Mapa conferido por script em 390x844 com fases 1 e 2 vencidas: progresso lido de `bombroo_stages_completed` e mostrado certo.
+- Fotos `docs/img/sprites.png` e `sprites/bosses.png` refeitas.
+- Tentativa de R5 (bundle menor) descartada, motivo em `task.md`.

@@ -120,3 +120,8 @@ Novas decisões entram no fim.
 - **Motivo:** o jogo é pixel art, no espírito do Super Bomberman 3 e 5. Uma tentativa de deixar a Roo suave no menu (vetor ampliado) foi descartada: o certo é o fundo e os efeitos combinarem com a Roo, e não o contrário.
 - **Consequência:** a Roo do menu usa escala inteira (3x) e não gira. Líquido, braço e varinha do menu são desenhados em baixa resolução e ampliados sem suavização (`pixelLayer` em `MenuScene`). Brilhos (`menu_puff`) e bolhas são feitos de pixels em faixas, sem degradê suave.
 - **Ficou de fora:** os anéis de onda na água do menu e o texto/HUD (fonte vetorial) continuam suaves.
+
+## Power-ups por poção
+- **Motivo:** alcance e frascos eram globais; aumentar o alcance da Poção de Fogo mudava todas as outras.
+- **Consequência:** `+1 RAIO` e `+1 FRASCO` valem só para a poção escolhida ao coletar (`game/upgrades.ts`). O limite de frascos é por poção (a HUD mostra ativos/limite da poção escolhida), então dá para ter frascos de tipos diferentes ao mesmo tempo. A velocidade de caminhada continua global. Nada disso é salvo em `localStorage` (só vale na partida e passa de fase em fase), então não precisou de migração.
+- **Ficou de fora:** equilíbrio com testes de pessoas: se ficar fácil demais ter vários tipos ao mesmo tempo, limitar o total de frascos.

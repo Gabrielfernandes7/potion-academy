@@ -77,6 +77,7 @@ Quem usa as regras: `MainScene` e `BossController` (que são o lado Phaser) cham
 ## Módulos principais
 
 - **`game/BombSystem.ts`:** bombas, explosões e empurrão. A `MainScene` cria o sistema em `create()` e chama `bombSystem.placeBomb()`, `update(delta)` e as outras ações. O chefe chama `bombSystem.spawnExplosion` para as poções dele.
+- **`game/PickupSystem.ts`, `game/EnemySystem.ts`, `game/SleepSystem.ts`:** itens do chão, inimigos e sono da Roo, criados em `MainScene.create()` como o `BombSystem` (`pickupSystem`, `enemySystem`, `sleepSystem`). As regras puras ficam em `pickupRules.ts`, `enemyRules.ts` e `sleepRules.ts` (testes em `tests/systemRules.test.ts`).
 - **`game/BossController.ts`:** Belladona. Uma máquina de estados (`idle`, `casting`, `blinking`, `stunned`, `defeated`) com fases de vida (normal e furiosa). Tempos usam o `delta` do jogo, então pausam com o jogo.
 - **`textures/`:** todos os sprites são gerados em código com a API Graphics (sem imagens externas). `make.ts` é a fábrica comum; `index.ts` chama cada gerador. `anselmo.ts` é o personagem novo, com formas em dados e um renderizador próprio.
 - **`audio/AudioEngine.ts`:** síntese com WebAudio (osciladores, filtros, reverberação por convolução) e agendador de música. Ver a seção de áudio abaixo.
@@ -113,7 +114,7 @@ Os testes de regra não usam o navegador. Verificação de jogo (FPS, sons, sens
 
 ## Pontos de atenção
 
-- **`MainScene.ts` tem cerca de 1.200 linhas.** Ainda concentra pickups, inimigos, sono, câmera e HUD. As bombas já saíram para `BombSystem`. Ver a proposta de divisão abaixo.
+- **`MainScene.ts` tem cerca de 885 linhas.** Ainda concentra grade, porta, fases, movimento da Roo, câmera e HUD. Bombas, itens, inimigos e sono já saíram para sistemas próprios. Ver a proposta de divisão abaixo.
 - **Lentidão:** o vazamento de nós de áudio foi a causa confirmada. A medição do FPS no navegador de teste ficou em 60, então outros gargalos só aparecem em máquinas reais.
 - **Pendências de jogo:** ver `task.md`.
 
@@ -133,4 +134,4 @@ Por que este padrão e não outro:
 - **Por que não ECS (entidades e componentes):** seria uma reescrita grande para um jogo deste tamanho, sem ganho claro.
 - **Por que não mais padrões:** o projeto já usa os que fazem sentido: **Observer** (`game.events` entre cenas), **State** (chefe), **Factory** (`make.ts` para texturas) e **dados em tabelas** (`config.ts`) no lugar de subclasses por tipo de inimigo ou bomba.
 
-A divisão deve ser feita em etapas pequenas, uma por vez, cada uma com testes para as regras que sair da cena. **Aplicado:** `BombSystem`. **Falta:** `PickupSystem`, `EnemySystem` e `SleepSystem`.
+A divisão deve ser feita em etapas pequenas, uma por vez, cada uma com testes para as regras que sair da cena. **Aplicado:** `BombSystem` (com o alcance puro em `blast.ts`), `PickupSystem`, `EnemySystem` e `SleepSystem`.

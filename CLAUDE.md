@@ -56,6 +56,9 @@ src/
   game/boss.ts             # regras puras do chefe: habilidades, áreas, alvos (testável)
   game/BossController.ts   # Belladona: movimento, ataques com aviso, dano, fúria, derrota
   game/balance.ts          # regra de equilíbrio das poções (testável)
+  game/upgrades.ts         # power-ups por poção: alcance e frascos valem só para a poção escolhida (puro)
+  game/blast.ts            # alcance de uma explosão, como gerador (puro, testável)
+  game/BombSystem.ts + PickupSystem.ts + EnemySystem.ts + SleepSystem.ts  # sistemas tirados da MainScene (regras puras em *Rules.ts)
   game/events.ts           # eventos globais (TEXTURES_READY)
   game/launcher.ts         # cria o Phaser.Game ao abrir a página; navegação menu/partida
   ui/dom.ts                # helpers de DOM (byId, setShown)
@@ -105,6 +108,8 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 **Scenes**: `MainScene` launches `HudScene`. `scene.restart()` re-runs `MainScene.init()`, which resets all per-run state (hides the pause overlay, clears touch input and picks a new music track). `HudScene` persists across restarts and is stopped together with `Main` when going back to the menu.
 
 **Game flow**: `MainScene.update()` returns early while the shop is open (`isShopOpen()`) and does nothing after `gameOver`/`won` except handle `R`. Keep that guard order when editing `update()`/`handleInput()`.
+
+**Movimento da Roo**: não usa tween. `stepPlayerMove(delta)` interpola entre casas e guarda o tempo que sobra (`moveCarry`) para o passo seguinte; o ciclo de caminhada (4 quadros) dura 2 casas e só vira "parada" quando ela de fato para. Não volte a usar `playIdle()` ao fim de cada casa: reinicia a animação e parece pulo.
 
 **Grid vs. visual position**: `player.gridX/gridY` and enemy `gridX/gridY` change when a move *starts*; the sprite tweens afterwards. Damage checks use the sprite position (player tile from `playerSprite.x/y`, enemy contact by sprite distance) so hits match what is on screen. Pickups, bombs and win check still use grid coordinates.
 
