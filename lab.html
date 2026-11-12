@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Potion Academy: laboratório (dev)</title>
+<style>
+  :root { --bg: #1b1714; --ink: #f1e6d6; --muted: #b3a494; --card: #241e1a; --line: #3d332b; --accent: #f97316; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Nunito", system-ui, sans-serif; line-height: 1.5; }
+  main { max-width: 1000px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-family: "Cinzel", Georgia, serif; font-size: 1.5rem; margin: 0 0 4px; }
+  .lead { color: var(--muted); margin: 0 0 16px; font-size: 0.95rem; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; align-items: start; }
+  @media (max-width: 720px) { .layout { grid-template-columns: 1fr; } }
+  #stage { background: #2c3b34; border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  #stage canvas { display: block; width: 100% !important; height: auto !important; image-rendering: pixelated; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+  .panel h2 { font-family: "Cinzel", Georgia, serif; font-size: 1rem; color: var(--accent); margin: 14px 0 6px; }
+  .panel h2:first-child { margin-top: 0; }
+  label { display: block; font-size: 0.9rem; margin: 6px 0; }
+  select { width: 100%; font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 6px; margin-top: 4px; }
+  .check { display: flex; gap: 8px; align-items: center; }
+  ul { padding-left: 18px; margin: 6px 0; font-size: 0.88rem; color: var(--muted); }
+  li { margin: 3px 0; }
+  kbd { background: rgba(249,115,22,0.15); border-radius: 3px; padding: 0 4px; color: var(--ink); }
+  #status { font-weight: 700; color: var(--ink); }
+  .tip { color: var(--muted); font-size: 0.85rem; margin-top: 16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Laboratório da Roo de fogo</h1>
+  <p class="lead">Ferramenta de desenvolvimento. Um mapa em miniatura com as regras de teste do jogo, para ver a transformação da Roo e as ideias do elemento Fogo. Não entra no build de produção.</p>
+
+  <div class="layout">
+    <div id="stage"></div>
+
+    <aside class="panel">
+      <h2>Estágio da Roo</h2>
+      <label>
+        Transformação
+        <select id="stage-select">
+          <option value="0">0 · Original (capa roxa)</option>
+          <option value="1">1 · Capa vermelha em degradê</option>
+          <option value="2">2 · Chapéu em chama, varinha e olhos</option>
+          <option value="3">3 · Manto em chamas e orelhas</option>
+          <option value="4" selected>4 · Faíscas e brasas</option>
+        </select>
+      </label>
+      <label>
+        Intensidade
+        <select id="intensity-select">
+          <option value="low">Baixa</option>
+          <option value="medium">Média</option>
+          <option value="high" selected>Alta</option>
+        </select>
+      </label>
+
+      <h2>Mecânica de teste</h2>
+      <label class="check">
+        <input type="checkbox" id="trail-check" checked>
+        Explosões deixam brasas (estágio 4)
+      </label>
+      <p class="tip">Ideia para testar a sensação. A regra final ainda não está definida em <code>docs/</code>.</p>
+
+      <h2>Controles</h2>
+      <ul>
+        <li><kbd>setas</kbd> andar (passo por casa)</li>
+        <li><kbd>Espaço</kbd> colocar Poção de Fogo (explode em 1,6 s)</li>
+        <li>Blocos destrutíveis somem na explosão; pilares e paredes não.</li>
+      </ul>
+
+      <h2>Exportar</h2>
+      <button type="button" id="export-btn" style="font:inherit;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer">Baixar folha da transformação (PNG)</button>
+      <p class="tip">Linhas: estágios 0 a 4. Colunas: as 8 fases do tremor. Escala 3×.</p>
+
+      <h2>Resultado</h2>
+      <p id="status">Explosões: 0</p>
+    </aside>
+  </div>
+</main>
+<script type="module" src="/src/labMain.ts"></script>
+</body>
+</html>

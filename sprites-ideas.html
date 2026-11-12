@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ideias de sprites: Roo de fogo</title>
+  <style>
+    :root {
+      --bg: #f6f1e7;
+      --ink: #2a211b;
+      --muted: #6b5d52;
+      --card: #fffdf8;
+      --line: #d9cbb8;
+      --accent: #c2410c;
+      --code-bg: #1f1a16;
+      --code-ink: #f5ead9;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #1b1714;
+        --ink: #f1e6d6;
+        --muted: #b3a494;
+        --card: #241e1a;
+        --line: #3d332b;
+        --accent: #f97316;
+        --code-bg: #0f0c0a;
+        --code-ink: #f5ead9;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #1b1714;
+      --ink: #f1e6d6;
+      --muted: #b3a494;
+      --card: #241e1a;
+      --line: #3d332b;
+      --accent: #f97316;
+      --code-bg: #0f0c0a;
+      --code-ink: #f5ead9;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Nunito", system-ui, sans-serif;
+      line-height: 1.5;
+    }
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+    h1 {
+      font-family: "Cinzel", Georgia, serif;
+      font-size: 1.8rem;
+      margin: 0 0 4px;
+    }
+    h2 {
+      font-family: "Cinzel", Georgia, serif;
+      font-size: 1.2rem;
+      margin: 32px 0 8px;
+    }
+    .lead { color: var(--muted); margin: 0 0 16px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    ul { padding-left: 20px; margin: 8px 0; }
+    li { margin: 4px 0; }
+    .tip { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--muted); }
+    .toolbar { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 8px; }
+    button {
+      font: inherit;
+      font-weight: 700;
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      border-radius: 6px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+    pre {
+      background: var(--code-bg);
+      color: var(--code-ink);
+      border-radius: 8px;
+      padding: 16px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 0.9rem;
+      margin: 0;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+    .status { color: var(--muted); font-size: 0.9rem; min-height: 1.2em; }
+    .grid { display: flex; flex-wrap: wrap; gap: 12px; }
+    figure { margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); text-align: center; }
+    .pair { display: flex; gap: 8px; justify-content: center; }
+    figure canvas, #fire-anim canvas { display: block; image-rendering: pixelated; background: #33413a; border-radius: 4px; max-width: 100%; height: auto; }
+    figcaption { font-size: 0.8rem; color: var(--muted); margin-top: 6px; }
+    figcaption b { display: block; color: var(--ink); }
+    .swatches { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0; }
+    .swatch { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+    .swatch i { width: 18px; height: 18px; border: 1px solid var(--line); border-radius: 3px; display: inline-block; }
+    code { background: rgba(194, 65, 12, 0.12); border-radius: 4px; padding: 0 4px; }
+    .anim-row { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+    @media (max-width: 480px) {
+      h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Roo de fogo: meta prompt para sprites</h1>
+  <p class="lead">Ideia de variação da Roo com visual de fogo, como se ela tivesse pegado o elemento Fogo (enxofre). A seção abaixo mostra a Roo de fogo já desenhada, gerada agora pelo código a partir do prompt. O prompt também está aqui, para usar em um gerador de imagem ou em outra IA.</p>
+
+  <h2>Roo de fogo (gerada pelo código)</h2>
+  <div class="card">
+    <p>Cada par mostra a Roo original e a versão de fogo, em 40 × 50 px ampliada sem suavização (<code>?zoom=8</code> na URL amplia mais). O desenho está em <code>src/textures/rooFire.ts</code> e pinta brasas e chamas por cima das texturas reais, sem alterar o jogo.</p>
+    <div id="fire-grid" class="grid"></div>
+    <h3>Caminhada de lado (a chama da varinha balança)</h3>
+    <div class="anim-row"><div id="fire-anim"></div></div>
+    <h3>Cores novas</h3>
+    <div id="fire-swatches" class="swatches"></div>
+    <button type="button" id="sheet-btn">Baixar folha das 4 poses (PNG, 8×)</button>
+  </div>
+
+  <h2>Como usar</h2>
+  <div class="card">
+    <ul>
+      <li>Cole o <strong>meta prompt</strong> inteiro na ferramenta. Ele já inclui a base da Roo e as regras de pixel art do projeto.</li>
+      <li>Gere de 3 a 4 variações e escolha a silhueta mais legível em 40 × 50 px.</li>
+      <li>Para a versão final, peça à IA de código o desenho em formas simples (retângulos, círculos, triângulos), sem imagens externas.</li>
+    </ul>
+    <p class="tip">Teste sempre em tamanho real (40 × 50 px) e no zoom 8×: se o fogo virar um borrão, simplifique.</p>
+  </div>
+
+  <h2>Meta prompt</h2>
+  <div class="card">
+    <div class="toolbar">
+      <span class="status" id="status" role="status" aria-live="polite"></span>
+      <button type="button" id="copy">Copiar prompt</button>
+    </div>
+    <pre id="prompt">Você é um artista de pixel art para um jogo 2D de bomba estilo Super Bomberman, com estética de alquimia.
+
+OBJETIVO
+Criar uma variação do sprite da Roo, uma canguru bruxa, com visual de FOGO: ela pegou o elemento Fogo (enxofre) e o corpo, o chapéu e a varinha mostram isso. Deve parecer a mesma personagem, só que "acesa" pelo fogo.
+
+PERSONAGEM BASE (manter)
+- Canguru bruxa: corpo marrom-quente, orelhas longas, chapéu pontudo de bruxa, varinha na lateral, manto que cobre as costas.
+- Bolsa na frente do manto (a Roo guarda poções ali).
+- Olhos simples, pequenos, legíveis.
+- Mesma proporção e mesma silhueta da versão original.
+
+VARIAÇÃO DE FOGO (o que muda)
+- Chapéu: a ponta e a aba com brasas laranja-avermelhadas; uma fagulha amarela no topo.
+- Manto: barra inferior queimada, com pequenas chamas e fagulhas laranja saindo.
+- Varinha: a ponta solta uma pequena chama amarela-branca de 2 a 3 pixels.
+- Olhos: laranja brilhante no centro, sem brilho branco.
+- Orelhas: bordas em laranja, como se estivessem em brasa.
+- Pés: 1 ou 2 pixels de brasa no chão, em volta das patas.
+- Não cobrir o rosto com fogo: o rosto deve continuar legível.
+
+PALETA
+- Use a cor do elemento Fogo do projeto para as chamas, em 3 tons: escuro (base), médio (corpo da chama), claro (centro amarelo).
+- Mantenha o marrom da Roo para o corpo, sem trocar a espécie.
+- Contorno escuro de 1 px em todo o sprite. Cores de frascos têm contorno claro; personagens têm contorno escuro.
+- No máximo 12 cores no sprite inteiro.
+
+REGRAS DE PIXEL ART (obrigatórias)
+- Tamanho: 40 × 50 px (10 px extras no topo para orelhas e chapéu).
+- Escala inteira, sem rotação, sem interpolação.
+- Sem degradês suaves. Sombreamento só em degraus (2 ou 3 tons).
+- Sem emojis, sem texto, sem fundo (fundo transparente).
+- Os pés ficam a 3 px do fundo da textura.
+- O lado direito é o desenho; o esquerdo é espelhado.
+
+POSES A GERAR (mesma identidade em todas)
+1. De frente, parada (olhos e fogo do chapéu acesos).
+2. De costas, parada (manto com a barra queimada visível).
+3. De lado, andando, 4 quadros: a chama da varinha balança entre os quadros.
+4. Dormindo (fogo bem fraco: brasas apagando, olhos fechados).
+
+SAÍDA ESPERADA
+- Uma folha de referência com as 4 poses lado a lado, em 40 × 50 px cada e ampliadas em 8×.
+- Uma lista curta com as cores hexadecimais usadas, em ordem: contorno, corpo, chama escura, chama média, chama clara.
+- Uma frase dizendo qual parte do fogo é a mais importante para a leitura do personagem.
+
+NÃO FAZER
+- Não transformar a Roo em outro animal ou em demônio.
+- Não usar brilho, glow ou desfoque: o estilo é seco e de pixel.
+- Não usar mais de uma fonte de luz por sprite.</pre>
+  </div>
+
+  <h2>Pacote para outra IA (DeepSeek ou similar)</h2>
+  <div class="card">
+    <ul>
+      <li><strong>Passo 1:</strong> copie o pacote abaixo e cole na outra IA, junto com o meta prompt acima se quiser que ela também gere imagens.</li>
+      <li><strong>Passo 2:</strong> peça para ela responder no formato pedido (lista, sem código).</li>
+      <li><strong>Passo 3:</strong> cole a resposta aqui na conversa. Eu filtro as ideias que cabem em 40 × 50 px, transformo nas poses e atualizo <code>rooFire.ts</code>.</li>
+    </ul>
+    <div class="toolbar">
+      <span class="status" id="brief-status" role="status" aria-live="polite"></span>
+      <button type="button" id="brief-copy">Copiar pacote</button>
+    </div>
+    <pre id="brief">Quero ideias para destacar o elemento FOGO no personagem de um jogo 2D de pixel art.
+
+CONTEXTO DO JOGO
+- Nome: Potion Academy. Estilo Super Bomberman, com estética de alquimia. Textos em português do Brasil.
+- Quatro elementos de poção: fogo (enxofre), água (mercúrio), terra (sal) e éter (ar).
+- O fogo é o elemento da Poção de Fogo, a poção básica. Pegar o power-up de raio melhora o alcance dessa poção.
+
+PERSONAGEM
+- Roo: canguru bruxa. Corpo marrom-quente (laranja claro no pelo), orelhas longas, chapéu pontudo roxo com aba e fivela dourada, manto roxo que cobre as costas e os ombros, bolsa na frente, varinha na lateral.
+- Olhos pretos pequenos com brilho branco. Bochechas rosadas.
+- Aparece em 3 direções (frente, costas, lado) com 4 quadros de caminhada cada, mais uma pose de dormir.
+
+RESTRIÇÕES TÉCNICAS (obrigatórias)
+- Tamanho: 40 × 50 px. As orelhas e o chapéu passam do topo do tile.
+- Pixel art: escala inteira, sem rotação, sem interpolação, sem degradê suave, sem blur, sem glow.
+- Contorno escuro de 1 px. Sombreamento em no máximo 2 ou 3 degraus.
+- Sprite desenhado por código com formas simples (retângulos, círculos, triângulos). Não há imagens externas.
+- Sem texto, sem emojis, fundo transparente.
+- O corpo é laranja: chamas laranja em cima do corpo somem. O contraste forte está no roxo do manto e fora da silhueta.
+
+ESTADO ATUAL DA VERSÃO DE FOGO
+Hoje a Roo de fogo tem: brasas nas pontas do chapéu e na borda das orelhas, uma fagulha amarela acima do chapéu, a barra do manto queimada com pequenas línguas de fogo, uma chama de 3 × 3 px na ponta da varinha, olhos laranja no lugar do brilho branco e 1 ou 2 pixels de brasa sob os pés. O problema: o fogo quase não se destaca à distância, no tamanho real do jogo.
+
+OBJETIVO
+Quero que o fogo fique claramente legível como o elemento da personagem, sem mudar a espécie nem a silhueta base dela.
+
+PEÇO
+1. Ideias de pistas visuais que destacam o fogo. Sugira pelo menos 8, e não se limite às que já existem no estado atual.
+2. Para cada ideia, informe: onde no sprite fica, o que muda na silhueta, se é animada (e em quantos quadros), o custo para desenhar em código (baixo, médio ou alto) e o ganho de leitura à distância (baixo, médio ou alto).
+3. Organize as ideias em três níveis de intensidade: sem fogo extra (só brasas), fogo médio e fogo forte. Mostre o que entra em cada nível.
+4. Diga qual combinação você recomenda para o nível médio e por quê.
+5. Proponha uma ideia de ligação com o jogo: por exemplo, a intensidade do fogo acompanhar o nível de raio da Poção de Fogo, ou acender só quando essa poção está selecionada.
+
+FORMATO DA RESPOSTA
+- Lista numerada, em português do Brasil.
+- Sem código e sem imagens. Descreva em palavras com posições aproximadas (topo do chapéu, lado direito do manto, etc.).
+- Evite ideias que pedem glow, blur, transparência em chamas ou mais de uma fonte de luz.</pre>
+  </div>
+
+  <h2>Notas para a versão em código</h2>
+  <div class="card">
+    <ul>
+      <li>Hoje a Roo de fogo é um pós-processamento (<code>makeFireRoo</code>) e só aparece nesta página. Para usá-la no jogo, o caminho mais limpo é <code>drawRooFrame(g, T, frame, dir, pose)</code> receber um parâmetro <code>element</code> e desenhar as chamas junto com o resto.</li>
+      <li>As chamas são pixels que alternam entre quadros (a língua do manto anda de coluna em coluna), sem tween de alpha.</li>
+      <li>Documente a nova variação em <code>docs/09-sprites.md</code> e atualize a foto em <code>/sprites.html</code>.</li>
+    </ul>
+  </div>
+</main>
+
+<div id="stage" hidden></div>
+<script type="module" src="/src/spritesIdeas.ts"></script>
+<script>
+  (function () {
+    var btn = document.getElementById('copy');
+    var status = document.getElementById('status');
+    var text = document.getElementById('prompt').textContent;
+    btn.addEventListener('click', function () {
+      function done(ok) {
+        status.textContent = ok ? 'Prompt copiado.' : 'Não foi possível copiar. Selecione o texto manualmente.';
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      } else {
+        done(false);
+      }
+    });
+  })();
+</script>
+<script>
+  (function () {
+    var btn = document.getElementById('brief-copy');
+    var status = document.getElementById('brief-status');
+    var text = document.getElementById('brief').textContent;
+    btn.addEventListener('click', function () {
+      function done(ok) {
+        status.textContent = ok ? 'Pacote copiado.' : 'Não foi possível copiar. Selecione o texto manualmente.';
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      } else {
+        done(false);
+      }
+    });
+  })();
+</script>
+</body>
+</html>

@@ -17,7 +17,7 @@ export const CONFIG = {
   maxSpeedUp: 2,
   timeUpBonus: 15000,
   overtimeDamageInterval: 1200,
-  baseMoveDuration: 220,
+  baseMoveDuration: 300, // ms por casa sem power-up (igual ao sapo; +2 velocidade fica em ~143 ms)
   sleepAfterMs: 5000,   // parada sem input por este tempo => dorme
   zzzIntervalMs: 1400,  // intervalo entre os 'z' flutuantes
   hudHeight: 56,        // faixa da HUD acima da grade, em px do canvas
