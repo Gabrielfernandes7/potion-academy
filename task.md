@@ -5,6 +5,14 @@ Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo). O
 
 Última atualização: 2026-11-11 (parte 10: história em passagens, música por fase, README). Alterações das partes 6 a 10 ainda **sem commit**.
 
+## História nova (parte 11): só o roteiro, ainda não aplicada no jogo
+
+- Escrito: `docs/12-historia.md` (roteiro) e `history.html` (livro). Direção: fome, Belladona com razão, mestre que busca a pedra por medo de perder a Roo, Roo nascida de uma bolha, ecos cristãos sem pregação.
+- Falta aplicar no jogo, na ordem sugerida: `BELLADONA_CARDS`, `ENDING_CARDS` (cartão da bolha), carta (`index.html`), `STAGES`, `PASSAGE_CARDS`, `DIARY`. Tabela completa em `history.html#jogo`.
+- Cena do nascimento da Roo (bolha iridescente) pronta em `history.html`; ver no navegador e dizer o que ajustar (ritmo, cores, enquadramento). Pode virar cena do jogo depois.
+- Sprites novos: Roo bebê na bolha iridescente, em duas poses: fetal (deitadinha de lado, dormindo, sem chapéu) e observando (acordada, olhando em volta, mão na bolha). Laço de 16 quadros em `src/textures/rooBubble.ts` (texturas `roo_bubble_{fetal,observe}_0..15`); GIFs em `docs/img/roo-bolha-*.gif` (cópia em `public/img/`), gerados por `scripts/bubble-gif.mjs` (ffmpeg + `npm i --no-save @napi-rs/canvas`). Na `history.html`: capa = observando, capítulo II = fetal. Mascote arquivado em `docs/mascote/`.
+- Decisões suas: gênero da Roo (carta diz "filho"), nomes das etapas da Obra como subtítulo, bolha no último quadro.
+
 ## Aguardando você (nada aqui eu consigo fechar sozinho)
 
 **Ver e ouvir no navegador** (eu só verifico por script; sensação de jogo, som e olho são seus):

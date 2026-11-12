@@ -31,6 +31,7 @@ Game state is persisted in `localStorage` under `bombroo_bank` (coins) and `bomb
 
 ```
 index.html                 # markup: topbar, canvas + menu, controles de toque, overlays (loja, pausa, game over)
+history.html              # livro da história em prosa (/history.html); script em src/history.ts, cena do nascimento da Roo em src/birthScene.ts, roteiro em docs/12-historia.md
 src/
   main.ts                  # layout (vars CSS do canvas, modo toque), botões do DOM, nome da faixa
   config.ts                # CONFIG, CANVAS, ELEMENTS, BOMB_TYPES, BOMB_ORDER (balanceamento)

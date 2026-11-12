@@ -1,81 +1,139 @@
 # História
 
-> **Em uma frase:** Roo, um canguru alquimista, recebe de um monge cristão a missão de recuperar escrituras roubadas por uma alquimista que quer transformá-las em fórmula — e descobre, no caminho, que o tesouro não é o texto, é o que o texto exige de quem o lê.
+> **Em uma frase:** Roo, uma alquimista nascida de uma bolha no Caldeirão, atravessa um vale faminto para recuperar escrituras levadas por Belladona, uma alquimista que tem razão sobre a dor do povo e erra sobre o remédio, e descobre que o conhecimento só serve quando é orientado pelo amor ao próximo.
 
-## O mundo
+**O texto corrido da história está em [`history.html`](../history.html)** (abra `/history.html` com `npm run dev`). Este arquivo é a *bíblia* do roteiro: decisões, personagens, regras e o que falta aplicar no jogo. Se algo mudar na história, mude aqui e no livro.
 
-Roo é um canguru alquimista que vive em **Vale das Fórmulas**, um mundo mágico onde a alquimia é ofício comum — parte ciência, parte arte, parte superstição. Os alquimistas de Vale destilam poções elementais (Fogo, Aqua, Telúrica, Etérea) e as vendem no **Caldeirão de Magia**. É um mundo de **técnica**: tudo se mede, tudo se transforma, tudo tem preço.
+## A tese (o que a história defende)
 
-Mas há uma região além do jardim de Roo que Vale não governa: o **Mosteiro de São Tomás**, no alto da serra. Lá vivem monges cristãos que **copiam manuscritos** e guardam algo que o mundo alquímico não sabe medir — **as escrituras do Novo Testamento**, em cópias antigas que sobreviveram a séculos de guerras, incêndios e descuidos. Para os alquimistas, são "curiosidades"; para os monges, são **o tesouro escondido no campo** (Mt 13,44).
+- O conhecimento é bom e deve servir à vida; não deve ficar trancado em torres ou laboratórios.
+- Mas nenhuma causa, nem a de acabar com a fome, justifica tratar pessoas como instrumentos de um projeto.
+- A resposta cristã não é uma técnica maior: é **a caridade**, cuidar de quem está diante de nós, e **receber** em vez de possuir.
+- Não é "alquimia ruim, fé boa". Anselmo também errou (a omissão); Belladona acerta no diagnóstico.
 
-## O chamado
+## Regras de roteiro
 
-Numa noite, Roo recebe uma **carta de frei Anselmo**, monge do mosteiro. Não é um pedido de ajuda comum — é um pedido **estranho**, quase absurdo para um alquimista:
+1. **Não pregar.** Os temas cristãos aparecem em decisões, objetos e silêncios, nunca em aula. Ninguém cita capítulo e versículo dentro do jogo.
+2. **Belladona tem razão no problema.** Ela só erra na solução (poder para controlar, no lugar de serviço).
+3. **Anselmo não converte a Roo e Belladona não é convertida.** A fé não se impõe.
+4. **O mestre amava a Roo.** A busca dele nasce do medo de perdê-la, não de ganância.
+5. **A Roo é um presente, não um produto.** Ninguém nunca soube explicar a origem dela; o jogo não explica.
+6. **A pergunta final é do jogador:** "o que você vai fazer com o que encontrou?"
 
-> *"Roo, filho do Caldeirão: preciso que busques o que eu não posso mais buscar. As escrituras que guardamos foram **levadas** — não roubadas, mas **tomadas** por alguém que acredita poder transformá-las em fórmula. Não te peço que creias no que eu creio. Peço que as **tragas de volta** — e que, ao encontrá-las, não as trates como pedra."*
+## O mundo: Vale das Fórmulas e os anos magros
 
-A carta vem com um **frasco vazio** lacrado. Nenhuma explicação.
+Vale das Fórmulas é um vale onde a alquimia é ofício comum: destilam-se poções de Fogo, Aqua, Telúrica e Etérea, vendidas no **Caldeirão de Magia**. Há três anos de colheitas ruins, e o vale sofre:
 
-## Por que o monge quer as escrituras
+- chuvas demais, trigo que apodrece em pé, pão caro;
+- celeiros reservados a quem pode pagar; pequenos produtores perdem a terra por dívida;
+- febres que vêm depois da fome.
 
-Frei Anselmo não quer as escrituras para **si**. Ele já as leu. Ele as quer de volta porque **elas são o testemunho de algo que aconteceu** — e um testemunho não serve para quem o guarda; serve para quem o **recebe**. O mosteiro não é um cofre: é um **scriptorium**, uma oficina de cópias. O valor das escrituras não está no pergaminho, está no **que elas exigem de quem as lê**.
+O **Mosteiro de São Tomás**, no alto da serra, distribui sopa à porta e copia manuscritos, mas a ajuda não alcança todos.
 
-Mas há um motivo mais duro, e ele é pessoal: **Anselmo foi confessor do mestre de Roo**, o velho alquimista que desapareceu. O mestre passou a vida buscando a pedra filosofal, e Anselmo **não o deteve** — deixou-o buscar, achando que era só ciência. Quando o mestre partiu para a última busca, Anselmo ficou com a culpa. As escrituras que ele agora pede são **as mesmas que ele deveria ter dado ao mestre** e não deu. Ele quer que Roo as encontre **antes** de Belladona — porque Belladona é o que o mestre teria sido se tivesse continuado.
-
-## Por que as escrituras são valiosas
-
-Em *Jornada ao Oeste*, os três livros (os sutras do Tripitaka) são valiosos porque **transformam a terra que os recebe** — não são relíquias de museu, são **sementes**. Aqui, a lógica é a mesma, mas cristã.
-
-As escrituras são valiosas porque **são o único mapa que não foi feito por alquimistas**. Todo mapa de Vale diz "onde está o ouro"; as escrituras dizem **quem é o dono do campo**. Para Belladona, isso é um **obstáculo**: se o mundo tem dono, ela não pode ser dona dele. Para Anselmo, é **a razão de viver**. Para Roo, no começo, é **um enigma** — ele quer decifrá-las como decifra uma fórmula. O jogo inteiro é a distância entre essas três leituras.
-
-E há um detalhe que dá peso material à coisa: **Belladona já rasurou parte dos textos** para transformá-los em fórmulas. As páginas que Roo encontra estão **incompletas**. Recompô-las é o puzzle do Ato II — e cada página recomposta **não devolve o texto original**, devolve **a possibilidade de lê-lo**. O jogador nunca "ganha" as escrituras; ele **ganha o direito de tentar entendê-las**.
-
-## O que o monge faz depois da jornada
-
-Quando Roo volta com as escrituras (ou com o que restou delas), frei Anselmo **não as guarda de novo**. Ele faz três coisas, e todas são **consequências narrativas**, não epílogo decorativo:
-
-1. **Copia.** Ele manda o scriptorium fazer **cópias** — muitas — e as distribui pelas aldeias de Vale. As escrituras deixam de ser um tesouro escondido e passam a ser **pão partido**. O mosteiro esvazia o cofre de propósito.
-2. **Devolve o frasco vazio a Roo.** O mesmo frasco da carta. Agora Roo entende: o frasco nunca foi para encher. É para lembrar que **nem tudo se enche** — e que a fé não é um recurso gerenciável.
-3. **Confessa.** Anselmo conta a Roo o que fez (ou não fez) com o mestre. Não pede desculpas — pede que Roo **não repita**. É o momento em que o monge deixa de ser "NPC de missão" e se torna **personagem com culpa**.
-
-E o monge **não converte Roo**. Ele some da história depois disso — volta para o scriptorium, e o jogo termina com Roo sozinho no Caldeirão, com o frasco vazio na HUD. A pergunta final não é "Roo acreditou?", é **"o que você, jogador, faria com o frasco vazio?"** — e o jogo não responde.
+> **Inspiração histórica (só inspiração):** a Grande Fome de 1315–1322 na Europa, no século XIV, quando alquimia, mosteiros e catedrais já conviviam com a fé em uma relação complexa, não de oposição simples. Vale é fictício; não representamos a história real.
 
 ## Personagens
 
-- **Roo** — *Protagonista.* Canguru alquimista. Começa buscando as escrituras como objeto de estudo; termina com uma pergunta sobre quem é. **Arco:** de técnico que manipula a matéria a criatura chamada a contemplar a Criação.
-- **Frei Anselmo** — *Mentor.* Monge do Mosteiro de São Tomás. Confessor do mestre de Roo. Carrega a culpa de não o ter detido. **Arco:** de NPC de missão a personagem com culpa — e com uma decisão a tomar sobre o que fazer com as escrituras.
-- **Belladona** — *Antagonista.* Alquimista renegada, ex-discípula do mesmo mestre. Quer transformar as escrituras em elixires. **Arco:** não se converte. É vencida — e deixada ir, porque a fé não se impõe.
+| Personagem | O que procura | Onde está o erro ou a virtude |
+|---|---|---|
+| **O mestre** (desaparecido) | Vencer a escassez e a morte, para que a Roo nunca tenha de enterrar ninguém | Confunde o poder de transformar a matéria com o poder de superar os limites humanos |
+| **Belladona** | O poder de aplicar a transformação em escala | Justifica qualquer meio pelo resultado: rouba, rasura, arrisca vidas, não confia em ninguém |
+| **Frei Anselmo** | Que as escrituras circulem, não fiquem guardadas | Foi confessor do mestre, viu a obsessão crescer e não o deteve |
+| **Roo** | Conhecer e praticar alquimia | Ainda não sabe para quê. O arco dela é descobrir |
 
-## Inspiração: *Jornada ao Oeste*
+### O mestre
+Já perdeu alguém que amava numa epidemia anterior. Desde então, uma pergunta: "se a matéria se transforma, por que o que sofre não?" Buscou a pedra filosofal não por ouro, mas por um remédio de tudo e um pão sem escassez. Depois de criar a Roo, a busca ganhou um segundo motivo: o medo de que uma bolha estoure.
 
-**O que fica:**
-- **A jornada como estrutura**: um pedido, um grupo improvável, um objetivo valioso, obstáculos que testam cada um.
-- **A valiosidade dos textos**: não como item de inventário, mas como **coisa que transforma quem a recebe**.
-- **O grupo**: Roo pode ganhar companheiros ao longo do caminho (um boticário cético, uma criatura transformada por Belladona que quer voltar a ser o que era) — cada um representa uma **leitura diferente** das escrituras.
+### Belladona
+Cresceu numa aldeia que dependia de um senhor local. Na fome, os estoques foram reservados a quem podia pagar. Perdeu o irmão mais novo para a fome e a mãe para a febre. Foi discípula do mestre, viu o nascimento da Roo e concluiu: se de um sopro e sabão nasce quem respira, de um sopro e sabão nasce pão. Quando o mestre sumiu, levou os cadernos, o laboratório e as gemas (que ele usava para fixar uma transformação), e as escrituras do mosteiro, porque os cadernos diziam que a chave da multiplicação dos pães estava ali.
 
-**O que sai (e por quê):**
-- **A lógica de "coletar 3 livros"**: aqui não há três volumes a somar. Há **um testemunho** que se lê e se vive. O objetivo não é acumular; é **compreender**.
-- **A ideia de que o monge quer os livros para "levar a sabedoria ao seu mundo"**: Anselmo já tem a sabedoria. O que ele quer é que **ela circule** — e para isso precisa que Roo a **recupere de quem a quer monopolizar**.
-- **O final triunfal**: não há apoteose. Há um frasco vazio e uma pergunta.
+- **A rasura:** ela lê o texto como receita e apaga o que "não serve" (o que exige algo de quem lê). É o que as páginas rasuradas do jogo mostram.
+- **O credo dela:** *"Quantas pessoas precisam morrer de fome enquanto os sábios discutem o que é possível?"*
+- **O erro:** para ela, qualquer limite moral é um obstáculo à missão.
 
-## O que Roo aprende (e o que o jogador sente)
+### Frei Anselmo
+Monge, confessor do mestre. Sabe que a caridade do mosteiro não resolve tudo e sabe o que o mestre fez na noite da bolha: disse-lhe que o que nasceu em suas mãos não era obra dele, era dádiva. O mestre chorou, assentiu e não acreditou. Anselmo não insistiu. É a culpa dele. Pede a Roo porque ela é a única que o mestre amou e que Belladona ainda ouviria.
 
-Roo aprende alquimia (mecânicas de poção), magia (elementos) e **fé** — mas a fé não entra como **terceira habilidade**. Ela entra como **o que reordena as outras duas**. No começo, Roo usa poções para **resolver problemas**; no fim, ele usa poções para **servir a alguém**. A mudança não está na árvore de talentos: está no **diário** que o jogador abre e relê, e nas **escolhas** que o jogo não premia com moeda.
+### Roo
+Nasceu no Caldeirão, de uma bolha. Os alquimistas do vale a chamam de "filho do Caldeirão". Ela acha que a história da bolha é uma fábula de ninar. Não é.
 
-> **A pergunta que o jogo faz, do começo ao fim, é a mesma da carta:** "o que você vai fazer com o que encontrou?" — e a resposta é do jogador, não do Roo.
+## Origem da Roo: a bolha
+
+Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Materia com o sabão de lixívia que o laboratório usa para purificar os vidros e soprou por um tubo de vidro. Subiu uma bolha iridescente, que refletiu o laboratório, o caldeirão e o rosto dele, e não estourou. Pousou na bolsa de uma capa pendurada num gancho e estourou sem ruído. Na bolsa respirava uma criatura pequena, de orelhas grandes: a Roo. Ninguém soube explicar por que um canguru. O mestre escreveu *"a matéria responde ao que não sabemos pedir"* e riscou.
+
+**Por que isso não abre furo de roteiro:**
+
+- **Reforça a tese:** a Roo é presente, não produto. O mestre errou ao tratá-la como prova de que tudo é questão de receita.
+- **Dá motivo ao mestre:** ele busca a pedra para que a Roo nunca precise enterrar ninguém.
+- **Dá motivo a Belladona:** ela viu a bolha e concluiu que a Obra serve para qualquer coisa, inclusive pão.
+- **Faz da culpa de Anselmo algo maior:** ele sabia que o mestre tratava um presente como prova de técnica.
+- **Combina com o frasco vazio e com a bolha:** um frasco vazio é o oposto de um recipiente que se enche, e a bolha é feita de ar dentro de uma película.
+
+**Cena animada:** em `history.html` (capítulo II, botão "Ver a cena do nascimento"), em pixel art com a Roo do próprio jogo: o mestre sopra, a bolha flutua até a bolsa da capa, estoura e a Roo respira. Código em `src/birthScene.ts`; serve de rascunho para uma cena do jogo.
+
+**Cuidados:** não explicar por que canguru; a Roo não é "de laboratório", não tem valor menor por isso; o final não deve revelar que ela pode estourar.
+
+## As escrituras: três ecos
+
+As escrituras aparecem como objeto e como tema. Nenhum dos três ecos é ensinado; eles se mostram nas decisões.
+
+| Texto | Como aparece | O que mostra |
+|---|---|---|
+| **A multiplicação dos pães** (João 6) | Belladona o lê como técnica reproduzível; Anselmo lê como compaixão, partilha e Pão da Vida | O erro dela não é querer alimentar os famintos, é querer ser dona do poder que alimenta |
+| **O Bom Samaritano** (Lucas 10,25–37) | Anselmo ao fim: "fica ao lado dessa pessoa" | Saber muito não basta; cuidar de quem está ferido, sim |
+| **O rico e Lázaro** (Lucas 16,19–31) | Celeiros trancados; Lázaro à porta, o portão do jardim | A fome não é só falta de comida, é também como se reparte |
+
+## A Grande Obra: os quatro atos
+
+Cada ato recebe o nome de uma etapa da Grande Obra, como cor e tema (os nomes dos atos não mudam). *Proposta: confirmar antes de aplicar.*
+
+| Ato | Etapa | O que acontece | Estado no jogo |
+|---|---|---|---|
+| **I. O Chamado** | Nigredo (escurecer, separar) | A carta de Anselmo; o laboratório do mestre agora é de Belladona; notícias da fome | Carta e fase 1 existem; falta a fome na carta e no cartão da fase |
+| **II. O Caminho** | Albedo (purificar, limpar) | O Salão dos Fantasmas; ecos de experimentos; páginas do mestre, entre elas "hoje a bolha não estourou" | Passagem 2 existe; falta a bolha e as páginas |
+| **III. O Duelo** | Citrinitas (iluminar) | Belladona expõe a razão dela e acusa Anselmo de guardar palavras enquanto o povo morre; Roo a vence, e ela não se converte | Duelo existe; falas a reescrever |
+| **IV. O Retorno** | Rubedo (consumar) | O portão, a confissão, as cópias, o frasco vazio, o Caldeirão | Existe; confissão a acrescentar |
+
+## O frasco vazio
+
+| Para quem | Significa |
+|---|---|
+| Belladona | Um recipiente que deveria ser enchido com poder suficiente para resolver tudo |
+| O mestre | A promessa de que algum dia haveria a solução perfeita |
+| Roo | Que nem tudo precisa ser possuído ou controlado; a disposição de receber |
+
+A cena final fica como está: o frasco sobre a mesa, o Caldeirão morno, silêncio. Nenhuma fala explica. *Opção a decidir:* uma única bolha iridescente sobe do caldeirão no último quadro.
 
 ## Onde a história está no jogo
 
-| Momento | Onde | Como |
+| Momento | Onde | Estado |
 |---|---|---|
-| A carta | antes da fase 1 (`ui/letter.ts`) | retrato de Anselmo e o texto da carta |
-| Cada fase | cartão de entrada | lugar, nome do ato e uma frase de história (`STAGES` em `config.ts`) |
-| Passagens | ao vencer a fase 1 e a fase 2, antes da próxima (`PASSAGE_CARDS` em `game/story.ts`) | a página rasgada do mestre; os ecos dele e a voz de Belladona na torre |
-| O portão | fase 4, ao pegar as 3 gemas | Anselmo aparece no portão |
-| A confissão | ao cruzar o portão (`ENDING_CARDS` em `game/story.ts`) | seis cartões: cópias, confissão, frasco vazio |
-| O fim | tela final "Jornada cumprida" | "o que você faria com o frasco vazio?" |
+| A carta | `index.html` (`#letter-overlay`) e `ui/letter.ts` | Texto atual; ajustar para citar a fome e Belladona |
+| Cartão de cada fase | `STAGES` em `config.ts` | Frases atuais; ajustar para o tema de cada etapa |
+| Passagens | `PASSAGE_CARDS` em `game/story.ts` | Funciona; passagem 2 ganha a bolha |
+| Despedida da Belladona | `BELLADONA_CARDS` em `game/story.ts` | **Reescrever** (hoje ela só queria "que as palavras servissem para alguma coisa") |
+| O portão | fase 4, ao pegar as 3 gemas | Funciona |
+| A confissão | `ENDING_CARDS` em `game/story.ts` | Acrescentar o cartão da bolha e da culpa |
+| Cena final | `CAULDRON_LINES` em `game/story.ts` | Manter |
+| Diário da Roo | `game/diary.ts` | Novas páginas (fome, bolha, mestre); hoje só 5 |
+| Tela final | "Jornada cumprida" | Manter |
 
-## Próximos passos (não implementados)
+### Falas propostas (rascunho para aplicar depois)
 
-- Diário do Roo (frases que ele guarda).
-- Companheiros de viagem (boticário cético, criatura transformada).
+Belladona, no duelo: *"Quantas pessoas morreram de fome enquanto o mestre hesitava? Eu contei. Você sabe quantas?"* / *"Anselmo guarda palavras em cofres enquanto o pão acaba."*
+
+Belladona, ao cair: *"Você venceu. Mas me diga, Roo: quem alimenta a aldeia amanhã?"* / *"Não preciso que concorde. Preciso que alguém responda."* / *"Leve o pergaminho. Leia melhor do que eu li."*
+
+Anselmo, na confissão (cartão novo): *"Ele me contou o que fez naquela noite. Disse-lhe que o que nasceu em suas mãos não era obra dele. Ele chorou. Não acreditou, e eu não insisti."*
+
+## Decisões em aberto
+
+- **O gênero da Roo.** Os documentos dizem "bruxa-canguru" e "ela"; a carta diz "filho do Caldeirão". O livro usa "ela". Se mantiver, trocar a carta para "filha" ou "cria do Caldeirão".
+- **Os nomes das etapas da Obra** (Nigredo, Albedo, Citrinitas, Rubedo) como subtítulo dos atos: usar ou deixar só como cor e tom?
+- **A bolha no último quadro:** sim ou não?
+- **Companheiros** (boticário cético, criatura transformada por Belladona): adiados (dependem do Ato II ampliado; ver `task.md`).
+
+## Inspiração: *Jornada ao Oeste*
+
+- **Fica:** a jornada como estrutura (um pedido, obstáculos, um objetivo valioso) e os textos como coisa que transforma quem os recebe, não como item de inventário.
+- **Sai:** a lógica de coletar três livros; o final triunfal. Aqui há um testemunho a compreender e uma pergunta sem resposta.

@@ -6,9 +6,9 @@ export default defineConfig({
     target: 'es2020',
     // Phaser (~1,2 MB) em arquivo próprio: o navegador o guarda em cache e não rebaixa a cada mudança do jogo
     chunkSizeWarningLimit: 1300,
-    // além do jogo, publica o catálogo de sprites (sprites.html)
+    // além do jogo, publica o catálogo de sprites (sprites.html) e o livro da história (history.html)
     rollupOptions: {
-      input: { main: 'index.html', sprites: 'sprites.html' },
+      input: { main: 'index.html', sprites: 'sprites.html', history: 'history.html' },
       output: { manualChunks: id => (id.includes('node_modules/phaser') ? 'phaser' : undefined) },
     },
   },

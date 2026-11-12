@@ -125,3 +125,8 @@ Novas decisões entram no fim.
 - **Motivo:** alcance e frascos eram globais; aumentar o alcance da Poção de Fogo mudava todas as outras.
 - **Consequência:** `+1 RAIO` e `+1 FRASCO` valem só para a poção escolhida ao coletar (`game/upgrades.ts`). O limite de frascos é por poção (a HUD mostra ativos/limite da poção escolhida), então dá para ter frascos de tipos diferentes ao mesmo tempo. A velocidade de caminhada continua global. Nada disso é salvo em `localStorage` (só vale na partida e passa de fase em fase), então não precisou de migração.
 - **Ficou de fora:** equilíbrio com testes de pessoas: se ficar fácil demais ter vários tipos ao mesmo tempo, limitar o total de frascos.
+
+## História: a fome, Belladona com razão e a Roo nascida de uma bolha
+- **Motivo:** Belladona só queria "rasurar" e tinha uma filosofia rasa (furo de roteiro). A lição cristã pedia um conflito moral real.
+- **Consequência:** o pano de fundo passa a ser uma fome inspirada na de 1315–1322 (Vale fictício). Belladona perdeu o irmão e a mãe, tem razão no problema e erra na solução (poder para controlar). O mestre busca a pedra por medo de perder a Roo, que nasceu de uma bolha de sabão iridescente no Caldeirão (dádiva, não produto). Os ecos cristãos são a multiplicação dos pães, o samaritano e o rico e Lázaro, sem pregação. O texto corrido vive em `history.html` e o roteiro em `docs/12-historia.md`.
+- **Ficou de fora:** aplicar no jogo (cartas, `BELLADONA_CARDS`, `ENDING_CARDS`, Diário) e os companheiros. Em aberto: o gênero da Roo ("filho" na carta), os nomes das etapas da Obra como subtítulo, a bolha no último quadro.
