@@ -137,7 +137,7 @@ function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPo
   else if (dir === 'up') drawBack();
   else drawFront();
 
-  // ---------------------------------------------------------------- de lado (olhando à direita)
+  // de lado (olhando à direita)
   function drawSide(): void {
     // perna de trás
     g.fillStyle(0xe89040);
@@ -232,7 +232,7 @@ function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPo
     drawClasp(g, cx + 3.5, cy - 2);
   }
 
-  // ---------------------------------------------------------------- livro de leitura (de frente)
+  // livro de leitura (de frente)
   // A Roo lê: as páginas ficam voltadas para ela e quem olha vê a CAPA (roxa, com ornamentos dourados),
   // sobre o peito e abaixo do queixo. Só a borda das páginas aparece acima da capa. Quadros 1 a 7: a mão
   // direita puxa a folha, que passa por cima do livro da direita para a esquerda. Quadros 0 e 8: parado.
@@ -286,7 +286,7 @@ function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPo
     g.fillCircle(hx, hy, 2.3);
   }
 
-  // ---------------------------------------------------------------- traje de maestro (sobre o lado)
+  // traje de maestro (sobre o lado)
   // Cabelo grisalho e revolto (Beethoven), gravata branca e casaca preta com botões dourados.
   function drawMaestroOutfit(): void {
     const COAT = 0x1d1b22;
@@ -319,7 +319,7 @@ function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPo
     drawEar(cx - 1, cy - 16, false);
   }
 
-  // ---------------------------------------------------------------- de costas
+  // de costas
   function drawBack(): void {
     // cauda (aparece abaixo da barra do manto)
     g.fillStyle(0xd07020);
@@ -374,7 +374,7 @@ function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPo
     drawWand(g, cx + 11.5 + wandWave * 0.5, cy + 3, cx + (sleep ? 13.5 : 14) + wandWave * 0.5, cy - (sleep ? 3 : 11));
   }
 
-  // ---------------------------------------------------------------- de frente
+  // de frente
   function drawFront(): void {
     // pés grandes de canguru
     g.fillStyle(0xe89040);
