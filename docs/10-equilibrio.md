@@ -27,6 +27,7 @@ Antes, a Aqua tinha alcance 4 e a Telúrica e a Etérea alcance 3, então a Aqua
 | +Frasco | até 6 poções | até 5 | com 6 poções a tela enchia de explosões |
 | +Raio | 4 níveis | 3 | alcance 3 + 3 níveis já cobre quase o mapa |
 | +Velocidade | 3 níveis | 2 | com 3 níveis a Roo corria mais que os inimigos o tempo todo |
+| Passo base da Roo | 220 ms por casa | 300 ms | a Roo parecia rápida demais; 300 ms é igual ao sapo, e +2 velocidade (~143 ms) ainda fica mais rápida que ele. Teste: se ficar lenta demais, use 260 ms |
 | Baú | +2 vida | 0 | só os corações curam; o baú dá POÇÃO |
 
 ## Economia (estimativa)
