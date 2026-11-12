@@ -29,3 +29,8 @@ Uma canguru alquimista de pelo laranja, orelhas altas com miolo claro, chapéu d
 ## Versão no git
 
 Etiqueta `mascote-roo-v1` (ver abaixo): o código da Roo adulta exatamente como está nesta data (2026-11-12). Para voltar a ela: `git show mascote-roo-v1:src/textures/roo.ts`.
+
+## Versões da Roo bebê na bolha (pose fetal)
+
+- `versoes/fetal-lua-v2.gif` + `versoes/rooBubble-fetal-lua-v2.ts`: versão em lua crescente, sem chapéu (guardada em 2026-11-12).
+- Versão atual (`roo-bolha-fetal.gif`): construída a partir da referência `referencia-bolha-fetal.png` (chapéu caído com estrela, orelha em pé, orelha deitada, mãozinhas no fecho dourado, manto de cobertor, bolhinhas ao redor).

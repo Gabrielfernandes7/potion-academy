@@ -16,6 +16,15 @@ const R = 46; // raio da bolha
 
 type Ctx = CanvasRenderingContext2D;
 
+// Fábrica de canvas: no navegador usa o DOM; o script dos GIFs injeta a do Node (setCanvasFactory).
+let makeCanvas: (w: number, h: number) => HTMLCanvasElement = (w, h) => {
+  const cv = document.createElement('canvas');
+  cv.width = w;
+  cv.height = h;
+  return cv;
+};
+export function setCanvasFactory(f: (w: number, h: number) => HTMLCanvasElement): void { makeCanvas = f; }
+
 // paleta da Roo (roo.ts)
 const OUT = '#1c1410';
 const FUR = '#ff9a3a';
@@ -25,6 +34,9 @@ const FUR_DARK = '#d07020';
 const EAR = '#e07820';
 const EAR_IN = '#ffd8a0';
 const EAR_TIP = '#c06018';
+const EAR_BACK = '#b8601a'; // orelha de trás, mais escura
+const PINK = '#ff9eb5';
+const CAPE_DEEP = '#240850';
 const CREAM = '#ffe4b0';
 const CREAM_DARK = '#f5c888';
 const NOSE = '#5d3a28';
@@ -84,81 +96,109 @@ function hat(c: Ctx, x: number, y: number, h: number, base: number, lean: number
 // Garras: dois pontinhos escuros.
 const claws = (c: Ctx, x: number, y: number): void => { rect(c, OUT, x, y, 1, 2); rect(c, OUT, x + 2, y, 1, 2); };
 
-// Cadeia de elipses (orelha caída): primeiro todos os contornos, depois os preenchimentos, sem "trançar".
-function chain(c: Ctx, path: ReadonlyArray<readonly [number, number]>, rx: number, ry: number, fill: string, inner: string): void {
-  // pontos intermediários: o miolo claro vira uma faixa contínua, não contas
-  const pts: Array<readonly [number, number]> = [];
-  path.forEach((p, i) => {
-    pts.push(p);
-    const n = path[i + 1];
-    if (n) { pts.push([Math.round((p[0] + n[0]) / 2), Math.round((p[1] + n[1]) / 2)]); }
-  });
-  for (const [x, y] of pts) ellipse(c, OUT, x, y, rx + 1, ry + 1);
-  for (const [x, y] of pts) ellipse(c, fill, x, y, rx, ry);
-  for (const [x, y] of pts) ellipse(c, inner, x, y, Math.max(1, rx - 2), Math.max(1, ry - 1));
+// Cápsula: traço grosso de pontas redondas, com a espessura variando ao longo do caminho (ponta de orelha, rabo,
+// curva do corpo). Desenha em pontos densos, então a silhueta sai contínua, sem "contas". `fill` null só faz o contorno.
+type P = readonly [number, number];
+function capsule(c: Ctx, color: string, path: readonly P[], radii: readonly number[], grow = 0): void {
+  for (let i = 0; i < path.length; i++) {
+    const [x0, y0] = path[i];
+    const [x1, y1] = path[Math.min(i + 1, path.length - 1)];
+    const r0 = radii[i], r1 = radii[Math.min(i + 1, radii.length - 1)];
+    const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) * 2));
+    for (let j = 0; j <= n; j++) {
+      const u = j / n;
+      const r = r0 + (r1 - r0) * u + grow;
+      ellipse(c, color, x0 + (x1 - x0) * u, y0 + (y1 - y0) * u, r, r);
+    }
+  }
+}
+// Peça com contorno escuro de 1 px (contorno primeiro, miolo depois).
+function part(c: Ctx, fill: string, path: readonly P[], radii: readonly number[]): void {
+  capsule(c, OUT, path, radii, 1);
+  capsule(c, fill, path, radii);
 }
 
 // ---------------------------------------------------------------- pose fetal
-// Deitadinha de lado, encolhida: cabeça à esquerda, joelhos junto da barriga, mão sob a bochecha,
-// rabo enrolado à direita, orelhas flutuando para trás e o manto de cobertor sobre as costas.
+// Um filhote aconchegado, em forma de lua crescente aberta para a esquerda: cabeça grande de lado, rosto de olhos
+// fechados, patinhas junto do queixo, joelhos dobrados e pés pequenos, rabo acompanhando a curva, orelhas caídas
+// (uma para trás, outra repousando junto da cabeça) e o manto roxo como cobertor nas costas.
+// Coordenadas relativas ao centro da bolha.
 function drawFetal(c: Ctx, k: number): void {
   const t = k / BUBBLE_FRAMES;
-  const b = Math.sin(t * Math.PI * 2) > 0.3 ? 1 : 0; // respira
-  const sway = Math.round(Math.sin((t + 0.25) * Math.PI * 2)); // a ponta das orelhas oscila
+  const bf = (1 - Math.cos(t * Math.PI * 2)) / 2; // respiração lenta, 0 a 1, sem saltos no laço
+  const hem = Math.round(bf); // o manto sobe e desce com o corpo
+  const tip = Math.round(Math.sin(t * Math.PI * 2 + 1)); // pontas das orelhas, quase imperceptível
 
-  // rabo enrolado, à direita
-  shape(c, FUR_DARK, 76, 63, 5, 4);
-  shape(c, FUR_DARK, 79, 57, 3, 5);
-  ellipse(c, FUR_LIGHT, 79, 54, 1, 2);
+  // rabo: contorna a curva do corpo por baixo e sobe pelas costas
+  part(c, FUR_DARK, [[6, 24], [17, 28], [26, 24], [29, 16]], [3.2, 3.2, 3, 2.6]);
+  ellipse(c, FUR_LIGHT, 29, 15, 2, 2);
 
-  // orelha de trás (aparece por cima do corpo)
-  chain(c, [[42, 47], [50, 43], [58, 41 + sway], [66, 41 + sway]], 4, 3, EAR, EAR_IN);
-  ellipse(c, EAR_TIP, 70, 41 + sway, 2, 2);
+  // orelha de trás: dobrada para trás, mais escura, ponta redonda
+  part(c, EAR_BACK, [[-2, -18], [5, -23], [12, -22 + tip], [17, -17 + tip]], [4.2, 4.2, 3.6, 3]);
+  capsule(c, EAR, [[1, -20], [7, -22], [12, -21 + tip]], [2, 2, 1.6]);
 
-  // corpo deitado
-  shape(c, FUR, 54, 61, 22, 13 + b);
-  ellipse(c, CREAM, 47, 64, 11, 6); // barriga clara
+  // joelhos e pés de trás (pequenos, sobrepostos)
+  part(c, FOOT, [[-3, 15], [-10, 16]], [3, 2.8]);
+  rect(c, OUT, -10, 14, 1, 4);
 
-  // manto de cobertor sobre as costas, com a barra dourada
-  ellipse(c, OUT, 62, 55, 18, 9 + b);
-  ellipse(c, CAPE, 62, 55, 17, 8 + b);
-  ellipse(c, CAPE_LIGHT, 58, 49, 8, 1);
-  ellipse(c, CAPE_DARK, 74, 56, 3, 5);
-  for (let x = 47; x <= 77; x += 2) rect(c, x % 4 === 1 ? GOLD : GOLD_TRIM, x, 62 + b - (x > 72 ? 2 : 0), 1, 1);
-  rect(c, GOLD, 45, 52, 3, 3); // fecho no pescoço
-  rect(c, '#ffffff', 45, 52, 1, 1);
+  // corpo: arco grosso, costas à direita; barriga clara do lado de dentro da curva
+  const body: P[] = [[4, -8], [12, -1], [14, 8], [9, 16], [0, 20]];
+  const br = [9, 11, 11, 10, 8].map(r => r + bf * 1.2);
+  part(c, FUR, body, br);
+  capsule(c, FUR_LIGHT, [[8, -14], [16, -6]], [2, 2]); // brilho no alto das costas
+  capsule(c, CREAM, [[3, 0], [6, 6], [5, 12]], [2.5, 3.8, 3]);
 
-  // pernas dobradas: coxa e pés grandes com garrinhas, junto da barriga
-  shape(c, FUR_LIGHT, 60, 69, 10, 5);
-  shape(c, FOOT, 48, 76, 9, 3);
-  shape(c, FOOT, 66, 77, 7, 3);
-  claws(c, 38, 76);
-  claws(c, 60, 77);
-
-  // cabeça, de olhos fechados, repousando à esquerda
-  shape(c, HEAD, 34, 58, 14, 12);
-  ellipse(c, FUR_LIGHT, 28, 50, 6, 2);
-  rect(c, BROW, 21, 53, 26, 1); // faixa da sobrancelha
-  for (const ex of [29, 41]) {
-    rect(c, EYE, ex - 2, 57, 5, 1); // olho fechado: arco para baixo
-    rect(c, EYE, ex - 1, 58, 3, 1);
-    rect(c, EYE, ex - 2, 56, 1, 1);
-    rect(c, EYE, ex + 2, 56, 1, 1);
+  // manto-cobertor sobre as costas, com a barra dourada do lado de dentro
+  const cape: P[] = [[8, -10], [16, -2], [18, 8], [13, 17 + hem]];
+  capsule(c, OUT, cape, [6, 6.5, 6.5, 5.5], 1);
+  capsule(c, CAPE, cape, [6, 6.5, 6.5, 5.5]);
+  capsule(c, CAPE_LIGHT, [[10, -13], [17, -5]], [1.4, 1.4]);
+  capsule(c, CAPE_DARK, [[22, 4], [20, 12], [14, 18 + hem]], [2, 2.4, 2]);
+  for (const [x, y] of [[8, -4], [11, 0], [12, 4], [12, 8], [11, 12], [9, 15 + hem]] as const) {
+    rect(c, GOLD, x, y + (y > 12 ? hem : 0), 1, 1);
+    rect(c, GOLD_TRIM, x, y + 1 + (y > 12 ? hem : 0), 1, 1);
   }
-  ellipse(c, CREAM, 34, 64, 7, 4); // focinho
-  rect(c, NOSE, 32, 61, 5, 3);
-  rect(c, '#ffffff', 33, 61, 1, 1);
-  rect(c, OUT, 33, 65, 3, 1); // sorriso pequeno
-  rect(c, '#ff9eb5', 22, 61, 3, 2);
-  rect(c, '#ff9eb5', 44, 61, 3, 2);
+  rect(c, GOLD, 4, -5, 3, 3); // fecho dourado no pescoço
+  rect(c, '#ffffff', 4, -5, 1, 1);
 
-  // orelha da frente, caída sobre o ombro
-  chain(c, [[40, 51], [48, 48], [56, 48 + sway]], 4, 3, EAR, EAR_IN);
-  ellipse(c, EAR_TIP, 60, 48 + sway, 2, 2);
+  // pé da frente, com dedos
+  part(c, FOOT, [[-5, 20], [-12, 21]], [3, 2.6]);
+  rect(c, OUT, -12, 20, 1, 3);
+  rect(c, OUT, -9, 19, 1, 4);
+  rect(c, FUR_LIGHT, -8, 18, 3, 1);
 
-  // mãozinha redonda sob a bochecha
-  shape(c, FUR, 38, 69 + b, 4, 4);
-  rect(c, FUR_LIGHT, 37, 67 + b, 2, 1);
+  // cabeça grande, inclinada, apoiada de lado
+  part(c, HEAD, [[-6, -10], [-5, -10]], [12, 12]);
+  capsule(c, FUR_LIGHT, [[-12, -18], [-5, -19]], [1.8, 1.8]);
+  rect(c, '#ffe2a8', -11, -20, 4, 1);
+  // olhos fechados (arcos) com cílios; leve inclinação da cabeça
+  for (const [ex, ey] of [[-12, -8], [-2, -11]] as const) {
+    rect(c, EYE, ex - 2, ey, 5, 1);
+    rect(c, EYE, ex - 1, ey + 1, 3, 1);
+    rect(c, EYE, ex - 3, ey - 1, 1, 1);
+    rect(c, EYE, ex + 3, ey - 1, 1, 1);
+    rect(c, BROW, ex - 2, ey - 4, 5, 1);
+  }
+  // focinho pequeno, nariz e boquinha em "w"
+  ellipse(c, CREAM, -8, -3, 5, 3);
+  rect(c, NOSE, -10, -5, 4, 2);
+  rect(c, '#ffffff', -9, -5, 1, 1);
+  rect(c, OUT, -10, -2, 1, 1); rect(c, OUT, -8, -2, 1, 1); rect(c, OUT, -6, -2, 1, 1);
+  rect(c, OUT, -9, -1, 1, 1); rect(c, OUT, -7, -1, 1, 1);
+  // bochechas
+  rect(c, PINK, -16, -4, 3, 2);
+  rect(c, PINK, 3, -7, 3, 2);
+
+  // orelha da frente: repousa junto da cabeça, caída pela lateral do rosto
+  part(c, EAR, [[-12, -19], [-17, -15], [-19, -8]], [3.8, 3.6, 3]);
+  capsule(c, EAR_IN, [[-13, -18], [-16, -14], [-17, -9]], [1.4, 1.4, 1.1]);
+  rect(c, PINK, -16, -13, 1, 2);
+
+  // patinhas junto do queixo: duas mãozinhas separadas por uma linha, com dedinhos
+  part(c, FUR, [[-11, 3 + hem]], [3.2]);
+  part(c, FUR, [[-4, 4 + hem]], [3.2]);
+  rect(c, OUT, -7, 1 + hem, 1, 6);
+  for (const hx of [-13, -11, -6, -4]) rect(c, FUR_LIGHT, hx, 0 + hem + (hx > -8 ? 1 : 0), 1, 1);
 }
 
 // ---------------------------------------------------------------- pose observando
@@ -195,6 +235,9 @@ function drawObserve(c: Ctx, k: number): void {
   ellipse(c, CAPE, 48, 66, 15, 11 + breathe);
   ellipse(c, CAPE_DARK, 62, 66, 2, 9 + breathe);
   ellipse(c, CAPE_LIGHT, 38, 62, 2, 5);
+  ellipse(c, CAPE_LIGHT, 44, 58, 3, 1);
+  ellipse(c, CAPE_DEEP, 48, 75 + breathe, 13, 1);
+  ellipse(c, CAPE_DARK, 48, 57, 9, 2); // sombra da cabeça sobre o manto
   ellipse(c, CREAM, 48, 66, 6, 8 + breathe);
   ellipse(c, CREAM_DARK, 48, 72 + breathe, 4, 2);
   for (let x = 34; x <= 62; x += 2) rect(c, x % 4 === 0 ? GOLD_TRIM : GOLD, x, 77 + breathe + (x % 4 === 0 ? 1 : 0), 1, 1);
@@ -328,17 +371,42 @@ function drawSparkles(c: Ctx, k: number): void {
   }
 }
 
+// Luz de contorno: a borda da silhueta recebe um tom da moldura (azul e rosa no alto, verde e amarelo embaixo).
+function rimLight(lc: Ctx, k: number): void {
+  const img = lc.getImageData(0, 0, BUBBLE_SIZE, BUBBLE_SIZE);
+  const d = img.data;
+  const a = (x: number, y: number): number => (x < 0 || y < 0 || x >= BUBBLE_SIZE || y >= BUBBLE_SIZE ? 0 : d[(y * BUBBLE_SIZE + x) * 4 + 3] < 128 ? 0 : 255); // sombras translúcidas não recebem luz
+  const top = ['#a8d8ff', '#ffb8e8'];
+  const bottom = ['#b8ffb8', '#fff0a0'];
+  const out: Array<[number, number, string]> = [];
+  for (let y = 0; y < BUBBLE_SIZE; y++) {
+    for (let x = 0; x < BUBBLE_SIZE; x++) {
+      if (a(x, y) === 0) continue;
+      if (a(x, y - 1) === 0) out.push([x, y, top[((x >> 1) + (k >> 2)) % 2]]);
+      else if (a(x, y + 1) === 0) out.push([x, y, bottom[((x >> 1) + (k >> 2)) % 2]]);
+    }
+  }
+  for (const [x, y, col] of out) { lc.fillStyle = col; lc.globalAlpha = 0.75; lc.fillRect(x, y, 1, 1); }
+  lc.globalAlpha = 1;
+}
+
 // Desenha o quadro `k` (0 a BUBBLE_FRAMES-1) da pose num contexto 112x112 transparente.
 export function drawRooBubbleFrame(c: Ctx, k: number, pose: BubblePose = 'fetal'): void {
   c.imageSmoothingEnabled = false;
   const bob = Math.round(Math.sin((k / BUBBLE_FRAMES) * Math.PI * 2) * 2);
   drawGlow(c, k);
-  c.save();
+  const layer = makeCanvas(BUBBLE_SIZE, BUBBLE_SIZE);
+  const lc = layer.getContext('2d') as Ctx;
+  lc.imageSmoothingEnabled = false;
+  lc.save();
   // o bebê boia: sobe e desce dentro da bolha. A pose fetal é mais baixa que a outra, então sobe um pouco.
-  c.translate(C - 48 + (pose === 'fetal' ? -3 : 0), C - 48 + bob + (pose === 'fetal' ? -2 : -1));
-  if (pose === 'fetal') drawFetal(c, k);
-  else drawObserve(c, k);
-  c.restore();
+  if (pose === 'fetal') lc.translate(C - 4, C - 3 + bob);
+  else lc.translate(C - 48, C - 48 + bob - 1);
+  if (pose === 'fetal') drawFetal(lc, k);
+  else drawObserve(lc, k);
+  lc.restore();
+  rimLight(lc, k);
+  c.drawImage(layer, 0, 0);
   drawBubbleFront(c, k);
   drawSparkles(c, k);
 }

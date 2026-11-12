@@ -8,8 +8,9 @@ import { pathToFileURL } from 'node:url';
 
 const bundle = '/tmp/roo-bubble-bundle.mjs';
 await build({ entryPoints: ['src/textures/rooBubble.ts'], bundle: true, format: 'esm', outfile: bundle, logLevel: 'error' });
-const { drawRooBubbleFrame, BUBBLE_FRAMES, BUBBLE_SIZE } = await import(pathToFileURL(bundle).href);
+const { drawRooBubbleFrame, setCanvasFactory, BUBBLE_FRAMES, BUBBLE_SIZE } = await import(pathToFileURL(bundle).href);
 
+setCanvasFactory((w, h) => createCanvas(w, h));
 const SCALE = 4;
 mkdirSync('public/img', { recursive: true });
 for (const [pose, name] of [['fetal', 'roo-bolha-fetal'], ['observe', 'roo-bolha-observando']]) {
