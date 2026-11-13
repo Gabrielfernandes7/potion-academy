@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { mulberry32 } from '../src/audio/tracks';
+import { mulberry32 } from '../../../src/audio/tracks';
 import {
-  BossSkill, blastTiles, blinkDestination, cooldownFor, phaseFor, pickBossSkill, rainTargets,
-} from '../src/game/boss';
-import { BOSS_DAMAGE, CONFIG } from '../src/config';
+  BossSkill, blinkDestination, cooldownFor, pickBossSkill, rainTargets,
+} from '../../../src/game/entities/bosses/belladonna/rules';
+import { blastTiles, phaseFor } from '../../../src/game/entities/bosses/common';
+import { CONFIG } from '../../../src/config';
+import { damageTo, hitsToKill } from '../../../src/game/entities/damage';
+import { PROFILES } from '../../../src/game/entities/profiles';
 
 describe('fases do chefe', () => {
   it('fica furiosa na metade da vida', () => {
@@ -81,14 +84,16 @@ describe('chuva e teletransporte', () => {
   });
 });
 
-describe('dano por elemento no chefe', () => {
+describe('dano por elemento na Belladona', () => {
+  const b = PROFILES.belladonna;
   it('todo elemento causa pelo menos 1 de dano e fogo/éter causam mais que água/terra', () => {
-    for (const el of ['fire', 'water', 'earth', 'air'] as const) expect(BOSS_DAMAGE[el]).toBeGreaterThanOrEqual(1);
-    expect(BOSS_DAMAGE.fire).toBeGreaterThan(BOSS_DAMAGE.water);
-    expect(BOSS_DAMAGE.air).toBeGreaterThan(BOSS_DAMAGE.earth);
+    for (const el of ['fire', 'water', 'earth', 'air'] as const) expect(damageTo(b, el)).toBeGreaterThanOrEqual(1);
+    expect(damageTo(b, 'fire')).toBeGreaterThan(damageTo(b, 'water'));
+    expect(damageTo(b, 'air')).toBeGreaterThan(damageTo(b, 'earth'));
   });
   it('a vida do chefe é divisível em golpes viáveis para qualquer elemento', () => {
-    expect(CONFIG.bossHp / BOSS_DAMAGE.water).toBeLessThanOrEqual(12);
-    expect(CONFIG.bossHp / BOSS_DAMAGE.fire).toBeGreaterThanOrEqual(3);
+    expect(CONFIG.bossHp).toBe(b.maxHp);
+    expect(hitsToKill(b, 'water')).toBeLessThanOrEqual(12);
+    expect(hitsToKill(b, 'fire')).toBeGreaterThanOrEqual(3);
   });
 });

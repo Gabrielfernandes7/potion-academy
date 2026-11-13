@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { STAGES } from '../src/config';
+import { STAGES } from '../../src/game/stages/index';
 
 describe('sorteio do baú por fase', () => {
   it('cada fase tem chances que somam 100%', () => {

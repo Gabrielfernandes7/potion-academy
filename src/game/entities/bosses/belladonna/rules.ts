@@ -1,10 +1,9 @@
 // Regras puras do chefe (sem Phaser): escolha de habilidades, alvos e área das explosões.
-// O comportamento visual está em BossController.ts. Ver docs/03-mundo.md.
-import { CONFIG, ElementId } from '../config';
+// O comportamento visual está em BelladonnaController.ts. Ver docs/03-mundo.md.
+import { CONFIG, ElementId } from '../../../../config';
+import type { BossPhase, Tile } from '../common';
 
 export type BossSkill = 'fire' | 'rain' | 'blink';
-export type BossPhase = 1 | 2;
-export interface Tile { x: number; y: number }
 
 export const BOSS_NAME = 'BELLADONA';
 
@@ -23,11 +22,6 @@ export const SKILL_ELEMENT: Record<BossSkill, ElementId> = {
   blink: 'air',
 };
 
-// Fase 2 ("furiosa") começa quando a vida chega à metade.
-export function phaseFor(hp: number, maxHp: number): BossPhase {
-  return hp <= maxHp / 2 ? 2 : 1;
-}
-
 export function cooldownFor(phase: BossPhase): number {
   return phase === 1 ? CONFIG.bossCooldownMs : CONFIG.bossFuriousCooldownMs;
 }
@@ -45,22 +39,6 @@ export function pickBossSkill(phase: BossPhase, last: BossSkill | null, rng: () 
     if (roll < 0) return skill;
   }
   return pool[pool.length - 1][0];
-}
-
-const DIRS4: ReadonlyArray<readonly [number, number]> = [[0, -1], [0, 1], [-1, 0], [1, 0]];
-
-// Casas atingidas por uma explosão em cruz. Obstáculos (muralha/caixote) bloqueiam o resto do braço.
-export function blastTiles(cx: number, cy: number, radius: number, isOpen: (x: number, y: number) => boolean): Tile[] {
-  const tiles: Tile[] = [{ x: cx, y: cy }];
-  for (const [dx, dy] of DIRS4) {
-    for (let r = 1; r <= radius; r++) {
-      const x = cx + dx * r;
-      const y = cy + dy * r;
-      if (!isOpen(x, y)) break;
-      tiles.push({ x, y });
-    }
-  }
-  return tiles;
 }
 
 // Alvos da chuva de gotas: sempre a casa do jogador (para obrigá-lo a se mexer) e outras perto dele.

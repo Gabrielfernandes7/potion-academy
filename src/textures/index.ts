@@ -9,6 +9,7 @@ import { drawEntities } from './entities';
 import { drawHudIcons } from './hud';
 import { drawMenuTextures } from './menu';
 import { drawWitchTextures } from './witch';
+import { drawMandrakeTextures } from './mandrake';
 import { drawAnselmoTextures } from './anselmo';
 import { BUBBLE_POSES, drawRooBubbleFrames } from './rooBubble';
 import { outlineTexture } from './outline';
@@ -32,6 +33,7 @@ export function generateTextures(scene: Phaser.Scene): void {
   drawHudIcons(g);
   drawMenuTextures(g);
   drawWitchTextures(g, CONFIG.tile);
+  drawMandrakeTextures(g, CONFIG.tile);
   drawAnselmoTextures(scene);
   g.destroy();
 }

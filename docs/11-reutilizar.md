@@ -48,7 +48,7 @@ Ao copiar, traga também `make.ts` e `rooGeometry.ts`, e ajuste `tile` (40 px) s
 ## 3. As regras do jogo
 
 - `src/config.ts`: os números (tamanho do mapa, vida, tempo, custo das poções). Mude aqui e o resto lê daqui.
-- `src/game/balance.ts`, `src/game/shopRules.ts`, `src/game/boss.ts`: regras puras, sem Phaser. Dá para reaproveitar e testar com `npm run test`.
+- `src/game/balance.ts`, `src/game/shopRules.ts`, `src/game/entities/bosses/belladonna/rules.ts`: regras puras, sem Phaser. Dá para reaproveitar e testar com `npm run test`.
 - `src/audio/tracks.ts`: gerador de músicas procedurais, sem dependências.
 
 ## Antes de copiar

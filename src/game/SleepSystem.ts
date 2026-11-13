@@ -10,10 +10,6 @@ export class SleepSystem {
 
   constructor(private readonly scene: MainScene) {}
 
-  get isSleeping(): boolean {
-    return this.state.sleeping;
-  }
-
   // Qualquer tecla ou toque conta como atividade.
   inputActive(): boolean {
     const c = this.scene.cursors;

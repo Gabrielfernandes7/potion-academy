@@ -1,9 +1,10 @@
-// Laboratório (só desenvolvimento): um mapa em miniatura para testar a Roo de fogo e as ideias de
-// habilidade do elemento. Abra /lab.html com `npm run dev`. Não entra no build (ver vite.config.ts).
+// Experimento "Roo de fogo": um mapa em miniatura para testar a transformação da Roo e as ideias de
+// habilidade do elemento Fogo. Abra /lab.html?exp=fire-roo com `npm run dev`. Não entra no build.
 import Phaser from 'phaser';
-import { generateTextures } from './textures';
-import { makeFireRoo, type FireDir, type FireIntensity } from './textures/rooFire';
-import { ROO_HEAD_ROOM, rooOriginY } from './textures/rooGeometry';
+import { generateTextures } from '../../textures';
+import { makeFireRoo, type FireDir, type FireIntensity } from '../../textures/rooFire';
+import { ROO_HEAD_ROOM, rooOriginY } from '../../textures/rooGeometry';
+import type { LabExperiment } from '../types';
 
 const TILE = 40;
 const COLS = 11;
@@ -31,7 +32,7 @@ function readControls(): Cfg {
   return { stage, intensity, trail };
 }
 
-class LabScene extends Phaser.Scene {
+class FireRooScene extends Phaser.Scene {
   private cfg!: Cfg;
   private player!: Phaser.GameObjects.Sprite;
   private gx = 1;
@@ -50,7 +51,7 @@ class LabScene extends Phaser.Scene {
   private bombKey!: Phaser.Input.Keyboard.Key;
 
   constructor() {
-    super('Lab');
+    super('FireRoo');
   }
 
   create(): void {
@@ -103,7 +104,7 @@ class LabScene extends Phaser.Scene {
   private buildMap(): void {
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
-        this.add.image(x * TILE, y * TILE, 'floor').setOrigin(0, 0);
+        this.add.image(x * TILE, y * TILE, (x + y) % 2 === 0 ? 'floor1' : 'floor2').setOrigin(0, 0);
         const border = x === 0 || y === 0 || x === COLS - 1 || y === ROWS - 1;
         const pillar = x % 2 === 0 && y % 2 === 0;
         if (border || pillar) {
@@ -292,14 +293,55 @@ class LabScene extends Phaser.Scene {
   }
 }
 
-new Phaser.Game({
-  type: Phaser.CANVAS,
-  width: COLS * TILE,
-  height: ROWS * TILE,
-  parent: 'stage',
-  pixelArt: true,
-  backgroundColor: '#1b1714',
-  audio: { noAudio: true },
-  scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [LabScene],
-});
+const PANEL_HTML = `
+      <h2>Estágio da Roo</h2>
+      <label>
+        Transformação
+        <select id="stage-select">
+          <option value="0">0 · Original (capa roxa)</option>
+          <option value="1">1 · Capa vermelha em degradê</option>
+          <option value="2">2 · Chapéu em chama, varinha e olhos</option>
+          <option value="3">3 · Manto em chamas e orelhas</option>
+          <option value="4" selected>4 · Faíscas e brasas</option>
+        </select>
+      </label>
+      <label>
+        Intensidade
+        <select id="intensity-select">
+          <option value="low">Baixa</option>
+          <option value="medium">Média</option>
+          <option value="high" selected>Alta</option>
+        </select>
+      </label>
+
+      <h2>Mecânica de teste</h2>
+      <label class="check">
+        <input type="checkbox" id="trail-check" checked>
+        Explosões deixam brasas (estágio 4)
+      </label>
+      <p class="tip">Ideia para testar a sensação. A regra final ainda não está definida em <code>docs/</code>.</p>
+
+      <h2>Controles</h2>
+      <ul>
+        <li><kbd>setas</kbd> andar (passo por casa)</li>
+        <li><kbd>Espaço</kbd> colocar Poção de Fogo (explode em 1,6 s)</li>
+        <li>Blocos destrutíveis somem na explosão; pilares e paredes não.</li>
+      </ul>
+
+      <h2>Exportar</h2>
+      <button type="button" id="export-btn" style="font:inherit;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer">Baixar folha da transformação (PNG)</button>
+      <p class="tip">Linhas: estágios 0 a 4. Colunas: as 8 fases do tremor. Escala 3×.</p>
+
+      <h2>Resultado</h2>
+      <p id="status">Explosões: 0</p>
+    
+`;
+
+export const fireRooExperiment: LabExperiment = {
+  id: 'fire-roo',
+  title: 'Roo de fogo',
+  summary: 'A transformação da Roo e as ideias do elemento Fogo, num mapa em miniatura.',
+  size: { cols: COLS, rows: ROWS, tile: TILE },
+  panelHtml: PANEL_HTML,
+  scene: FireRooScene,
+};

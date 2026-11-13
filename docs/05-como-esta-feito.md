@@ -19,8 +19,8 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 | o menu animado (caldeirão e Roo) | `src/scenes/MenuScene.ts` |
 | o menu, pausa, loja e fim de jogo (telas em texto) | `index.html` e `src/ui/` |
 | as cores e fontes | `src/styles/main.css` (variáveis em `:root`) |
-| a Belladona (movimento, habilidades, vida) | `src/game/BossController.ts` |
-| as regras do chefe (escolha de ataque, áreas, alvos) | `src/game/boss.ts` |
+| a Belladona (movimento, habilidades, vida) | `src/game/entities/bosses/belladonna/BelladonnaController.ts` |
+| as regras do chefe (escolha de ataque, áreas, alvos) | `src/game/entities/bosses/belladonna/rules.ts` |
 | o desenho da Belladona | `src/textures/witch.ts` |
 | a janela de ajuda (botão ?) | `index.html` (`#help-overlay`) e `src/ui/help.ts` |
 | os números de equilíbrio | `src/config.ts` (veja `10-equilibrio.md`) |

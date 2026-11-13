@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
-import type { BombId, ElementId, EnemyKind } from '../config';
+import type { BombId, ElementId } from '../config';
 import type { PickupType } from './rewards';
 import type { Upgrades } from './upgrades';
+import type { EnemyKind } from './entities/enemies/defs';
 
 export type Facing = 'up' | 'down' | 'left' | 'right';
 
@@ -36,6 +37,7 @@ export interface Pickup {
   gridY: number;
   type: PickupType;
   value?: number; // moedas do baú (sorteadas ao nascer)
+  potion?: BombId; // power-up de alcance/frasco: a poção que ele fortalece (sorteada ao nascer)
   sprite: Phaser.GameObjects.Image;
   halo?: Phaser.GameObjects.Image;
 }
@@ -54,7 +56,10 @@ export interface Enemy {
   hopY: boolean; // o passo é na vertical: o pulo é maior
   phase: number;
   lashMs: number; // flor do mal: tempo até o próximo chicote de espinhos
-  fxCooldown: number; // evita repetir o aviso "IMUNE" a cada quadro enquanto a explosão dura
+  fxCooldown: number; // evita repetir o aviso "IMUNE" e o dano a cada quadro enquanto a explosão dura
+  hp: number;
+  maxHp: number;
+  bar: Phaser.GameObjects.Graphics; // barra de vida (aparece depois do primeiro golpe)
 }
 
 export interface Explosion {

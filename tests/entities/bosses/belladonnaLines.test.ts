@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BOSS_LINES, pickBossLine } from '../src/game/bossLines';
+import { BOSS_LINES, pickBossLine } from '../../../src/game/entities/bosses/belladonna/lines';
 
 describe('falas da Belladona', () => {
   it('todo tipo de fala tem pelo menos uma frase curta', () => {
