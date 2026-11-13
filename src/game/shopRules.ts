@@ -5,7 +5,7 @@ type CardState = 'initial' | 'owned' | 'affordable' | 'locked';
 
 export interface CardView {
   state: CardState;
-  missing: number; // quanto falta de POÇÃO para comprar (só em 'locked')
+  missing: number; // quanto falta de OURO para comprar (só em 'locked')
 }
 
 export function cardView(type: BombId, owned: boolean, bank: number): CardView {
@@ -20,8 +20,8 @@ export function buttonLabel(type: BombId, view: CardView): string {
   switch (view.state) {
     case 'initial': return 'Inicial';
     case 'owned': return 'Adquirida';
-    case 'affordable': return `Comprar · ${BOMB_TYPES[type].cost} POÇÃO`;
-    case 'locked': return `Faltam ${view.missing} POÇÃO`;
+    case 'affordable': return `Comprar · ${BOMB_TYPES[type].cost} OURO`;
+    case 'locked': return `Faltam ${view.missing} OURO`;
   }
 }
 

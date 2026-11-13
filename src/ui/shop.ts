@@ -2,11 +2,10 @@
 // Markup do cenário em index.html; visual em styles/main.css (seção "Caldeirão").
 import { BOMB_ORDER, BOMB_TYPES, ELEMENTS, BombId, ElementId } from '../config';
 import { Bank, buyBombType, hasBombType } from '../storage';
-import { buttonLabel, cardView, formatFuse } from '../game/shopRules';
+import { buttonLabel, cardView } from '../game/shopRules';
 import { byId, setShown } from './dom';
 
 const hex = (n: number): string => '#' + n.toString(16).padStart(6, '0');
-const MAX_PIPS = 5;
 
 // Frasco em SVG, com o mesmo formato do sprite do jogo (um por elemento).
 // A cor do líquido vem das variáveis CSS --el / --el-glow do cartão.
@@ -50,34 +49,20 @@ function potionSvg(element: ElementId): string {
   return `<svg viewBox="0 0 64 80" aria-hidden="true" focusable="false">${FLASK_SVG[element]}</svg>`;
 }
 
-function radiusPips(radius: number): string {
-  const on = Math.min(radius, MAX_PIPS);
-  return Array.from({ length: MAX_PIPS }, (_, i) => `<i${i < on ? ' class="on"' : ''}></i>`).join('');
-}
-
 function buildCard(type: BombId, index: number, justBought: boolean): HTMLElement {
   const cfg = BOMB_TYPES[type];
   const el = ELEMENTS[cfg.element];
   const view = cardView(type, hasBombType(type), Bank.get());
-  const tags: string[] = [];
-  if (cfg.pierce) tags.push('Atravessa blocos');
-  if (cfg.remote) tags.push('Detonação manual');
 
   const card = document.createElement('article');
   card.className = `shop-item ${view.state}${justBought ? ' just-bought' : ''}`;
   card.style.setProperty('--el', hex(el.color));
   card.style.setProperty('--el-glow', hex(el.glow));
+  card.title = cfg.desc; // detalhes ficam na dica, sem poluir o cartão
   card.innerHTML = `
     <span class="key-badge" title="Tecla de atalho">${index + 1}</span>
     <div class="potion-art">${potionSvg(cfg.element)}</div>
     <h3>${cfg.label}</h3>
-    <p class="element-line"><span class="sym" aria-hidden="true">${el.symbol}</span> ${el.alchemy} · ${el.name}</p>
-    <p class="desc">${cfg.desc}</p>
-    <dl class="stats">
-      <div><dt>Raio</dt><dd class="pips" aria-label="Raio ${cfg.radius}">${radiusPips(cfg.radius)}</dd></div>
-      <div><dt>Fusível</dt><dd>${formatFuse(cfg.fuse)}</dd></div>
-    </dl>
-    <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
     <button type="button" class="buy-btn"${view.state === 'affordable' ? '' : ' disabled'}>${buttonLabel(type, view)}</button>
   `;
   if (view.state === 'affordable') {
@@ -99,7 +84,7 @@ function showToast(message: string): void {
 
 function purchase(type: BombId): void {
   if (!buyBombType(type)) {
-    showToast('POÇÃO insuficiente.');
+    showToast('OURO insuficiente.');
     return;
   }
   renderShop(type);

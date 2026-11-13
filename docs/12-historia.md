@@ -17,7 +17,7 @@
 2. **Belladona tem razão no problema.** Ela só erra na solução (poder para controlar, no lugar de serviço).
 3. **Anselmo não converte a Roo e Belladona não é convertida.** A fé não se impõe.
 4. **O mestre amava a Roo.** A busca dele nasce do medo de perdê-la, não de ganância.
-5. **A Roo é um presente, não um produto.** Ninguém nunca soube explicar a origem dela; o jogo não explica.
+5. **A Roo é um presente, não um produto.** Ninguém nunca soube explicar a origem dele; o jogo não explica.
 6. **A pergunta final é do jogador:** "o que você vai fazer com o que encontrou?"
 
 ## O mundo: Vale das Fórmulas e os anos magros
@@ -39,7 +39,7 @@ O **Mosteiro de São Tomás**, no alto da serra, distribui sopa à porta e copia
 | **O mestre** (desaparecido) | Vencer a escassez e a morte, para que a Roo nunca tenha de enterrar ninguém | Confunde o poder de transformar a matéria com o poder de superar os limites humanos |
 | **Belladona** | O poder de aplicar a transformação em escala | Justifica qualquer meio pelo resultado: rouba, rasura, arrisca vidas, não confia em ninguém |
 | **Frei Anselmo** | Que as escrituras circulem, não fiquem guardadas | Foi confessor do mestre, viu a obsessão crescer e não o deteve |
-| **Roo** | Conhecer e praticar alquimia | Ainda não sabe para quê. O arco dela é descobrir |
+| **Roo** | Conhecer e praticar alquimia | Ainda não sabe para quê. O arco dele é descobrir |
 
 ### O mestre
 Já perdeu alguém que amava numa epidemia anterior. Desde então, uma pergunta: "se a matéria se transforma, por que o que sofre não?" Buscou a pedra filosofal não por ouro, mas por um remédio de tudo e um pão sem escassez. Depois de criar a Roo, a busca ganhou um segundo motivo: o medo de que uma bolha estoure.
@@ -52,10 +52,10 @@ Cresceu numa aldeia que dependia de um senhor local. Na fome, os estoques foram 
 - **O erro:** para ela, qualquer limite moral é um obstáculo à missão.
 
 ### Frei Anselmo
-Monge, confessor do mestre. Sabe que a caridade do mosteiro não resolve tudo e sabe o que o mestre fez na noite da bolha: disse-lhe que o que nasceu em suas mãos não era obra dele, era dádiva. O mestre chorou, assentiu e não acreditou. Anselmo não insistiu. É a culpa dele. Pede a Roo porque ela é a única que o mestre amou e que Belladona ainda ouviria.
+Monge, confessor do mestre. Sabe que a caridade do mosteiro não resolve tudo e sabe o que o mestre fez na noite da bolha: disse-lhe que o que nasceu em suas mãos não era obra dele, era dádiva. O mestre chorou, assentiu e não acreditou. Anselmo não insistiu. É a culpa dele. Pede a Roo porque ele é o único que o mestre amou e que Belladona ainda ouviria.
 
 ### Roo
-Nasceu no Caldeirão, de uma bolha. Os alquimistas do vale a chamam de "filho do Caldeirão". Ela acha que a história da bolha é uma fábula de ninar. Não é.
+Nasceu no Caldeirão, de uma bolha. Os alquimistas do vale o chamam de "filho do Caldeirão". Ele acha que a história da bolha é uma fábula de ninar. Não é.
 
 ## Origem da Roo: a bolha
 
@@ -63,7 +63,7 @@ Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Ma
 
 **Por que isso não abre furo de roteiro:**
 
-- **Reforça a tese:** a Roo é presente, não produto. O mestre errou ao tratá-la como prova de que tudo é questão de receita.
+- **Reforça a tese:** a Roo é presente, não produto. O mestre errou ao tratá-lo como prova de que tudo é questão de receita.
 - **Dá motivo ao mestre:** ele busca a pedra para que a Roo nunca precise enterrar ninguém.
 - **Dá motivo a Belladona:** ela viu a bolha e concluiu que a Obra serve para qualquer coisa, inclusive pão.
 - **Faz da culpa de Anselmo algo maior:** ele sabia que o mestre tratava um presente como prova de técnica.
@@ -71,7 +71,7 @@ Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Ma
 
 **Cena animada:** em `history.html` (capítulo II, botão "Ver a cena do nascimento"), em pixel art com a Roo do próprio jogo: o mestre sopra, a bolha flutua até a bolsa da capa, estoura e a Roo respira. Código em `src/birthScene.ts`; serve de rascunho para uma cena do jogo.
 
-**Cuidados:** não explicar por que canguru; a Roo não é "de laboratório", não tem valor menor por isso; o final não deve revelar que ela pode estourar.
+**Cuidados:** não explicar por que canguru; a Roo não é "de laboratório", não tem valor menor por isso; o final não deve revelar que ele pode estourar.
 
 ## As escrituras: três ecos
 
@@ -128,7 +128,6 @@ Anselmo, na confissão (cartão novo): *"Ele me contou o que fez naquela noite. 
 
 ## Decisões em aberto
 
-- **O gênero da Roo.** Os documentos dizem "bruxa-canguru" e "ela"; a carta diz "filho do Caldeirão". O livro usa "ela". Se mantiver, trocar a carta para "filha" ou "cria do Caldeirão".
 - **Os nomes das etapas da Obra** (Nigredo, Albedo, Citrinitas, Rubedo) como subtítulo dos atos: usar ou deixar só como cor e tom?
 - **A bolha no último quadro:** sim ou não?
 - **Companheiros** (boticário cético, criatura transformada por Belladona): adiados (dependem do Ato II ampliado; ver `task.md`).

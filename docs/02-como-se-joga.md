@@ -32,8 +32,8 @@ O botão **?** fica no topo, ao lado do botão de som. A ajuda **pausa o jogo** 
 - **Vida:** 5 corações. Cada explosão ou contato com inimigo tira 1; depois de um golpe há 1,5 s de proteção.
 - **Poções ao mesmo tempo:** começa com 2; cada +frasco soma 1, até 5.
 - **Caixotes:** ao quebrar, podem deixar um item. Caixotes e muralhas bloqueiam a explosão.
-- **Tempo esgotado:** a Roo perde 1 de vida a cada 1,2 s. Ela precisa terminar logo.
-- **Descanso:** parada por 5 s, ela cochila. Qualquer tecla a acorda.
+- **Tempo esgotado:** a Roo perde 1 de vida a cada 1,2 s. Ele precisa terminar logo.
+- **Descanso:** parada por 5 s, ele cochila. Qualquer tecla a acorda.
 
 ## Exemplos
 
@@ -67,10 +67,10 @@ O botão **?** fica no topo, ao lado do botão de som. A ajuda **pausa o jogo** 
 
 ## Como se ganha
 
-- Derrotar a Belladona dá **+40 POÇÃO** e abre o caminho para o jardim.
-- Cruzar o portão do jardim vence o jogo e dá **+30 POÇÃO**.
+- Derrotar a Belladona dá **+80 OURO** e abre o caminho para o jardim.
+- Cruzar o portão do jardim vence o jogo e dá **+60 OURO**.
 
 ## Loja
 
-No **Caldeirão de Magia** você gasta POÇÃO para liberar poções (veja a tabela em `03-mundo.md`).
-O POÇÃO vem das moedas, dos baús e da vitória sobre a Belladona.
+No **Caldeirão de Magia** você gasta OURO para liberar poções (veja a tabela em `03-mundo.md`).
+O OURO vem das moedas, dos baús e da vitória sobre a Belladona.

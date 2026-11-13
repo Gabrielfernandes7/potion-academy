@@ -18,8 +18,8 @@ Uma mecânica é uma regra nova, como "a poção de gelo congela inimigos". Para
 2. **Situação:** o jogador não aperta nenhuma tecla por 5 segundos.
 3. **Regra:** a Roo fecha os olhos e mostra "z" subindo. Qualquer tecla a acorda.
 4. **Números:** `sleepAfterMs: 5000` e `zzzIntervalMs: 1400` em `config.ts`.
-5. **Exemplo:** a Roo para no meio da sala. Depois de 5 segundos, ela cochila. Quando o jogador aperta seta, ela acorda e anda.
-6. **Casos estranhos:** se o jogador apertar uma tecla no mesmo instante em que ela acorda, ela anda normalmente (sem ficar presa em animação de sono).
+5. **Exemplo:** a Roo para no meio da sala. Depois de 5 segundos, ele cochila. Quando o jogador aperta seta, ele acorda e anda.
+6. **Casos estranhos:** se o jogador apertar uma tecla no mesmo instante em que ele acorda, ele anda normalmente (sem ficar preso em animação de sono).
 7. **Como testar:** deixar o jogo parado por 6 segundos e verificar que o estado de sono ligou.
 
 ## Depois de criar

@@ -27,7 +27,7 @@ export function showGameOver(d: GameOverData): void {
   story.hidden = !d.won;
   title.className = d.won ? 'win' : 'lose';
   byId('go-stats').innerHTML = [
-    tile('POÇÃO', String(d.coins)),
+    tile('OURO', String(d.coins)),
     tile('GEMAS', String(d.gems)),
     tile('VIDA', `${d.hp}/${d.maxHp}`),
     tile('BLOCOS', String(d.blocksDestroyed)),
