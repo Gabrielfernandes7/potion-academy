@@ -29,6 +29,7 @@ export interface BossSetup {
   moveIntervalMs: number;
   firstCastMs: number;
   furiousTint: number; // cor da aura da fase 2
+  furiousFlash?: [number, number, number]; // cor (RGB) do clarão da fúria; padrão: verde
 }
 
 export abstract class BossBase {
@@ -102,7 +103,8 @@ export abstract class BossBase {
   onExplosion(tiles: Tile[], element: ElementId = 'fire'): void {
     if (this.hidden || this.invulnMs > 0 || this.state === 'defeated') return;
     if (!tiles.some(t => t.x === this.gridX && t.y === this.gridY)) return;
-    const damage = this.damageFor(element);
+    const base = this.damageFor(element);
+    const damage = base > 0 ? this.scene.boostBlast(base, element) : base; // Roo Fire: poção de fogo mais forte
     if (damage <= 0) {
       this.onResisted(element, damage);
       this.invulnMs = 500; // evita repetir o aviso a cada quadro da mesma explosão
@@ -322,7 +324,8 @@ export abstract class BossBase {
   protected furious(): void {
     this.say('furious');
     this.scene.floatingText(this.gridX, this.gridY - 1, 'FURIOSA!', '#9be564');
-    this.scene.cameras.main.flash(260, 60, 140, 40);
+    const [fr, fg, fb] = this.setup.furiousFlash ?? [60, 140, 40];
+    this.scene.cameras.main.flash(260, fr, fg, fb);
     this.aura = this.scene.add.image(this.sprite.x, this.sprite.y - 12, 'menu_puff')
       .setTint(this.setup.furiousTint).setBlendMode(Phaser.BlendModes.ADD).setScale(1.5).setAlpha(0.45).setDepth(8);
     this.scene.tweens.add({ targets: this.aura, alpha: 0.2, scale: 1.3, duration: 500, yoyo: true, repeat: -1 });

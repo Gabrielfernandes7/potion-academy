@@ -26,7 +26,7 @@ describe('TouchInput', () => {
   it('atividade acorda a personagem e é consumida na consulta', () => {
     const t = new TouchInput();
     expect(t.consumeActivity()).toBe(false);
-    t.press('push');
+    t.press('detonate');
     expect(t.consumeActivity()).toBe(true);
     expect(t.consumeActivity()).toBe(false);
   });

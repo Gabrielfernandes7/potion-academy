@@ -11,6 +11,7 @@ import { hitFx } from '../hitEffects';
 import type { MainScene } from '../../../scenes/MainScene';
 import { ENEMY_TYPES, EnemyKind } from './defs';
 import { PROFILES } from '../profiles';
+import { EMBER_TICK_MS, emberDamage } from '../../forms';
 
 // Movimento de cada inimigo: pulo vertical e horizontal do passo, e o balanço parado (altura e velocidade).
 const MOTION: Record<EnemyKind, { hopV: number; hopH: number; bob: number; bobMs: number }> = {
@@ -74,7 +75,7 @@ export class EnemySystem {
       this.enemies.push({
         kind, gridX: x, gridY: y, sprite, moveTimer: def.moveInterval, alive: true,
         moveT: def.stepMs, fromX: sprite.x, fromY: sprite.y, hopY: false, phase: Math.random() * 1000,
-        lashMs: CONFIG.flowerLashCycleMs * (0.5 + Math.random() * 0.5), fxCooldown: 0,
+        lashMs: CONFIG.flowerLashCycleMs * (0.5 + Math.random() * 0.5), fxCooldown: 0, trapMs: 0,
         hp: PROFILES[kind].maxHp, maxHp: PROFILES[kind].maxHp, bar: s.add.graphics().setDepth(12).setVisible(false),
       });
       return;
@@ -96,10 +97,11 @@ export class EnemySystem {
 
   // Uma explosão alcançou o inimigo: tira vida conforme a tabela de dano (game/entities/damage.ts). Fraqueza
   // tira mais, resistência menos, imunidade nada (flor do mal e a água, fantasma e a terra).
-  hitEnemy(enemy: Enemy, element: ElementId): void {
+  hitEnemy(enemy: Enemy, element: ElementId, fromRoo = false): void {
     if (enemy.fxCooldown > 0) return; // a explosão dura 380 ms; sem isso o golpe se repetiria a cada quadro
     enemy.fxCooldown = 700;
-    const damage = damageTo(PROFILES[enemy.kind], element);
+    const base = damageTo(PROFILES[enemy.kind], element);
+    const damage = fromRoo ? this.scene.boostBlast(base, element) : base; // Roo Fire: poção de fogo mais forte
     if (damage === 0) {
       hitFx(this.scene, enemy.sprite.x, enemy.sprite.y - 6, element);
       this.scene.floatingText(enemy.gridX, enemy.gridY, 'IMUNE', '#c5e1a5');
@@ -113,6 +115,30 @@ export class EnemySystem {
     }
     hitFx(this.scene, enemy.sprite.x, enemy.sprite.y - 6, element);
     this.scene.floatingText(enemy.gridX, enemy.gridY, `-${damage}`, '#ff80ab');
+    this.scene.tweens.add({ targets: enemy.sprite, alpha: 0.45, duration: 90, yoyo: true, repeat: 1 });
+  }
+
+  // A bolha de sabão da Roo Aqua prende o inimigo: ele fica parado e inofensivo até a bolha estourar.
+  trapEnemy(enemy: Enemy, ms: number): void {
+    if (!enemy.alive || ms <= 0) return;
+    enemy.trapMs = ms;
+    this.scene.floatingText(enemy.gridX, enemy.gridY, 'PRESO!', '#7fd6ff');
+    this.scene.play('bubble');
+  }
+
+  // Queimadura das brasas da Roo Fire: dano de fogo da tabela, sem o bônus, de tempos em tempos.
+  burnEnemy(enemy: Enemy): void {
+    if (enemy.fxCooldown > 0 || !enemy.alive) return;
+    enemy.fxCooldown = EMBER_TICK_MS;
+    const damage = emberDamage(PROFILES[enemy.kind]);
+    if (damage === 0) return;
+    enemy.hp -= damage;
+    if (enemy.hp <= 0) {
+      this.killEnemy(enemy, 'fire');
+      return;
+    }
+    hitFx(this.scene, enemy.sprite.x, enemy.sprite.y - 6, 'fire');
+    this.scene.floatingText(enemy.gridX, enemy.gridY, `-${damage}`, '#ffa94d');
     this.scene.tweens.add({ targets: enemy.sprite, alpha: 0.45, duration: 90, yoyo: true, repeat: 1 });
   }
 
@@ -236,11 +262,17 @@ export class EnemySystem {
       // chama residual também atinge inimigos
       const blast = s.bombSystem.explosions.find(e => e.x === enemy.gridX && e.y === enemy.gridY);
       if (blast) {
-        this.hitEnemy(enemy, blast.element);
+        this.hitEnemy(enemy, blast.element, blast.fromRoo);
         if (!enemy.alive) continue;
       }
       this.animateEnemy(enemy, delta);
       this.drawBar(enemy);
+      if (enemy.trapMs > 0) {
+        // preso na bolha: não anda, não machuca e não chicoteia; quando acaba, a bolha estoura
+        enemy.trapMs = Math.max(0, enemy.trapMs - delta);
+        if (enemy.trapMs === 0) s.forms.pop(enemy.sprite.x, enemy.sprite.y);
+        continue;
+      }
       if (def.rooted) {
         this.updateFlower(enemy, delta);
         continue;

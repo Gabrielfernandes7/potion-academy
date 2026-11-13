@@ -15,7 +15,7 @@ export class SleepSystem {
     const c = this.scene.cursors;
     const k = this.scene.keys;
     return c.up.isDown || c.down.isDown || c.left.isDown || c.right.isDown ||
-      k.space.isDown || k.x.isDown || k.d.isDown || k.r.isDown ||
+      k.space.isDown || k.x.isDown || k.t.isDown || k.y.isDown || k.d.isDown || k.r.isDown ||
       k.one.isDown || k.two.isDown || k.three.isDown || k.four.isDown ||
       touch.anyHeld || touch.consumeActivity();
   }

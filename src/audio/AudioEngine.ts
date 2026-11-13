@@ -13,7 +13,9 @@ import {
   MelodyState, NoteEvent, STEPS_PER_BAR, Track, generateBar, midiToHz, mulberry32, trackById,
 } from './tracks';
 
-export type SfxName = 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door' | 'fizzle';
+export type SfxName =
+  | 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door' | 'fizzle'
+  | 'transform' | 'formEnd' | 'flame' | 'bubble' | 'pop'; // transformações da Roo (variante = o elemento da forma)
 
 type WebkitWindow = { webkitAudioContext?: typeof AudioContext };
 type BusName = 'sfx' | 'music';
@@ -262,6 +264,25 @@ class AudioEngine {
     }
   }
 
+  // Transformação da Roo: cada forma tem o seu som, subindo (a energia se junta) e abrindo num acorde.
+  //   fogo : rugido que cresce, estalos de brasa e um acorde quente (sol, si, ré)
+  //   água : borbulhar que sobe, gotas em escala e um acorde claro (mi, lá, si)
+  private transformSound(element: ElementId, t: number): void {
+    if (element === 'water') {
+      this.breath(t, 0.9, 0.06, 300, 3000, 0.5);
+      [0, 0.1, 0.2, 0.32, 0.45, 0.6].forEach((d, i) => {
+        const f = 330 * Math.pow(1.19, i);
+        this.voice(f, t + d, 0.2, { gain: 0.04, type: 'sine', attack: 0.003, glideTo: f * 1.9, glideTime: 0.09, send: 0.5 });
+      });
+      [330, 440, 494].forEach((f, i) => this.voice(f, t + 0.55 + i * 0.05, 1.1, { gain: 0.03, type: 'triangle', attack: 0.08, send: 0.7 }));
+      return;
+    }
+    this.breath(t, 0.9, 0.08, 250, 2800, 0.3);
+    this.voice(98, t, 0.9, { gain: 0.08, type: 'triangle', attack: 0.05, glideTo: 392, glideTime: 0.8, send: 0.3 });
+    this.crackle(t + 0.15, 22, 0.8, 3200, 0.05);
+    [392, 494, 587].forEach((f, i) => this.voice(f, t + 0.6 + i * 0.05, 1.1, { gain: 0.032, type: 'triangle', attack: 0.06, send: 0.6 }));
+  }
+
   // Sopro de ruído filtrado: sobe e desce suave (como vento ou borbulhar).
   private breath(time: number, dur: number, gain: number, fromHz: number, toHz: number, send = 0.3): void {
     const ctx = this.ctx;
@@ -482,6 +503,40 @@ class AudioEngine {
         // batida grave e abafada (sem aspereza)
         this.voice(150, t, 0.34, { gain: 0.06, glideTo: 92, glideTime: 0.3, send: 0.15 });
         this.breath(t, 0.2, 0.012, 500, 200, 0.1);
+        break;
+      }
+      case 'transform':
+        this.transformSound(variant ?? 'fire', t);
+        break;
+      case 'formEnd': {
+        // a forma se desfaz: o mesmo timbre, descendo e se apagando
+        if (variant === 'water') {
+          this.breath(t, 0.8, 0.04, 2200, 300, 0.5);
+          [0, 0.12, 0.26, 0.42].forEach((d, i) => this.voice(700 - i * 110, t + d, 0.22, { gain: 0.03, type: 'sine', attack: 0.004, glideTo: 380 - i * 40, glideTime: 0.14, send: 0.5 }));
+        } else {
+          this.breath(t, 0.9, 0.05, 1800, 240, 0.4);
+          this.voice(220, t, 0.8, { gain: 0.05, type: 'triangle', attack: 0.01, glideTo: 70, glideTime: 0.7, send: 0.3 });
+        }
+        break;
+      }
+      case 'flame': {
+        // Labareda: um sopro de fogo curto e quente, com estalos
+        this.breath(t, 0.5, 0.09, 2800, 500, 0.3);
+        this.voice(190, t, 0.4, { gain: 0.07, type: 'triangle', attack: 0.004, glideTo: 70, glideTime: 0.35, send: 0.25 });
+        this.crackle(t + 0.03, 10, 0.4, 3400, 0.045);
+        break;
+      }
+      case 'bubble': {
+        // bolha de sabão soprada: um sopro suave e um "plim" que sobe
+        this.breath(t, 0.35, 0.03, 700, 2600, 0.5);
+        this.voice(520, t + 0.05, 0.3, { gain: 0.035, type: 'sine', attack: 0.01, glideTo: 940, glideTime: 0.22, send: 0.6 });
+        this.voice(1040, t + 0.14, 0.4, { gain: 0.016, type: 'sine', attack: 0.01, send: 0.7 });
+        break;
+      }
+      case 'pop': {
+        // a bolha estoura: um estalo seco e uma gotinha
+        this.grain(t, 0.05, 0.07, 'bandpass', 2600, 2, 0.4);
+        this.voice(1500, t, 0.1, { gain: 0.04, type: 'sine', attack: 0.001, glideTo: 520, glideTime: 0.07, send: 0.5 });
         break;
       }
       case 'door': {

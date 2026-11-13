@@ -89,14 +89,7 @@ export class BombSystem {
         this.scene.pickupSystem.spawnReward(t.x, t.y);
       }
     }
-    const element = ELEMENTS[bomb.element] ?? ELEMENTS.fire;
-    this.scene.boss?.onExplosion(tiles, bomb.element);
-    for (const t of tiles) {
-      for (const enemy of this.scene.enemySystem.enemies) {
-        if (enemy.alive && enemy.gridX === t.x && enemy.gridY === t.y) this.scene.enemySystem.hitEnemy(enemy, bomb.element);
-      }
-      this.spawnExplosion(t.x, t.y, element.color, element.glow, bomb.element);
-    }
+    this.applyBlast(tiles, bomb.element);
     this.scene.tweens.killTweensOf(bomb.sprite);
     bomb.sprite.destroy();
     bomb.halo.destroy();
@@ -105,7 +98,28 @@ export class BombSystem {
     this.scene.cameras.main.shake(70, 0.003);
   }
 
-  neutralizeBomb(bomb: Bomb): void {
+  // O efeito de uma explosão da Roo nas casas atingidas: chefe, inimigos, visual e as brasas da Roo Fire
+  // (o fogo acende, a água apaga). Serve às poções e à Labareda.
+  private applyBlast(tiles: Array<{ x: number; y: number }>, elementId: ElementId): void {
+    const element = ELEMENTS[elementId] ?? ELEMENTS.fire;
+    this.scene.boss?.onExplosion(tiles, elementId);
+    for (const t of tiles) {
+      for (const enemy of this.scene.enemySystem.enemies) {
+        if (enemy.alive && enemy.gridX === t.x && enemy.gridY === t.y) this.scene.enemySystem.hitEnemy(enemy, elementId, true);
+      }
+      this.spawnExplosion(t.x, t.y, element.color, element.glow, elementId, false, true);
+    }
+    this.scene.onRooBlast(tiles, elementId);
+  }
+
+  /** Labareda da Roo Fire: um jato de fogo nas casas à frente. */
+  flameBlast(tiles: Array<{ x: number; y: number }>): void {
+    this.applyBlast(tiles, 'fire');
+    this.scene.play('explosion', 'fire');
+    this.scene.cameras.main.shake(60, 0.003);
+  }
+
+  neutralizeBomb(bomb: Bomb, label = 'APAGADA'): void {
     if (bomb.detonated) return;
     bomb.detonated = true;
     const { x, y } = bomb.sprite;
@@ -124,31 +138,8 @@ export class BombSystem {
     }).setDepth(10);
     steam.explode(7);
     this.scene.time.delayedCall(1300, () => steam.destroy());
-    this.scene.floatingText(Math.floor(x / CONFIG.tile), Math.floor(y / CONFIG.tile), 'APAGADA', '#a8e6f5');
+    this.scene.floatingText(Math.floor(x / CONFIG.tile), Math.floor(y / CONFIG.tile), label, '#a8e6f5');
     this.scene.play('fizzle');
-  }
-
-  pushAbility(): void {
-    if (this.scene.cooldowns.push > 0 || this.scene.player.moving) return;
-    const { gridX, gridY, dir } = this.scene.player;
-    const fx = gridX + dir.x;
-    const fy = gridY + dir.y;
-    const bomb = this.bombs.find(b => b.gridX === fx && b.gridY === fy);
-    if (!bomb) return;
-    let lastX = fx;
-    let lastY = fy;
-    for (let i = 1; i <= CONFIG.pushRange; i++) {
-      const tx = fx + dir.x * i;
-      const ty = fy + dir.y * i;
-      if (!this.scene.isFree(tx, ty)) break;
-      lastX = tx;
-      lastY = ty;
-    }
-    if (lastX === fx && lastY === fy) return;
-    bomb.gridX = lastX;
-    bomb.gridY = lastY;
-    this.scene.tweenSpriteTo(bomb.sprite, lastX, lastY, 200, 'Cubic.easeOut');
-    this.scene.cooldowns.push = CONFIG.pushCd;
   }
 
   updateBombs(delta: number): void {
@@ -175,7 +166,7 @@ export class BombSystem {
   }
 
   // `lite` pula as partículas (para explosões em muitas casas ao mesmo tempo, como o Grito da Mandrágora).
-  spawnExplosion(x: number, y: number, color: number, glow: number, element: ElementId = 'fire', lite = false): void {
+  spawnExplosion(x: number, y: number, color: number, glow: number, element: ElementId = 'fire', lite = false, fromRoo = false): void {
     const px = x * CONFIG.tile + CONFIG.tile / 2;
     const py = y * CONFIG.tile + CONFIG.tile / 2;
     const core = this.scene.add.image(px, py, 'menu_puff').setTint(color)
@@ -191,7 +182,7 @@ export class BombSystem {
       onComplete: () => ring.destroy(),
     });
     if (!lite) this.explosionFx(px, py, color, glow, element);
-    this.explosions.push({ x, y, timer: 380, key: `${x},${y}`, hitPlayer: false, element });
+    this.explosions.push({ x, y, timer: 380, key: `${x},${y}`, hitPlayer: false, element, fromRoo });
   }
 
   private explosionFx(px: number, py: number, color: number, glow: number, element: ElementId): void {
