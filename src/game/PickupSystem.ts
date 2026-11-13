@@ -2,10 +2,10 @@
 // um inimigo morre, e são coletados quando a Roo pisa na casa (coordenadas de grade).
 // As regras puras estão em game/pickupRules.ts e game/rewards.ts.
 import Phaser from 'phaser';
-import { BOMB_TYPES, CONFIG } from '../config';
-import { Bank } from '../storage';
-import { PICKUP_HALO, PICKUP_TEXTURE, PickupType, rollChestCoins, rollReward } from './rewards';
-import { pickupAt, resolveRewardType, timeAfterBonus } from './pickupRules';
+import { BOMB_ORDER, BOMB_TYPES, BombId, CONFIG } from '../config';
+import { Bank, hasBombType } from '../storage';
+import { PickupType, isPotionPowerup, pickupHalo, pickupTexture, rollChestCoins, rollReward } from './rewards';
+import { pickPowerupPotion, pickupAt, resolveRewardType, timeAfterBonus } from './pickupRules';
 import { addBombSlot, addFireLevel } from './upgrades';
 import type { Pickup } from './types';
 import type { MainScene } from '../scenes/MainScene';
@@ -22,23 +22,25 @@ export class PickupSystem {
     }
     const type = rollReward();
     // na fase do chefe não há porta: gema vira moeda
-    const final = resolveRewardType(type, !!this.scene.def.door);
+    const final = resolveRewardType(type, !!this.scene.def.door && !this.scene.isBossStage);
     // o baú já nasce com o valor sorteado pela tabela desta fase
     const value = final === 'chest' ? rollChestCoins(this.scene.def.chest) : undefined;
-    this.spawnPickupSprite(x, y, final, value);
+    // +frasco e +raio nascem já com a poção que fortalecem (uma das que a Roo tem)
+    const potion = isPotionPowerup(final) ? pickPowerupPotion(BOMB_ORDER.filter(hasBombType)) : undefined;
+    this.spawnPickupSprite(x, y, final, value, potion);
   }
 
-  spawnPickupSprite(x: number, y: number, type: PickupType, value?: number): void {
+  spawnPickupSprite(x: number, y: number, type: PickupType, value?: number, potion?: BombId): void {
     const sprite = this.scene.add.image(
       x * CONFIG.tile + CONFIG.tile / 2,
       y * CONFIG.tile + CONFIG.tile / 2,
-      PICKUP_TEXTURE[type],
+      pickupTexture(type, potion),
     ).setDepth(6);
     this.scene.tweens.add({
       targets: sprite, y: sprite.y - 4,
       duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
     });
-    const haloColor = PICKUP_HALO[type];
+    const haloColor = pickupHalo(type, potion);
     let halo: Phaser.GameObjects.Image | undefined;
     if (haloColor !== undefined) {
       halo = this.scene.add.image(sprite.x, sprite.y, 'menu_puff').setScale(0.95).setTint(haloColor)
@@ -48,12 +50,12 @@ export class PickupSystem {
         duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
       });
     }
-    this.pickups.push({ gridX: x, gridY: y, type, value, sprite, halo });
+    this.pickups.push({ gridX: x, gridY: y, type, value, potion, sprite, halo });
   }
 
   // "Fogo", "Aqua"...: a poção que recebeu o power-up
-  private potionShortName(): string {
-    return BOMB_TYPES[this.scene.bombType].label.replace('Poção ', '').replace('de ', '').toUpperCase();
+  private potionShortName(potion: BombId): string {
+    return BOMB_TYPES[potion].label.replace('Poção ', '').replace('de ', '').toUpperCase();
   }
 
   collectPickup(pickup: Pickup): void {
@@ -73,7 +75,7 @@ export class PickupSystem {
         const coins = pickup.value ?? 5;
         s.coins += coins;
         Bank.add(coins);
-        s.play('powerup'); // o baú só dá POÇÃO: a cura vem dos corações (ver docs/06-decisoes.md)
+        s.play('powerup'); // o baú só dá OURO: a cura vem dos corações (ver docs/06-decisoes.md)
         break;
       }
       case 'heart':
@@ -81,15 +83,15 @@ export class PickupSystem {
         s.play('pickup');
         break;
       case 'bomb_up':
-        addBombSlot(s.player.upgrades, s.bombType);
+        addBombSlot(s.player.upgrades, pickup.potion ?? 'normal');
         s.powerupsCollected.bomb_up++;
-        s.floatingText(pickup.gridX, pickup.gridY, `+1 FRASCO ${this.potionShortName()}`, '#b39ddb');
+        s.floatingText(pickup.gridX, pickup.gridY, `+1 FRASCO ${this.potionShortName(pickup.potion ?? 'normal')}`, '#b39ddb');
         s.play('powerup');
         break;
       case 'fire_up':
-        addFireLevel(s.player.upgrades, s.bombType);
+        addFireLevel(s.player.upgrades, pickup.potion ?? 'normal');
         s.powerupsCollected.fire_up++;
-        s.floatingText(pickup.gridX, pickup.gridY, `+1 RAIO ${this.potionShortName()}`, '#ff8a65');
+        s.floatingText(pickup.gridX, pickup.gridY, `+1 RAIO ${this.potionShortName(pickup.potion ?? 'normal')}`, '#ff8a65');
         s.play('powerup');
         break;
       case 'speed_up':

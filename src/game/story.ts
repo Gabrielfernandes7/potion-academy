@@ -23,6 +23,14 @@ export const BELLADONA_CARDS: StoryCard[] = [
   { speaker: BELLADONA, text: 'Leve o pergaminho, então. Leia melhor do que eu li.' },
 ];
 
+// Derrota da Mandrágora: a guardiã do portão do jardim se despede antes de o portão abrir.
+export const MANDRAKE = 'Mandrágora';
+export const MANDRAKE_CARDS: StoryCard[] = [
+  { speaker: MANDRAKE, text: 'Eu cuidava deste jardim antes de haver mosteiro. Cada raiz aqui guarda um pedaço do que foi lido em voz alta.' },
+  { speaker: MANDRAKE, text: 'Gritei para afastar quem queria arrancar tudo. Você não arrancou. Só pediu passagem.' },
+  { speaker: MANDRAKE, text: 'Passe, Roo. Diga ao frei que a terra também escuta.' },
+];
+
 // Cena final no Caldeirão: uma linha por vez, devagar. A última é o título da tela de fim.
 export const CAULDRON_LINES: string[] = [
   'O Caldeirão estava como Roo o deixou: morno, em silêncio.',
@@ -45,5 +53,33 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
     { speaker: MESTRE, text: '...não é ouro o que procuro, Roo. Diga ao Anselmo que eu...' },
     { speaker: ROO, text: 'A voz se perde entre as colunas. Anselmo sabia que o mestre tinha ido até aqui? Ou só sabia que eu seguiria os ecos?' },
     { speaker: BELLADONA, text: 'Você chegou até aqui, e ele também chegou, uma vez. Depois pediu que eu parasse de ler. Eu não parei.' },
+  ],
+  3: [
+    { speaker: ROO, text: 'A névoa se abre devagar. Atrás de mim, a charneca desaparece como se nunca tivesse existido.' },
+    { speaker: ROO, text: 'Ao longe, uma torre aponta para o céu. É para lá que as pistas me levam.' },
+  ],
+  4: [
+    { speaker: ROO, text: 'A torre se ergue sobre o vale. Os degraus são frios, e os fantasmas daqui não têm cheiro, só silêncio.' },
+    { speaker: ROO, text: 'Lá em cima, sinto o cheiro da água benta que Anselmo usava nas missas. Subo.' },
+  ],
+  5: [
+    { speaker: ROO, text: 'O corredor tem portas trancadas com cera. Em cada selo, o mesmo símbolo do mestre.' },
+    { speaker: ROO, text: 'Atrás de uma delas, ouço a voz de Belladona, calma, como quem já esperava por mim.' },
+  ],
+  6: [
+    { speaker: ROO, text: 'Na antecâmara, os frascos brilham com um pó que não reconheço.' },
+    { speaker: ROO, text: 'Sei que a próxima sala é a dela. Respiro fundo e sigo.' },
+  ],
+  8: [
+    { speaker: ROO, text: 'Desço o vale com o frasco vazio. A estrada é a mesma da ida, mas agora sei o que o mestre temia.' },
+    { speaker: ROO, text: 'Não sei se volto para o Caldeirão ou se fico por aqui. Sigo, por enquanto.' },
+  ],
+  9: [
+    { speaker: ROO, text: 'As flores de Belladona crescem até na beira do riacho. Não as toco.' },
+    { speaker: ROO, text: 'Do outro lado da ponte, os muros do mosteiro já aparecem.' },
+  ],
+  10: [
+    { speaker: ROO, text: 'O portão do mosteiro está à vista. Anselmo deve estar do outro lado.' },
+    { speaker: ROO, text: 'Ensaio o que vou dizer e percebo que não tenho nada a provar. Só levo o frasco.' },
   ],
 };

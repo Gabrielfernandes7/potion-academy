@@ -1,4 +1,4 @@
-// Broomstick Roo: canguru bruxa com chapéu, varinha e manto.
+// Broomstick Roo: canguru bruxo com chapéu, varinha e manto.
 //
 // Poses:
 // - 'awake': 4 frames de caminhada por direção (idle usa frames 0 e 1).

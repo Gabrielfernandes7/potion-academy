@@ -5,10 +5,7 @@
 // - Pickups, bombas e vitória usam coordenadas de grade.
 // - update() retorna cedo com a loja aberta e, após gameOver/won, só trata a tecla R.
 import Phaser from 'phaser';
-import {
-  BLOCK, BOMB_ORDER, BombId, CANVAS, CONFIG, ElementId, EMPTY, ENEMY_TYPES, EnemyKind,
-  LAST_STAGE, StageDef, StageTheme, WALL, stageDef,
-} from '../config';
+import { BLOCK, BOMB_ORDER, BombId, CANVAS, CONFIG, ElementId, EMPTY, WALL } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
 import { Bank, hasBombType } from '../storage';
 import { rooOriginY } from '../textures/rooGeometry';
@@ -19,24 +16,23 @@ import { hideGameOver, setPauseVisible, showGameOver } from '../ui/overlays';
 import { isShopOpen } from '../ui/shop';
 import { isHelpOpen } from '../ui/help';
 import { readTheme } from '../ui/theme';
-import { BossController } from '../game/BossController';
+import { Fog } from '../game/effects/Fog';
+import { BossBase } from '../game/entities/bosses/BossBase';
+import { BelladonnaController } from '../game/entities/bosses/belladonna/BelladonnaController';
+import { MandrakeController } from '../game/entities/bosses/mandrake/MandrakeController';
 import { BombSystem } from '../game/BombSystem';
 import { PickupSystem } from '../game/PickupSystem';
-import { EnemySystem } from '../game/EnemySystem';
+import { EnemySystem } from '../game/entities/enemies/EnemySystem';
 import { SleepSystem } from '../game/SleepSystem';
 import { markStageCompleted } from '../storage';
 import { cloneUpgrades, createUpgrades } from '../game/upgrades';
+import { HIT_TINT, hitFx } from '../game/entities/hitEffects';
 import { SCENE_TRACKS } from '../audio/tracks';
 import { showDialogue } from '../ui/dialogue';
-import { ANSELMO, BELLADONA_CARDS, ENDING_CARDS, PASSAGE_CARDS, type StoryCard } from '../game/story';
-
-// Cor que tinge a Roo ao ser atingida por cada elemento.
-const HIT_TINT: Record<ElementId, number> = {
-  fire: 0xff7043,
-  water: 0x4fc3f7,
-  earth: 0xa1887f,
-  air: 0xe0d8ff,
-};
+import { ANSELMO, BELLADONA_CARDS, ENDING_CARDS, MANDRAKE_CARDS, PASSAGE_CARDS, type StoryCard } from '../game/story';
+import { ENEMY_TYPES, EnemyKind } from '../game/entities/enemies/defs';
+import { LAST_STAGE, stageDef } from '../game/stages/index';
+import { StageDef, StageTheme } from '../game/stages/types';
 
 type MainKeys = Record<'space' | 'x' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
 
@@ -88,7 +84,8 @@ export class MainScene extends Phaser.Scene {
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   keys!: MainKeys;
   stage = 1; // 1 laboratório, 2 salão dos fantasmas, 3 duelo com a Belladona, 4 jardim (ver STAGES em config.ts)
-  boss: BossController | null = null;
+  boss: BossBase | null = null;
+  fog: Fog | null = null; // névoa da fase (se a fase tiver `fog`)
   transitioning = false; // passando de fase: ignora entrada
   private helpPaused = false;
 
@@ -101,12 +98,13 @@ export class MainScene extends Phaser.Scene {
   }
 
   get isBossStage(): boolean {
-    return this.def.kind === 'boss';
+    return !!this.def.boss;
   }
 
   init(data?: StageData): void {
     this.stage = data?.stage ?? 1;
     this.boss = null;
+    this.fog = null;
     this.transitioning = false;
     this.helpPaused = false;
     this.grid = [];
@@ -168,7 +166,7 @@ export class MainScene extends Phaser.Scene {
     this.buildGrid();
     if (this.def.door) {
       this.placeDoor();
-      this.assignHiddenGems();
+      if (!this.isBossStage) this.assignHiddenGems(); // chefe com porta: ela abre quando ele cai
     }
     this.enemySystem.spawnEnemies();
     this.playerSprite = this.add.sprite(
@@ -178,7 +176,9 @@ export class MainScene extends Phaser.Scene {
     ).setOrigin(0.5, rooOriginY(CONFIG.tile)).setDepth(10);
     this.cdGraphics = this.add.graphics().setDepth(15);
     this.enemySystem.createLashGfx();
-    if (this.isBossStage) this.boss = new BossController(this);
+    if (this.def.fog) this.fog = new Fog(this, CONFIG.cols * CONFIG.tile, CONFIG.rows * CONFIG.tile, this.def.fog.radius, CONFIG.tile);
+    if (this.def.boss === 'belladonna') this.boss = new BelladonnaController(this);
+    else if (this.def.boss === 'mandrake') this.boss = new MandrakeController(this);
     if (this.stage > 1) this.cameras.main.fadeIn(600, 8, 14, 12);
     // a grade é desenhada abaixo da faixa da HUD (cena 'Hud', por cima)
     this.cameras.main.setViewport(0, CONFIG.hudHeight, CANVAS.width, CONFIG.rows * CONFIG.tile);
@@ -204,7 +204,8 @@ export class MainScene extends Phaser.Scene {
     const bandH = hasTip ? 150 : 124;
     items.push(this.add.rectangle(cx, cy, CONFIG.cols * CONFIG.tile, bandH, 0x120d08, 0.78).setDepth(29));
     let y = cy - bandH / 2 + 22;
-    items.push(this.add.text(cx, y, `FASE ${this.stage} · ${this.def.place.toUpperCase()}`, {
+    const head = this.def.chapter ? `${this.def.chapter} · ${this.def.part ?? ''}`.replace(/ · $/, '') : `FASE ${this.stage}`;
+    items.push(this.add.text(cx, y, `${head} · ${this.def.place.toUpperCase()}`, {
       fontFamily: theme.fontDisplay, fontSize: '12px', color: theme.textMuted, fontStyle: '700',
     }).setOrigin(0.5).setDepth(30));
     y += 28;
@@ -361,10 +362,10 @@ export class MainScene extends Phaser.Scene {
   isSpawnSafe(x: number, y: number): boolean {
     // área livre em L ao redor do spawn, para sempre haver rota de fuga
     if (this.isBossStage) {
-      // a Belladona nasce no canto oposto: deixa as casas ao redor dela livres
-      const r = CONFIG.rows - 2;
+      // o chefe nasce num canto (Belladona embaixo, Mandrágora em cima): deixa as casas ao redor livres
+      const r = this.def.boss === 'mandrake' ? 1 : CONFIG.rows - 2;
       const c = CONFIG.cols - 2;
-      if ((y === r && x >= c - 2) || (x === c && y >= r - 2)) return true;
+      if ((y === r && x >= c - 2) || (x === c && Math.abs(y - r) <= 2)) return true;
     }
     return (y === 1 && x <= 3) || (x === 1 && y <= 3);
   }
@@ -512,16 +513,30 @@ export class MainScene extends Phaser.Scene {
     });
   }
 
-  // A Belladona foi derrotada: bônus de POÇÃO e a Roo segue para o jardim, fora do castelo.
+  // A Belladona foi derrotada: bônus de OURO e a Roo segue para o jardim, fora do castelo.
   onBossDefeated(): void {
     if (this.gameOver || this.transitioning) return;
     this.transitioning = true;
     this.coins += CONFIG.bossVictoryBonus;
     Bank.add(CONFIG.bossVictoryBonus);
+    if (this.def.boss === 'mandrake') {
+      // jardim: a Mandrágora se despede e o portão (onde Anselmo espera) se abre
+      this.floatingText(this.player.gridX, this.player.gridY, 'MANDRÁGORA DERROTADA!', '#9be564');
+      this.time.delayedCall(1600, () => { void this.playMandrakeFarewell(); });
+      return;
+    }
     markStageCompleted(this.stage);
     this.floatingText(this.player.gridX, this.player.gridY, 'BELLADONA DERROTADA!', '#9be564');
     // espera a queda dela terminar; então ela se despede (cartões) e a Roo segue para o jardim
     this.time.delayedCall(1600, () => { void this.playBossFarewell(); });
+  }
+
+  async playMandrakeFarewell(): Promise<void> {
+    this.scene.pause();
+    await showDialogue(MANDRAKE_CARDS, 'SEGUIR');
+    this.scene.resume();
+    this.transitioning = false;
+    this.openDoor();
   }
 
   async playBossFarewell(): Promise<void> {
@@ -539,7 +554,7 @@ export class MainScene extends Phaser.Scene {
 
   // ---------- Explosões e dano ----------
 
-  // Punhado de partículas do elemento: brasas (fogo), gotas (água), pedriscos (terra), brilhos (éter).
+  // Dano à Roo; o efeito do elemento vive em game/entities/hitEffects.ts.
   damagePlayer(bypassInvuln = false, element?: ElementId): void {
     if (!bypassInvuln && this.player.invulnerable > 0) return;
     this.player.hp -= CONFIG.damagePerExplosion;
@@ -547,7 +562,7 @@ export class MainScene extends Phaser.Scene {
     this.updateHud();
     this.play('hurt');
     this.playerSprite.setTint(element ? HIT_TINT[element] : 0xff5252);
-    if (element) this.enemySystem.hitFx(this.playerSprite.x, this.playerSprite.y - 8, element);
+    if (element) hitFx(this, this.playerSprite.x, this.playerSprite.y - 8, element);
     this.tweens.add({
       targets: this.playerSprite, alpha: 0.3,
       duration: 120, yoyo: true, repeat: 5,
@@ -892,6 +907,7 @@ export class MainScene extends Phaser.Scene {
     this.bombSystem.update(delta);
     this.enemySystem.update(delta);
     this.boss?.update(delta);
+    this.fog?.update(this.playerSprite.x, this.playerSprite.y);
     this.checkPlayerHit();
     if (this.gameOver) return;
     this.pickupSystem.checkPickups();

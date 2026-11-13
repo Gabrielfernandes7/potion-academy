@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Potion Academy: laboratório (dev)</title>
+<title>Potion Academy: lab (dev)</title>
 <style>
   :root { --bg: #1b1714; --ink: #f1e6d6; --muted: #b3a494; --card: #241e1a; --line: #3d332b; --accent: #f97316; }
   * { box-sizing: border-box; }
@@ -26,60 +26,24 @@
   kbd { background: rgba(249,115,22,0.15); border-radius: 3px; padding: 0 4px; color: var(--ink); }
   #status { font-weight: 700; color: var(--ink); }
   .tip { color: var(--muted); font-size: 0.85rem; margin-top: 16px; }
+  input[type=range] { width: 100%; margin-top: 4px; accent-color: var(--accent); }
+  nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+  nav a { color: var(--ink); text-decoration: none; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; font-size: 0.9rem; }
+  nav a.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
 </style>
 </head>
 <body>
 <main>
-  <h1>Laboratório da Roo de fogo</h1>
-  <p class="lead">Ferramenta de desenvolvimento. Um mapa em miniatura com as regras de teste do jogo, para ver a transformação da Roo e as ideias do elemento Fogo. Não entra no build de produção.</p>
+  <h1>Lab · <span id="lab-title"></span></h1>
+  <p class="lead">Ferramenta de desenvolvimento, só para testar ideias do jogo antes de entrarem nele. Não entra no build de produção. Experimentos em <code>src/lab/experiments/</code>, registrados em <code>src/lab/registry.ts</code>.</p>
+  <nav id="lab-nav" aria-label="Experimentos"></nav>
+  <p class="lead" id="lab-summary"></p>
 
   <div class="layout">
     <div id="stage"></div>
-
-    <aside class="panel">
-      <h2>Estágio da Roo</h2>
-      <label>
-        Transformação
-        <select id="stage-select">
-          <option value="0">0 · Original (capa roxa)</option>
-          <option value="1">1 · Capa vermelha em degradê</option>
-          <option value="2">2 · Chapéu em chama, varinha e olhos</option>
-          <option value="3">3 · Manto em chamas e orelhas</option>
-          <option value="4" selected>4 · Faíscas e brasas</option>
-        </select>
-      </label>
-      <label>
-        Intensidade
-        <select id="intensity-select">
-          <option value="low">Baixa</option>
-          <option value="medium">Média</option>
-          <option value="high" selected>Alta</option>
-        </select>
-      </label>
-
-      <h2>Mecânica de teste</h2>
-      <label class="check">
-        <input type="checkbox" id="trail-check" checked>
-        Explosões deixam brasas (estágio 4)
-      </label>
-      <p class="tip">Ideia para testar a sensação. A regra final ainda não está definida em <code>docs/</code>.</p>
-
-      <h2>Controles</h2>
-      <ul>
-        <li><kbd>setas</kbd> andar (passo por casa)</li>
-        <li><kbd>Espaço</kbd> colocar Poção de Fogo (explode em 1,6 s)</li>
-        <li>Blocos destrutíveis somem na explosão; pilares e paredes não.</li>
-      </ul>
-
-      <h2>Exportar</h2>
-      <button type="button" id="export-btn" style="font:inherit;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:6px;padding:8px 12px;cursor:pointer">Baixar folha da transformação (PNG)</button>
-      <p class="tip">Linhas: estágios 0 a 4. Colunas: as 8 fases do tremor. Escala 3×.</p>
-
-      <h2>Resultado</h2>
-      <p id="status">Explosões: 0</p>
-    </aside>
+    <aside class="panel" id="lab-panel"></aside>
   </div>
 </main>
-<script type="module" src="/src/labMain.ts"></script>
+<script type="module" src="/src/lab/main.ts"></script>
 </body>
 </html>

@@ -4,14 +4,14 @@ Cada personagem e item tem uma ficha curta: o que é, o que faz e um detalhe que
 
 ## Personagens
 
-**Roo, a bruxa-canguru** (jogadora)
+**Roo, o bruxo-canguru** (jogador)
 - *Quer:* sair do laboratório com as gemas e vencer a rival.
 - *Sabe fazer:* colocar poções, empurrá-las e explodir as etéreas de longe.
-- *Detalhe:* manto roxo com barra dourada, chapéu e varinha. Parada, ela cochila.
+- *Detalhe:* manto roxo com barra dourada, chapéu e varinha. Parada, ele cochila.
 - *Frase:* "Mais uma poção e a porta é minha."
 
 **Belladona, a alquimista rival** (chefe da fase 3)
-- *Quer:* o laboratório e as gemas só para ela.
+- *Quer:* o laboratório e as gemas só para ele.
 - *Sabe fazer:* arremessar poções, fazer chover gotas e sumir em névoa.
 - *Detalhe:* roupa verde-escura com detalhes verde-limão, chapéu torto com faixa magenta, cabelo carmim, olhos verde-limão.
 - *Vida:* 8. *Frase:* "Essas poções são minhas, canguru!"
@@ -67,12 +67,12 @@ A explosão de água que apaga uma poção de fogo continua machucando quem esti
 
 | Item | Efeito | Limite |
 |---|---|---|
-| Moeda | +1 POÇÃO | |
-| Baú | +5 POÇÃO e +1 vida | |
+| Moeda | +1 OURO | |
+| Baú | OURO sorteado (5 a 50, conforme a fase); não cura | |
 | Coração | +1 vida | máximo 5 |
 | Gema | conta para abrir a porta | 3 por fase |
-| +Frasco | +1 poção ao mesmo tempo | até 5 |
-| +Raio | explosões mais longas | 3 níveis |
+| +Frasco | +1 poção ao mesmo tempo, **só da poção do elemento do item** | até 5 por poção |
+| +Raio | explosões mais longas, **só da poção do elemento do item** | 3 níveis por poção |
 | +Velocidade | a Roo anda mais rápido | 2 níveis |
 | +Tempo | +15 segundos | |
 
@@ -89,6 +89,7 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 - *Faz:* flutua sem rumo (um passo a cada 1,5 s), **atravessa muralhas, caixotes e poções** e tira 1 de vida ao encostar. Deixa uma moeda.
 - *Detalhe:* dentro de uma muralha fica meio transparente e a explosão não o alcança. Começam 2, até 4 (mais um a cada 10 caixotes).
 - *Limite:* não persegue nem sai da sala.
+- *Imune:* só a Telúrica (terra). Água, fogo e éter o derrotam. Também aparece na Torre da Belladona (2 no início, até 3).
 
 **Flor do mal** (jardim)
 - *Faz:* fica fixa e **bloqueia a casa**. A cada 3,2 s mostra um aviso rosa nas 4 casas ao redor e, 0,8 s depois, chicoteia quem estiver ali (1 de vida).
@@ -103,4 +104,16 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 - **Jardim do castelo (fase 4):** fora do castelo. Grama, sebes no lugar das muralhas, canteiros de flores no lugar dos caixotes e um portão no lugar da porta.
 - **Sala de Música:** a tela onde a Roo de maestro (casaca e cabelo de Beethoven) deixa escolher a música.
 - **Caldeirão de Magia:** a loja.
-- **Menu:** a Roo mexe uma poção no caldeirão. De tempos em tempos ela aponta a varinha para um frasco da prateleira, ele levita e voa guiado por ela até o caldeirão, que reage de um jeito próprio de cada elemento (labareda, respingo, pedras ou redemoinho de névoa). Clicar num frasco da prateleira o chama na hora.
+- **Menu:** a Roo mexe uma poção no caldeirão. De tempos em tempos ele aponta a varinha para um frasco da prateleira, ele levita e voa guiado por ele até o caldeirão, que reage de um jeito próprio de cada elemento (labareda, respingo, pedras ou redemoinho de névoa). Clicar num frasco da prateleira o chama na hora.
+
+
+## Mandrágora (chefe do jardim)
+
+**Mandrágora, a feiticeira do jardim** (28 de vida)
+- *Poder:* terra e água. Resiste às duas (dano baixo, sem cura). O **fogo** é a fraqueza (dano alto); o éter machuca normal.
+- *Raízes:* raízes de terra sobem na linha e na coluna em que você está (na fase 2, em cruz).
+- *Maré:* anéis de água se expandem a partir dela, um depois do outro. Uma faixa fica seca: é o caminho seguro.
+- *Cavar:* some no chão e ressurge onde você estava, com um abalo. Depois fica **exposta** por cerca de 2,4 s e leva +2 de dano.
+- *Grito (fase 2):* quase o mapa todo é atingido; as casas verdes são seguras.
+- *Brotos (fase 2):* faz nascer até 3 flores do mal.
+- *Sem gemas:* o portão do jardim abre quando ela cai.

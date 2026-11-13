@@ -1,16 +1,23 @@
 import { describe, expect, it } from 'vitest';
-import { ENEMY_TYPES, LAST_STAGE, STAGES, isImmune, stageDef } from '../src/config';
+import { ENEMY_TYPES, isImmune } from '../../src/game/entities/enemies/defs';
+import { LAST_STAGE, STAGES, stageDef } from '../../src/game/stages/index';
 
 describe('fases', () => {
-  it('são quatro, na ordem: laboratório, salão dos fantasmas, duelo e jardim', () => {
-    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'boss', 'garden']);
-    expect(LAST_STAGE).toBe(4);
+  it('são onze: Vale (três), Torre (três e o duelo), Retorno (três e o jardim)', () => {
+    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'crypt', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'garden']);
+    expect(LAST_STAGE).toBe(11);
   });
 
   it('a fase 1 não tem fantasmas nem flores do mal', () => {
     const kinds = stageDef(1).enemies.map(e => e.kind);
     expect(kinds).not.toContain('ghost');
     expect(kinds).not.toContain('flower');
+  });
+
+  it('os chefes: Belladona na Torre, Mandrágora no jardim; só o duelo não tem porta', () => {
+    expect(stageDef(7).boss).toBe('belladonna');
+    expect(stageDef(11).boss).toBe('mandrake');
+    expect(STAGES.filter(s => s.boss)).toHaveLength(2);
   });
 
   it('só o duelo não tem porta nem inimigos comuns', () => {
@@ -20,8 +27,9 @@ describe('fases', () => {
     }
   });
 
-  it('o jardim tem sapos e flores do mal; o salão tem fantasmas', () => {
-    expect(stageDef(4).enemies.map(e => e.kind).sort()).toEqual(['flower', 'frog']);
+  it('o jardim só tem as flores que a Mandrágora faz brotar; o salão tem fantasmas', () => {
+    expect(stageDef(11).enemies.map(e => e.kind)).toEqual(['flower']);
+    expect(stageDef(11).enemies[0].start).toBe(0);
     expect(stageDef(2).enemies.map(e => e.kind)).toContain('ghost');
   });
 
@@ -53,10 +61,10 @@ describe('inimigos', () => {
     for (const e of ['fire', 'earth', 'air'] as const) expect(isImmune('flower', e)).toBe(false);
   });
 
-  it('sapos e fantasmas não são imunes a nada', () => {
+  it('sapos não são imunes a nada; fantasmas só à Telúrica', () => {
     for (const e of ['fire', 'water', 'earth', 'air'] as const) {
       expect(isImmune('frog', e)).toBe(false);
-      expect(isImmune('ghost', e)).toBe(false);
+      expect(isImmune('ghost', e)).toBe(e === 'earth');
     }
   });
 });

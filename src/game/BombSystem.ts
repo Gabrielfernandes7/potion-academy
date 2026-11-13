@@ -174,7 +174,8 @@ export class BombSystem {
     this.explosions = this.explosions.filter(e => (e.timer -= delta) > 0);
   }
 
-  spawnExplosion(x: number, y: number, color: number, glow: number, element: ElementId = 'fire'): void {
+  // `lite` pula as partículas (para explosões em muitas casas ao mesmo tempo, como o Grito da Mandrágora).
+  spawnExplosion(x: number, y: number, color: number, glow: number, element: ElementId = 'fire', lite = false): void {
     const px = x * CONFIG.tile + CONFIG.tile / 2;
     const py = y * CONFIG.tile + CONFIG.tile / 2;
     const core = this.scene.add.image(px, py, 'menu_puff').setTint(color)
@@ -189,7 +190,7 @@ export class BombSystem {
       targets: ring, scale: 2.2, alpha: 0, duration: 380,
       onComplete: () => ring.destroy(),
     });
-    this.explosionFx(px, py, color, glow, element);
+    if (!lite) this.explosionFx(px, py, color, glow, element);
     this.explosions.push({ x, y, timer: 380, key: `${x},${y}`, hitPlayer: false, element });
   }
 

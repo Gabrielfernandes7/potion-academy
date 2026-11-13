@@ -13,23 +13,39 @@ Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo). O
 - Sprites novos: Roo bebê na bolha iridescente, em duas poses: fetal (deitadinha de lado, dormindo, sem chapéu) e observando (acordada, olhando em volta, mão na bolha). Laço de 16 quadros em `src/textures/rooBubble.ts` (texturas `roo_bubble_{fetal,observe}_0..15`); GIFs em `docs/img/roo-bolha-*.gif` (cópia em `public/img/`), gerados por `scripts/bubble-gif.mjs` (ffmpeg + `npm i --no-save @napi-rs/canvas`). Na `history.html`: capa = observando, capítulo II = fetal. Mascote arquivado em `docs/mascote/`.
 - Decisões suas: gênero da Roo (carta diz "filho"), nomes das etapas da Obra como subtítulo, bolha no último quadro.
 
+## Feito nesta rodada (2026-11-13)
+
+- Roo masculina na prosa de `docs/12-historia.md` e `history.html` (revisado frase a frase).
+- Torre da Belladona (teste): é o chefe do capítulo 1, com só fantasmas (2 no início, até 3). Fantasma imune só à Telúrica. Testes ajustados (105 passam). Falta jogar.
+- **Pendente:** o jardim tem chefe? (a Belladona agora é o chefe da Torre). Ver item abaixo.
+- **Pendente:** Belladona como chefe do jardim. Falta decidir o que acontece com a fase da Torre (duelo): (a) vira fase normal, e a campanha fica com 3 fases + chefe; (b) sai da campanha.
+- **Pendente:** gasto que se repete (depois de conversar); barra de vida contínua (ver item acima).
+
+- Mandrágora (chefe do jardim, 4/4 de O Retorno) e classe-pai `BossBase`: feitas e testadas por script (115 testes; fase rodada em navegador sem erros). **Falta jogar**: equilíbrio (14 de vida, água cura 1, fogo 3), sprite e as falas dela.
+
+- Dano por elemento (`game/entities/damage.ts`): todos os personagens têm barra de vida, fraqueza e resistência; Mandrágora sem cura pela água; chefes em `game/bosses/`. 122 testes passam. **Falta jogar**: o ritmo das fases agora que sapo e fantasma levam 1 a 3 golpes (números em `docs/10-equilibrio.md`).
+
+- Reorganização (2026-11-13): `src/game/entities/` (enemies, bosses, damage, profiles) e `src/game/stages/` (capítulos em `chapters/`, `index.ts` calcula numeração, capítulo e posição). Guia em `docs/14-estrutura-do-codigo.md`. 128 testes passam.
+- Power-ups `+1 RAIO` e `+1 FRASCO` agora elementais (carregam a poção que fortalecem). **Falta jogar** para ver se o sorteio uniforme entre as poções que a Roo tem agrada.
+- **Próximo:** inimigo novo no primeiro capítulo (começa pelo perfil em `profiles.ts` e `enemies/defs.ts`) e blocos visuais próprios por capítulo (hoje só há três temas: stone, crypt, garden).
+
+- Capítulo 1 (O Vale) ganhou a fase A NÉVOA (fase 3; 11 fases no total) com `fog: { radius: 3 }`; progresso salvo migra sozinho (`bombroo_stages_schema`). `src/lab/` criado (experimentos `fog` e `fire-roo`; `docs/15-lab.md`). 136 testes passam. **Falta jogar** a Névoa (raio, escuridão, dificuldade com fantasmas) e **definir o chefe do capítulo 1**.
+
 ## Aguardando você (nada aqui eu consigo fechar sozinho)
 
 **Ver e ouvir no navegador** (eu só verifico por script; sensação de jogo, som e olho são seus):
 - Caminhada da Roo: agora o passo é feito à mão (`stepPlayerMove`), com o tempo que sobra carregado de uma casa para a outra e um ciclo de 4 quadros a cada 2 casas. Medido por script: 3,03 px por quadro, constante, sem quadro de "parada" entre casas. Se ainda parecer pulo, diga em que tela e se é com o jogo em 60 ou 120 Hz; o próximo passo seria um ciclo de 6 a 8 quadros (arte nova da Roo).
+- Roo é masculino (decidido, `docs/06-decisoes.md`): textos de `docs/`, `history.html` e carta usam "ele". Revisado em 2026-11-13 frase a frase em `docs/12-historia.md` e `history.html`; "ela" restante é a Belladona. Os cartões ficam por ora; no futuro, um vídeo da história da Roo no lugar.
 - Contorno escuro da Roo no jardim; dano `-2` na Belladona; página do Diário depois de vencer fases; menu em pixel art; `EndScene`; cartões de despedida.
-- **Belladona nova**: poses `witch_talk` (fala) e `witch_defeat` (vencida, calma, sem girar nem sumir). Ver se a derrota agora tem a dignidade certa.
-- **Power-ups por poção** (`game/upgrades.ts`): `+1 RAIO` e `+1 FRASCO` valem só para a poção escolhida. Jogar e dizer se o limite por poção deixa o jogo fácil demais (alternativa: limitar o total de frascos).
-- Vida entre fases: se ficar duro, subir a chance do coração em `game/rewards.ts`.
+- **Power-ups por poção** (`game/upgrades.ts`): confirmado pelo usuário, `+1 RAIO` e `+1 FRASCO` valem só para a poção escolhida. Falta jogar e dizer se fica fácil demais (alternativa: limitar o total de frascos).
+- **Vida em barra contínua (proposta, não decidida):** trocar os corações por uma barra de vida contínua, e cada poção causar um efeito diferente sobre ela. Perguntas: (1) o que cada elemento faz na barra (dano, cura, outro efeito)? (2) quanto vale a barra inteira (hoje são 5 corações)?
 - Músicas (6 faixas, nenhuma ouvida): clima, andamento e volume. Parâmetros de cada uma e o arco da tensão em `docs/13-musica.md`; o duelo foi para 80 BPM. Sons dos elementos (fogo, água, terra, éter) também.
 - Passagens entre fases (`PASSAGE_CARDS`, fases 1 e 2): ver se o ritmo do jogo não quebra e se o texto soa natural em português.
-- Chance dos baús: seu exemplo (5 moedas 1%, 20 moedas 5%) é o inverso da regra implementada (quanto maior o prêmio, menor a chance). Confirmar os números (`CHEST_COMMON`/`CHEST_RICH` em `config.ts`).
-- Lentidão: no meu teste (Chromium sem GPU) são 60 fps e menos de 1 ms por quadro, sem vazamento. Se persistir, preciso de aparelho/navegador, tela e se piora com o tempo.
+- Chance dos baús: confirmado, quanto maior o prêmio, menor a chance (`CHEST_COMMON`/`CHEST_RICH` em `config.ts`). Os números atuais ficam como estão.
 - "Som não toca" (relato antigo): causa no seu computador não confirmada. Preciso do navegador, do sistema e de quando o som para.
-- Aparelho de celular real (toque, mapa, layout): só testado por emulação.
 - Equilíbrio com pessoas (roteiro em `docs/10-equilibrio.md`): 5 a 10 partidas, anotar e ajustar (era a D4).
 - Licença do projeto: **sua decisão** (o README continua sem licença). Endereço final do site (`og:image` absoluto).
-- Regras e recompensas nos documentos: uma fonte oficial (hoje `docs/10-equilibrio.md` e `config.ts`); ainda não conferido ponto a ponto.
+- Regras e recompensas nos documentos: conferido em 2026-11-13 (baú em `docs/03-mundo.md` corrigido: dava "+5 e +1 vida", agora POÇÃO sorteada e sem cura, como no código). Ainda não conferido: a estimativa de economia de `docs/10-equilibrio.md` (80 POÇÃO por partida).
 
 **Ideia para depois: Roo com fogo (decisão de desenho, sem código ainda):**
 - Power-up de fogo (`+1 RAIO`) muda a aparência da Roo enquanto o efeito dura.
@@ -43,10 +59,8 @@ Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo). O
 
 ## Fila técnica (o que sobrou e eu posso fazer)
 
-- R1 (resto): `damagePlayer` e `hitFx` (efeito de ser atingido) ainda vivem entre `MainScene` e `EnemySystem`; se o chefe passar a usá-los, mover para um módulo de efeitos. `SleepSystem.isSleeping` está sem uso.
 - Fotos do catálogo: `docs/img/sprites.png` e `sprites/bosses.png` estão atualizadas; as outras sete de `docs/img/sprites/` não mudaram de conteúdo, mas o script de recorte por categoria não achou os seletores (`sprites.html` não tem `id` por categoria). Se mudar sprite de outra categoria, recortar à mão.
 - HUD desenhada no canvas fica serrilhada em telas muito grandes (decisão visual: o estilo é pixel art; mudar só se você quiser texto nítido).
-- Botão de toque "BOMBA" no celular: o glossário pede FRASCO/POÇÃO; conferir o texto.
 
 ## Descartado (com motivo)
 
@@ -126,7 +140,7 @@ Não entregue código Phaser nem imagem gerada por IA.
 | regras da fase | `src/scenes/MainScene.ts`, `src/game/{Bomb,Pickup,Enemy,Sleep}System.ts` |
 | movimento e animação da Roo | `MainScene.stepPlayerMove`, `createHeroAnims` |
 | power-ups por poção | `src/game/upgrades.ts` |
-| chefe | `src/game/BossController.ts`, `src/game/boss.ts` |
+| chefe | `src/game/entities/bosses/belladonna/BelladonnaController.ts`, `src/game/entities/bosses/belladonna/rules.ts` |
 | sprites | `src/textures/*.ts` (ver `docs/09-sprites.md`) |
 | menu | `src/scenes/MenuScene.ts` e `index.html` (`#menu`) |
 | loja | `src/ui/shop.ts`, `src/game/shopRules.ts` |

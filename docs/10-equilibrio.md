@@ -28,11 +28,11 @@ Antes, a Aqua tinha alcance 4 e a Telúrica e a Etérea alcance 3, então a Aqua
 | +Raio | 4 níveis | 3 | alcance 3 + 3 níveis já cobre quase o mapa |
 | +Velocidade | 3 níveis | 2 | com 3 níveis a Roo corria mais que os inimigos o tempo todo |
 | Passo base da Roo | 220 ms por casa | 300 ms | a Roo parecia rápida demais; 300 ms é igual ao sapo, e +2 velocidade (~143 ms) ainda fica mais rápida que ele. Teste: se ficar lenta demais, use 260 ms |
-| Baú | +2 vida | 0 | só os corações curam; o baú dá POÇÃO |
+| Baú | +2 vida | 0 | só os corações curam; o baú dá OURO |
 
 ## Economia (estimativa)
 
-- Uma partida boa rende cerca de **80 POÇÃO** (moedas ≈ 36, baús ≈ 40, inimigos ≈ 6). Os ganhos estão dobrados desde a inflação; os preços da loja não mudaram.
+- Uma partida boa rende cerca de **60 OURO** (moedas ≈ 18, baús ≈ 20, inimigos ≈ 6, estimativa). Moedas e baús foram reduzidos (OURO acumulava sem ter o que comprar); os preços da loja não mudaram.
 - Liberar tudo custa 60 + 90 + 120 = **270** → 3 a 4 partidas. Vencer a Belladona dá **+80**.
 
 ## Chefe
@@ -59,9 +59,9 @@ Ficam em `STAGES` e `ENEMY_TYPES` (`src/config.ts`); `tests/stages.test.ts` guar
 | fantasmas no salão | 2 no início, até 4 | mais que 4 fecha o mapa |
 | flores no jardim | 5, fixas | cada flor bloqueia uma casa |
 | `flowerLashCycleMs` / `flowerWarnMs` | 3,2 s / 0,8 s | o aviso não pode ser menor que 0,6 s (justo) |
-| `gardenVictoryBonus` | 60 POÇÃO | prêmio por zerar o jogo |
-| `bossVictoryBonus` | 80 POÇÃO | prêmio por vencer a Belladona |
-| `coinPickupValue` | 2 POÇÃO | valor de cada moeda solta |
+| `gardenVictoryBonus` | 60 OURO | prêmio por zerar o jogo |
+| `bossVictoryBonus` | 80 OURO | prêmio por vencer a Belladona |
+| `coinPickupValue` | 1 OURO | valor de cada moeda solta |
 
 Reações entre poções (`src/game/chain.ts`): só o fogo acende outras poções. Isso deixa a água com um papel claro (apaga o fogo) e a terra com outro (estável).
 
@@ -69,9 +69,24 @@ Reações entre poções (`src/game/chain.ts`): só o fogo acende outras poçõe
 
 1. Mude **um** número em `config.ts`.
 2. Rode `npm run test` (os testes de equilíbrio avisam se algo ficou desbalanceado).
-3. Jogue 5 partidas e anote: tempo, vida restante, POÇÃO ganha.
+3. Jogue 5 partidas e anote: tempo, vida restante, OURO ganho.
 4. Compare com as metas acima.
 
 ## O que ainda não foi medido
 
 Estes números vêm de análise, **não de testes com jogadores**. O primeiro passo antes de mexer em mais coisas é jogar 5 a 10 partidas, anotar e ajustar.
+
+
+## Dano por elemento e vida dos personagens
+
+Fonte: `src/game/entities/damage.ts` (`PROFILES`). Dano-base de toda poção: 4. Fraqueza ×1,5 (6), neutro ×1 (4), resistência ×0,5 (2), imune 0.
+
+| Personagem | Vida | Fraco a | Resiste | Imune | Golpes (fogo / água / terra / éter) |
+|---|---|---|---|---|---|
+| Sapo | 6 | terra | água | – | 2 / 3 / 1 / 2 |
+| Fantasma | 6 | água | éter | terra | 2 / 1 / – / 3 |
+| Flor do mal | 10 | fogo | terra | água | 2 / – / 5 / 3 |
+| Belladona | 20 | fogo, éter | água, terra | – | 4 / 10 / 10 / 4 |
+| Mandrágora | 28 | fogo | terra, água | – | 5 / 14 / 14 / 7 |
+
+O teste `tests/damage.test.ts` garante: todo personagem tem fraqueza, nenhuma poção é a melhor contra todos e nenhum personagem exige mais de 14 golpes.

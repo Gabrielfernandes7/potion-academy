@@ -9,6 +9,6 @@ describe('diário da Roo', () => {
     expect(unlockedEntries([1, 3]).map(e => e.stage)).toEqual([0, 1, 3]);
   });
   it('há uma página para cada fase do jogo', () => {
-    expect(DIARY.map(e => e.stage)).toEqual([0, 1, 2, 3, 4]);
+    expect(DIARY.map(e => e.stage)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
   });
 });

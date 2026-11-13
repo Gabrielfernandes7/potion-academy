@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { currentStage, isStageUnlocked } from '../src/game/mapRules';
+import { currentStage, isStageUnlocked } from '../../src/game/stages/mapRules';
 
 const done = (...stages: number[]) => (s: number): boolean => stages.includes(s);
 

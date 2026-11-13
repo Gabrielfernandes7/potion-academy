@@ -3,10 +3,12 @@
 // sem uma migração, senão os jogadores perdem o progresso.
 
 import { BOMB_TYPES, BombId } from './config';
+import { STAGE_SCHEMA, migrateCompleted } from './game/stages/migration';
 
 const BANK_KEY = 'bombroo_bank';
 const OWNED_KEY = 'bombroo_owned';
 const STAGES_KEY = 'bombroo_stages_completed';
+const STAGES_SCHEMA_KEY = 'bombroo_stages_schema'; // versão da numeração das fases (game/stages/migration.ts)
 const START_BANK = 100;
 
 export const Storage = {
@@ -63,7 +65,16 @@ export function buyBombType(t: BombId): boolean {
   return true;
 }
 
-// Rastreamento de fases concluídas
+// Rastreamento de fases concluídas. A numeração das fases tem versão: se o jogo inseriu fases desde
+// a última vez, o progresso salvo é renumerado uma vez, ao carregar.
+(function migrateStageProgress(): void {
+  const version = Storage.get<number | null>(STAGES_SCHEMA_KEY, null);
+  if (version === STAGE_SCHEMA) return;
+  const list = Storage.get<number[]>(STAGES_KEY, []);
+  Storage.set(STAGES_KEY, migrateCompleted(list, version ?? 1));
+  Storage.set(STAGES_SCHEMA_KEY, STAGE_SCHEMA);
+})();
+
 export function isStageCompleted(stage: number): boolean {
   const completed = Storage.get<number[]>(STAGES_KEY, []);
   return completed.includes(stage);

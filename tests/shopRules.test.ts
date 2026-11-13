@@ -21,8 +21,8 @@ describe('cardView', () => {
 
 describe('buttonLabel / formatFuse', () => {
   it('textos do botão por estado', () => {
-    expect(buttonLabel('mega', cardView('mega', false, 100))).toBe('Comprar · 60 POÇÃO');
-    expect(buttonLabel('pierce', cardView('pierce', false, 50))).toBe('Faltam 40 POÇÃO');
+    expect(buttonLabel('mega', cardView('mega', false, 100))).toBe('Comprar · 60 OURO');
+    expect(buttonLabel('pierce', cardView('pierce', false, 50))).toBe('Faltam 40 OURO');
     expect(buttonLabel('remote', cardView('remote', true, 0))).toBe('Adquirida');
     expect(buttonLabel('normal', cardView('normal', true, 0))).toBe('Inicial');
   });

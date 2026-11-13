@@ -84,7 +84,7 @@ Novas decisões entram no fim.
 
 ## Falas curtas da Belladona, sem pausar o jogo
 - **Motivo:** a Belladona era só um alvo que lança poções. Uma fala curta em cada habilidade, ao ser atingida e na derrota dá personalidade sem mudar a regra.
-- **Consequência:** a fala é uma legenda de 1,7 s acima dela, no máximo uma por vez (`game/bossLines.ts`). Não pausa, não bloqueia e não muda tempos de aviso nem de dano.
+- **Consequência:** a fala é uma legenda de 1,7 s acima dela, no máximo uma por vez (`game/entities/bosses/belladonna/lines.ts`). Não pausa, não bloqueia e não muda tempos de aviso nem de dano.
 - **Ficou de fora:** diálogos com janela, que interromperiam o ritmo do duelo.
 
 ## Uma música para cada parte do jogo (fim do sorteio)
@@ -99,7 +99,7 @@ Novas decisões entram no fim.
 
 ## Mapa: pergaminho com caminho e fases seladas
 - **Motivo:** o mapa era um castelo genérico, com rótulos sobrepostos, fases sempre abertas e só o jardim contava como vencido.
-- **Consequência:** `MapScene` desenha o Vale das Fórmulas, com o caminho entre os quatro lugares. Cada fase vencida (1 a 3 ao cruzar a porta ou vencer a Belladona; 4 na confissão) fica marcada e libera a seguinte (`game/mapRules.ts`). A Roo fica na fase à frente; Anselmo, no mosteiro. Quem tinha só o jardim vencido (progresso antigo) tem todas as fases abertas.
+- **Consequência:** `MapScene` desenha o Vale das Fórmulas, com o caminho entre os quatro lugares. Cada fase vencida (1 a 3 ao cruzar a porta ou vencer a Belladona; 4 na confissão) fica marcada e libera a seguinte (`game/stages/mapRules.ts`). A Roo fica na fase à frente; Anselmo, no mosteiro. Quem tinha só o jardim vencido (progresso antigo) tem todas as fases abertas.
 
 ## Dano por elemento no chefe
 - **Motivo:** todas as poções tiravam 1 de vida da Belladona, então escolher o elemento não mudava o duelo.
@@ -129,4 +129,58 @@ Novas decisões entram no fim.
 ## História: a fome, Belladona com razão e a Roo nascida de uma bolha
 - **Motivo:** Belladona só queria "rasurar" e tinha uma filosofia rasa (furo de roteiro). A lição cristã pedia um conflito moral real.
 - **Consequência:** o pano de fundo passa a ser uma fome inspirada na de 1315–1322 (Vale fictício). Belladona perdeu o irmão e a mãe, tem razão no problema e erra na solução (poder para controlar). O mestre busca a pedra por medo de perder a Roo, que nasceu de uma bolha de sabão iridescente no Caldeirão (dádiva, não produto). Os ecos cristãos são a multiplicação dos pães, o samaritano e o rico e Lázaro, sem pregação. O texto corrido vive em `history.html` e o roteiro em `docs/12-historia.md`.
-- **Ficou de fora:** aplicar no jogo (cartas, `BELLADONA_CARDS`, `ENDING_CARDS`, Diário) e os companheiros. Em aberto: o gênero da Roo ("filho" na carta), os nomes das etapas da Obra como subtítulo, a bolha no último quadro.
+- **Ficou de fora:** aplicar no jogo (cartas, `BELLADONA_CARDS`, `ENDING_CARDS`, Diário) e os companheiros. Em aberto: os nomes das etapas da Obra como subtítulo, a bolha no último quadro.
+
+## Roo é masculino; cartas são o formato atual
+- **Motivo:** a carta de Anselmo já trata a Roo como "filho"; o gênero estava em aberto nos documentos.
+- **Consequência:** Roo é "o bruxo-canguru" e usa "ele" em todos os textos (docs, livro e cartas). Belladona continua feminina. Os cartões de história seguem como estão; no futuro podem ser trocados por um vídeo da história da Roo.
+- **Em aberto:** o gênero da Roo deixa de ser pergunta; restam os nomes das etapas da Obra e a bolha no último quadro.
+
+## Moeda vira OURO; moedas e baús rendem menos
+- **Motivo:** o saldo acumulava sem ter o que comprar (só 3 poções, uma vez cada). A POÇÃO como moeda confundia com a poção; a temática medieval pede "ouro".
+- **Consequência:** a moeda se chama OURO na interface e nos textos. Moeda solta vale 1 (era 2) e os baús pela metade (5 a 50). Preços da loja iguais. Falta um gasto que se repita (decisão em aberto).
+
+## Torre da Belladona: fase de chefe com fantasma (teste)
+- **Motivo:** cada capítulo tem 3 fases e um chefe. A Torre é o chefe do capítulo 1 e a Belladona já estava lá.
+- **Consequência:** a Torre tem só fantasmas como inimigos. O fantasma passou a ser imune só à Telúrica (antes não era imune a nada), o que vale também no salão dos ecos. Água (água benta), fogo e éter o derrotam com o dano normal. Não há fraqueza do fantasma ao éter: é um teste.
+- **Em aberto:** se o éter deve perder para o ar (teria de ser uma regra de dano extra por inimigo, que ainda não existe).
+
+## Capítulo da Torre: três fases e o duelo
+- **Motivo:** cada capítulo tem 3 fases e um chefe. O Duelo (Torre) passa a ter três fases de fantasmas (A Escadaria, O Corredor, A Antecâmara) e, na quarta, a Belladona.
+- **Consequência:** são 7 fases (lab, salão, três da Torre, duelo, jardim). As três da Torre usam a faixa de música do salão, porque há só seis faixas. O progresso salvo em `bombroo_stages_completed` tem números antigos (3 = duelo, 4 = jardim): quem já jogou pode ver fases marcadas como vencidas por engano. Ainda não há migração.
+- **Em aberto:** textos das três fases da Torre (feitos como rascunho), e se o jardim recebe um chefe.
+
+## Capítulos e posição na fase
+- **Motivo:** o jogador precisa saber em que capítulo está (A TORRE / DUELO, 1/4 a chefe) e que o RETORNO é o capítulo seguinte à Belladona.
+- **Consequência:** `StageDef` tem `chapter` e `part` (opcionais). A tela de entrada mostra "CAPÍTULO · 1/4" acima do lugar. O Retorno é um capítulo de uma fase só, por enquanto.
+
+## Mapa em dois níveis: vale e capítulo
+- **Motivo:** o jogador precisa ver o capítulo como um lugar e, dentro dele, as quatro fases (1/4 a 4/4).
+- **Consequência:** o mapa do vale mostra O Chamado, O Caminho e os dois capítulos, A Torre / Duelo (fases 3 a 6) e O Retorno (fases 7 a 10). Tocar num capítulo abre o mapa dele. Vencer o chefe (fase 6) libera a fase 7 (1/4 de O Retorno). O Retorno tem três fases de estrada (rascunho) e o jardim (4/4), com Anselmo no portão.
+- **Em aberto:** os textos e os inimigos das fases 7 a 9 são rascunho. O progresso salvo com números antigos ainda não tem migração.
+
+## Chefe do jardim: a Mandrágora, e uma classe-pai para os chefes
+- **Motivo:** o jardim (4/4 de O Retorno) ganha um chefe: a Mandrágora, feiticeira da terra e da água, vulnerável ao fogo. Belladona e Mandrágora precisavam dividir o que é comum.
+- **Consequência:** `game/entities/bosses/BossBase.ts` é a classe-pai (vida, fases, tempos que pausam com o jogo, avisos, explosões, dano, fúria, derrota, falas, cura). Cada chefe só define nome, tabela de dano, habilidades, falas e sprites (`BelladonnaController` = Belladona, `MandrakeController` = Mandrágora). Regras puras em `boss.ts` e `mandrake.ts`. `StageDef.boss` diz qual chefe a fase tem.
+- **Mandrágora (28 de vida):** fogo é a fraqueza; terra e água só resistem (ver a decisão de dano por elemento, abaixo; a cura pela água foi retirada). Habilidades: Raízes (linha e coluna de terra), Maré (anéis de água em sequência, com uma faixa seca), Cavar (some e ressurge onde você estava; fica EXPOSTA 2,4 s com dano extra), e na fase 2 o Grito (casas verdes são seguras) e Brotos (faz nascer flores do mal, até 3).
+- **Fluxo:** no jardim não há gemas; o portão abre quando ela cai (despedida em cartões), Anselmo espera no portão e o final segue como antes.
+- **Em aberto:** equilíbrio (vida, tempos, dano) só testado por script; sprite novo, vale revisar.
+
+## Dano por elemento: perfil por personagem e barra de vida em todos
+- **Motivo:** cada personagem tem um atributo principal, fraquezas, resistências e imunidades. Antes havia tabelas soltas (dano do chefe, `immune` dos inimigos) e inimigos comuns morriam de um golpe.
+- **Consequência:** `game/entities/profiles.ts` tem `PROFILES` e `game/entities/damage.ts` tem `damageTo()`;  (vida, atributo, `weak`, `resist`, `immune`) e `damageTo()`. Toda poção causa 4 de dano-base; fraqueza ×1,5, resistência ×0,5, imunidade 0. Sapo e fantasma (6 de vida) caem de um golpe na fraqueza e de dois no neutro; a flor tem 10. Inimigos feridos mostram barra de vida. Belladona 20, Mandrágora 28.
+- **Tabela:** sapo (água; fraco a terra, resiste água), fantasma (éter; fraco a água benta, resiste éter, imune a terra), flor do mal (terra; fraca a fogo, resiste terra, imune a água), Belladona (terra; fraca a fogo e éter, resiste água e terra), Mandrágora (terra; fraca a fogo, resiste terra e água).
+- **Mandrágora sem cura:** a água só resiste (planta também morre de excesso de água). Exposta (depois de Cavar), leva +2 de dano.
+- **Em aberto:** só testado por script; vale jogar para ver o ritmo das fases com inimigos que levam mais de um golpe.
+
+## Power-ups de alcance e de frasco são elementais
+- **Motivo:** o item de alcance (chama) fortalecia a poção que estivesse escolhida na hora de pegá-lo, mesmo a de água. O item dizia uma coisa e fazia outra.
+- **Consequência:** `+1 RAIO` e `+1 FRASCO` nascem já com uma poção, sorteada entre as que a Roo tem. A cor do item (aro, cruz de explosão ou líquido do frasco) mostra qual poção ele fortalece, e só ela recebe o bônus, não importa qual esteja escolhida. Com só o Fogo comprado, todos são de Fogo. Texturas `pickup_radius_<elemento>` e `pickup_flask_<elemento>`; regra do sorteio em `pickPowerupPotion` (`game/pickupRules.ts`).
+- **Em aberto:** se o sorteio entre as poções que a Roo tem deve ser uniforme (hoje é) ou favorecer a escolhida.
+
+## Capítulo 1 (O Vale) com a fase da Névoa; migração do progresso; lab
+- **Motivo:** o primeiro capítulo ganha mais uma fase, com névoa (só se vê o que está perto). O capítulo agrupa as fases como os outros. Para testar ideias sem mexer no jogo, nasce o `src/lab/`.
+- **Consequência:** `O VALE` (`stages/chapters/vale.ts`) tem 3 fases (O Chamado, O Caminho, A Névoa) e ainda não tem chefe. São 11 fases. A Névoa é a fase 3, então as seguintes subiram um número; o progresso salvo é renumerado uma vez (`bombroo_stages_schema`, `stages/migration.ts`). `PASSAGE_CARDS` e `DIARY` foram renumerados. O mapa do vale agora tem 3 lugares (um por capítulo) e o mapa de cada capítulo posiciona qualquer número de fases.
+- **Névoa:** `game/effects/Fog.ts` (camada escura com círculo claro em torno da Roo, em degraus de pixel art) e `fogRules.ts` (puro); a fase liga com `fog: { radius }`. Só atrapalha a visão: inimigos e regras são os mesmos.
+- **Lab:** `src/lab/` modular (`registry`, `LabArena`, experimentos). Ver `docs/15-lab.md`.
+- **Em aberto:** o chefe do capítulo 1; saves de antes da versão de 10 fases podem ficar com fases marcadas por engano.

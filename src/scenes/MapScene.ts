@@ -1,12 +1,15 @@
-// Mapa do Vale das Fórmulas: um pergaminho com o caminho da história (Caldeirão, Salão dos Ecos,
-// Torre de Belladona e Jardim do Mosteiro). Mostra o que já foi vencido, onde a Roo está e o que
-// ainda está selado. Cada lugar é uma fase (ver STAGES em config.ts).
+// Mapa do Vale das Fórmulas: um pergaminho com o caminho da história. No mapa do vale, cada
+// capítulo longo (A Torre / Duelo, O Retorno) é um lugar só; ao tocá-lo, abre o mapa do capítulo
+// com as fases dele. Mostra o que já foi vencido, onde a Roo está e o que ainda está selado.
+// Fases e capítulos: game/stages (STAGES, CHAPTERS, CHAPTER_LIST).
 import Phaser from 'phaser';
-import { CANVAS, LAST_STAGE, STAGES } from '../config';
+import { CANVAS } from '../config';
 import { readTheme } from '../ui/theme';
 import { isStageCompleted } from '../storage';
 import { setMenuVisible } from '../ui/menu';
-import { currentStage as nextStage, isStageUnlocked as unlocked } from '../game/mapRules';
+import { currentStage as nextStage, isStageUnlocked as unlocked } from '../game/stages/mapRules';
+import { CHAPTERS, CHAPTER_LIST, LAST_STAGE, STAGES } from '../game/stages/index';
+import { ChapterDef } from '../game/stages/types';
 
 const isUnlocked = (stage: number): boolean => unlocked(stage, isStageCompleted);
 
@@ -19,22 +22,29 @@ const PARCH = 0xe8d6a8;
 const PARCH_DARK = 0xcfb782;
 const SEAL = 0x7a2f22;
 
-interface Spot { stage: number; x: number; y: number }
+// Um lugar do mapa: uma fase, ou um capítulo inteiro (no mapa do vale).
+interface Spot { stage: number; x: number; y: number; chapter?: ChapterDef }
 
-// Posição dos lugares, em fração do canvas: o caminho sobe do Caldeirão ao mosteiro, na serra.
-const SPOTS: ReadonlyArray<{ fx: number; fy: number }> = [
-  { fx: 0.17, fy: 0.66 },
-  { fx: 0.40, fy: 0.46 },
-  { fx: 0.59, fy: 0.65 },
-  { fx: 0.82, fy: 0.45 },
-];
+// Posição de cada lugar, em fração do canvas: zigue-zague da esquerda para a direita, qualquer que
+// seja a quantidade de lugares (o mapa do vale tem um por capítulo; o de um capítulo, um por fase).
+function zigzag(i: number, n: number): { fx: number; fy: number } {
+  const fx = n === 1 ? 0.5 : 0.14 + (i * 0.72) / (n - 1);
+  return { fx, fy: i % 2 === 0 ? 0.64 : 0.42 };
+}
+
+const chapterById = (id: string): ChapterDef | undefined => CHAPTERS.find(c => c.id === id);
 
 export class MapScene extends Phaser.Scene {
   spots: Spot[] = [];
+  private chapter: ChapterDef | null = null; // null = mapa do vale
   private toast?: Phaser.GameObjects.Text;
 
   constructor() {
     super('Map');
+  }
+
+  init(data?: { chapter?: string }): void {
+    this.chapter = data?.chapter ? chapterById(data.chapter) ?? null : null;
   }
 
   create(): void {
@@ -42,26 +52,70 @@ export class MapScene extends Phaser.Scene {
     const h = CANVAS.height;
     const theme = readTheme();
     this.cameras.main.setBackgroundColor('#2a1d10');
-    this.spots = SPOTS.map((p, i) => ({ stage: i + 1, x: p.fx * w, y: p.fy * h }));
+    this.spots = this.buildSpots();
 
     const g = this.add.graphics().setDepth(0);
     this.drawParchment(g, w, h);
     this.drawScenery(g, w, h);
     this.drawPaths(g);
 
-    // Título em uma faixa de pergaminho
-    this.add.text(w / 2, h * 0.085, 'VALE DAS FÓRMULAS', {
+    const title = this.chapter ? this.chapter.name : 'VALE DAS FÓRMULAS';
+    const sub = this.chapter
+      ? `${this.chapter.place}: quatro fases, e a última é o chefe ou o desfecho`
+      : 'A jornada de Roo, do Caldeirão ao Mosteiro de São Tomás';
+    this.add.text(w / 2, h * 0.085, title, {
       fontFamily: theme.fontDisplay, fontSize: '30px', color: INK_CSS, fontStyle: '700',
     }).setOrigin(0.5).setDepth(10);
-    this.add.text(w / 2, h * 0.085 + 28, 'A jornada de Roo, do Caldeirão ao Mosteiro de São Tomás', {
+    this.add.text(w / 2, h * 0.085 + 28, sub, {
       fontFamily: theme.fontBody, fontSize: '13px', color: INK_SOFT_CSS, fontStyle: 'italic',
     }).setOrigin(0.5).setDepth(10);
 
     const now = nextStage(isStageCompleted);
-    this.spots.forEach(spot => this.buildSpot(spot, spot.stage === now, theme));
+    this.spots.forEach(spot => this.buildSpot(spot, this.containsStage(spot, now), theme));
     this.buildTokens(now);
     this.buildFooter(w, h, theme);
-    this.bindKeys(now);
+    this.bindKeys();
+  }
+
+  // ---------- lugares e capítulos ----------
+
+  // Lugares da tela atual: no mapa do vale, duas fases e dois capítulos; num capítulo, as fases dele.
+  private buildSpots(): Spot[] {
+    const at = (i: number, n: number): { x: number; y: number } => {
+      const p = zigzag(i, n);
+      return { x: p.fx * CANVAS.width, y: p.fy * CANVAS.height };
+    };
+    if (this.chapter) {
+      const c = this.chapter;
+      const n = c.last - c.first + 1;
+      return Array.from({ length: n }, (_, i) => ({ stage: c.first + i, ...at(i, n) }));
+    }
+    // vale: um lugar por capítulo agrupado e um por fase dos capítulos soltos
+    const items: Array<Omit<Spot, 'x' | 'y'>> = [];
+    let stage = 1;
+    for (const spec of CHAPTER_LIST) {
+      const chapter = spec.grouped ? CHAPTERS.find(c => c.id === spec.id) : undefined;
+      if (chapter) items.push({ stage: chapter.first, chapter });
+      else spec.stages.forEach((_, i) => items.push({ stage: stage + i }));
+      stage += spec.stages.length;
+    }
+    return items.map((it, i) => ({ ...it, ...at(i, items.length) }));
+  }
+
+  // Um lugar contém a fase? (um capítulo contém as fases dele)
+  private containsStage(spot: Spot, stage: number): boolean {
+    if (spot.chapter) return stage >= spot.chapter.first && stage <= spot.chapter.last;
+    return spot.stage === stage;
+  }
+
+  private spotDone(spot: Spot): boolean {
+    if (!spot.chapter) return isStageCompleted(spot.stage);
+    for (let s = spot.chapter.first; s <= spot.chapter.last; s++) if (!isStageCompleted(s)) return false;
+    return true;
+  }
+
+  private spotOpen(spot: Spot): boolean {
+    return isUnlocked(spot.stage);
   }
 
   // ---------- desenho ----------
@@ -127,7 +181,7 @@ export class MapScene extends Phaser.Scene {
   private drawPaths(g: Phaser.GameObjects.Graphics): void {
     for (let i = 0; i < this.spots.length - 1; i++) {
       const a = this.spots[i], b = this.spots[i + 1];
-      const done = isStageCompleted(a.stage);
+      const done = this.spotDone(a);
       const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
       const nx = -(b.y - a.y), ny = b.x - a.x;
       const len = Math.hypot(nx, ny) || 1;
@@ -138,20 +192,24 @@ export class MapScene extends Phaser.Scene {
       );
       const pts = curve.getSpacedPoints(Math.max(8, Math.floor(curve.getLength() / 12)));
       g.fillStyle(done ? SEAL : INK, done ? 0.9 : 0.4);
-      pts.forEach((p, k) => {
-        if (k >= 0 && Phaser.Math.Distance.Between(p.x, p.y, a.x, a.y) > 34 && Phaser.Math.Distance.Between(p.x, p.y, b.x, b.y) > 34) {
+      pts.forEach((p) => {
+        if (Phaser.Math.Distance.Between(p.x, p.y, a.x, a.y) > 34 && Phaser.Math.Distance.Between(p.x, p.y, b.x, b.y) > 34) {
           g.fillCircle(p.x, p.y, done ? 2.8 : 2.2);
         }
       });
     }
   }
 
-  // ---------- lugares ----------
+  // ---------- lugares (desenho) ----------
 
   private buildSpot(spot: Spot, isCurrent: boolean, theme: ReturnType<typeof readTheme>): void {
+    const c = spot.chapter;
     const def = STAGES[spot.stage - 1];
-    const done = isStageCompleted(spot.stage);
-    const open = isUnlocked(spot.stage);
+    const done = this.spotDone(spot);
+    const open = this.spotOpen(spot);
+    const kind = c ? (c.id === 'torre' ? 'boss' : 'garden') : def.kind;
+    const name = c ? c.name : def.name;
+    const place = c ? c.place : def.place;
     const { x, y } = spot;
     const R = 34;
     const dim = open ? 1 : 0.62;
@@ -161,20 +219,21 @@ export class MapScene extends Phaser.Scene {
     g.fillStyle(PARCH, 1).fillCircle(x, y, R);
     g.lineStyle(3, INK, 1).strokeCircle(x, y, R);
     g.lineStyle(1, INK, 0.7).strokeCircle(x, y, R - 5);
-    this.drawIcon(g, def.kind, x, y);
+    this.drawIcon(g, kind, x, y);
 
-    // número em um selo de cera
+    // número da fase, ou faixa de fases do capítulo, em um selo de cera
+    const badge = c ? `${c.first}–${c.last}` : String(spot.stage);
     g.fillStyle(SEAL, 1).fillCircle(x - R + 4, y - R + 4, 11);
     g.lineStyle(1.5, INK, 0.9).strokeCircle(x - R + 4, y - R + 4, 11);
-    this.add.text(x - R + 4, y - R + 4, String(spot.stage), {
-      fontFamily: theme.fontDisplay, fontSize: '14px', color: '#f5e6c0', fontStyle: '700',
+    this.add.text(x - R + 4, y - R + 4, badge, {
+      fontFamily: theme.fontDisplay, fontSize: c ? '9px' : '14px', color: '#f5e6c0', fontStyle: '700',
     }).setOrigin(0.5).setDepth(6);
 
     // nome e lugar
-    const label = this.add.text(x, y + R + 10, def.name, {
+    const label = this.add.text(x, y + R + 10, name, {
       fontFamily: theme.fontDisplay, fontSize: '14px', color: INK_CSS, fontStyle: '700',
     }).setOrigin(0.5, 0).setDepth(6).setAlpha(dim);
-    this.add.text(x, y + R + 28, def.place, {
+    this.add.text(x, y + R + 28, place, {
       fontFamily: theme.fontBody, fontSize: '12px', color: INK_SOFT_CSS, fontStyle: 'italic',
     }).setOrigin(0.5, 0).setDepth(6).setAlpha(dim);
 
@@ -201,7 +260,7 @@ export class MapScene extends Phaser.Scene {
     const hit = this.add.circle(x, y, R + 8, 0x000000, 0.001).setDepth(8).setInteractive({ useHandCursor: open });
     hit.on('pointerover', () => label.setColor(GOLD_CSS));
     hit.on('pointerout', () => label.setColor(INK_CSS));
-    hit.on('pointerdown', () => this.tryLoad(spot.stage));
+    hit.on('pointerdown', () => this.activate(spot));
   }
 
   // Ícone de cada lugar, desenhado em formas simples.
@@ -247,24 +306,25 @@ export class MapScene extends Phaser.Scene {
 
   // Roo na fase atual e frei Anselmo no mosteiro.
   private buildTokens(now: number): void {
-    const cur = this.spots[now - 1];
-    if (this.textures.exists('roo_down_0')) {
-      const roo = this.add.image(cur.x + 38, cur.y + 6, 'roo_down_0').setScale(0.9).setOrigin(0.5, 0.85).setDepth(9);
+    const cur = this.spots.find(s => this.containsStage(s, now));
+    if (cur && this.textures.exists('roo_down_0')) {
+      const roo = this.add.image(cur.x - 38, cur.y + 6, 'roo_down_0').setScale(0.9).setOrigin(0.5, 0.85).setDepth(9);
       this.tweens.add({ targets: roo, y: roo.y - 5, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     }
-    const last = this.spots[LAST_STAGE - 1];
-    if (this.textures.exists('anselmo_front_0') && now !== LAST_STAGE) {
+    const last = this.spots.find(s => this.containsStage(s, LAST_STAGE));
+    if (last && this.textures.exists('anselmo_front_0') && now !== LAST_STAGE) {
       this.add.image(last.x + 38, last.y + 6, 'anselmo_front_0').setScale(0.9).setOrigin(0.5, 0.85).setDepth(9);
     }
   }
 
   private buildFooter(w: number, h: number, theme: ReturnType<typeof readTheme>): void {
+    const back = this.chapter ? 'VOLTAR AO VALE' : 'VOLTAR AO MENU';
     const btn = this.add.rectangle(w * 0.5, h - 52, 180, 38, 0x3a2814, 0.92)
       .setStrokeStyle(2, 0x9a6416, 1).setInteractive({ useHandCursor: true }).setDepth(9);
-    const label = this.add.text(w * 0.5, h - 52, 'VOLTAR AO MENU', {
+    const label = this.add.text(w * 0.5, h - 52, back, {
       fontFamily: theme.fontBody, fontSize: '14px', color: '#f1e6c9', fontStyle: '700',
     }).setOrigin(0.5).setDepth(10);
-    btn.on('pointerdown', () => this.backToMenu());
+    btn.on('pointerdown', () => (this.chapter ? this.openWorld() : this.backToMenu()));
     btn.on('pointerover', () => label.setColor('#f0c674'));
     btn.on('pointerout', () => label.setColor('#f1e6c9'));
 
@@ -278,15 +338,16 @@ export class MapScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(20).setAlpha(0);
   }
 
-  private bindKeys(now: number): void {
+  private bindKeys(): void {
     // guardados para remover ao sair: senão cada visita soma um atalho a mais
+    const now = nextStage(isStageCompleted);
     const keys: Array<[string, () => void]> = [
-      ['keydown-ESC', () => this.backToMenu()],
-      ['keydown-ENTER', () => this.tryLoad(now)],
-      ['keydown-ONE', () => this.tryLoad(1)],
-      ['keydown-TWO', () => this.tryLoad(2)],
-      ['keydown-THREE', () => this.tryLoad(3)],
-      ['keydown-FOUR', () => this.tryLoad(4)],
+      ['keydown-ESC', () => (this.chapter ? this.openWorld() : this.backToMenu())],
+      ['keydown-ENTER', () => this.enterCurrent(now)],
+      ['keydown-ONE', () => this.activateIndex(0)],
+      ['keydown-TWO', () => this.activateIndex(1)],
+      ['keydown-THREE', () => this.activateIndex(2)],
+      ['keydown-FOUR', () => this.activateIndex(3)],
     ];
     for (const [event, fn] of keys) this.input.keyboard?.on(event, fn);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -295,6 +356,43 @@ export class MapScene extends Phaser.Scene {
   }
 
   // ---------- navegação ----------
+
+  private activateIndex(i: number): void {
+    const spot = this.spots[i];
+    if (spot) this.activate(spot);
+  }
+
+  // Enter: entra na fase da Roo (no mapa do vale, abre o capítulo dela).
+  private enterCurrent(now: number): void {
+    if (this.chapter) {
+      if (this.containsStage(this.spotOf(now), now)) this.tryLoad(now);
+      return;
+    }
+    const spot = this.spotOf(now);
+    if (spot.chapter) this.openChapter(spot.chapter.id);
+    else this.tryLoad(now);
+  }
+
+  private spotOf(stage: number): Spot {
+    return this.spots.find(s => this.containsStage(s, stage)) ?? this.spots[0];
+  }
+
+  private activate(spot: Spot): void {
+    if (spot.chapter) {
+      if (this.spotOpen(spot)) this.openChapter(spot.chapter.id);
+      else this.showToast(`Selado. Vença ${STAGES[spot.stage - 2]?.name ?? ''} primeiro.`);
+      return;
+    }
+    this.tryLoad(spot.stage);
+  }
+
+  private openChapter(id: string): void {
+    this.scene.restart({ chapter: id });
+  }
+
+  private openWorld(): void {
+    this.scene.restart({});
+  }
 
   private tryLoad(stage: number): void {
     if (!isUnlocked(stage)) {

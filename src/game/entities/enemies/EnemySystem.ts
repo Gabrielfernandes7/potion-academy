@@ -1,25 +1,16 @@
 // Inimigos: sapo, fantasma e flor do mal. Nascem no começo da fase (e conforme os caixotes quebram),
 // andam em passos animados, morrem nas explosões (menos quando imunes) e machucam a Roo.
-// As regras puras (contagem, casa de nascimento, direções) estão em game/enemyRules.ts.
+// As regras puras (contagem, casa de nascimento, direções) estão em game/entities/enemies/enemyRules.ts.
 // Dano usa a posição visual do sprite; gridX/gridY mudam quando o passo COMEÇA.
 import Phaser from 'phaser';
-import { CONFIG, ElementId, EMPTY, ENEMY_TYPES, EnemyKind, WALL, DIRS, isImmune } from '../config';
+import { CONFIG, ElementId, EMPTY, WALL, DIRS } from '../../../config';
+import { damageTo } from '../damage';
 import { canSpawnEnemyAt, countKind, enemyMoveOptions } from './enemyRules';
-import type { Enemy } from './types';
-import type { MainScene } from '../scenes/MainScene';
-
-// Efeito de quem é atingido, por elemento: o que sobra depois da explosão.
-// fogo: brasas e fumaça subindo; água: respingos que caem; terra: lascas de pedra e poeira;
-// éter: faíscas que giram no ar.
-const HIT_FX: Record<ElementId, {
-  texture: string; speed: { min: number; max: number }; angle: { min: number; max: number };
-  gravity: number; life: { min: number; max: number }; size: number; count: number; tint: number[]; blend: string;
-}> = {
-  fire: { texture: 'menu_spark', speed: { min: 40, max: 110 }, angle: { min: -120, max: -60 }, gravity: -60, life: { min: 500, max: 900 }, size: 1.8, count: 9, tint: [0xff7043, 0xffb74d, 0xffd54f], blend: 'ADD' },
-  water: { texture: 'menu_bubble', speed: { min: 60, max: 140 }, angle: { min: 200, max: 340 }, gravity: 260, life: { min: 450, max: 700 }, size: 1.1, count: 10, tint: [0x4fc3f7, 0xb3e5fc, 0xffffff], blend: 'NORMAL' },
-  earth: { texture: 'menu_spark', speed: { min: 30, max: 100 }, angle: { min: -170, max: -10 }, gravity: 380, life: { min: 400, max: 650 }, size: 1.8, count: 8, tint: [0x8d6e63, 0x6d4c41, 0xa1887f], blend: 'NORMAL' },
-  air: { texture: 'menu_spark', speed: { min: 30, max: 90 }, angle: { min: 0, max: 360 }, gravity: -30, life: { min: 500, max: 900 }, size: 1.5, count: 12, tint: [0xffffff, 0xe0d8ff, 0xb3e5fc], blend: 'ADD' },
-};
+import type { Enemy } from '../../types';
+import { hitFx } from '../hitEffects';
+import type { MainScene } from '../../../scenes/MainScene';
+import { ENEMY_TYPES, EnemyKind } from './defs';
+import { PROFILES } from '../profiles';
 
 // Movimento de cada inimigo: pulo vertical e horizontal do passo, e o balanço parado (altura e velocidade).
 const MOTION: Record<EnemyKind, { hopV: number; hopH: number; bob: number; bobMs: number }> = {
@@ -84,6 +75,7 @@ export class EnemySystem {
         kind, gridX: x, gridY: y, sprite, moveTimer: def.moveInterval, alive: true,
         moveT: def.stepMs, fromX: sprite.x, fromY: sprite.y, hopY: false, phase: Math.random() * 1000,
         lashMs: CONFIG.flowerLashCycleMs * (0.5 + Math.random() * 0.5), fxCooldown: 0,
+        hp: PROFILES[kind].maxHp, maxHp: PROFILES[kind].maxHp, bar: s.add.graphics().setDepth(12).setVisible(false),
       });
       return;
     }
@@ -95,41 +87,45 @@ export class EnemySystem {
     const px = enemy.sprite.x;
     const py = enemy.sprite.y;
     enemy.sprite.destroy();
+    enemy.bar.destroy();
     this.enemies = this.enemies.filter(e => e !== enemy);
-    this.hitFx(px, py, element);
+    hitFx(this.scene, px, py, element);
     this.scene.pickupSystem.spawnPickupSprite(enemy.gridX, enemy.gridY, 'coin');
     this.scene.cameras.main.shake(60, 0.003);
   }
 
-  // Uma explosão alcançou o inimigo: mata, a menos que ele seja imune ao elemento (flor do mal e a água).
+  // Uma explosão alcançou o inimigo: tira vida conforme a tabela de dano (game/entities/damage.ts). Fraqueza
+  // tira mais, resistência menos, imunidade nada (flor do mal e a água, fantasma e a terra).
   hitEnemy(enemy: Enemy, element: ElementId): void {
-    if (!isImmune(enemy.kind, element)) {
+    if (enemy.fxCooldown > 0) return; // a explosão dura 380 ms; sem isso o golpe se repetiria a cada quadro
+    enemy.fxCooldown = 700;
+    const damage = damageTo(PROFILES[enemy.kind], element);
+    if (damage === 0) {
+      hitFx(this.scene, enemy.sprite.x, enemy.sprite.y - 6, element);
+      this.scene.floatingText(enemy.gridX, enemy.gridY, 'IMUNE', '#c5e1a5');
+      this.scene.tweens.add({ targets: enemy.sprite, alpha: 0.55, duration: 90, yoyo: true, repeat: 1 });
+      return;
+    }
+    enemy.hp -= damage;
+    if (enemy.hp <= 0) {
       this.killEnemy(enemy, element);
       return;
     }
-    if (enemy.fxCooldown > 0) return;
-    enemy.fxCooldown = 700; // a explosão dura 380 ms; sem isso o aviso se repetiria a cada quadro
-    this.hitFx(enemy.sprite.x, enemy.sprite.y - 6, element);
-    this.scene.floatingText(enemy.gridX, enemy.gridY, 'IMUNE', '#c5e1a5');
-    this.scene.tweens.add({ targets: enemy.sprite, alpha: 0.55, duration: 90, yoyo: true, repeat: 1 });
+    hitFx(this.scene, enemy.sprite.x, enemy.sprite.y - 6, element);
+    this.scene.floatingText(enemy.gridX, enemy.gridY, `-${damage}`, '#ff80ab');
+    this.scene.tweens.add({ targets: enemy.sprite, alpha: 0.45, duration: 90, yoyo: true, repeat: 1 });
   }
 
-  // Efeito de ser atingido por um elemento (inimigo ou Roo): partículas próprias do elemento.
-  hitFx(px: number, py: number, element: ElementId): void {
-    const c = HIT_FX[element];
-    const emitter = this.scene.add.particles(px, py, c.texture, {
-      speed: c.speed,
-      angle: c.angle,
-      gravityY: c.gravity,
-      lifespan: c.life,
-      scale: { start: c.size, end: 0 },
-      alpha: { start: 1, end: 0 },
-      tint: c.tint,
-      blendMode: c.blend,
-      emitting: false,
-    }).setDepth(10);
-    emitter.explode(c.count);
-    this.scene.time.delayedCall(1000, () => emitter.destroy());
+  // Barra de vida sobre o inimigo ferido (some enquanto ele está inteiro).
+  drawBar(enemy: Enemy): void {
+    const bar = enemy.bar;
+    if (enemy.hp >= enemy.maxHp) { bar.setVisible(false); return; }
+    const w = 24;
+    const x = enemy.sprite.x - w / 2;
+    const y = enemy.sprite.y - CONFIG.tile * (ENEMY_TYPES[enemy.kind].rooted ? 0.95 : 0.6);
+    bar.setVisible(true).clear();
+    bar.fillStyle(0x17110d, 0.9).fillRect(x - 1, y - 1, w + 2, 5);
+    bar.fillStyle(0x66bb6a, 1).fillRect(x, y, Math.max(0, (w * enemy.hp) / enemy.maxHp), 3);
   }
 
   moveEnemy(enemy: Enemy): void {
@@ -244,6 +240,7 @@ export class EnemySystem {
         if (!enemy.alive) continue;
       }
       this.animateEnemy(enemy, delta);
+      this.drawBar(enemy);
       if (def.rooted) {
         this.updateFlower(enemy, delta);
         continue;

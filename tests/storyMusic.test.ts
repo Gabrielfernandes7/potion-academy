@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { STAGES, LAST_STAGE } from '../src/config';
 import { TRACKS } from '../src/audio/tracks';
 import { PASSAGE_CARDS, BELLADONA_CARDS, ENDING_CARDS } from '../src/game/story';
+import { STAGES, LAST_STAGE } from '../src/game/stages/index';
 
 describe('trilha por fase', () => {
-  it('cada fase tem uma faixa própria (nenhuma repetida entre as quatro)', () => {
-    const tracks = STAGES.map(s => s.track);
+  it('cada fase fora da Torre tem uma faixa própria; as três da Torre dividem a faixa do salão', () => {
+    const tracks = [0, 1, 6, 7].map(i => STAGES[i].track);
+    for (const i of [2, 3, 4, 5]) expect(STAGES[i].track).toBe(STAGES[1].track);
     expect(new Set(tracks).size).toBe(tracks.length);
   });
 
@@ -22,7 +23,7 @@ describe('trilha por fase', () => {
 describe('passagens entre fases', () => {
   it('há passagem depois de cada fase que tem porta, exceto a última', () => {
     for (let s = 1; s < LAST_STAGE; s++) {
-      if (s === 3) continue; // o chefe tem a própria despedida (BELLADONA_CARDS)
+      if (s === 7) continue; // o chefe tem a própria despedida (BELLADONA_CARDS)
       expect(PASSAGE_CARDS[s], `fase ${s}`).toBeDefined();
     }
   });

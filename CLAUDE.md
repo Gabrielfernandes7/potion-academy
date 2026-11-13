@@ -52,16 +52,21 @@ src/
   game/rewards.ts          # tabela de drop (rollReward), texturas e brilho dos itens
   game/hudState.ts         # contrato de eventos MainScene <-> HudScene, timerView
   game/shopRules.ts        # estados dos cartões da loja (puro, testável)
-  game/mapRules.ts         # fases liberadas e fase atual no mapa (puro, testável)
-  game/story.ts            # textos da história (cartões da confissão)
-  game/boss.ts             # regras puras do chefe: habilidades, áreas, alvos (testável)
-  game/BossController.ts   # Belladona: movimento, ataques com aviso, dano, fúria, derrota
+  game/story.ts + diary.ts # textos da história (cartões, passagens) e Diário da Roo
   game/balance.ts          # regra de equilíbrio das poções (testável)
   game/upgrades.ts         # power-ups por poção: alcance e frascos valem só para a poção escolhida (puro)
   game/blast.ts            # alcance de uma explosão, como gerador (puro, testável)
-  game/BombSystem.ts + PickupSystem.ts + EnemySystem.ts + SleepSystem.ts  # sistemas tirados da MainScene (regras puras em *Rules.ts)
-  game/events.ts           # eventos globais (TEXTURES_READY)
-  game/launcher.ts         # cria o Phaser.Game ao abrir a página; navegação menu/partida
+  game/BombSystem.ts + PickupSystem.ts + SleepSystem.ts  # sistemas tirados da MainScene (regras puras em *Rules.ts)
+  game/events.ts + launcher.ts  # eventos globais; cria o Phaser.Game e navega menu/partida
+  game/entities/           # personagens que sofrem dano: inimigos e chefes (ver docs/14-estrutura-do-codigo.md)
+  game/entities/damage.ts  # regra pura de dano por elemento (multiplicadores, damageTo, hitsToKill)
+  game/entities/profiles.ts # tabela de personagens: vida, atributo, fraqueza, resistência, imunidade
+  game/entities/hitEffects.ts # efeito visual de acerto por elemento
+  game/entities/enemies/   # defs.ts (dados), enemyRules.ts (puro), EnemySystem.ts (Phaser)
+  game/entities/bosses/    # BossBase.ts (classe-pai), common.ts (puro), belladonna/ e mandrake/ (Controller, rules, lines)
+  game/effects/            # efeitos de tela com regra pura própria: Fog.ts (névoa) e fogRules.ts
+  lab/                     # só dev: experimentos de ideias (/lab.html); ver docs/15-lab.md
+  game/stages/             # fases e capítulos: index.ts (STAGES, CHAPTERS), types.ts, chests.ts, mapRules.ts, chapters/<capítulo>.ts
   ui/dom.ts                # helpers de DOM (byId, setShown)
   ui/theme.ts              # lê cores/fontes das variáveis CSS para o canvas
   ui/fonts.ts              # espera as fontes antes de iniciar a partida
@@ -102,7 +107,7 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 
 ## Key Technical Patterns
 
-**Fases e reinício**: a `MainScene` recebe `{ stage: 1 }` ou `{ stage: 2, carry }`. **Sempre passe os dados explicitamente** ao reiniciar (`scene.restart({ stage: 1 })`): sem eles o Phaser reaproveita os do reinício anterior e voltaria à fase 2. Na fase 2 não há porta, gemas nem inimigos comuns; `BossController` cuida da Belladona, que só perde vida por `onExplosion()` de poções da jogadora. Todos os tempos do chefe usam o `delta` do jogo (não timers do navegador), então pausam junto.
+**Fases e reinício**: a `MainScene` recebe `{ stage: 1 }` ou `{ stage: 2, carry }`. **Sempre passe os dados explicitamente** ao reiniciar (`scene.restart({ stage: 1 })`): sem eles o Phaser reaproveita os do reinício anterior e voltaria à fase 2. Na fase 2 não há porta, gemas nem inimigos comuns; `BelladonnaController` cuida da Belladona, que só perde vida por `onExplosion()` de poções da jogadora. Todos os tempos do chefe usam o `delta` do jogo (não timers do navegador), então pausam junto.
 
 **Janela de ajuda**: com `isHelpOpen()`, `MainScene.update()` congela tudo (tweens, animações, entrada) e zera as teclas, para nada acontecer ao fechar.
 

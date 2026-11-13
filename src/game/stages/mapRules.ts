@@ -1,5 +1,5 @@
+import { LAST_STAGE } from './index';
 // Regras do mapa (puras, testáveis): quais fases estão liberadas e qual é a próxima da Roo.
-import { LAST_STAGE } from '../config';
 
 type Completed = (stage: number) => boolean;
 

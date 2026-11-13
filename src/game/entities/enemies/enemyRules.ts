@@ -1,5 +1,6 @@
-// Regras puras dos inimigos (sem Phaser, testáveis). Ver game/EnemySystem.ts.
-import { DIRS, EMPTY, EnemyKind } from '../config';
+// Regras puras dos inimigos (sem Phaser, testáveis). Ver game/entities/enemies/EnemySystem.ts.
+import { DIRS, EMPTY } from '../../../config';
+import { EnemyKind } from './defs';
 
 // Quantos inimigos de um tipo existem.
 export function countKind(enemies: ReadonlyArray<{ kind: EnemyKind }>, kind: EnemyKind): number {

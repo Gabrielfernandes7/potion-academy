@@ -16,7 +16,7 @@ describe('storage (chaves de persistência)', () => {
     vi.resetModules();
   });
 
-  it('começa com 100 de POÇÃO e só a poção de fogo', async () => {
+  it('começa com 100 de OURO e só a poção de fogo', async () => {
     installLocalStorage();
     const s = await import('../src/storage');
     expect(s.Bank.get()).toBe(100);
@@ -45,5 +45,25 @@ describe('storage (chaves de persistência)', () => {
     const s = await import('../src/storage');
     expect(s.Bank.get()).toBe(250);
     expect(s.hasBombType('remote')).toBe(true);
+  });
+});
+
+describe('storage: migração do progresso das fases', () => {
+  beforeEach(() => { vi.resetModules(); });
+
+  it('renumera o progresso antigo uma vez e grava a versão', async () => {
+    installLocalStorage({ bombroo_stages_completed: JSON.stringify([1, 2, 3]) });
+    const s = await import('../src/storage');
+    expect(s.isStageCompleted(1)).toBe(true);
+    expect(s.isStageCompleted(3)).toBe(false); // a Névoa (nova) ainda não foi vencida
+    expect(s.isStageCompleted(4)).toBe(true);  // a antiga 3 agora é a 4
+    expect(JSON.parse(localStorage.getItem('bombroo_stages_schema')!)).toBe(2);
+  });
+
+  it('com a versão atual não renumera de novo', async () => {
+    installLocalStorage({ bombroo_stages_completed: JSON.stringify([1, 2, 3]), bombroo_stages_schema: '2' });
+    const s = await import('../src/storage');
+    expect(s.isStageCompleted(3)).toBe(true);
+    expect(s.isStageCompleted(4)).toBe(false);
   });
 });

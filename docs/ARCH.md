@@ -48,7 +48,7 @@ Navegação em `game/launcher.ts`: `startGame()` (sempre com `{ stage: 1 }` expl
 
 | Chave | Conteúdo |
 |---|---|
-| `bombroo_bank` | POÇÃO (moedas) |
+| `bombroo_bank` | OURO (moedas) |
 | `bombroo_owned` | tipos de bomba comprados |
 | `bombroo_audio` | preferência de música e efeitos |
 | `bombroo_track` | (antigo) faixa escolhida na sala de música; não é mais lida |
@@ -63,22 +63,22 @@ A lógica de regra fica em arquivos sem dependência do Phaser, para os testes e
 | Arquivo | Regra |
 |---|---|
 | `config.ts` | todos os números: fases, inimigos, bombas, chefe, baús |
-| `game/boss.ts` | habilidades, áreas de ataque e alvos do chefe |
+| `game/entities/bosses/belladonna/rules.ts` | habilidades, áreas de ataque e alvos do chefe |
 | `game/chain.ts` | reação entre poções (fogo acende, água apaga, terra é estável) |
 | `game/balance.ts` | regra de equilíbrio das poções (nenhuma domina outra) |
 | `game/rewards.ts` | tabela de drop e sorteio de baús |
 | `game/shopRules.ts` | estados dos cartões da loja |
-| `game/bossLines.ts` | textos e sorteio das falas da Belladona |
+| `game/entities/bosses/belladonna/lines.ts` | textos e sorteio das falas da Belladona |
 | `textures/rooGeometry.ts` | constantes de tamanho do sprite da Roo |
 | `audio/tracks.ts` | faixas, gerador de compassos e sementes (`mulberry32`) |
 
-Quem usa as regras: `MainScene` e `BossController` (que são o lado Phaser) chamam essas funções e aplicam o resultado na tela.
+Quem usa as regras: `MainScene` e `BelladonnaController` (que são o lado Phaser) chamam essas funções e aplicam o resultado na tela.
 
 ## Módulos principais
 
 - **`game/BombSystem.ts`:** bombas, explosões e empurrão. A `MainScene` cria o sistema em `create()` e chama `bombSystem.placeBomb()`, `update(delta)` e as outras ações. O chefe chama `bombSystem.spawnExplosion` para as poções dele.
-- **`game/PickupSystem.ts`, `game/EnemySystem.ts`, `game/SleepSystem.ts`:** itens do chão, inimigos e sono da Roo, criados em `MainScene.create()` como o `BombSystem` (`pickupSystem`, `enemySystem`, `sleepSystem`). As regras puras ficam em `pickupRules.ts`, `enemyRules.ts` e `sleepRules.ts` (testes em `tests/systemRules.test.ts`).
-- **`game/BossController.ts`:** Belladona. Uma máquina de estados (`idle`, `casting`, `blinking`, `stunned`, `defeated`) com fases de vida (normal e furiosa). Tempos usam o `delta` do jogo, então pausam com o jogo.
+- **`game/PickupSystem.ts`, `game/entities/enemies/EnemySystem.ts`, `game/SleepSystem.ts`:** itens do chão, inimigos e sono da Roo, criados em `MainScene.create()` como o `BombSystem` (`pickupSystem`, `enemySystem`, `sleepSystem`). As regras puras ficam em `pickupRules.ts`, `enemyRules.ts` e `sleepRules.ts` (testes em `tests/systemRules.test.ts`).
+- **`game/entities/bosses/belladonna/BelladonnaController.ts`:** Belladona. Uma máquina de estados (`idle`, `casting`, `blinking`, `stunned`, `defeated`) com fases de vida (normal e furiosa). Tempos usam o `delta` do jogo, então pausam com o jogo.
 - **`textures/`:** todos os sprites são gerados em código com a API Graphics (sem imagens externas). `make.ts` é a fábrica comum; `index.ts` chama cada gerador. `anselmo.ts` é o personagem novo, com formas em dados e um renderizador próprio.
 - **`audio/AudioEngine.ts`:** síntese com WebAudio (osciladores, filtros, reverberação por convolução) e agendador de música. Ver a seção de áudio abaixo.
 - **`ui/`:** telas em DOM. `theme.ts` lê as cores das variáveis CSS (`:root`), então o canvas e o DOM usam a mesma paleta.
@@ -106,7 +106,7 @@ Os testes de regra não usam o navegador. Verificação de jogo (FPS, sons, sens
 |---|---|
 | números do jogo | `src/config.ts` |
 | regras da fase | `src/scenes/MainScene.ts` (e `game/*` quando puro) |
-| chefe | `src/game/BossController.ts`, `src/game/boss.ts`, `src/game/bossLines.ts` |
+| chefe | `src/game/entities/bosses/belladonna/BelladonnaController.ts`, `src/game/entities/bosses/belladonna/rules.ts`, `src/game/entities/bosses/belladonna/lines.ts` |
 | sprites | `src/textures/*.ts` (ver `docs/09-sprites.md`) |
 | menu, loja, pausa | `src/scenes/MenuScene.ts`, `src/ui/*`, `index.html` |
 | música e sons | `src/audio/AudioEngine.ts`, `src/audio/tracks.ts` |
