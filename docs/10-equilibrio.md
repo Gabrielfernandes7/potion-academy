@@ -29,6 +29,9 @@ Antes, a Aqua tinha alcance 4 e a Telúrica e a Etérea alcance 3, então a Aqua
 | +Velocidade | 3 níveis | 2 | com 3 níveis a Roo corria mais que os inimigos o tempo todo |
 | Passo base da Roo | 220 ms por casa | 300 ms | a Roo parecia rápida demais; 300 ms é igual ao sapo, e +2 velocidade (~143 ms) ainda fica mais rápida que ele. Teste: se ficar lenta demais, use 260 ms |
 | Baú | +2 vida | 0 | só os corações curam; o baú dá OURO |
+| Vida da Roo | 5 corações, 1 por golpe | barra de 24 pontos: contato 4, fogo 6, água 2, terra e éter 4 | a Roo ganha perfil de fraqueza (fogo) e resistência (água); 24 mantém 6 golpes neutros e dá 4 contra fogo. Coração cura 4. Testar com a Belladona, que usa fogo em 65% dos ataques |
+| Formas da Roo (T fogo, Y água) | 12 s só no fogo | **20 s** (era 12, depois 16) em 4 degraus de 5 s; espera comum de 25 s; poções do próprio elemento +50% (cai por degrau). **Fogo:** resiste ao fogo (2), fraca à água (6), **sem Poção Aqua**; Labareda 3 casas. **Água:** imune à água, fraca ao fogo, todas as poções; Bolha de sabão: 4 casas, prende por 1,75 a 4 s. As duas habilidades custam 2 s e esperam 3,5 s | `game/forms/`; valores de teste, ainda a jogar |
+| Leão Verde (Arena) | não existia | 28 de vida: terra imune, éter 6, fogo 4, água 2; Bote com exposição de 2,2 s (+2 de dano); Dissolver 1,4 s de aviso; Rugido só na fúria; espera de 3,6 s (2,5 s na fúria) | o fogo o vence em 7 golpes, o éter em 5; só na Arena, ainda a testar jogando |
 
 ## Economia (estimativa)
 

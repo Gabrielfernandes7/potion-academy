@@ -108,15 +108,18 @@ A cena final fica como está: o frasco sobre a mesa, o Caldeirão morno, silênc
 
 | Momento | Onde | Estado |
 |---|---|---|
-| A carta | `index.html` (`#letter-overlay`) e `ui/letter.ts` | Texto atual; ajustar para citar a fome e Belladona |
-| Cartão de cada fase | `STAGES` em `config.ts` | Frases atuais; ajustar para o tema de cada etapa |
-| Passagens | `PASSAGE_CARDS` em `game/story.ts` | Funciona; passagem 2 ganha a bolha |
-| Despedida da Belladona | `BELLADONA_CARDS` em `game/story.ts` | **Reescrever** (hoje ela só queria "que as palavras servissem para alguma coisa") |
-| O portão | fase 4, ao pegar as 3 gemas | Funciona |
-| A confissão | `ENDING_CARDS` em `game/story.ts` | Acrescentar o cartão da bolha e da culpa |
-| Cena final | `CAULDRON_LINES` em `game/story.ts` | Manter |
-| Diário da Roo | `game/diary.ts` | Novas páginas (fome, bolha, mestre); hoje só 5 |
-| Tela final | "Jornada cumprida" | Manter |
+| A carta | `index.html` (`#letter-overlay`) e `ui/letter.ts` | **Aplicado:** cita a fome, o preço do pão e Belladona como discípula do mestre |
+| Cartão de cada fase | `story` em `game/stages/chapters/*.ts` | **Aplicado:** cada cartão fala da fome, do laboratório tomado, das páginas do mestre e do portão com famílias à espera |
+| Passagens | `PASSAGE_CARDS` em `game/story.ts` | **Aplicado:** a passagem 2 ganha a página da bolha ("hoje a bolha não estourou"); a 7 é a voz de Belladona atrás da porta |
+| Despedida da Belladona | `BELLADONA_CARDS` em `game/story.ts` | **Aplicado:** "quem alimenta a aldeia amanhã?", "não preciso que concorde, preciso que alguém responda", "leia melhor do que eu li" |
+| Falas dela na luta | `belladonna/lines.ts` | **Aplicado:** "Eu contei quem morreu.", "Sabe quantos morreram?", "Quem alimenta a aldeia?" |
+| O portão | fase 12, a Mandrágora guarda o portão | Funciona |
+| A confissão | `ENDING_CARDS` em `game/story.ts` | **Aplicado:** o cartão da culpa traz a noite da bolha ("era dádiva... ele chorou, não acreditou, e eu não insisti") |
+| Cena final | `CAULDRON_LINES` em `game/story.ts` | Mantida |
+| Manuscrito do Alquimista | `game/manuscrito.ts` | Substituiu o Diário da Roo: uma página por personagem, não por fase |
+| Tela final | "Jornada cumprida" | Mantida |
+
+> **Para a revisão de roteiro (a fazer):** a campanha tem 12 fases em 3 capítulos (O Vale, A Torre / Duelo, O Retorno) e 3 chefes, mais a Quimera, que é a prata do mestre. O roteiro foi escrito para 4 atos; aqui o Ato I (Nigredo) cobre O Vale inteiro, o Ato II (Albedo) a Torre até a Antecâmara, o Ato III (Citrinitas) o Duelo e o Ato IV (Rubedo) O Retorno. O Leão Verde e os capítulos selados (Biblioteca Proibida, Observatório) ainda não têm lugar na história. Furos conhecidos para revisar: por que Belladona guarda um laboratório com fantasmas e uma Quimera; como a Quimera se liga à busca do mestre; o que a Mandrágora faz no mosteiro; por que o mosteiro volta a ter um frasco vazio.
 
 ### Falas propostas (rascunho para aplicar depois)
 

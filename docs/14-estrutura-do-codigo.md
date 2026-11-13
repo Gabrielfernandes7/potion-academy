@@ -5,7 +5,7 @@ Regra de ouro: **lógica pura num arquivo, Phaser em outro.** O que é puro (sor
 ## Entidades (`src/game/entities/`)
 - `damage.ts`: regra de dano por elemento (puro). `profiles.ts`: a tabela de todos os personagens (vida, atributo, fraqueza, resistência, imunidade). É o único lugar para ajustar o equilíbrio.
 - `enemies/`: `defs.ts` (dados), `enemyRules.ts` (puro), `EnemySystem.ts` (Phaser).
-- `bosses/`: `BossBase.ts` (classe-pai), `common.ts` (puro), e uma pasta por chefe com `*Controller.ts`, `rules.ts` e `lines.ts`.
+- `bosses/`: `BossBase.ts` (classe-pai), `common.ts` (puro), e uma pasta por chefe (belladonna, mandrake, chimera) com `*Controller.ts`, `rules.ts` e `lines.ts`.
 
 **Inimigo novo:** (1) id em `EntityId` e linha em `profiles.ts`; (2) tipo em `EnemyKind` e linha em `ENEMY_TYPES` (`enemies/defs.ts`); (3) textura em `src/textures/`; (4) movimento em `EnemySystem.ts` (`MOTION`); (5) use-o nas fases. O teste de `tests/entities/damage.test.ts` confere a tabela.
 

@@ -76,7 +76,7 @@ Quem usa as regras: `MainScene` e `BelladonnaController` (que são o lado Phaser
 
 ## Módulos principais
 
-- **`game/BombSystem.ts`:** bombas, explosões e empurrão. A `MainScene` cria o sistema em `create()` e chama `bombSystem.placeBomb()`, `update(delta)` e as outras ações. O chefe chama `bombSystem.spawnExplosion` para as poções dele.
+- **`game/BombSystem.ts`:** bombas e explosões. A `MainScene` cria o sistema em `create()` e chama `bombSystem.placeBomb()`, `update(delta)` e as outras ações. O chefe chama `bombSystem.spawnExplosion` para as poções dele.
 - **`game/PickupSystem.ts`, `game/entities/enemies/EnemySystem.ts`, `game/SleepSystem.ts`:** itens do chão, inimigos e sono da Roo, criados em `MainScene.create()` como o `BombSystem` (`pickupSystem`, `enemySystem`, `sleepSystem`). As regras puras ficam em `pickupRules.ts`, `enemyRules.ts` e `sleepRules.ts` (testes em `tests/systemRules.test.ts`).
 - **`game/entities/bosses/belladonna/BelladonnaController.ts`:** Belladona. Uma máquina de estados (`idle`, `casting`, `blinking`, `stunned`, `defeated`) com fases de vida (normal e furiosa). Tempos usam o `delta` do jogo, então pausam com o jogo.
 - **`textures/`:** todos os sprites são gerados em código com a API Graphics (sem imagens externas). `make.ts` é a fábrica comum; `index.ts` chama cada gerador. `anselmo.ts` é o personagem novo, com formas em dados e um renderizador próprio.
