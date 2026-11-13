@@ -17,6 +17,8 @@ import { ensureFonts } from '../ui/fonts';
 import { showLetter } from '../ui/letter';
 import { audio } from '../audio/AudioEngine';
 import { SCENE_TRACKS } from '../audio/tracks';
+import { ARENA_STAGE } from './arena';
+import type { BossId } from './stages/types';
 
 let phaserGame: Phaser.Game | null = null;
 let texturesReady: Promise<void> = Promise.resolve();
@@ -76,8 +78,27 @@ export async function startGame(): Promise<void> {
 
 export function retryGame(): void {
   hideGameOver();
-  // sempre recomeça da fase 1 (dados explícitos: o Phaser guarda os do último reinício)
-  phaserGame?.scene.getScene('Main').scene.restart({ stage: 1 });
+  // recomeça da fase 1, ou a mesma luta, se for treino na Arena (dados explícitos: o Phaser guarda os do último reinício)
+  const main = phaserGame?.scene.getScene('Main') as MainScene | undefined;
+  main?.scene.restart(main.restartData());
+}
+
+// Começa uma luta de treino na Arena, a partir do menu. Não toca na carta nem no progresso da campanha.
+export async function startArena(boss: BossId): Promise<void> {
+  if (!phaserGame) bootGame();
+  await texturesReady;
+  await ensureFonts();
+  const game = phaserGame as Phaser.Game;
+  closeShop();
+  hideGameOver();
+  setMenuVisible(false);
+  const data = { stage: ARENA_STAGE, arena: boss };
+  if (game.scene.isActive('Main')) {
+    game.scene.getScene('Main').scene.restart(data);
+  } else {
+    game.scene.stop('Menu');
+    game.scene.start('Main', data);
+  }
 }
 
 // Volta ao menu principal (da pausa, do fim de jogo ou da loja).

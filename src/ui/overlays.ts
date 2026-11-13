@@ -10,6 +10,7 @@ export interface GameOverData {
   blocksDestroyed: number;
   timeLeft: number;
   stage: number;
+  arenaBoss?: string; // luta de treino na Arena: o nome do chefe (muda o título e os números)
 }
 
 export function setPauseVisible(visible: boolean): void {
@@ -22,18 +23,26 @@ function tile(label: string, value: string): string {
 
 export function showGameOver(d: GameOverData): void {
   const title = byId('go-title');
-  title.textContent = d.won ? 'JORNADA CUMPRIDA' : 'GAME OVER';
+  const arena = d.arenaBoss !== undefined;
+  title.textContent = arena ? (d.won ? 'ARENA VENCIDA' : 'DERROTA NA ARENA') : d.won ? 'JORNADA CUMPRIDA' : 'GAME OVER';
   const story = byId('go-story');
-  story.hidden = !d.won;
+  story.hidden = !d.won || arena;
   title.className = d.won ? 'win' : 'lose';
-  byId('go-stats').innerHTML = [
-    tile('OURO', String(d.coins)),
-    tile('GEMAS', String(d.gems)),
-    tile('VIDA', `${d.hp}/${d.maxHp}`),
-    tile('BLOCOS', String(d.blocksDestroyed)),
-    tile('TEMPO', `${Math.ceil(d.timeLeft / 1000)} s`),
-    tile('FASE', String(d.stage)),
-  ].join('');
+  byId('go-stats').innerHTML = (arena
+    ? [
+      tile('CHEFE', d.arenaBoss as string),
+      tile('VIDA', `${d.hp}/${d.maxHp}`),
+      tile('BLOCOS', String(d.blocksDestroyed)),
+      tile('TEMPO', `${Math.ceil(d.timeLeft / 1000)} s`),
+    ]
+    : [
+      tile('OURO', String(d.coins)),
+      tile('GEMAS', String(d.gems)),
+      tile('VIDA', `${d.hp}/${d.maxHp}`),
+      tile('BLOCOS', String(d.blocksDestroyed)),
+      tile('TEMPO', `${Math.ceil(d.timeLeft / 1000)} s`),
+      tile('FASE', String(d.stage)),
+    ]).join('');
   setShown('gameover-overlay', true);
 }
 

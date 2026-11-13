@@ -9,6 +9,7 @@ const BANK_KEY = 'bombroo_bank';
 const OWNED_KEY = 'bombroo_owned';
 const STAGES_KEY = 'bombroo_stages_completed';
 const STAGES_SCHEMA_KEY = 'bombroo_stages_schema'; // versão da numeração das fases (game/stages/migration.ts)
+const ARENA_KEY = 'bombroo_arena_wins'; // chefes já vencidos na Arena (chave nova; não mexe no progresso antigo)
 const START_BANK = 100;
 
 export const Storage = {
@@ -85,5 +86,19 @@ export function markStageCompleted(stage: number): void {
   if (!completed.includes(stage)) {
     completed.push(stage);
     Storage.set(STAGES_KEY, completed);
+  }
+}
+
+// Vitórias na Arena de treino: guardam só o id de cada chefe vencido (abre a página dele no Manuscrito).
+export function arenaWins(): string[] {
+  const list = Storage.get<unknown>(ARENA_KEY, []);
+  return Array.isArray(list) ? list.filter((x): x is string => typeof x === 'string') : [];
+}
+
+export function markArenaWin(boss: string): void {
+  const wins = arenaWins();
+  if (!wins.includes(boss)) {
+    wins.push(boss);
+    Storage.set(ARENA_KEY, wins);
   }
 }
