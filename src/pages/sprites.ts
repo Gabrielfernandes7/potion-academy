@@ -3,24 +3,10 @@
 import '@fontsource/cinzel/700.css';
 import '@fontsource/nunito/400.css';
 import '@fontsource/nunito/700.css';
-import './styles/sprites.css';
+import '../styles/sprites.css';
 import Phaser from 'phaser';
-import { generateTextures } from './textures';
-
-// Cada grupo vira uma pasta em docs/img/sprites/<id>.png (ver docs/09-sprites.md).
-interface Group { id: string; title: string; note: string; test: (key: string) => boolean }
-
-const GROUPS: Group[] = [
-  { id: 'heroes', title: 'Heróis (a Roo)', note: 'roo_{down,up,side}_0-3: andar. roo_sleep_*: dormindo. roo_stir_*: mexendo a poção (menu, sem braço). roo_maestro_*: maestro de casaca (Sala de Música). roo_read_*: de frente, lendo; vemos a capa do livro e a folha virando por cima (GIF do README).', test: k => k.startsWith('roo_') },
-  { id: 'bosses', title: 'Chefes', note: 'Belladona e Mandrágora. witch_idle_0/1: parada. witch_cast: lançando poção. witch_hurt: machucada. witch_talk_0/1: falando. witch_defeat: vencida, calma, cabeça baixa.', test: k => k.startsWith('witch_') || k.startsWith('mandrake_') },
-  { id: 'humans', title: 'Personagens humanos', note: 'Frei Anselmo (anselmo_front_0/1: de frente, 1 respira; anselmo_back: de costas; anselmo_side: perfil; anselmo_retrato: de frente em 4x, vetorial, usado na carta e na confissão). Aparece na carta, no portão do jardim e na confissão final.', test: k => k.startsWith('anselmo_') },
-  { id: 'enemies', title: 'Inimigos', note: 'enemy: sapo mago (laboratório e jardim). enemy_ghost: fantasma (salão dos fantasmas; atravessa paredes). enemy_flower: flor do mal (jardim; fixa, imune à água).', test: k => k.startsWith('enemy') },
-  { id: 'objects', title: 'Objetos', note: 'Poções: um formato por elemento: fogo (balão), água (tubo), terra (pote), éter (losango). Itens: power-ups são fichas redondas; moeda, gema, coração e baú são itens soltos.', test: k => k.startsWith('bomb_') || k.startsWith('pickup_') },
-  { id: 'effects', title: 'Efeitos', note: 'Peças pequenas dos sistemas de partículas e a explosão.', test: k => k.startsWith('menu_') || k === 'explosion' },
-  { id: 'scenery', title: 'Cenário', note: 'Castelo: floor, wall, block, door. Jardim: g_floor, g_wall (sebe), g_block (canteiro), gate (portão).', test: k => /^(floor|wall|block|door|g_|gate_)/.test(k) },
-  { id: 'ui', title: 'Interface (HUD)', note: 'Ícones usados na faixa de cima do jogo.', test: k => k.startsWith('hud_') },
-  { id: 'other', title: 'Outros', note: 'Sprites sem grupo definido.', test: () => true },
-];
+import { FORM_PREVIEW, bootPage, prepareTextures } from './shared';
+import { SPRITE_GROUPS } from '../textures/groups';
 
 // Folha de sprites: todas as texturas numa imagem só (grade), mais um JSON com a posição de cada uma.
 // Formato simples, que qualquer engine ou ferramenta aceita: { "image": ..., "frames": { chave: {x, y, w, h} } }.
@@ -61,14 +47,14 @@ class CatalogScene extends Phaser.Scene {
   }
 
   create(): void {
-    generateTextures(this);
+    prepareTextures(this, { forms: FORM_PREVIEW });
     document.getElementById('atlas-btn')?.addEventListener('click', () => downloadAtlas(this));
     const zoom = Number(new URLSearchParams(location.search).get('zoom')) || 5;
     const keys = this.textures.getTextureKeys().filter(k => !k.startsWith('__')).sort();
     const root = document.getElementById('catalog') as HTMLElement;
     const used = new Set<string>();
 
-    for (const group of GROUPS) {
+    for (const group of SPRITE_GROUPS) {
       const members = keys.filter(k => !used.has(k) && group.test(k));
       if (members.length === 0) continue;
       members.forEach(k => used.add(k));
@@ -104,12 +90,4 @@ class CatalogScene extends Phaser.Scene {
   }
 }
 
-new Phaser.Game({
-  type: Phaser.CANVAS,
-  width: 1,
-  height: 1,
-  parent: 'stage',
-  pixelArt: true,
-  audio: { noAudio: true },
-  scene: [CatalogScene],
-});
+bootPage(CatalogScene);

@@ -4,9 +4,9 @@ import '@fontsource/cinzel/700.css';
 import '@fontsource/nunito/400.css';
 import '@fontsource/nunito/700.css';
 import Phaser from 'phaser';
-import { generateTextures } from './textures';
-import { outlineTexture } from './textures/outline';
-import { FIRE_PALETTE, makeFireRoo, type FireDir } from './textures/rooFire';
+import { generateTextures } from '../textures';
+import { outlineTexture } from '../textures/outline';
+import { FIRE_PALETTE, makeFireRoo, type FireDir } from '../textures/rooFire';
 
 interface Pose { label: string; key: string; dir: FireDir; frame: number; sleep?: boolean }
 

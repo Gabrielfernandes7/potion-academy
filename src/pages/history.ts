@@ -4,7 +4,7 @@ import '@fontsource/cinzel/600.css';
 import '@fontsource/cinzel/700.css';
 import '@fontsource/nunito/400.css';
 import '@fontsource/nunito/700.css';
-import './styles/history.css';
+import '../styles/history.css';
 
 const NOTES_KEY = 'history_notes';
 
