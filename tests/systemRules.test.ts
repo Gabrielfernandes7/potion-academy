@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EMPTY, BLOCK, WALL } from '../src/config';
-import { canSpawnEnemyAt, countKind, enemyMoveOptions, MIN_SPAWN_DISTANCE, SpawnContext } from '../src/game/enemyRules';
+import { canSpawnEnemyAt, countKind, enemyMoveOptions, MIN_SPAWN_DISTANCE, SpawnContext } from '../src/game/entities/enemies/enemyRules';
 import { pickupAt, resolveRewardType, timeAfterBonus } from '../src/game/pickupRules';
 import { SleepState, stepSleep } from '../src/game/sleepRules';
 
