@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { rollChestCoins, rollReward } from '../src/game/rewards';
+import { ELEMENTS, type BombId } from '../src/config';
+import { isPotionPowerup, pickupHalo, pickupTexture, rollChestCoins, rollReward } from '../src/game/rewards';
+import { pickPowerupPotion } from '../src/game/pickupRules';
 
 describe('rollReward', () => {
   it('mapeia as faixas de probabilidade para os tipos de item', () => {
@@ -27,5 +29,26 @@ describe('rollChestCoins', () => {
     expect(rollChestCoins(table, 0.95)).toBe(20);
     expect(rollChestCoins(table, 0.99)).toBe(50);
     expect(rollChestCoins(table, 0.999)).toBe(50);
+  });
+});
+
+describe('power-ups de poção: elemental', () => {
+  it('+frasco e +raio carregam a poção; a textura e o brilho seguem o elemento dela', () => {
+    expect(isPotionPowerup('bomb_up')).toBe(true);
+    expect(isPotionPowerup('fire_up')).toBe(true);
+    expect(isPotionPowerup('speed_up')).toBe(false);
+    expect(pickupTexture('fire_up', 'mega')).toBe('pickup_radius_water');
+    expect(pickupTexture('bomb_up', 'pierce')).toBe('pickup_flask_earth');
+    expect(pickupTexture('coin', 'mega')).toBe('pickup_coin');
+    expect(pickupHalo('fire_up', 'remote')).toBe(ELEMENTS.air.color);
+    expect(pickupHalo('speed_up')).toBeDefined();
+  });
+
+  it('o sorteio só escolhe entre as poções que a Roo tem', () => {
+    const owned: BombId[] = ['normal', 'pierce'];
+    for (let i = 0; i < 40; i++) expect(owned).toContain(pickPowerupPotion(owned, () => i / 40));
+    expect(pickPowerupPotion(['normal'], () => 0.99)).toBe('normal');
+    expect(pickPowerupPotion(owned, () => 0)).toBe('normal');
+    expect(pickPowerupPotion(owned, () => 0.999)).toBe('pierce');
   });
 });

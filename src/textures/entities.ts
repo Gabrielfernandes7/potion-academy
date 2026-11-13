@@ -5,12 +5,11 @@
 // distinguir o que melhora a personagem do que é só recompensa.
 import type { DrawFn, MakeFn } from './make';
 import { GARDEN_PALETTE as P } from './gardenPalette';
+import { ELEMENTS } from '../config';
 
 type Gfx = Parameters<DrawFn>[0];
 
 export const POWERUP_COLORS = {
-  bomb_up: 0xb39ddb, // lilás
-  fire_up: 0xff8a65, // laranja
   speed_up: 0x4dd0e1, // ciano
   time_up: 0xfff59d, // amarelo claro
 } as const;
@@ -183,40 +182,42 @@ export function drawEntities(make: MakeFn): void {
 
   // ------------------------------------------------------------ power-ups
 
-  make('pickup_bomb_up', g => {
-    // +frasco: frasco Erlenmeyer lilás com um selo de "+"
-    token(g, POWERUP_COLORS.bomb_up);
-    g.fillStyle(0x8b6f47); g.fillRect(16.8, 9.5, 4.4, 2.6);
-    g.fillStyle(0xdfe6e9); g.fillRect(17.6, 11.6, 2.8, 4.2);
-    g.fillStyle(0xdfe6e9);
-    g.fillTriangle(17.6, 15, 20.4, 15, 27, 29.5);
-    g.fillTriangle(17.6, 15, 11, 29.5, 27, 29.5);
-    g.fillStyle(0xb39ddb);
-    g.fillTriangle(14.2, 23.5, 23.8, 23.5, 27, 29.5);
-    g.fillTriangle(14.2, 23.5, 11.8, 29.5, 27, 29.5);
-    g.fillStyle(0xffffff, 0.8); g.fillCircle(17, 27, 1); g.fillCircle(21, 25.5, 0.8);
-    // selo "+"
-    g.fillStyle(0x2e7d32); g.fillCircle(30, 10.5, 5.2);
-    g.fillStyle(0x66bb6a); g.fillCircle(30, 10.5, 4.2);
-    g.fillStyle(0xffffff); g.fillRect(27.5, 9.7, 5, 1.7); g.fillRect(29.15, 8, 1.7, 5);
-  });
-
-  make('pickup_fire_up', g => {
-    // +raio: chama de três camadas
-    token(g, POWERUP_COLORS.fire_up);
-    g.fillStyle(0xff5722);
-    g.fillTriangle(20, 7.5, 28.5, 24, 11.5, 24);
-    g.fillCircle(20, 24, 8.5);
-    g.fillStyle(0xff9800);
-    g.fillTriangle(20, 13, 26, 25, 14, 25);
-    g.fillCircle(20, 25, 6);
-    g.fillStyle(0xffeb3b);
-    g.fillTriangle(20, 18, 23.8, 27, 16.2, 27);
-    g.fillCircle(20, 26.5, 3.6);
-    g.fillStyle(0xffffff, 0.9); g.fillCircle(20, 27.2, 1.6);
-    // faíscas
-    g.fillStyle(0xffd54f); g.fillCircle(11, 11, 1.1); g.fillCircle(29.5, 14, 1); g.fillCircle(27, 8.5, 0.8);
-  });
+  // +frasco e +raio carregam o elemento da poção que fortalecem: a cor do aro e do líquido
+  // diz qual poção recebe o bônus (pickup_flask_<elemento> e pickup_radius_<elemento>).
+  for (const el of ['fire', 'water', 'earth', 'air'] as const) {
+    const color = ELEMENTS[el].color;
+    const glow = ELEMENTS[el].glow;
+    make(`pickup_flask_${el}`, g => {
+      // +frasco: frasco Erlenmeyer com o líquido do elemento e um selo de "+"
+      token(g, color);
+      g.fillStyle(0x8b6f47); g.fillRect(16.8, 9.5, 4.4, 2.6);
+      g.fillStyle(0xdfe6e9); g.fillRect(17.6, 11.6, 2.8, 4.2);
+      g.fillStyle(0xdfe6e9);
+      g.fillTriangle(17.6, 15, 20.4, 15, 27, 29.5);
+      g.fillTriangle(17.6, 15, 11, 29.5, 27, 29.5);
+      g.fillStyle(color);
+      g.fillTriangle(14.2, 23.5, 23.8, 23.5, 27, 29.5);
+      g.fillTriangle(14.2, 23.5, 11.8, 29.5, 27, 29.5);
+      g.fillStyle(0xffffff, 0.8); g.fillCircle(17, 27, 1); g.fillCircle(21, 25.5, 0.8);
+      g.fillStyle(0x2e7d32); g.fillCircle(30, 10.5, 5.2);
+      g.fillStyle(0x66bb6a); g.fillCircle(30, 10.5, 4.2);
+      g.fillStyle(0xffffff); g.fillRect(27.5, 9.7, 5, 1.7); g.fillRect(29.15, 8, 1.7, 5);
+    });
+    make(`pickup_radius_${el}`, g => {
+      // +raio: a cruz de uma explosão, nas cores do elemento, com o centro brilhando
+      token(g, color);
+      g.fillStyle(color, 0.35); g.fillCircle(20, 20, 9.5);
+      g.fillStyle(color);
+      g.fillRect(17, 8, 6, 24); g.fillRect(8, 17, 24, 6);
+      g.fillStyle(glow);
+      g.fillRect(18.4, 9.5, 3.2, 21); g.fillRect(9.5, 18.4, 21, 3.2);
+      g.fillStyle(0xffffff, 0.95); g.fillCircle(20, 20, 3.2);
+      // pontas da cruz em "seta", para ler como "alcance maior"
+      g.fillStyle(color);
+      g.fillTriangle(20, 5.5, 16.5, 10, 23.5, 10); g.fillTriangle(20, 34.5, 16.5, 30, 23.5, 30);
+      g.fillTriangle(5.5, 20, 10, 16.5, 10, 23.5); g.fillTriangle(34.5, 20, 30, 16.5, 30, 23.5);
+    });
+  }
 
   make('pickup_speed_up', g => {
     // +velocidade: raio com linhas de movimento
