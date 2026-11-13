@@ -21,8 +21,8 @@ describe('faixas', () => {
   });
 
   it('cada fase tem a faixa da cena correspondente', () => {
-    // Torre (índices 2 a 4) usa a faixa do salão (stage2)
-    const map: Record<number, keyof typeof SCENE_TRACKS> = { 0: 'stage1', 1: 'stage2', 2: 'stage2', 3: 'stage2', 4: 'stage2', 5: 'stage2', 6: 'stage3', 7: 'stage4', 8: 'stage4', 9: 'stage4', 10: 'stage4' };
+    // Névoa e Torre (índices 2, 4 a 6) usam a faixa do salão (stage2); os dois chefes sem porta (Poço e Duelo), a do duelo
+    const map: Record<number, keyof typeof SCENE_TRACKS> = { 0: 'stage1', 1: 'stage2', 2: 'stage2', 3: 'stage3', 4: 'stage2', 5: 'stage2', 6: 'stage2', 7: 'stage3', 8: 'stage4', 9: 'stage4', 10: 'stage4', 11: 'stage4' };
     STAGES.forEach((s, i) => {
       expect(s.track).toBe(SCENE_TRACKS[map[i]]);
     });

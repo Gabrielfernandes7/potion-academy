@@ -1,9 +1,10 @@
 // Tipos das fases e dos capítulos (sem dados nem lógica).
 import type { EnemyKind } from '../entities/enemies/defs';
+import type { BlockStyle } from './blockStyles';
 
 export type StageKind = 'lab' | 'crypt' | 'boss' | 'garden';
 export type StageTheme = 'stone' | 'crypt' | 'garden';
-export type BossId = 'belladonna' | 'mandrake';
+export type BossId = 'belladonna' | 'mandrake' | 'chimera' | 'lion';
 
 // Quantos inimigos de um tipo: `start` no início; se houver `every`, mais um a cada N caixotes quebrados, até `max`.
 export interface EnemyRule {
@@ -31,6 +32,7 @@ export interface StageSpec {
   door: boolean; // fase de gemas e porta (o chefe não tem porta)
   enemies: EnemyRule[];
   theme: StageTheme;
+  block?: BlockStyle; // o bloco destrutível da fase (ver game/stages/blockStyles.ts); sem ele, madeira ou canteiro
   track: string; // faixa de música da fase (ver SCENE_TRACKS em audio/tracks.ts)
   chest: ReadonlyArray<ChestOdd>; // sorteio do baú (moedas) nesta fase
 }

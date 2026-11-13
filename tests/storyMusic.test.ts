@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { TRACKS } from '../src/audio/tracks';
-import { PASSAGE_CARDS, BELLADONA_CARDS, ENDING_CARDS } from '../src/game/story';
+import { PASSAGE_CARDS, BELLADONA_CARDS, CHIMERA_CARDS, ENDING_CARDS } from '../src/game/story';
 import { STAGES, LAST_STAGE } from '../src/game/stages/index';
 
 describe('trilha por fase', () => {
-  it('cada fase fora da Torre tem uma faixa própria; as três da Torre dividem a faixa do salão', () => {
-    const tracks = [0, 1, 6, 7].map(i => STAGES[i].track);
-    for (const i of [2, 3, 4, 5]) expect(STAGES[i].track).toBe(STAGES[1].track);
+  it('Chamado, Caminho, Duelo e Estrada têm faixas próprias; a Névoa e as três da Torre dividem a do salão; o Poço usa a do duelo', () => {
+    const tracks = [0, 1, 7, 8].map(i => STAGES[i].track);
+    for (const i of [2, 4, 5, 6]) expect(STAGES[i].track).toBe(STAGES[1].track);
+    expect(STAGES[3].track).toBe(STAGES[7].track);
     expect(new Set(tracks).size).toBe(tracks.length);
   });
 
@@ -23,7 +24,7 @@ describe('trilha por fase', () => {
 describe('passagens entre fases', () => {
   it('há passagem depois de cada fase que tem porta, exceto a última', () => {
     for (let s = 1; s < LAST_STAGE; s++) {
-      if (s === 7) continue; // o chefe tem a própria despedida (BELLADONA_CARDS)
+      if (s === 4 || s === 8) continue; // os chefes têm a própria despedida (CHIMERA_CARDS, BELLADONA_CARDS)
       expect(PASSAGE_CARDS[s], `fase ${s}`).toBeDefined();
     }
   });
@@ -38,8 +39,9 @@ describe('passagens entre fases', () => {
     }
   });
 
-  it('o final e a despedida da Belladona continuam com cartões', () => {
+  it('o final e as despedidas da Belladona e da Quimera têm cartões', () => {
     expect(ENDING_CARDS.length).toBeGreaterThan(0);
     expect(BELLADONA_CARDS.length).toBeGreaterThan(0);
+    expect(CHIMERA_CARDS.length).toBeGreaterThan(0);
   });
 });
