@@ -8,7 +8,10 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "tsc --noEmit && vitest run && vite build",
+    "smoke": "node scripts/smoke.cjs"
   },
   "dependencies": {
     "@fontsource/cinzel": "^5.3.0",

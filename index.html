@@ -38,8 +38,9 @@
       <div class="menu-actions">
         <button class="big-btn" id="menu-play" type="button">JOGAR</button>
         <button class="big-btn alt" id="menu-map" type="button">MAPA</button>
+        <button class="big-btn alt" id="menu-arena" type="button">ARENA</button>
         <button class="big-btn alt" id="menu-shop" type="button">CALDEIRÃO</button>
-        <button class="big-btn alt" id="menu-diary" type="button">DIÁRIO</button>
+        <button class="big-btn alt" id="menu-manuscript" type="button">MANUSCRITO</button>
         <button class="big-btn alt" id="menu-music" type="button">SALA DE MÚSICA</button>
         <p class="menu-hint">Pressione <kbd>Enter</kbd> para jogar</p>
       </div>
@@ -55,8 +56,10 @@
     </div>
     <div class="actions">
       <button type="button" class="act bomb" data-touch="bomb">POÇÃO</button>
-      <button type="button" class="act" data-touch="push">EMPURRAR</button>
       <button type="button" class="act" data-touch="detonate">DETONAR</button>
+      <button type="button" class="act fire" data-touch="transformFire">ROO FIRE</button>
+      <button type="button" class="act aqua" data-touch="transformWater">ROO AQUA</button>
+      <button type="button" class="act form" data-touch="ability" id="ability-btn">HABILIDADE</button>
       <button type="button" class="act" data-touch="cycle" aria-label="Trocar tipo de frasco">TROCAR FRASCO</button>
       <button type="button" class="act small" data-touch="pause">PAUSA</button>
     </div>
@@ -119,12 +122,24 @@
   </div>
 </div>
 
+<!-- Arena de treino: enfrente os chefes quando quiser -->
+<div id="arena-overlay" class="overlay" role="dialog" aria-labelledby="arena-title">
+  <div class="panel arena">
+    <h2 id="arena-title">ARENA DE TREINO</h2>
+    <p class="letter-note">Enfrente os chefes quando quiser. Todas as poções estão liberadas, o tempo é de sobra e nada aqui conta para a jornada.</p>
+    <div class="arena-grid" id="arena-grid"></div>
+    <div class="btn-row">
+      <button class="big-btn alt" id="arena-close" type="button">VOLTAR</button>
+    </div>
+  </div>
+</div>
+
 <!-- Carta de frei Anselmo (antes da primeira fase de uma partida nova) -->
 <div id="letter-overlay" class="overlay overlay--letter" role="dialog" aria-labelledby="letter-title">
   <div class="panel letter">
     <img id="letter-portrait" class="portrait" alt="Frei Anselmo" width="160" height="200" hidden>
     <h2 id="letter-title">A CARTA</h2>
-    <p class="letter-text">Roo, filho do Caldeirão: preciso que busques o que eu não posso mais buscar. As escrituras que guardamos foram <b>levadas</b> — não roubadas, mas <b>tomadas</b> por alguém que acredita poder transformá-las em fórmula. Não te peço que creias no que eu creio. Peço que as <b>tragas de volta</b> — e que, ao encontrá-las, não as trates como pedra.</p>
+    <p class="letter-text">Roo, filho do Caldeirão: preciso que busques o que eu não posso mais buscar. Há três anos o vale colhe pouco, e o pão custa mais do que o povo tem. As escrituras que guardamos foram <b>levadas</b> por Belladona, discípula do teu mestre. Não foi por maldade: ela acredita que, lidas como receita, podem virar pão para todos. Não te peço que creias no que eu creio. Peço que as <b>tragas de volta</b> e que, ao encontrá-las, não as trates como pedra.</p>
     <p class="letter-sign">— frei Anselmo, Mosteiro de São Tomás</p>
     <p class="letter-note">Dentro do envelope, um frasco vazio, lacrado.</p>
     <div class="btn-row">
@@ -134,16 +149,6 @@
 </div>
 
 <!-- Diálogo (cartões de conversa, ex.: a confissão de frei Anselmo) -->
-<div id="diary-overlay" class="overlay overlay--letter" role="dialog" aria-labelledby="diary-title">
-  <div class="panel letter">
-    <h2 id="diary-title">DIÁRIO DA ROO</h2>
-    <ul id="diary-list" class="diary-list"></ul>
-    <div class="btn-row">
-      <button class="big-btn" id="diary-close" type="button">FECHAR</button>
-    </div>
-  </div>
-</div>
-
 <div id="dialogue-overlay" class="overlay overlay--letter" role="dialog" aria-labelledby="dialogue-speaker">
   <div class="panel dialogue">
     <img id="dialogue-portrait" class="portrait" alt="" width="160" height="200" hidden>
@@ -175,7 +180,9 @@
         <tbody>
           <tr><td>Andar</td><td><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></td><td>botões de direção</td></tr>
           <tr><td>Colocar poção</td><td><kbd>Espaço</kbd></td><td>POÇÃO</td></tr>
-          <tr><td>Empurrar a poção</td><td><kbd>X</kbd></td><td>EMPURRAR</td></tr>
+          <tr><td>Transformar em Roo Fire (20 s)</td><td><kbd>T</kbd></td><td>ROO FIRE</td></tr>
+          <tr><td>Transformar em Roo Aqua (20 s)</td><td><kbd>Y</kbd></td><td>ROO AQUA</td></tr>
+          <tr><td>Habilidade da forma: Labareda ou Bolha de sabão</td><td><kbd>X</kbd></td><td>HABILIDADE</td></tr>
           <tr><td>Explodir poção etérea</td><td><kbd>D</kbd></td><td>DETONAR</td></tr>
           <tr><td>Escolher frasco</td><td><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></td><td>toque no seletor</td></tr>
           <tr><td>Pausar</td><td><kbd>Enter</kbd></td><td>PAUSA</td></tr>
