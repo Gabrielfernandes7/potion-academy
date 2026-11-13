@@ -3,6 +3,7 @@ import type { BombId, ElementId } from '../config';
 import type { PickupType } from './rewards';
 import type { Upgrades } from './upgrades';
 import type { EnemyKind } from './entities/enemies/defs';
+import type { BossId } from './stages/types';
 
 export type Facing = 'up' | 'down' | 'left' | 'right';
 
@@ -56,6 +57,7 @@ export interface Enemy {
   hopY: boolean; // o passo é na vertical: o pulo é maior
   phase: number;
   lashMs: number; // flor do mal: tempo até o próximo chicote de espinhos
+  trapMs: number; // preso numa bolha de sabão da Roo Aqua: não anda, não machuca e não chicoteia até estourar
   fxCooldown: number; // evita repetir o aviso "IMUNE" e o dano a cada quadro enquanto a explosão dura
   hp: number;
   maxHp: number;
@@ -69,6 +71,7 @@ export interface Explosion {
   key: string;
   hitPlayer: boolean;
   element: ElementId; // de qual poção veio: define o efeito de quem é atingido
+  fromRoo?: boolean; // poção ou Labareda da Roo: só estas ganham o bônus de fogo da transformação
 }
 
 export interface PowerupCounts {
@@ -91,4 +94,5 @@ interface Carry {
 export interface StageData {
   stage?: number;
   carry?: Carry;
+  arena?: BossId; // treino na Arena contra este chefe (stage = ARENA_STAGE; nada vale para a campanha)
 }

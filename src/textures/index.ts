@@ -3,13 +3,13 @@ import Phaser from 'phaser';
 import { createMaker } from './make';
 import { drawTerrain } from './terrain';
 import { drawGarden } from './garden';
+import { drawBlocks } from './blocks';
 import { drawPotions } from './potions';
 import { drawRooTextures } from './roo';
 import { drawEntities } from './entities';
 import { drawHudIcons } from './hud';
 import { drawMenuTextures } from './menu';
-import { drawWitchTextures } from './witch';
-import { drawMandrakeTextures } from './mandrake';
+import { BOSS_DEFS, BOSS_IDS } from '../game/entities/bosses/defs';
 import { drawAnselmoTextures } from './anselmo';
 import { BUBBLE_POSES, drawRooBubbleFrames } from './rooBubble';
 import { outlineTexture } from './outline';
@@ -24,6 +24,7 @@ export function generateTextures(scene: Phaser.Scene): void {
   const { g, make } = createMaker(scene);
   drawTerrain(make);
   drawGarden(make);
+  drawBlocks(make);
   drawPotions(make);
   drawRooTextures(g, CONFIG.tile);
   // contorno só na Roo que anda (as poses de menu e de leitura têm fundo próprio)
@@ -32,8 +33,7 @@ export function generateTextures(scene: Phaser.Scene): void {
   drawEntities(make);
   drawHudIcons(g);
   drawMenuTextures(g);
-  drawWitchTextures(g, CONFIG.tile);
-  drawMandrakeTextures(g, CONFIG.tile);
+  for (const id of BOSS_IDS) BOSS_DEFS[id].sprite.draw(g, CONFIG.tile); // os chefes vêm do registro
   drawAnselmoTextures(scene);
   g.destroy();
 }

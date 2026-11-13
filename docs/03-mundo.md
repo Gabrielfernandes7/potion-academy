@@ -6,11 +6,12 @@ Cada personagem e item tem uma ficha curta: o que é, o que faz e um detalhe que
 
 **Roo, o bruxo-canguru** (jogador)
 - *Quer:* sair do laboratório com as gemas e vencer a rival.
-- *Sabe fazer:* colocar poções, empurrá-las e explodir as etéreas de longe.
+- *Sabe fazer:* colocar poções e explodir as etéreas de longe. Com a tecla T vira **Roo Fire** (poções de fogo mais fortes, brasas, Labareda, luz na névoa; resiste ao fogo, fraca à água e sem a Poção Aqua) e com a tecla Y vira **Roo Aqua** (imune à água, poções de água mais fortes e a Bolha de sabão que prende inimigos). Cada forma dura 20 s (ver `02-como-se-joga.md`).
 - *Detalhe:* manto roxo com barra dourada, chapéu e varinha. Parada, ele cochila.
+- *Vida e dano:* barra de 24 pontos. **Fraca ao fogo** (as próprias poções machucam mais: 6), **resiste à água** (2); terra e éter, 4.
 - *Frase:* "Mais uma poção e a porta é minha."
 
-**Belladona, a alquimista rival** (chefe da fase 3)
+**Belladona, a alquimista rival** (chefe do duelo na Torre)
 - *Quer:* o laboratório e as gemas só para ele.
 - *Sabe fazer:* arremessar poções, fazer chover gotas e sumir em névoa.
 - *Detalhe:* roupa verde-escura com detalhes verde-limão, chapéu torto com faixa magenta, cabelo carmim, olhos verde-limão.
@@ -63,13 +64,17 @@ Veja `10-equilibrio.md` para os motivos desses números.
 
 A explosão de água que apaga uma poção de fogo continua machucando quem estiver no caminho.
 
+## Os blocos de cada fase
+
+Cada fase da campanha tem um bloco destrutível próprio (`game/stages/blockStyles.ts`): O Chamado, caixote de madeira; O Caminho, bloco de sal; A Névoa, caixote com musgo; O Poço, barril de azougue; A Escadaria, laje de pedra; O Corredor, caixote lacrado com cera; A Antecâmara, caixa de frascos; O Duelo, pilha de pergaminhos; A Estrada, fardo de feno; A Ponte, pilha de pedras; Os Muros, bloco de tijolos; O Jardim, canteiro de flores. A pilha de livros acorrentados espera a Biblioteca (por ora só na Arena do Leão Verde). Só muda o desenho: as regras são as mesmas.
+
 ## Itens que caem dos caixotes
 
 | Item | Efeito | Limite |
 |---|---|---|
 | Moeda | +1 OURO | |
 | Baú | OURO sorteado (5 a 50, conforme a fase); não cura | |
-| Coração | +1 vida | máximo 5 |
+| Coração | +4 de vida (um golpe neutro) | até 24 de vida |
 | Gema | conta para abrir a porta | 3 por fase |
 | +Frasco | +1 poção ao mesmo tempo, **só da poção do elemento do item** | até 5 por poção |
 | +Raio | explosões mais longas, **só da poção do elemento do item** | 3 níveis por poção |
@@ -99,6 +104,8 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 ## Lugares
 
 - **Laboratório (fase 1):** a grade de 15 por 13 casas. As muralhas de pedra não quebram.
+- **Arena de Treino:** fora da campanha; um campo de chefe com o chão e o bloco da casa de cada um (ver `02-como-se-joga.md`).
+- **Poço de Prata (fase 4, chefe do Vale):** campo mais aberto (menos caixotes), onde a Quimera de Mercúrio espera.
 - **Salão dos fantasmas (fase 2):** o mesmo tamanho, em pedra azulada e fria.
 - **Arena do duelo (fase 3):** menos caixotes (a arena é mais aberta).
 - **Jardim do castelo (fase 4):** fora do castelo. Grama, sebes no lugar das muralhas, canteiros de flores no lugar dos caixotes e um portão no lugar da porta.
@@ -106,6 +113,25 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 - **Caldeirão de Magia:** a loja.
 - **Menu:** a Roo mexe uma poção no caldeirão. De tempos em tempos ele aponta a varinha para um frasco da prateleira, ele levita e voa guiado por ele até o caldeirão, que reage de um jeito próprio de cada elemento (labareda, respingo, pedras ou redemoinho de névoa). Clicar num frasco da prateleira o chama na hora.
 
+
+## Leão Verde (chefe da Biblioteca Proibida, por ora só na Arena)
+
+**Leão Verde, o solvente universal** (28 de vida)
+- *Poder:* terra (o sal que ele já dissolveu). A **terra** não o toca (**imune**); o **éter**, a quintessência que nada dissolve, o fere muito (6); a **água** o dilui (resiste, 2); o fogo é neutro (4).
+- *Bote:* some e salta sobre a sua casa, com um abalo em cruz. Depois fica **exposto** por 2,2 s e leva +2 de dano.
+- *Dissolver:* um ácido verde corre pela linha da sua casa (furioso, também pela coluna) e **dissolve as suas poções** que estiverem no caminho.
+- *Rugido (fúria):* atinge quase o campo todo; as casas verdes são seguras.
+- *História:* nos manuscritos alquímicos o Leão Verde aparece devorando o sol, porque dissolve até o ouro. Guarda a Biblioteca Proibida, o capítulo ainda selado; por enquanto só se luta com ele na Arena.
+
+## Quimera de Mercúrio (chefe do Vale)
+
+**Quimera de Mercúrio, prata derramada do mestre** (24 de vida)
+- *Poder:* água (mercúrio). A água escorre por ela: **imune**. A **terra** é a fraqueza (6 de dano); fogo e éter machucam normal (4).
+- *Cuspe:* jato de prata em linha reta que passa pela sua casa (furiosa: dois jatos em cruz).
+- *Gotas:* gotas de prata caem uma depois da outra, a primeira na sua casa (3; furiosa, 5).
+- *Escorrer:* vira poça (protegida), escorre e ressurge perto de você com um respingo em cruz.
+- *Onda (furiosa):* faixas de 2 colunas varrem o campo; a linha verde fica seca e sempre há uma ao seu alcance.
+- *Sem gemas nem porta:* ao cair, ela se despede e a Roo segue para a Torre.
 
 ## Mandrágora (chefe do jardim)
 

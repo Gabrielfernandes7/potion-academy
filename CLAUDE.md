@@ -31,7 +31,8 @@ Game state is persisted in `localStorage` under `bombroo_bank` (coins) and `bomb
 
 ```
 index.html                 # markup: topbar, canvas + menu, controles de toque, overlays (loja, pausa, game over)
-history.html              # livro da história em prosa (/history.html); script em src/history.ts, cena do nascimento da Roo em src/birthScene.ts, roteiro em docs/12-historia.md
+manuscrito.html              # manuscrito do alquimista (botão MANUSCRITO do menu); script em src/pages/manuscrito.ts
+history.html              # livro da história em prosa (/history.html); script em src/pages/history.ts, cena do nascimento da Roo em src/pages/birthScene.ts, roteiro em docs/12-historia.md
 src/
   main.ts                  # layout (vars CSS do canvas, modo toque), botões do DOM, nome da faixa
   config.ts                # CONFIG, CANVAS, ELEMENTS, BOMB_TYPES, BOMB_ORDER (balanceamento)
@@ -52,7 +53,16 @@ src/
   game/rewards.ts          # tabela de drop (rollReward), texturas e brilho dos itens
   game/hudState.ts         # contrato de eventos MainScene <-> HudScene, timerView
   game/shopRules.ts        # estados dos cartões da loja (puro, testável)
-  game/story.ts + diary.ts # textos da história (cartões, passagens) e Diário da Roo
+  game/story.ts            # textos da história (cartões, passagens)
+  game/manuscrito.ts          # páginas do Manuscrito do Alquimista (textos; números vêm de profiles.ts), puro e testado
+  game/voynich.ts          # decoração à moda do Voynich (puro): seções, fólios, palavras em escrita não decifrada (EVA)
+  game/arena.ts + loadout.ts # Arena de treino (chefes, fase montada na hora) e quais poções valem (todas na Arena)
+  game/stages/blockStyles.ts # o bloco destrutível de cada fase (textures/blocks.ts, terrain.ts, garden.ts)
+  game/forms/              # as transformações da Roo (puro): registry.ts (uma linha por forma), RooForm.ts (máquina de estados), fire.ts, water.ts
+  game/RooFormSystem.ts    # as formas na partida (Phaser): habilidade, brasas, bolhas, sprite, luz; a MainScene só delega
+  game/StoryDirector.ts    # a direção da história na partida: cartão de fase, passagens, final, despedida dos chefes
+  textures/rooFire.ts + rooWater.ts + rooFormTextures.ts # sprites de cada forma por estágio (768 texturas geradas no boot, só no jogo)
+  game/entities/roo.ts     # vida da Roo: barra contínua, dano por elemento, cura (puro)
   game/balance.ts          # regra de equilíbrio das poções (testável)
   game/upgrades.ts         # power-ups por poção: alcance e frascos valem só para a poção escolhida (puro)
   game/blast.ts            # alcance de uma explosão, como gerador (puro, testável)
@@ -63,10 +73,14 @@ src/
   game/entities/profiles.ts # tabela de personagens: vida, atributo, fraqueza, resistência, imunidade
   game/entities/hitEffects.ts # efeito visual de acerto por elemento
   game/entities/enemies/   # defs.ts (dados), enemyRules.ts (puro), EnemySystem.ts (Phaser)
-  game/entities/bosses/    # BossBase.ts (classe-pai), common.ts (puro), belladonna/ e mandrake/ (Controller, rules, lines)
+  game/entities/bosses/    # defs.ts (LISTA ÚNICA de chefes, pura), registry.ts (fábrica), BossBase.ts, common.ts e uma pasta por chefe (Controller, rules, lines)
   game/effects/            # efeitos de tela com regra pura própria: Fog.ts (névoa) e fogRules.ts
   lab/                     # só dev: experimentos de ideias (/lab.html); ver docs/15-lab.md
+  game/stages/upcoming.ts  # capítulos selados que já aparecem no mapa (Biblioteca Proibida, Observatório): sem fases e sem acesso
   game/stages/             # fases e capítulos: index.ts (STAGES, CHAPTERS), types.ts, chests.ts, mapRules.ts, chapters/<capítulo>.ts
+  ui/arena.ts              # janela da Arena de treino (um cartão por chefe)
+  ui/elementIcons.ts       # ícones SVG dos atributos (Enxofre, Mercúrio, Sal, Éter) e o filtro de tinta #rough
+  ui/ornaments.ts          # ornamentos SVG das seções do manuscrito e a estrela de parágrafo
   ui/dom.ts                # helpers de DOM (byId, setShown)
   ui/theme.ts              # lê cores/fontes das variáveis CSS para o canvas
   ui/fonts.ts              # espera as fontes antes de iniciar a partida
@@ -76,10 +90,11 @@ src/
   ui/letter.ts             # carta de Anselmo antes da fase 1
   ui/overlays.ts           # pausa e game over
   ui/shop.ts               # Caldeirão de Magia (loja)
-  ui/diary.ts + game/diary.ts # Diário da Roo (páginas liberadas por fase vencida)
+  pages/                   # scripts das páginas de apoio (sprites, manuscrito, história, ideias): shared.ts tem o boot compartilhado
+  manuscrito.html + src/pages/manuscrito.ts + styles/manuscrito.css # Manuscrito do Alquimista (/manuscrito.html): uma carta por personagem
   textures/outline.ts      # contorno escuro de 1 px em texturas prontas (Roo)
   styles/main.css          # todo o CSS (tokens em :root)
-tests/                     # testes unitários (lógica pura, storage, toque, faixas, geometria)
+tests/                     # testes unitários (lógica pura, storage, toque, faixas, geometria); tests/contracts/ confere que registros, HTML e textos continuam ligados
 ```
 
 ## UI
@@ -90,7 +105,7 @@ tests/                     # testes unitários (lógica pura, storage, toque, fa
 - **Escala responsiva**: `Phaser.Scale.FIT` dentro de `#game`, cujo tamanho é definido por CSS (`--canvas-w/--canvas-h` vêm de `CANVAS`, em `main.ts`).
 - **Telas de menu** (menu, loja, pausa, game over) são DOM. Cores e fontes vivem em variáveis CSS (`:root`); o canvas as lê via `ui/theme.ts`, então mude as cores só no CSS.
 - **Toque**: `data-touch="up|down|left|right|bomb|push|detonate|pause"` nos botões; `input/touch.ts` guarda o estado e `MainScene.handleInput()` o consome junto com o teclado.
-- **Glossário** (use estes nomes em toda a UI): **POÇÃO** = moeda; **FRASCOS** = bombas ativas/limite (ex.: "+1 FRASCO"); **GEMAS**; **BLOCOS**; **TEMPO**; **VIDA** (corações). Os 4 tipos continuam "Poção de Fogo/Aqua/Telúrica/Etérea".
+- **Glossário** (use estes nomes em toda a UI): **POÇÃO** = moeda; **FRASCOS** = bombas ativas/limite (ex.: "+1 FRASCO"); **GEMAS**; **BLOCOS**; **TEMPO**; **VIDA** (barra contínua). Os 4 tipos continuam "Poção de Fogo/Aqua/Telúrica/Etérea".
 - Sem emojis na UI. Os símbolos alquímicos (△ ▽ ◇ ☿) são glifos do tema e ficam.
 
 ## Estado do trabalho
@@ -136,3 +151,11 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 - HUD text is drawn in the canvas, so it is pixel-scaled on very large screens.
 - The Phaser bundle is ~1.2 MB (full build); could be trimmed by importing only the used modules.
 - Audio levels were verified with an analyser, not by ear: tune `master`/`MUSIC_LEVEL` in `AudioEngine.ts` if it feels too quiet or loud.
+
+## Como estender e como testar
+
+Antes de acrescentar um chefe, uma forma da Roo, uma fase ou uma página, leia `docs/16-guia-de-extensao.md`: cada tipo de coisa tem uma **lista única** (registro) e uma receita curta. Depois de qualquer mudança rode `npm run check` (tipos, testes e build); `PW=... npm run smoke` abre o jogo num navegador e confere os caminhos principais. Regra de jogo vive em arquivo puro com teste; o arquivo do Phaser só desenha e liga.
+
+## Respeito à fé (regra de conteúdo)
+
+O jogo trata temas cristãos com reverência. **Nenhuma cruz em objeto destrutível, inimigo, bloco ou ficha**; a cruz só no hábito de frei Anselmo e no mosteiro. Nada que ridicularize a fé. Veja `docs/16-guia-de-extensao.md`.

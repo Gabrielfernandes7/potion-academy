@@ -3,9 +3,9 @@ import { ENEMY_TYPES, isImmune } from '../../src/game/entities/enemies/defs';
 import { LAST_STAGE, STAGES, stageDef } from '../../src/game/stages/index';
 
 describe('fases', () => {
-  it('são onze: Vale (três), Torre (três e o duelo), Retorno (três e o jardim)', () => {
-    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'crypt', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'garden']);
-    expect(LAST_STAGE).toBe(11);
+  it('são doze: Vale (três e o poço), Torre (três e o duelo), Retorno (três e o jardim)', () => {
+    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'garden']);
+    expect(LAST_STAGE).toBe(12);
   });
 
   it('a fase 1 não tem fantasmas nem flores do mal', () => {
@@ -14,13 +14,14 @@ describe('fases', () => {
     expect(kinds).not.toContain('flower');
   });
 
-  it('os chefes: Belladona na Torre, Mandrágora no jardim; só o duelo não tem porta', () => {
-    expect(stageDef(7).boss).toBe('belladonna');
-    expect(stageDef(11).boss).toBe('mandrake');
-    expect(STAGES.filter(s => s.boss)).toHaveLength(2);
+  it('os chefes: Quimera no Vale, Belladona na Torre, Mandrágora no jardim', () => {
+    expect(stageDef(4).boss).toBe('chimera');
+    expect(stageDef(8).boss).toBe('belladonna');
+    expect(stageDef(12).boss).toBe('mandrake');
+    expect(STAGES.filter(s => s.boss)).toHaveLength(3);
   });
 
-  it('só o duelo não tem porta nem inimigos comuns', () => {
+  it('as fases de chefe sem porta (Poço e Duelo) não têm inimigos comuns', () => {
     for (const s of STAGES) {
       expect(s.door).toBe(s.kind !== 'boss');
       if (s.kind === 'boss') expect(s.enemies).toHaveLength(0);
@@ -28,8 +29,8 @@ describe('fases', () => {
   });
 
   it('o jardim só tem as flores que a Mandrágora faz brotar; o salão tem fantasmas', () => {
-    expect(stageDef(11).enemies.map(e => e.kind)).toEqual(['flower']);
-    expect(stageDef(11).enemies[0].start).toBe(0);
+    expect(stageDef(12).enemies.map(e => e.kind)).toEqual(['flower']);
+    expect(stageDef(12).enemies[0].start).toBe(0);
     expect(stageDef(2).enemies.map(e => e.kind)).toContain('ghost');
   });
 

@@ -56,14 +56,36 @@ describe('storage: migração do progresso das fases', () => {
     const s = await import('../src/storage');
     expect(s.isStageCompleted(1)).toBe(true);
     expect(s.isStageCompleted(3)).toBe(false); // a Névoa (nova) ainda não foi vencida
-    expect(s.isStageCompleted(4)).toBe(true);  // a antiga 3 agora é a 4
-    expect(JSON.parse(localStorage.getItem('bombroo_stages_schema')!)).toBe(2);
+    expect(s.isStageCompleted(4)).toBe(false); // nem o Poço (chefe do Vale)
+    expect(s.isStageCompleted(5)).toBe(true);  // a antiga 3 (Escadaria) agora é a 5
+    expect(JSON.parse(localStorage.getItem('bombroo_stages_schema')!)).toBe(3);
   });
 
   it('com a versão atual não renumera de novo', async () => {
-    installLocalStorage({ bombroo_stages_completed: JSON.stringify([1, 2, 3]), bombroo_stages_schema: '2' });
+    installLocalStorage({ bombroo_stages_completed: JSON.stringify([1, 2, 3]), bombroo_stages_schema: '3' });
     const s = await import('../src/storage');
     expect(s.isStageCompleted(3)).toBe(true);
     expect(s.isStageCompleted(4)).toBe(false);
+  });
+});
+
+describe('storage: vitórias na Arena', () => {
+  beforeEach(() => { vi.resetModules(); });
+
+  it('começa sem vitórias, guarda cada chefe uma vez e lê de volta', async () => {
+    installLocalStorage();
+    const s = await import('../src/storage');
+    expect(s.arenaWins()).toEqual([]);
+    s.markArenaWin('lion');
+    s.markArenaWin('lion');
+    s.markArenaWin('chimera');
+    expect(s.arenaWins()).toEqual(['lion', 'chimera']);
+    expect(JSON.parse(localStorage.getItem('bombroo_arena_wins')!)).toEqual(['lion', 'chimera']);
+  });
+  it('um valor estranho salvo não quebra a leitura, e o progresso antigo não muda', async () => {
+    installLocalStorage({ bombroo_arena_wins: '"lixo"', bombroo_bank: '250' });
+    const s = await import('../src/storage');
+    expect(s.arenaWins()).toEqual([]);
+    expect(s.Bank.get()).toBe(250);
   });
 });

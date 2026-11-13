@@ -15,7 +15,7 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 | o desenho de poções | `src/textures/potions.ts` |
 | o desenho de itens e inimigos | `src/textures/entities.ts` |
 | a tabela de drop dos caixotes | `src/game/rewards.ts` |
-| a HUD (corações, tempo, seletor) | `src/scenes/HudScene.ts` |
+| a HUD (vida, tempo, seletor, Roo Fire; sem legendas, em ícones) | `src/scenes/HudScene.ts` |
 | o menu animado (caldeirão e Roo) | `src/scenes/MenuScene.ts` |
 | o menu, pausa, loja e fim de jogo (telas em texto) | `index.html` e `src/ui/` |
 | as cores e fontes | `src/styles/main.css` (variáveis em `:root`) |

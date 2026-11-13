@@ -17,5 +17,6 @@ Cada arquivo responde uma pergunta e cabe em uma tela.
 | [10-equilibrio.md](10-equilibrio.md) | Por que os números do jogo são esses? |
 | [11-reutilizar.md](11-reutilizar.md) | Como usar os personagens e o código em outro projeto? |
 | [12-historia.md](12-historia.md) | Qual é a história, e quem são os personagens? |
+| [16-guia-de-extensao.md](16-guia-de-extensao.md) | Onde mexer para acrescentar um chefe, uma forma, uma fase ou uma página? Como testar? Regras de respeito à fé |
 
 Regra geral: se uma informação muda, mude no arquivo certo, e não copie em outros lugares.

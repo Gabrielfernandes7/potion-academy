@@ -3,11 +3,13 @@
 // As regras puras estão em game/pickupRules.ts e game/rewards.ts.
 import Phaser from 'phaser';
 import { BOMB_ORDER, BOMB_TYPES, BombId, CONFIG } from '../config';
-import { Bank, hasBombType } from '../storage';
+import { Bank } from '../storage';
+import { canUseBomb } from './loadout';
 import { PickupType, isPotionPowerup, pickupHalo, pickupTexture, rollChestCoins, rollReward } from './rewards';
 import { pickPowerupPotion, pickupAt, resolveRewardType, timeAfterBonus } from './pickupRules';
 import { addBombSlot, addFireLevel } from './upgrades';
 import type { Pickup } from './types';
+import { HEART_HEAL, healRoo } from './entities/roo';
 import type { MainScene } from '../scenes/MainScene';
 
 export class PickupSystem {
@@ -26,7 +28,7 @@ export class PickupSystem {
     // o baú já nasce com o valor sorteado pela tabela desta fase
     const value = final === 'chest' ? rollChestCoins(this.scene.def.chest) : undefined;
     // +frasco e +raio nascem já com a poção que fortalecem (uma das que a Roo tem)
-    const potion = isPotionPowerup(final) ? pickPowerupPotion(BOMB_ORDER.filter(hasBombType)) : undefined;
+    const potion = isPotionPowerup(final) ? pickPowerupPotion(BOMB_ORDER.filter(canUseBomb)) : undefined;
     this.spawnPickupSprite(x, y, final, value, potion);
   }
 
@@ -79,7 +81,8 @@ export class PickupSystem {
         break;
       }
       case 'heart':
-        s.player.hp = Math.min(CONFIG.maxHp, s.player.hp + 1);
+        s.player.hp = healRoo(s.player.hp);
+        s.floatingText(pickup.gridX, pickup.gridY, `+${HEART_HEAL}`, '#9be564');
         s.play('pickup');
         break;
       case 'bomb_up':

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Potion Academy: manuscrito do alquimista</title>
+<meta name="description" content="O manuscrito do alquimista, um códice de vitela em escrita não decifrada: uma folha para cada personagem, com atributo, vida, força, fraqueza e habilidades.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<div class="mesa">
+  <header class="topo">
+    <a class="voltar" href="/">Voltar ao jogo</a>
+    <h1>Manuscrito do Alquimista</h1>
+    <p class="sub">Um códice de vitela, escrito numa língua que ninguém decifrou. Uma folha para cada personagem que a Roo encontra; elas se completam com a jornada.</p>
+  </header>
+
+  <div class="manuscrito">
+    <nav class="abas" id="abas" aria-label="Personagens"></nav>
+    <main class="pagina" id="pagina" aria-live="polite"></main>
+  </div>
+
+  <p class="dica">Use as setas <kbd>←</kbd> <kbd>→</kbd> ou toque nas abas para virar a página.</p>
+</div>
+<div id="stage" hidden></div>
+<script type="module" src="/src/pages/manuscrito.ts"></script>
+</body>
+</html>

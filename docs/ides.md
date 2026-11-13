@@ -270,7 +270,6 @@ Ao explodir, dispara descargas elétricas pelas casas conectadas por água.
 
 | Prioridade | Sistema                               | Por que vale a pena                                  |
 | ---------- | ------------------------------------- | ---------------------------------------------------- |
-| 1          | Grimório de receitas                  | Dá motivo para experimentar e retornar               |
 | 2          | Reações elementais                    | Diferencia o jogo de um Bomberman convencional       |
 | 3          | Laboratório persistente               | Cria progressão entre partidas                       |
 | 4          | Ingredientes com propriedades ocultas | Incentiva exploração e descoberta                    |
@@ -279,3 +278,44 @@ Ao explodir, dispara descargas elétricas pelas casas conectadas por água.
 Minha recomendação de design: não transforme Potion Academy em um jogo que apenas usa poções como bombas. Faça dele um jogo sobre descoberta alquímica, no qual o jogador aprende a manipular as propriedades da matéria para dominar a arena.
 
 Isso pode se tornar a identidade central do jogo: não vencer pela força das explosões, mas pelo conhecimento das transformações.
+
+## Guardadas em 2026-11-13 (sem decisão)
+
+**Chefes do Vale (não escolhidos):**
+- **Gólem de Caixotes:** feito dos caixotes; cada caixote quebrado vira um pedaço dele. Fraco ao fogo.
+- **Homúnculo de Sal:** fraco à água (sal se dissolve), resiste à terra.
+- **Leão Verde:** solvente universal; fraco ao éter, imune à terra.
+- **Basilisco de Vidro:** petrifica pelo olhar; fraco à água (reflete) e ao éter.
+- **Mercenário-alquimista contratado por Belladona:** rival humano que joga poções como a Roo.
+- **Espectro do Brejo:** some na névoa e reaparece.
+- **Corvo de Éter:** voa por cima de muralhas e caixotes.
+- **Sapo Mago gigante:** versão ampliada do sapo do laboratório.
+
+**Blocos e cenário:**
+- Blocos com material por capítulo (madeira, sal, pedra).
+- Blocos que não quebram, em algumas fases (só a Telúrica abre caminho).
+- Blocos empurráveis (puzzles de rota).
+- Caixotes com brilho que mostram o item escondido.
+- Poças de água que o Aqua transforma em caminho; raízes que bloqueiam por um tempo.
+- Névoa como variação em outras fases.
+
+**Habilidades da Roo (a definir):**
+- Bolhas de sabão (bloquear, carregar, flutuar pela grade).
+- Substituto do empurrão para a transformação: deve ser equilibrado, sem deixar o jogo fácil.
+- Dúvida em aberto: o significado de "apago" na descrição da transformação.
+
+## Guardadas em 2026-11-13: habilidades da Roo Fire e outras formas de obter
+
+**Mais habilidades de fogo (não feitas):**
+- **Passo de Chama:** um pulo curto de 2 casas que deixa brasas no caminho; custa 1 s da transformação.
+- **Anel de Brasas:** um círculo de brasas ao redor da Roo (escudo contra contato), com espera longa.
+- **Explosão Solar:** quando a transformação acaba, solta uma onda de fogo ao redor (a "última chama"), e a Roo fica uns segundos fraca.
+- **Tocha viva:** acende as flores do mal vizinhas e as queima; inimigos ficam com medo da chama e se afastam.
+- **Fusão com a Aqua:** vapor, quando o fogo e a água se encontram: nuvem que esconde a Roo dos inimigos por alguns segundos.
+
+**Habilidades para a Roo normal:**
+- **Bolhas de sabão** (a origem dela): bloquear um tiro, carregar uma poção ou flutuar sobre uma casa.
+
+**Outras formas de obter a transformação:**
+- Item da loja (compra única, como a Poção Aqua), recompensa de chefe, ou uma carga que enche com os caixotes quebrados.
+- Uma **segunda forma** para cada elemento (Roo Aqua, Roo Telúrica, Roo Etérea), cada uma com o próprio perfil (fraqueza, resistência) e uma habilidade.

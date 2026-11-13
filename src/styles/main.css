@@ -467,7 +467,11 @@ kbd {
   color: #fff;
 }
 
-.act.small { grid-column: 1 / -1; min-height: 38px; color: var(--text-muted); }
+.act.fire { border-color: #b8642a; color: #ffd9a8; letter-spacing: 0.02em; white-space: nowrap; }
+.act.aqua { border-color: #3a8fc4; color: #c9ecff; letter-spacing: 0.02em; white-space: nowrap; }
+.act.form { letter-spacing: 0.02em; white-space: nowrap; }
+
+.act.small { grid-column: 1 / -1; min-height: 40px; color: var(--text-muted); }
 
 .dp.pressed,
 .act.pressed {
@@ -745,6 +749,29 @@ kbd {
 }
 #shop-toast.show { opacity: 1; }
 
+/*  Arena de treino  */
+.panel.arena { width: min(100%, 860px); max-width: none; gap: 14px; }
+.panel.arena h2 { font-size: clamp(22px, 5vw, 32px); }
+.arena-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; text-align: left; }
+.arena-card {
+  display: flex; flex-direction: column; gap: 8px; padding: 12px;
+  border: 1px solid var(--panel-border); border-radius: var(--radius-m);
+  background: var(--panel-raised);
+}
+.arena-head { display: flex; gap: 12px; align-items: center; }
+.arena-sprite { flex: none; width: 64px; height: 80px; object-fit: contain; image-rendering: pixelated; background: radial-gradient(ellipse at 50% 70%, rgba(155, 229, 100, 0.12), transparent 70%); border-radius: var(--radius-s); }
+.arena-card h3 { font-size: 1rem; color: var(--gold-bright); letter-spacing: 0.04em; }
+.arena-place { margin: 0; font-size: 0.8rem; color: var(--text-faint); font-style: italic; }
+.arena-won { display: inline-block; margin-top: 2px; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.12em; color: #9be564; border: 1px solid #5f8a3c; border-radius: 999px; padding: 0 8px; }
+.arena-life { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+.arena-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.arena-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); min-width: 66px; }
+.arena-chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 2px; border: 1px solid var(--panel-border); border-radius: 999px; font-size: 0.74rem; font-weight: 700; background: rgba(255, 255, 255, 0.04); }
+.arena-chip .el-icon { display: block; }
+.arena-none { font-size: 0.78rem; color: var(--text-faint); font-style: italic; }
+.arena-tip { margin: 0; font-size: 0.82rem; color: var(--text); line-height: 1.4; }
+.arena-card .big-btn { align-self: stretch; margin-top: 2px; padding: 10px 14px; font-size: 14px; }
+
 /*  Como jogar ("?")  */
 .overlay--help { z-index: 120; padding: 12px; }
 
@@ -859,6 +886,7 @@ kbd {
 @media (max-width: 600px) {
   /* cartão da loja na horizontal: frasco à esquerda, texto à direita */
   .shop-grid { grid-template-columns: 1fr; }
+  .arena-grid { grid-template-columns: 1fr; }
 
   .shop-item {
     display: grid;
@@ -890,7 +918,7 @@ kbd {
 }
 
 @media (max-width: 420px) {
-  .chip-btn { padding: 5px 10px; font-size: 11px; letter-spacing: 0.05em; }
+  .chip-btn { padding: 5px 10px; min-height: 36px; font-size: 11px; letter-spacing: 0.05em; }
   .sound { gap: 6px; }
 }
 
@@ -900,26 +928,28 @@ kbd {
   .dpad { grid-template-columns: repeat(3, 54px); grid-template-rows: repeat(3, 54px); }
 }
 
-/* celular estreito em pé: direcional menor e botões de ação em uma coluna (cabem ao lado do direcional) */
+/* celular estreito em pé: direcional menor e os botões de ação em duas colunas pequenas (sete botões em uma coluna
+   passavam da altura da tela e o PAUSA ficava cortado) */
 @media (max-width: 380px) and (orientation: portrait) {
   .dpad { grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); gap: 3px; }
-  .actions { grid-template-columns: 1fr; gap: 5px; max-width: none; }
-  .act { min-height: 34px; padding: 4px 6px; font-size: 11px; letter-spacing: 0.04em; }
+  .actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; max-width: none; }
+  .act { min-height: 38px; padding: 4px 3px; font-size: 10px; letter-spacing: 0; }
   .act.bomb { min-height: 52px; font-size: 15px; }
-  .act.small { min-height: 30px; }
+  .act.small { min-height: 38px; }
 }
 
 /*  Menu em canvas pequeno  */
 /* #stage é um container: quando o jogo fica pequeno (celular deitado, janelas baixas), os botões do menu
    encolhem para não esconder a Roo e o caldeirão. */
 @container (max-width: 420px) {
-  .menu .big-btn { min-height: 34px; padding: 5px 14px; font-size: 12px; }
-  .menu-actions { gap: 6px; }
+  /* seis botões em duas colunas (3 linhas), cada um com pelo menos 38 px de altura: dá para tocar com o dedo */
+  .menu-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; width: min(94%, 330px); }
+  .menu .big-btn { min-height: 38px; padding: 4px 8px; font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; }
   .menu-hint { display: none; }
 }
 
 @container (max-width: 330px) {
-  .menu .big-btn { min-height: 30px; padding: 4px 10px; font-size: 11px; letter-spacing: 0.1em; }
+  .menu .big-btn { min-height: 38px; padding: 4px 6px; font-size: 11px; letter-spacing: 0.06em; }
   .menu-tag { display: none; }
 }
 
@@ -967,10 +997,15 @@ kbd {
   .touch-on .actions { max-width: 156px; gap: 6px; }
   .touch-on .act { min-height: 38px; padding: 4px 2px; font-size: 10px; letter-spacing: 0.03em; }
   .touch-on .act.bomb { min-height: 48px; font-size: 14px; }
-  .touch-on .act.small { min-height: 30px; }
+  .touch-on .act.small { min-height: 36px; }
 }
 
 /*  Movimento reduzido  */
+/* telas de toque: alvo de pelo menos 36 px de altura nos botões do topo */
+@media (pointer: coarse) {
+  .chip-btn { min-height: 36px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
@@ -979,8 +1014,3 @@ kbd {
   }
 }
 
-/* Diário da Roo */
-.diary-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; max-height: 50vh; overflow-y: auto; }
-.diary-entry b { font-family: var(--font-title, inherit); color: var(--gold, #f0c674); }
-.diary-entry p { margin: 2px 0 0; color: var(--text); }
-.diary-entry.locked { opacity: 0.5; }

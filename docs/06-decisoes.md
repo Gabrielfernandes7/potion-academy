@@ -183,4 +183,100 @@ Novas decisões entram no fim.
 - **Consequência:** `O VALE` (`stages/chapters/vale.ts`) tem 3 fases (O Chamado, O Caminho, A Névoa) e ainda não tem chefe. São 11 fases. A Névoa é a fase 3, então as seguintes subiram um número; o progresso salvo é renumerado uma vez (`bombroo_stages_schema`, `stages/migration.ts`). `PASSAGE_CARDS` e `DIARY` foram renumerados. O mapa do vale agora tem 3 lugares (um por capítulo) e o mapa de cada capítulo posiciona qualquer número de fases.
 - **Névoa:** `game/effects/Fog.ts` (camada escura com círculo claro em torno da Roo, em degraus de pixel art) e `fogRules.ts` (puro); a fase liga com `fog: { radius }`. Só atrapalha a visão: inimigos e regras são os mesmos.
 - **Lab:** `src/lab/` modular (`registry`, `LabArena`, experimentos). Ver `docs/15-lab.md`.
-- **Em aberto:** o chefe do capítulo 1; saves de antes da versão de 10 fases podem ficar com fases marcadas por engano.
+- **Em aberto:** (o chefe do capítulo 1 foi decidido: Quimera, ver abaixo); saves de antes da versão de 10 fases podem ficar com fases marcadas por engano.
+
+## Roo: habilidade de empurrar removida; transformação de fogo; barra de vida
+- **Motivo:** a habilidade de empurrar (X) não era usada no jogo e foi removida. A Roo ganha uma transformação de fogo, com sprites já prontos, e a barra de vida passa a ser como a dos chefes.
+- **Consequência:** removidos `pushAbility`, `pushCd`, `pushRange`, a barra de recarga, o botão EMPURRAR e a tecla X. A transformação dura **12 s** e depois vai saindo aos poucos (o efeito enfraquece em etapas, não corta de uma vez). Na transformação, a poção de fogo causa mais dano, o que a torna do atributo fogo. **Em aberto:** a nova habilidade que substitui o empurrão, que não pode deixar o jogo fácil demais. A transformação ainda não está implementada (pedido de não testar por enquanto).
+- **Em aberto:** perfil da Roo (fraquezas, resistências e imunidades) no formato de `profiles.ts`, para ser padronizado depois junto com os demais personagens.
+
+## Chefe do Vale: Quimera de Mercúrio
+- **Motivo:** o chefe do capítulo O Vale precisava de uma fraqueza que não fosse o fogo e de tema alquímico. Escolhida a Quimera de Mercúrio (azougue: líquida, juba de leão, chifres de bode, cauda de serpente).
+- **Consequência:** `O POÇO` é a **fase 4** (4/4 do Vale, sem porta nem gemas, `boss: 'chimera'`); as seguintes subiram um número (são 12 fases) e o progresso salvo é renumerado uma vez (`STAGE_SCHEMA` 3, passo em `stages/migration.ts`). `PASSAGE_CARDS` e `DIARY` foram renumerados; a passagem da Névoa agora leva ao poço, e a Quimera se despede (`CHIMERA_CARDS`) antes da Torre. Perfil `chimera` (24 de vida, atributo água, **fraca à terra**, **imune à água**; fogo e éter normais): terra tira 6, fogo e éter 4, água 0 ("ESCORRE"). Fogo, a poção inicial, vence em 6 golpes; a terra, em 4.
+- **Habilidades** (todas com aviso de 1,2 s no chão, como os outros chefes): *Cuspe* (jato de prata em linha reta, até diagonal, que passa pela Roo; furiosa: um segundo jato em cruz), *Gotas* (3 gotas, furiosa 5, a primeira na casa da Roo), *Escorrer* (vira poça protegida e ressurge a 2-4 casas da Roo com um respingo em cruz), *Onda* (só furiosa: faixas de 2 colunas varrem o campo; uma linha fica seca e é escolhida por alcance real, em até 4 passos, nunca a da Roo).
+- **Código:** `game/entities/bosses/chimera/` (`rules.ts` puro e testado, `lines.ts`, `ChimeraController.ts`), sprite em `textures/chimera.ts`. `BossSetup` ganhou `furiousFlash` (cor do clarão da fúria, opcional). `onBossDefeated` agora serve a Quimera e a Belladona (só a Mandrágora abre o portão e vence o jogo).
+- **Em aberto:** equilíbrio jogado (vida 24, tempos das habilidades), música própria (hoje usa "Duelo na Torre") e falas. As outras opções de chefe ficam em `ides.md`.
+
+## Vida contínua da Roo, com perfil de dano
+- **Motivo:** a Roo passa a ter barra de vida como a dos chefes e a mesma tabela de fraqueza e resistência dos outros personagens, para padronizar a estrutura (cada personagem herda o mesmo perfil).
+- **Consequência:** `PROFILES.roo` (24 pontos, atributo água, **fraca ao fogo**, resiste à água). Explosões causam dano pelo elemento (fogo 6, água 2, terra e éter 4); contato com inimigo e chefe é neutro (4); coração cura 4. `CONFIG.maxHp` agora é 24, `damagePerExplosion` saiu, e a HUD desenha uma barra com uma faixa clara que mostra o dano recém-levado (`HudScene.setHp`). Regras puras em `game/entities/roo.ts`, com teste.
+- **Equilíbrio:** 24 em vez de 20 para compensar a fraqueza: contra um golpe neutro continua dando 6 batidas; contra fogo, 4 (a Belladona usa fogo em 65% dos ataques). Aguardando jogo para ajustar.
+- **Ficou de fora:** o contato com inimigo poderia usar o elemento dele (o sapo, de água, machucaria menos). Por ora é neutro para não mudar o ritmo das fases.
+
+## Roo Fire (teste no lab): transformação, estágios e Brasas
+- **Motivo:** testar a transformação em fogo, com os sprites prontos (estágios 4 a 0), sem decidir ainda como ela entra na campanha.
+- **Consequência:** `game/rooFire.ts` (puro, testado) e o experimento `/lab.html?exp=fire-roo`. Tecla **T** transforma por **12 s**, esfriando em 4 degraus de 3 s (4, 3, 2, 1, depois normal). Depois há uma espera de 25 s (valor de teste).
+  - Degraus 4 e 3: forma de fogo, **resiste ao fogo e é fraca à água**. Degraus 2 e 1: esfriando, sem fraqueza nem resistência. Degrau 0: a Roo normal.
+  - Poções de fogo causam **+50%** de dano no auge, e o bônus cai 12,5 pontos percentuais por degrau.
+  - **Habilidade Brasas:** a explosão de fogo deixa brasas nas casas atingidas (700 ms por degrau). Queimam inimigos comuns que pisam nelas, de 0,8 em 0,8 s; chefes são imunes; a Roo nunca se queima; uma explosão de água apaga as brasas.
+- **Por que é equilibrada:** o bônus vem com um risco (a água passa a doer mais, e as próprias poções ainda machucam a Roo, só menos), o efeito é curto, cai por degrau e tem espera. Não vale para chefes além do dano da poção.
+- **Em aberto:** como a transformação é obtida no jogo (item, poção, recarga) e se a espera de 25 s fica; entrar na `MainScene`. Os dados saem do lab para `src/game/` só depois de aprovados.
+
+## Manuscrito do Alquimista no lugar do Diário (antes chamado Caderno)
+- **Motivo:** o Diário contava a história por fase; o Manuscrito mostra cada personagem em forma de carta, como num manuscrito de alquimista, com atributo, vida, força, fraqueza, dano recebido por poção e habilidades.
+- **Consequência:** o botão DIÁRIO do menu virou **MANUSCRITO** e abre a página `/manuscrito.html` (script `src/manuscrito.ts`, dados `game/manuscrito.ts`). Saíram `ui/diary.ts`, `game/diary.ts`, a janela do diário e o CSS dele (os textos antigos estão no histórico do git). Os números vêm de `profiles.ts`, então não divergem do jogo. Cada página abre quando a fase do personagem é alcançada (`?all` abre todas, para conferir); a ainda fechada mostra a silhueta.
+- **Mapa:** cada capítulo tem papel próprio ao abrir (O Vale: charneca com névoa; A Torre: pedra fria em tijolos, com torre ao fundo; O Retorno: jardim com folhas e canteiros). O mapa do vale continua em pergaminho, e o ícone do capítulo do Vale deixou de ser o do mosteiro.
+- **Quimera:** ficou mais fiel ao mito (leão, bode saindo das costas e serpente na cauda): ganhou a cabeça de bode. O fogo do mito virou mercúrio por escolha nossa.
+
+## Ícones SVG dos atributos e papel de manuscrito
+- **Motivo:** o caderno usava os glifos de texto (△ ▽ ◇ ☿) e um papel de caderno pautado, que não combinavam com a referência de manuscrito alquímico iluminado.
+- **Consequência:** `ui/elementIcons.ts` desenha um SVG próprio para cada atributo, com tinta marrom e aquarela levemente fora da linha: **Enxofre** (triângulo com a chama, sobre a cruz), **Mercúrio** (o sinal ☿ com ondas), **Sal** (círculo cortado com camadas) e **Éter** (estrela de oito pontas no círculo), com o nome latino como legenda. O traço tremido vem do filtro `#rough`, que a página declara uma vez (`ROUGH_FILTER`). O papel é um pergaminho creme liso, sem pauta, margem nem argolas, com manchas, fibras e grão em CSS e a sombra da lombada. Só o caderno usa os ícones; o jogo mantém os glifos do tema.
+
+## Caderno vira Manuscrito, com a estética do Voynich
+- **Motivo:** "o Caderno não é caderno, é manuscrito". A página passa a ser um códice de vitela, como o Manuscrito de Voynich, só como estética.
+- **Pesquisa usada:** o Voynich (Beinecke MS 408) é um códice de vitela do início do século XV (datação por carbono: 1404 a 1438), com cerca de 240 páginas, escrito numa língua que ninguém decifrou. As seções costumam ser seis: herbária (plantas com raízes grandes), farmacêutica (vidros de farmácia e partes de ervas), balneológica (banhos e tubos), astrológica/astronômica (diagramas circulares do zodíaco), cosmológica e receitas (parágrafos curtos marcados com estrelas). As palavras mais comuns em transcrição EVA são `daiin`, `ol`, `chedy`, `qokeedy`, `qokaiin`. A cor é de aquarela simples (verde, marrom, amarelo, azul e vermelho).
+- **Consequência:** `manuscrito.html` (antes `caderno.html`), `src/manuscrito.ts`, `game/manuscrito.ts`, `styles/manuscrito.css`; o botão do menu diz **MANUSCRITO**. Cada folha tem **fólio** (`f. 10v`, em outra tinta), **seção** e o **ornamento** dela em SVG próprio (`ui/ornaments.ts`), e uma **legenda em voynichês** com estrelas de parágrafo (`game/voynich.ts`: palavras sorteadas com o alfabeto EVA, sempre iguais para a mesma folha, sem significado). Seções: Belladona, Flor do mal e Mandrágora na herbária; Sapo mago e Quimera na balneológica; Fantasma na astronômica; Roo na farmacêutica; Anselmo nas receitas. Folhas ainda fechadas mostram a silhueta e a legenda ilegível.
+- **Ficou de fora:** a seção cosmológica e as páginas dobráveis; a letra à mão (não há fonte nova no projeto, só Cinzel e Nunito).
+
+## Capítulos selados no mapa: Biblioteca Proibida e Observatório
+- **Motivo:** anunciar mais dois capítulos sem ainda criá-los: a Biblioteca Proibida (livros acorrentados, manuscritos que ninguém deveria ler) e o Observatório (astrolábios, mapas celestes, cartas de estrelas, tudo como manuscritos antigos).
+- **Consequência:** `game/stages/upcoming.ts` guarda os dois. Eles **não são fases**: ficam fora de `STAGES`, `CHAPTER_LIST` e `CHAPTERS`, não mudam `LAST_STAGE` nem a numeração e não pedem migração do progresso. No mapa do vale aparecem depois de O Retorno, com cadeado, ícone próprio (estante acorrentada; cúpula com astrolábio) e o lugar escrito em escrita ilegível (voynichês). Tocá-los, ou apertar 4 ou 5, só mostra "Selado. Este capítulo ainda não pode ser visitado." O mapa do vale ganhou um diagrama circular de astros no canto (referência aos mapas celestes). O espaçamento do mapa deu margem aos rótulos largos.
+- **Para criar um de verdade:** `chapters/<nome>.ts`, uma linha em `CHAPTER_LIST`, e tirar o capítulo de `UPCOMING_CHAPTERS`. Quem passar a ter fases muda a numeração das seguintes: aumentar `STAGE_SCHEMA` e acrescentar o passo em `stages/migration.ts`.
+- **Em aberto:** fases, inimigos, chefe e papel de mapa de cada um; o papel deles seria de manuscrito (a Biblioteca em vitela escura com livros; o Observatório com cartas de estrelas e astrolábios).
+
+## Roo Fire entra no jogo: T, Brasas, Labareda e Luz de chama
+- **Motivo:** a transformação passou do lab para a partida, com habilidades novas que combinam com o fogo e não deixam o jogo fácil.
+- **Como se obtém (decidido por padrão, dá para mudar):** a Roo **já nasce com o poder**, ativado com **T** (botão ROO FIRE no toque), com 25 s de espera depois de cada uso. Alternativas guardadas em `ides.md`: item da loja, recompensa de chefe, ou carga que enche com caixotes quebrados.
+- **Consequência:** `MainScene` guarda um `FireForm` e um `EmberField` (regras em `game/rooFire.ts`). A transformação **não passa de fase** (cada fase começa normal). Os sprites trocam por estágio sem mexer na animação de andar (`textures/rooFireTextures.ts`, gerados no boot). O perfil de dano da Roo muda com o degrau (`fireProfile`): forma de fogo resiste ao fogo e é fraca à água; esfriando é neutra.
+- **Habilidades (só transformada):**
+  - **Poções de fogo +50%** (cai por degrau), nos inimigos e nos chefes; só vale para explosões da Roo (`Explosion.fromRoo`), nunca para as dos chefes.
+  - **Brasas:** a explosão de fogo acende as casas; queimam inimigos comuns de 0,8 em 0,8 s; chefes imunes; nunca machucam a Roo; a água apaga.
+  - **Labareda (X):** jato de 3 casas à frente, dano de poção de fogo, deixa brasas, **custa 2 s da transformação** e espera 3,5 s. Não derruba caixotes. Ao usar sem estar transformada, mostra "T: ROO FIRE".
+  - **Luz de chama:** +0,5 casa de visão na névoa por degrau (`Fog.setRadius`).
+- **Por que é equilibrado:** a fraqueza à água é o preço do bônus; a Labareda gasta o próprio tempo da transformação; tudo cai por degrau; e a espera de 25 s limita o uso a 3 ou 4 vezes por fase.
+- **HUD:** medidor ao lado do elemento (pronto, tempo que resta com 4 degraus, esfriando); botões ROO FIRE e LABAREDA no toque; ajuda atualizada.
+- **Em aberto:** equilíbrio jogado (bônus de 50%, espera de 25 s), som próprio da transformação e da Labareda, e as outras habilidades de `ides.md`.
+
+## HUD mais limpa e no clima do jogo
+- **Motivo:** a faixa tinha texto demais (VIDA, OURO, GEMAS, FRASCOS, BLOCOS, nome do elemento, "T: ROO FIRE"). No celular, o canvas encolhe e o texto de 9 a 10 px ficava ilegível.
+- **Consequência:** `HudScene` refeita em ícones. **Linha de cima:** coração e barra de vida (com a faixa clara do dano), ampulheta e tempo, moeda e número, gemas em **losangos** (cheio = pegou); na luta de chefe, a vida dele toma o lugar das gemas. **Linha de baixo:** os 4 frascos, o medidor da Roo Fire em **4 degraus** (com a tecla T ou X ao lado) e **bolinhas** dos frascos já colocados, na cor do elemento escolhido. Saíram as legendas de texto, o contador de BLOCOS (continua na tela de fim) e o nome do elemento (o ícone e a cor dizem). Moldura dourada fina com rebites nos cantos e filetes com losango entre as zonas, como num instrumento de alquimia. Regras puras em `hudState.ts` (`pipsView`, `segmentFill`).
+- **Ficou de fora:** HUD maior só para telas pequenas; cada zona continua do mesmo tamanho no canvas (o `Scale.FIT` a reduz).
+
+## Blocos próprios por fase
+- **Motivo:** o chão mudava pouco entre as fases; o bloco é o que mais se vê.
+- **Consequência:** 12 estilos, um por fase (lista em `03-mundo.md`), mais a pilha de livros acorrentados para a Biblioteca. `StageSpec.block` escolhe o estilo; sem ele, madeira ou canteiro. Texturas procedurais em `textures/blocks.ts`. Só muda o desenho.
+
+## Arena de treino e o Leão Verde
+- **Motivo:** treinar chefes sem refazer a campanha, e já ter o chefe da Biblioteca Proibida (selada) para testar.
+- **Consequência:** botão ARENA no menu (`ui/arena.ts`, `game/arena.ts`). A luta é uma fase de chefe montada na hora (`ARENA_STAGE` = 0, fora de `STAGES`): sem porta, sem inimigos comuns, 10 min, e **todas as poções liberadas** (`game/loadout.ts`: `canUseBomb`). Vencer guarda o chefe (`bombroo_arena_wins`, chave nova) e **abre a página dele no Manuscrito**; a página do Leão Verde só abre assim, porque o capítulo dele está selado. Não dá ouro nem marca fase vencida. "Tentar novamente" e R recomeçam a mesma luta (`MainScene.restartData`).
+- **Leão Verde** (`bosses/lion/`, sprite em `textures/greenLion.ts`): 28 de vida, **imune à terra**, **fraco ao éter**, resiste à água. Habilidades: Bote (some e salta; fica exposto), Dissolver (ácido na linha da sua casa que dissolve as suas poções) e Rugido (só furioso). É o inverso da Quimera: a terra, que a prende, não o toca.
+- **Ficou de fora:** a fase dele na campanha (a Biblioteca Proibida segue selada), a despedida em cartões e a música própria.
+
+## Roteiro aplicado ao jogo
+- **Motivo:** a história estava só no livro (`history.html`) e no roteiro; faltava no jogo.
+- **Consequência:** carta, cartões de fase, passagens, despedida da Belladona, falas dela, confissão de Anselmo (com a noite da bolha) e as dicas dos chefes agora seguem `12-historia.md`. A tabela de estado está em `12-historia.md`. **A revisar:** os furos de roteiro listados lá (o autor vai avaliar depois).
+
+## Sem cruzes em objetos do jogo (respeito à fé)
+- **Motivo:** a laje de pedra da Escadaria tinha uma runa em forma de cruz, o selo de cera do Corredor um "+", o caixote de madeira um "+" feito de tábuas, a pilha de pergaminhos uma fita vertical que cruzava os rolos, a pilha de livros correntes em "X" e a ficha de +raio uma cruz grande. Blocos são destruídos em explosões: um símbolo sagrado não deve estar em algo que se destrói. O autor é cristão.
+- **Consequência:** caixote e musgo com tábuas horizontais e pregos; laje com um brasão de círculo e triângulo; selo de cera com anel e ponto; pergaminhos com fitas em posições diferentes; livros com uma corrente horizontal e cadeado; ficha de +raio como ondas de explosão com setas nas diagonais; o "+" verde das fichas de frasco virou seta para cima. **Regra permanente** (`CLAUDE.md` e `docs/16-guia-de-extensao.md`): nenhuma cruz em objeto destrutível, inimigo, bloco ou ficha; a cruz só no hábito de frei Anselmo e na capela do mosteiro (mapa). O formato de explosão em quatro direções é geometria de jogo, não símbolo.
+
+## Formas da Roo: 16 s, Roo Aqua, regras de poção e som
+- **Motivo:** a transformação de fogo ficava curta; faltava a de água, com a bolha de sabão (a origem da Roo); e a forma de fogo não devia usar água.
+- **Consequência:** todas as formas duram **16 s** (33% a mais que os 12 s), em 4 degraus de 4 s, com uma espera comum de 25 s. **Roo Fire** não pode usar a Poção Aqua enquanto durar (`loadout.setForbiddenElement`; se era a escolhida, troca ao transformar; o slot apaga). **Roo Aqua** (tecla **Y**): imune à água no auge (esfriando, resistência), fraca ao fogo, poções de água +50%, pode usar todas as poções. **Bolha de sabão (X)**: bolha que flutua até 4 casas e prende o primeiro inimigo comum (`Enemy.trapMs`: parado, inofensivo, sem chicote), por 1,75 a 4 s; chefes imunes; estoura com som. Sprite da forma de água: `textures/rooWater.ts` (capa azul em degradê, gotas, bolhas que giram e ondas nos pés). **Sons** novos: `transform` (fogo ruge e estala; água borbulha subindo), `formEnd`, `flame`, `bubble`, `pop`.
+- **Escolha do jogador:** a habilidade (X) é uma só tecla; o botão de toque HABILIDADE muda de nome com a forma (LABAREDA ou BOLHA).
+- **Em aberto:** o equilíbrio jogado (a bolha prende por muito tempo?), outras formas (Telúrica, Etérea), e a Roo Aqua poder prender também a flor do mal.
+
+## Arquitetura por registros e testes de contrato
+- **Motivo:** o jogo muda muito nos personagens, nas formas, nas fases e nos textos, e pouco na estrutura. Um chefe novo tocava cerca de 12 arquivos (perfil, id, regras, falas, controlador, textura, grupo do catálogo, quatro `if` na cena, lista da Arena, página do Manuscrito, fase, testes).
+- **Consequência:** uma **lista única por tipo de coisa** (`docs/16-guia-de-extensao.md`): `bosses/defs.ts` + `registry.ts` (chefes), `forms/registry.ts` (transformações), `enemies/defs.ts`, `profiles.ts`, `stages/chapters`. A Arena, as texturas dos chefes, o catálogo de sprites, o nascimento e a despedida deles agora **derivam** do registro; o `Record<Id, Definição>` faz o TypeScript exigir a entrada. A `MainScene` perdeu 225 linhas: `RooFormSystem` (formas) e `StoryDirector` (cartão de fase, passagens, final, despedida) saíram dela. As páginas de apoio foram para `src/pages/` com um boot compartilhado (`pages/shared.ts`). Os **testes de contrato** (`tests/contracts/`: chefes, formas, fases, HTML e sprites) dizem o que falta quando algo novo é ligado pela metade. Novos comandos: `npm run check` e `npm run smoke` (navegador, com Playwright fora do projeto).
+- **Ficou de fora:** pôr os textos de cada chefe (Manuscrito) dentro da pasta dele (hoje os textos ficam em `manuscrito.ts` e `story.ts`, para quem escreve ter um lugar só, e o contrato cuida da ligação); o mesmo registro para os inimigos comuns no Manuscrito.

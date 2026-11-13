@@ -1,7 +1,7 @@
 // Cena do nascimento da Roo (livro da história, capítulo "A bolha"): pixel art em 240x135, ampliada sem suavização.
 // A Roo é a do próprio jogo: as texturas vêm de generateTextures. Carregada só quando a pessoa aperta "Ver a cena".
 import Phaser from 'phaser';
-import { generateTextures } from './textures';
+import { generateTextures } from '../textures';
 
 const W = 240;
 const H = 135;

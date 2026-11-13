@@ -8,7 +8,6 @@ import './styles/main.css';
 import { CANVAS } from './config';
 import { audio } from './audio/AudioEngine';
 import { SCENE_TRACKS } from './audio/tracks';
-import { bindDiary, isDiaryOpen, openDiary } from './ui/diary';
 import { bootGame, retryGame, showMenu, startGame, textureDataUrl, showMap } from './game/launcher';
 import { loadAudioPrefs, saveAudioPrefs } from './audio/prefs';
 import { touch } from './input/touch';
@@ -17,6 +16,7 @@ import { bindMenuButtons, isMenuVisible } from './ui/menu';
 import { closeMusicRoom, initMusicRoom, isMusicRoomOpen, openMusicRoom } from './ui/musicRoom';
 import { isShopOpen, openShop, renderShop } from './ui/shop';
 import { bindHelp } from './ui/help';
+import { bindArena, isArenaOpen, openArena } from './ui/arena';
 
 function setupLayout(): void {
   const root = document.documentElement;
@@ -107,8 +107,10 @@ function bindButtons(): void {
   document.addEventListener('pointerdown', wake, { passive: true });
   document.addEventListener('keydown', wake);
 
-  bindMenuButtons({ play, shop: openShop, music: openMusicRoom, map: showMap, diary: openDiary });
-  bindDiary();
+  // o manuscrito do alquimista é uma página própria (manuscrito.html), no mesmo molde do livro da história
+  const openManuscript = (): void => { location.assign('/manuscrito.html'); };
+  bindMenuButtons({ play, shop: openShop, music: openMusicRoom, map: showMap, arena: openArena, manuscript: openManuscript });
+  bindArena();
   byId('music-overlay').addEventListener('keydown', e => { if (e.key === 'Escape') closeMusicRoom(); });
   bindHelp();
   // botões do topo não ficam com o foco: senão Espaço/Enter no jogo os apertariam de novo
@@ -129,7 +131,7 @@ function bindButtons(): void {
 
   // Enter inicia o jogo, mas só enquanto o menu está na tela (na partida, Enter é pausa)
   window.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && isMenuVisible() && !isShopOpen() && !isMusicRoomOpen() && !isDiaryOpen()) {
+    if (e.key === 'Enter' && isMenuVisible() && !isShopOpen() && !isMusicRoomOpen() && !isArenaOpen()) {
       e.preventDefault();
       play();
     }

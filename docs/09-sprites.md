@@ -97,12 +97,12 @@ Quando uma explosão atinge um inimigo ou a Roo, aparece um efeito próprio do e
 
 ## Organização por papel no jogo
 
-As categorias abaixo aparecem agrupadas no catálogo (`src/sprites.ts`) e em `docs/img/sprites/`. Os arquivos de código ainda são separados por tipo técnico (`roo.ts`, `witch.ts`, `entities.ts`); a pasta de código pode seguir a mesma divisão depois:
+As categorias abaixo aparecem agrupadas no catálogo (`src/pages/sprites.ts`; os grupos estão em `src/textures/groups.ts`) e em `docs/img/sprites/`. Os arquivos de código ainda são separados por tipo técnico (`roo.ts`, `witch.ts`, `entities.ts`); a pasta de código pode seguir a mesma divisão depois:
 
 | Pasta | O que vai dentro | Exemplos atuais |
 |---|---|---|
 | `heroes/` | a jogadora | Roo |
-| `bosses/` | chefes | Belladona (`witch_*`) |
+| `bosses/` | chefes | Belladona (`witch_*`), Mandrágora, Quimera (`chimera_*`) e Leão Verde (`lion_*`) |
 | `enemies/` | inimigos comuns | sapo mago (`enemy`), fantasma (`enemy_ghost`) |
 | `objects/` | o que se coleta ou se usa | poções (`bomb_*`), itens (`pickup_*`), caixotes e portas |
 | `effects/` | partículas e brilhos | `menu_spark`, `menu_bubble`, `menu_puff`, explosões |

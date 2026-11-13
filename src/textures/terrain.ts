@@ -32,13 +32,13 @@ export function drawTerrain(make: MakeFn): void {
 
   make('block', (g, T) => {
     // Bloco de madeira/magia (destrutível)
+    // tábuas horizontais e pregos (nada que forme uma cruz: o bloco é destruído nas explosões)
     g.fillStyle(0x8b7355); g.fillRect(0, 0, T, T);
     g.fillStyle(0xa89968); g.fillRect(3, 3, T - 6, T - 6);
-    g.lineStyle(2, 0xc9d6df);
-    g.beginPath(); g.moveTo(3, T / 2); g.lineTo(T - 3, T / 2);
-    g.moveTo(T / 2, 3); g.lineTo(T / 2, T - 3); g.strokePath();
-    g.fillStyle(0x6b5a3e);
-    g.fillCircle(T / 2, T / 2, 2);
+    g.fillStyle(0x6b5a3e); g.fillRect(3, T / 3 + 1, T - 6, 2); g.fillRect(3, (2 * T) / 3 - 1, T - 6, 2);
+    g.fillStyle(0xc9b88a); g.fillRect(4, 4, T - 8, 2);
+    g.fillStyle(0x4a3c28);
+    for (const [x, y] of [[6, 8], [T - 7, 8], [6, T - 9], [T - 7, T - 9]]) g.fillCircle(x, y, 1.3);
   });
 
   make('door_closed', (g, T) => {

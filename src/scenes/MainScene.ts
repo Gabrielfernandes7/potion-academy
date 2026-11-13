@@ -7,7 +7,8 @@
 import Phaser from 'phaser';
 import { BLOCK, BOMB_ORDER, BombId, CANVAS, CONFIG, ElementId, EMPTY, WALL } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
-import { Bank, hasBombType } from '../storage';
+import { ARENA_STAGE, arenaStageDef } from '../game/arena';
+import { canUseBomb, isBannedBomb, setArenaLoadout } from '../game/loadout';
 import { rooOriginY } from '../textures/rooGeometry';
 import type { Facing, Player, PowerupCounts, StageData } from '../game/types';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
@@ -15,11 +16,13 @@ import { touch } from '../input/touch';
 import { hideGameOver, setPauseVisible, showGameOver } from '../ui/overlays';
 import { isShopOpen } from '../ui/shop';
 import { isHelpOpen } from '../ui/help';
-import { readTheme } from '../ui/theme';
 import { Fog } from '../game/effects/Fog';
 import { BossBase } from '../game/entities/bosses/BossBase';
-import { BelladonnaController } from '../game/entities/bosses/belladonna/BelladonnaController';
-import { MandrakeController } from '../game/entities/bosses/mandrake/MandrakeController';
+import { BOSS_DEFS } from '../game/entities/bosses/defs';
+import { createBoss } from '../game/entities/bosses/registry';
+import { damageToRoo } from '../game/entities/roo';
+import { RooFormSystem } from '../game/RooFormSystem';
+import { StoryDirector } from '../game/StoryDirector';
 import { BombSystem } from '../game/BombSystem';
 import { PickupSystem } from '../game/PickupSystem';
 import { EnemySystem } from '../game/entities/enemies/EnemySystem';
@@ -27,14 +30,12 @@ import { SleepSystem } from '../game/SleepSystem';
 import { markStageCompleted } from '../storage';
 import { cloneUpgrades, createUpgrades } from '../game/upgrades';
 import { HIT_TINT, hitFx } from '../game/entities/hitEffects';
-import { SCENE_TRACKS } from '../audio/tracks';
-import { showDialogue } from '../ui/dialogue';
-import { ANSELMO, BELLADONA_CARDS, ENDING_CARDS, MANDRAKE_CARDS, PASSAGE_CARDS, type StoryCard } from '../game/story';
 import { ENEMY_TYPES, EnemyKind } from '../game/entities/enemies/defs';
 import { LAST_STAGE, stageDef } from '../game/stages/index';
-import { StageDef, StageTheme } from '../game/stages/types';
+import { blockTextureOf } from '../game/stages/blockStyles';
+import { BossId, StageDef, StageTheme } from '../game/stages/types';
 
-type MainKeys = Record<'space' | 'x' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
+type MainKeys = Record<'space' | 'x' | 't' | 'y' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
 
 // Aparência de cada fase: texturas do chão, da muralha, do caixote e da porta (e um tom, se houver).
 interface Look {
@@ -61,7 +62,6 @@ export class MainScene extends Phaser.Scene {
   coins = 0;
   gems = 0;
   bombType: BombId = 'normal';
-  cooldowns = { push: 0 };
   gameOver = false;
   won = false;
   player!: Player;
@@ -80,7 +80,6 @@ export class MainScene extends Phaser.Scene {
   isPaused = false;
   gemBlocks = new Set<string>();
   playerSprite!: Phaser.GameObjects.Sprite;
-  cdGraphics!: Phaser.GameObjects.Graphics;
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   keys!: MainKeys;
   stage = 1; // 1 laboratório, 2 salão dos fantasmas, 3 duelo com a Belladona, 4 jardim (ver STAGES em config.ts)
@@ -88,13 +87,27 @@ export class MainScene extends Phaser.Scene {
   fog: Fog | null = null; // névoa da fase (se a fase tiver `fog`)
   transitioning = false; // passando de fase: ignora entrada
   private helpPaused = false;
+  // As transformações da Roo (T: fogo, Y: água; X: a habilidade da forma). Criado em create().
+  forms!: RooFormSystem;
+  // A direção da história (cartão de fase, passagens, final, despedida dos chefes). Criado em create().
+  story!: StoryDirector;
 
   constructor() {
     super('Main');
   }
 
+  // Treino na Arena: o chefe escolhido (ou null na campanha). A luta é uma fase montada na hora (game/arena.ts).
+  arena: BossId | null = null;
+  private arenaDef: StageDef | null = null;
+
   get def(): StageDef {
+    if (this.arena) return (this.arenaDef ??= arenaStageDef(this.arena));
     return stageDef(this.stage);
+  }
+
+  // Dados explícitos para recomeçar (o Phaser reaproveita os do último reinício): a Arena recomeça a luta; a campanha, a fase 1.
+  restartData(): StageData {
+    return this.arena ? { stage: ARENA_STAGE, arena: this.arena } : { stage: 1 };
   }
 
   get isBossStage(): boolean {
@@ -102,7 +115,10 @@ export class MainScene extends Phaser.Scene {
   }
 
   init(data?: StageData): void {
-    this.stage = data?.stage ?? 1;
+    this.arena = data?.arena ?? null;
+    this.arenaDef = null;
+    setArenaLoadout(!!this.arena); // na Arena, todas as poções estão liberadas
+    this.stage = this.arena ? ARENA_STAGE : (data?.stage ?? 1);
     this.boss = null;
     this.fog = null;
     this.transitioning = false;
@@ -112,7 +128,6 @@ export class MainScene extends Phaser.Scene {
     this.coins = 0;
     this.gems = 0;
     this.bombType = 'normal';
-    this.cooldowns = { push: 0 };
     this.gameOver = false;
     this.won = false;
     this.moveCarry = 0;
@@ -137,7 +152,8 @@ export class MainScene extends Phaser.Scene {
     this.doorX = this.def.door ? CONFIG.cols - 2 : -1;
     this.doorY = this.def.door ? CONFIG.rows - 2 : -1;
     this.doorOpen = false;
-    this.look = LOOKS[this.def.theme];
+    // o chão e a muralha vêm do tema; o bloco é o da fase (cada fase tem o seu: game/stages/blockStyles.ts)
+    this.look = { ...LOOKS[this.def.theme], block: blockTextureOf(this.def), blockTint: undefined };
     this.timeLeft = this.def.time;
     this.overtimeDamageTimer = CONFIG.overtimeDamageInterval;
     this.blocksDestroyed = 0;
@@ -174,11 +190,11 @@ export class MainScene extends Phaser.Scene {
       this.player.gridY * CONFIG.tile + CONFIG.tile / 2,
       'roo_down_0',
     ).setOrigin(0.5, rooOriginY(CONFIG.tile)).setDepth(10);
-    this.cdGraphics = this.add.graphics().setDepth(15);
     this.enemySystem.createLashGfx();
+    this.forms = new RooFormSystem(this);
+    this.story = new StoryDirector(this);
     if (this.def.fog) this.fog = new Fog(this, CONFIG.cols * CONFIG.tile, CONFIG.rows * CONFIG.tile, this.def.fog.radius, CONFIG.tile);
-    if (this.def.boss === 'belladonna') this.boss = new BelladonnaController(this);
-    else if (this.def.boss === 'mandrake') this.boss = new MandrakeController(this);
+    if (this.def.boss) this.boss = createBoss(this.def.boss, this);
     if (this.stage > 1) this.cameras.main.fadeIn(600, 8, 14, 12);
     // a grade é desenhada abaixo da faixa da HUD (cena 'Hud', por cima)
     this.cameras.main.setViewport(0, CONFIG.hudHeight, CANVAS.width, CONFIG.rows * CONFIG.tile);
@@ -189,46 +205,8 @@ export class MainScene extends Phaser.Scene {
     });
     this.updateHud();
     this.playIdle();
-    this.showStageBanner();
+    this.story.showBanner();
     if (!this.scene.isActive('Hud')) this.scene.launch('Hud');
-  }
-
-  // Cartão de entrada da fase: número e lugar, nome, uma frase da história e (se houver) a dica.
-  showStageBanner(): void {
-    const theme = readTheme();
-    const cx = (CONFIG.cols * CONFIG.tile) / 2;
-    const cy = (CONFIG.rows * CONFIG.tile) / 2;
-    const textW = CONFIG.cols * CONFIG.tile - 48;
-    const items: Phaser.GameObjects.GameObject[] = [];
-    const hasTip = !!this.def.tip;
-    const bandH = hasTip ? 150 : 124;
-    items.push(this.add.rectangle(cx, cy, CONFIG.cols * CONFIG.tile, bandH, 0x120d08, 0.78).setDepth(29));
-    let y = cy - bandH / 2 + 22;
-    const head = this.def.chapter ? `${this.def.chapter} · ${this.def.part ?? ''}`.replace(/ · $/, '') : `FASE ${this.stage}`;
-    items.push(this.add.text(cx, y, `${head} · ${this.def.place.toUpperCase()}`, {
-      fontFamily: theme.fontDisplay, fontSize: '12px', color: theme.textMuted, fontStyle: '700',
-    }).setOrigin(0.5).setDepth(30));
-    y += 28;
-    items.push(this.add.text(cx, y, this.def.name, {
-      fontFamily: theme.fontDisplay, fontSize: '26px', color: '#f0c674', fontStyle: '700',
-      stroke: '#000000', strokeThickness: 3,
-    }).setOrigin(0.5).setDepth(30));
-    y += 22;
-    const story = this.add.text(cx, y, this.def.story, {
-      fontFamily: theme.fontBody, fontSize: '13px', fontStyle: 'italic', color: '#f1e6c9',
-      align: 'center', wordWrap: { width: textW },
-    }).setOrigin(0.5, 0).setDepth(30);
-    items.push(story);
-    if (this.def.tip) {
-      items.push(this.add.text(cx, y + story.height + 8, this.def.tip, {
-        fontFamily: theme.fontBody, fontSize: '12px', color: '#c9b98f',
-        align: 'center', wordWrap: { width: textW },
-      }).setOrigin(0.5, 0).setDepth(30));
-    }
-    this.tweens.add({
-      targets: items, alpha: 0, delay: 3200, duration: 600,
-      onComplete: () => items.forEach(i => i.destroy()),
-    });
   }
 
   // ---------- Animação do herói ----------
@@ -292,15 +270,16 @@ export class MainScene extends Phaser.Scene {
 
   // Próximo tipo de frasco que a jogadora possui (botão TROCAR no toque; os slots da HUD são pequenos demais para o dedo).
   cycleBomb(): void {
-    const owned = BOMB_ORDER.filter(t => hasBombType(t));
+    const owned = BOMB_ORDER.filter(t => canUseBomb(t));
     if (owned.length === 0) return;
     const at = owned.indexOf(this.bombType);
     this.setBomb(owned[(at + 1) % owned.length]);
   }
 
   setBomb(type: BombId): void {
-    if (!hasBombType(type)) {
-      this.floatingText(this.player.gridX, this.player.gridY, 'BLOQUEADA', '#bfae8a');
+    if (!canUseBomb(type)) {
+      // a chama recusa a água; as outras poções só estão bloqueadas por não terem sido compradas
+      this.floatingText(this.player.gridX, this.player.gridY, isBannedBomb(type) ? 'A CHAMA RECUSA A ÁGUA' : 'BLOQUEADA', '#bfae8a', 12, 900);
       return;
     }
     this.bombType = type;
@@ -363,7 +342,7 @@ export class MainScene extends Phaser.Scene {
     // área livre em L ao redor do spawn, para sempre haver rota de fuga
     if (this.isBossStage) {
       // o chefe nasce num canto (Belladona embaixo, Mandrágora em cima): deixa as casas ao redor livres
-      const r = this.def.boss === 'mandrake' ? 1 : CONFIG.rows - 2;
+      const r = this.def.boss && BOSS_DEFS[this.def.boss].spawn === 'top' ? 1 : CONFIG.rows - 2;
       const c = CONFIG.cols - 2;
       if ((y === r && x >= c - 2) || (x === c && Math.abs(y - r) <= 2)) return true;
     }
@@ -452,47 +431,12 @@ export class MainScene extends Phaser.Scene {
     this.transitioning = true;
     this.play('door');
     if (this.stage >= LAST_STAGE) {
-      // portão do jardim: frei Anselmo espera. A confissão fecha a história.
-      this.floatingText(this.player.gridX, this.player.gridY, 'O PORTÃO SE ABRE', '#9be564');
-      this.coins += CONFIG.gardenVictoryBonus;
-      Bank.add(CONFIG.gardenVictoryBonus);
-      this.time.delayedCall(900, () => { void this.playEnding(); });
+      this.story.gateReached(); // portão do jardim: frei Anselmo espera e a confissão fecha a história
       return;
     }
     markStageCompleted(this.stage);
     this.floatingText(this.player.gridX, this.player.gridY, 'FASE COMPLETA!', '#9be564');
-    void this.playPassage();
-  }
-
-  // Passagem entre fases: a Roo lê ou ouve algo (se a fase tem cartões) e só então segue.
-  playPassage(): void {
-    const cards = PASSAGE_CARDS[this.stage];
-    if (cards) void this.showPassage(cards);
-    else this.advanceStage();
-  }
-
-  async showPassage(cards: StoryCard[]): Promise<void> {
-    this.scene.pause();
-    await showDialogue(cards, 'SEGUIR');
-    this.scene.resume();
-    this.advanceStage();
-  }
-
-  // Final: frei Anselmo confessa e devolve o frasco vazio. A cena fica parada durante a conversa
-  // (nada acontece com a Roo) e só depois aparece a tela de fim.
-  async playEnding(): Promise<void> {
-    audio.playTrack(SCENE_TRACKS.ending);
-    const portrait = this.textures.getBase64('anselmo_retrato') || undefined;
-    this.scene.pause();
-    await showDialogue(ENDING_CARDS.map(c => ({ ...c, portrait: c.speaker === ANSELMO ? portrait : undefined })), 'FIM');
-    // última cena: a Roo de volta ao Caldeirão (a partida segue pausada por baixo);
-    // só depois vem a tela "Jornada cumprida"
-    this.game.events.once('end:done', () => {
-      this.scene.resume();
-      this.won = true;
-      this.triggerGameOver();
-    });
-    this.scene.launch('End');
+    this.story.passage();
   }
 
   // Fade e recomeço da cena na fase seguinte, levando vida, power-ups, moedas e o frasco escolhido.
@@ -513,37 +457,9 @@ export class MainScene extends Phaser.Scene {
     });
   }
 
-  // A Belladona foi derrotada: bônus de OURO e a Roo segue para o jardim, fora do castelo.
+  // Um chefe foi derrotado (chamado pelo controlador dele): a direção da história decide o resto.
   onBossDefeated(): void {
-    if (this.gameOver || this.transitioning) return;
-    this.transitioning = true;
-    this.coins += CONFIG.bossVictoryBonus;
-    Bank.add(CONFIG.bossVictoryBonus);
-    if (this.def.boss === 'mandrake') {
-      // jardim: a Mandrágora se despede e o portão (onde Anselmo espera) se abre
-      this.floatingText(this.player.gridX, this.player.gridY, 'MANDRÁGORA DERROTADA!', '#9be564');
-      this.time.delayedCall(1600, () => { void this.playMandrakeFarewell(); });
-      return;
-    }
-    markStageCompleted(this.stage);
-    this.floatingText(this.player.gridX, this.player.gridY, 'BELLADONA DERROTADA!', '#9be564');
-    // espera a queda dela terminar; então ela se despede (cartões) e a Roo segue para o jardim
-    this.time.delayedCall(1600, () => { void this.playBossFarewell(); });
-  }
-
-  async playMandrakeFarewell(): Promise<void> {
-    this.scene.pause();
-    await showDialogue(MANDRAKE_CARDS, 'SEGUIR');
-    this.scene.resume();
-    this.transitioning = false;
-    this.openDoor();
-  }
-
-  async playBossFarewell(): Promise<void> {
-    this.scene.pause();
-    await showDialogue(BELLADONA_CARDS, 'SEGUIR');
-    this.scene.resume();
-    this.advanceStage();
+    this.story.bossDefeated();
   }
 
   // Casa onde a jogadora está de fato (posição do sprite, como o dano).
@@ -557,8 +473,10 @@ export class MainScene extends Phaser.Scene {
   // Dano à Roo; o efeito do elemento vive em game/entities/hitEffects.ts.
   damagePlayer(bypassInvuln = false, element?: ElementId): void {
     if (!bypassInvuln && this.player.invulnerable > 0) return;
-    this.player.hp -= CONFIG.damagePerExplosion;
+    const damage = damageToRoo(element, this.forms.profile()); // transformada, o que a machuca muda
+    this.player.hp -= damage;
     this.player.invulnerable = CONFIG.invulnTime;
+    this.floatingText(this.player.gridX, this.player.gridY, `-${damage}`, '#ff8a80');
     this.updateHud();
     this.play('hurt');
     this.playerSprite.setTint(element ? HIT_TINT[element] : 0xff5252);
@@ -673,7 +591,7 @@ export class MainScene extends Phaser.Scene {
     this.cursors = keyboard.createCursorKeys();
     const K = Phaser.Input.Keyboard.KeyCodes;
     this.keys = keyboard.addKeys({
-      space: K.SPACE, x: K.X, d: K.D, r: K.R,
+      space: K.SPACE, x: K.X, t: K.T, y: K.Y, d: K.D, r: K.R,
       one: K.ONE, two: K.TWO, three: K.THREE, four: K.FOUR,
       enter: K.ENTER,
     }) as unknown as MainKeys;
@@ -735,7 +653,9 @@ export class MainScene extends Phaser.Scene {
 
     if (JD(this.keys.space) || touch.consumeAction('bomb')) this.bombSystem.placeBomb();
     if (touch.consumeAction('cycle')) this.cycleBomb();
-    if (JD(this.keys.x) || touch.consumeAction('push')) this.bombSystem.pushAbility();
+    if (JD(this.keys.t) || touch.consumeAction('transformFire')) this.forms.transform('fire');
+    if (JD(this.keys.y) || touch.consumeAction('transformWater')) this.forms.transform('water');
+    if (JD(this.keys.x) || touch.consumeAction('ability')) this.forms.useAbility();
     if (JD(this.keys.d) || touch.consumeAction('detonate')) this.bombSystem.detonateRemote();
     if (JD(this.keys.one)) this.setBomb('normal');
     if (JD(this.keys.two)) this.setBomb('mega');
@@ -761,6 +681,7 @@ export class MainScene extends Phaser.Scene {
       selected: this.bombType,
       stage: this.stage,
       boss: this.boss ? this.boss.hudView() : null,
+      form: this.forms.hudView(),
     };
   }
 
@@ -789,22 +710,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   updateCooldowns(delta: number): void {
-    this.cooldowns.push = Math.max(0, this.cooldowns.push - delta);
     this.player.invulnerable = Math.max(0, this.player.invulnerable - delta);
-  }
-
-  updateCooldownBar(): void {
-    this.cdGraphics.clear();
-    if (this.gameOver || this.won) return;
-    const cd = this.cooldowns.push;
-    if (cd <= 0) return;
-    const ratio = 1 - cd / CONFIG.pushCd;
-    const px = this.playerSprite.x - CONFIG.tile / 2 + 6;
-    const py = this.playerSprite.y - CONFIG.tile / 2 + CONFIG.tile - 4;
-    this.cdGraphics.fillStyle(0x000000, 0.65);
-    this.cdGraphics.fillRect(px, py, CONFIG.tile - 12, 3);
-    this.cdGraphics.fillStyle(0xff8c1a, 1);
-    this.cdGraphics.fillRect(px, py, (CONFIG.tile - 12) * ratio, 3);
   }
 
   triggerGameOver(): void {
@@ -816,7 +722,7 @@ export class MainScene extends Phaser.Scene {
     this.enemySystem.clearLash();
     if (this.won) {
       // sem fanfarra: as "Vésperas" da confissão seguem tocando no fim
-      markStageCompleted(this.stage);
+      if (!this.arena) markStageCompleted(this.stage);
     } else {
       audio.playGameOverMusic();
     }
@@ -829,6 +735,7 @@ export class MainScene extends Phaser.Scene {
       blocksDestroyed: this.blocksDestroyed,
       timeLeft: Math.max(0, this.timeLeft),
       stage: this.stage,
+      arenaBoss: this.arena ? (this.boss?.name ?? this.def.name) : undefined,
     });
   }
 
@@ -850,6 +757,18 @@ export class MainScene extends Phaser.Scene {
 
   play(name: SfxName, variant?: ElementId): void {
     audio.play(name, variant);
+  }
+
+  // ---------- Roo Fire e Roo Aqua (as transformações: ver game/RooFormSystem.ts) ----------
+
+  // Bônus de dano da forma para as explosões da Roo (poção e Labareda); chamado por inimigos e chefes.
+  boostBlast(base: number, element: ElementId): number {
+    return this.forms.boost(base, element);
+  }
+
+  // Uma explosão da Roo: o fogo acende brasas (forma de fogo) e a água as apaga.
+  onRooBlast(tiles: Array<{ x: number; y: number }>, element: ElementId): void {
+    this.forms.onBlast(tiles, element);
   }
 
   // ---------- Janela de ajuda ----------
@@ -887,7 +806,7 @@ export class MainScene extends Phaser.Scene {
       hideGameOver();
       setPauseVisible(false);
       // dados explícitos: sem eles o Phaser reaproveita os do último reinício (e voltaria à fase 2)
-      this.scene.restart({ stage: 1 } satisfies StageData);
+      this.scene.restart(this.restartData());
       return;
     }
     if (!this.isPaused) this.stepPlayerMove(delta);
@@ -903,7 +822,7 @@ export class MainScene extends Phaser.Scene {
     this.sleepSystem.update(delta);
     this.updateTimer(delta);
     this.updateCooldowns(delta);
-    this.updateCooldownBar();
+    this.forms.update(delta);
     this.bombSystem.update(delta);
     this.enemySystem.update(delta);
     this.boss?.update(delta);
