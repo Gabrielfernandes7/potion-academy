@@ -201,21 +201,21 @@ export function drawEntities(make: MakeFn): void {
       g.fillStyle(0xffffff, 0.8); g.fillCircle(17, 27, 1); g.fillCircle(21, 25.5, 0.8);
       g.fillStyle(0x2e7d32); g.fillCircle(30, 10.5, 5.2);
       g.fillStyle(0x66bb6a); g.fillCircle(30, 10.5, 4.2);
-      g.fillStyle(0xffffff); g.fillRect(27.5, 9.7, 5, 1.7); g.fillRect(29.15, 8, 1.7, 5);
+      g.fillStyle(0xffffff); g.fillTriangle(30, 7.2, 26.8, 12.6, 33.2, 12.6); // seta para cima: "mais" (sem formar uma cruz)
     });
     make(`pickup_radius_${el}`, g => {
-      // +raio: a cruz de uma explosão, nas cores do elemento, com o centro brilhando
+      // +raio: uma onda de explosão que se alarga (anéis e setas nas diagonais), nas cores do elemento.
+      // Sem braços em cruz: o desenho só diz "alcance maior".
       token(g, color);
-      g.fillStyle(color, 0.35); g.fillCircle(20, 20, 9.5);
+      g.fillStyle(color, 0.35); g.fillCircle(20, 20, 11);
+      g.lineStyle(2.4, color); g.strokeCircle(20, 20, 11);
+      g.lineStyle(1.6, glow); g.strokeCircle(20, 20, 6.5);
+      g.fillStyle(0xffffff, 0.95); g.fillCircle(20, 20, 3.4);
       g.fillStyle(color);
-      g.fillRect(17, 8, 6, 24); g.fillRect(8, 17, 24, 6);
-      g.fillStyle(glow);
-      g.fillRect(18.4, 9.5, 3.2, 21); g.fillRect(9.5, 18.4, 21, 3.2);
-      g.fillStyle(0xffffff, 0.95); g.fillCircle(20, 20, 3.2);
-      // pontas da cruz em "seta", para ler como "alcance maior"
-      g.fillStyle(color);
-      g.fillTriangle(20, 5.5, 16.5, 10, 23.5, 10); g.fillTriangle(20, 34.5, 16.5, 30, 23.5, 30);
-      g.fillTriangle(5.5, 20, 10, 16.5, 10, 23.5); g.fillTriangle(34.5, 20, 30, 16.5, 30, 23.5);
+      for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) {
+        const cx = 20 + dx * 11.5; const cy = 20 + dy * 11.5;
+        g.fillTriangle(cx + dx * 4.5, cy + dy * 4.5, cx - dx * 1.5, cy + dy * 3.5, cx + dx * 3.5, cy - dy * 1.5);
+      }
     });
   }
 
