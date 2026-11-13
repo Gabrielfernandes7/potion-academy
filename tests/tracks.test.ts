@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   SCENE_TRACKS, STEPS_PER_BAR, TRACKS, generateBar, midiToHz, mulberry32, trackById,
 } from '../src/audio/tracks';
-import { STAGES } from '../src/config';
+import { STAGES } from '../src/game/stages/index';
 
 const pc = (m: number): number => ((m % 12) + 12) % 12;
 
@@ -21,8 +21,10 @@ describe('faixas', () => {
   });
 
   it('cada fase tem a faixa da cena correspondente', () => {
+    // Torre (índices 2 a 4) usa a faixa do salão (stage2)
+    const map: Record<number, keyof typeof SCENE_TRACKS> = { 0: 'stage1', 1: 'stage2', 2: 'stage2', 3: 'stage2', 4: 'stage2', 5: 'stage2', 6: 'stage3', 7: 'stage4', 8: 'stage4', 9: 'stage4', 10: 'stage4' };
     STAGES.forEach((s, i) => {
-      expect(s.track).toBe(SCENE_TRACKS[`stage${i + 1}` as keyof typeof SCENE_TRACKS]);
+      expect(s.track).toBe(SCENE_TRACKS[map[i]]);
     });
   });
 });

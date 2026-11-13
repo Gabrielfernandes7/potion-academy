@@ -1,13 +1,14 @@
 // HUD dentro do canvas: faixa no topo, acima da grade.
-// Linha de cima: vida (corações), tempo (ampulheta), POÇÃO e GEMAS.
+// Linha de cima: vida (corações), tempo (ampulheta), OURO e GEMAS.
 // Linha de baixo: seletor de frascos (teclas 1-4 ou toque), elemento atual, BLOCOS e FRASCOS.
 // Recebe o estado da MainScene por evento (HUD_UPDATE) e devolve a escolha de frasco por HUD_SELECT_BOMB.
 import Phaser from 'phaser';
-import { BOMB_ORDER, BOMB_TYPES, CANVAS, CONFIG, ELEMENTS, LAST_STAGE, BombId } from '../config';
+import { BOMB_ORDER, BOMB_TYPES, CANVAS, CONFIG, ELEMENTS, BombId } from '../config';
 import { hasBombType } from '../storage';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState, timerView } from '../game/hudState';
 import { readTheme, Theme } from '../ui/theme';
 import type { MainScene } from './MainScene';
+import { LAST_STAGE } from '../game/stages/index';
 
 const ROW_A = 18;
 const ROW_B = 41;
@@ -119,7 +120,7 @@ export class HudScene extends Phaser.Scene {
     this.coinIcon = this.add.image(398, ROW_A, 'pickup_coin').setScale(0.9).setDepth(2);
     this.coins = new ValueWithCaption(
       this.text(412, ROW_A, '0', 18, gold, true).setDepth(2),
-      this.text(0, ROW_A + 1, 'POÇÃO', 10, t.textMuted).setDepth(2),
+      this.text(0, ROW_A + 1, 'OURO', 10, t.textMuted).setDepth(2),
     );
     this.coins.set('0');
 
@@ -193,7 +194,7 @@ export class HudScene extends Phaser.Scene {
       this.timerText.setAlpha(1);
     }
 
-    // POÇÃO e GEMAS
+    // OURO e GEMAS
     this.coins.set(String(s.coins));
     if (this.lastCoins !== null && s.coins > this.lastCoins) this.pulse(this.coinIcon);
     this.lastCoins = s.coins;
