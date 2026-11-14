@@ -13,6 +13,16 @@ Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo). O
 - Sprites novos: Roo bebê na bolha iridescente, em duas poses: fetal (deitadinha de lado, dormindo, sem chapéu) e observando (acordada, olhando em volta, mão na bolha). Laço de 16 quadros em `src/textures/rooBubble.ts` (texturas `roo_bubble_{fetal,observe}_0..15`); GIFs em `docs/img/roo-bolha-*.gif` (cópia em `public/img/`), gerados por `scripts/bubble-gif.mjs` (ffmpeg + `npm i --no-save @napi-rs/canvas`). Na `history.html`: capa = observando, capítulo II = fetal. Mascote arquivado em `docs/mascote/`.
 - Decisões suas: gênero da Roo (carta diz "filho"), nomes das etapas da Obra como subtítulo, bolha no último quadro.
 
+## Feito em 2026-11-14
+- **Páginas de erro e versões no menu:** `404.html` e `500.html` (estáticas, publicadas pelo Vite); em desenvolvimento, um middleware em `vite.config.ts` responde 404 de verdade para endereços sem extensão. Botão VERSÕES DA HISTÓRIA no menu (leva a `history.html#versoes`). Testes em `tests/contracts/errorPages.test.ts`. `vite.config.ts` saiu do typecheck (`tsconfig`). **Falta**: o hospedeiro precisa mandar 404 para `404.html` e erros 5xx para `500.html`; o 500 de verdade só existe se o servidor falhar.
+- **Versões da história:** seção "Versões da história" em `history.html` (antes e depois de cada fato, v2 e v1, e o que vem antes). Regra 7 em `docs/12-historia.md`: toda mudança de fato entra lá. Versões futuras começam pelo commit.
+- **history.html** atualizado ao jogo: status (aplicado, em aberto), apêndice reescrito, Diário trocado por Manuscrito. Doenças e capítulos selados marcados como em aberto.
+- **Derrota recomeça na fase perdida:** `retryData` (`src/game/retry.ts`, usado por `MainScene.restartData`); a campanha volta à fase em que a Roo perdeu, a Arena recomeça a luta. Teste em `tests/retry.test.ts`. Antes, a campanha sempre voltava à fase 1.
+- **Manuscrito lento no celular:** o ruído do papel era um filtro SVG (feTurbulence) refeito a cada repintura, e o body tinha `background-attachment: fixed`. Agora o grão é gerado uma vez em canvas (`setPaperGrain` em `src/pages/manuscrito.ts`). Medido com CPU 6x no Chromium headless: a troca de página já era ~30 ms, então o ganho real só se confirma num aparelho: **falta testar num celular de verdade**. Suspeito restante: os 12 ícones com `feDisplacementMap` (filtro #rough) por página.
+- **Fase 1 com 100 s** (era 90 s), com a doc de tempo atualizada.
+- **Roteiro:** o status das pendências estava desatualizado. Aplicados: carta e cartão da fase com a fome, falas da Belladona, confissão do Anselmo. Novo: frase dos fantasmas-ecos na passagem 2. Em aberto: página do mestre no manuscrito, bolha no último quadro, e os capítulos selados (ver `12-historia.md`).
+- **Problemas vistos no celular, sem correção:** a legenda "Visto em" fica sob o sprite no medalhão; o sprite ainda lê como coelho.
+
 ## Feito nesta rodada (2026-11-13)
 
 - Roo masculina na prosa de `docs/12-historia.md` e `history.html` (revisado frase a frase).
