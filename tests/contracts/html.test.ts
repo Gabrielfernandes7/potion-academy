@@ -41,7 +41,8 @@ describe('contrato do HTML', () => {
   });
 
   it('cada página .html da raiz aponta para um script que existe', () => {
-    const entries = Object.entries(rootHtml);
+    // as páginas de erro (404, 500) são estáticas, sem jogo: não entram aqui
+    const entries = Object.entries(rootHtml).filter(([f]) => !/\/(404|500)\.html$/.test(f));
     expect(entries.length).toBeGreaterThanOrEqual(5);
     for (const [file, html] of entries) {
       const m = html.match(/<script type="module" src="([^"]+)"/);
