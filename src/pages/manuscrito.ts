@@ -10,6 +10,42 @@ import { ELEMENTS, ElementId } from '../config';
 import { FORM_PREVIEW, bootPage, prepareTextures } from './shared';
 import { arenaWins, isStageCompleted } from '../storage';
 import { isStageUnlocked } from '../game/stages/mapRules';
+
+// Textura de papel (grão e fibras), gerada uma vez em canvas e guardada como imagem. Antes ela era um
+// filtro SVG (feTurbulence) no CSS, que o navegador refazia a cada rolagem; no celular isso pesava.
+function paperGrain(w: number, h: number, alpha: number, streaks: boolean, rgb: [number, number, number]): string | null {
+  const cv = document.createElement('canvas');
+  cv.width = w;
+  cv.height = h;
+  const ctx = cv.getContext('2d');
+  if (!ctx) return null;
+  const img = ctx.createImageData(w, h);
+  // ruído por linhas (fibras) ou por pixel (grão), suavizado para não ficar chapado
+  let prev = 0;
+  for (let y = 0; y < h; y++) {
+    const row = Math.random();
+    for (let x = 0; x < w; x++) {
+      const v = streaks ? row : Math.random();
+      prev = prev * 0.6 + v * 0.4;
+      const i = (y * w + x) * 4;
+      img.data[i] = rgb[0];
+      img.data[i + 1] = rgb[1];
+      img.data[i + 2] = rgb[2];
+      img.data[i + 3] = Math.round(prev * alpha * 255);
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  return `url("${cv.toDataURL('image/png')}")`;
+}
+
+function setPaperGrain(): void {
+  const root = document.documentElement.style;
+  const fine = paperGrain(260, 260, 0.24, false, [97, 64, 26]);
+  const wash = paperGrain(400, 400, 0.16, true, [115, 77, 31]);
+  if (fine) root.setProperty('--grain-fine', fine);
+  if (wash) root.setProperty('--grain-wash', wash);
+}
+setPaperGrain();
 import { MANUSCRITO, ManuscritoEntry, GRUPOS, entryById, isEntryOpen, statsOf } from '../game/manuscrito';
 import { LATIN, elementIconSvg } from '../ui/elementIcons';
 import { SECOES, folioLabel, voynichLines } from '../game/voynich';

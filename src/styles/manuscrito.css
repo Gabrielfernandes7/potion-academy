@@ -42,7 +42,6 @@ body {
     radial-gradient(ellipse at 50% 20%, rgba(255, 190, 110, 0.10), transparent 60%),
     repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.10) 0 2px, transparent 2px 9px),
     linear-gradient(180deg, var(--desk-1), var(--desk-0));
-  background-attachment: fixed;
 }
 
 .mesa { max-width: 1080px; margin: 0 auto; padding: 18px 16px 36px; }
@@ -102,8 +101,8 @@ body {
     radial-gradient(ellipse 160px 110px at 12% 78%, rgba(150, 100, 40, 0.09), transparent 70%),
     radial-gradient(ellipse 70px 50px at 60% 55%, rgba(150, 100, 40, 0.06), transparent 70%),
     radial-gradient(ellipse at 50% 45%, transparent 60%, rgba(120, 80, 30, 0.13) 100%),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 0.38  0 0 0 0 0.25  0 0 0 0 0.1  0 0 0 0.24 0'/></filter><rect width='260' height='260' filter='url(%23n)'/></svg>"),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.35' numOctaves='2' seed='9'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.3  0 0 0 0 0.12  0 0 0 0.16 0'/></filter><rect width='400' height='400' filter='url(%23f)'/></svg>"),
+    var(--grain-fine, none),
+    var(--grain-wash, none),
     linear-gradient(180deg, var(--paper-3), var(--paper) 40%, var(--paper-2));
   border: 9px solid var(--leather);
   border-radius: 6px 14px 14px 6px;
