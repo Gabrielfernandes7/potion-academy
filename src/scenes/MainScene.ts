@@ -11,6 +11,7 @@ import { ARENA_STAGE, arenaStageDef } from '../game/arena';
 import { canUseBomb, isBannedBomb, setArenaLoadout } from '../game/loadout';
 import { rooOriginY } from '../textures/rooGeometry';
 import type { Facing, Player, PowerupCounts, StageData } from '../game/types';
+import { retryData } from '../game/retry';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
 import { touch } from '../input/touch';
 import { hideGameOver, setPauseVisible, showGameOver } from '../ui/overlays';
@@ -105,9 +106,9 @@ export class MainScene extends Phaser.Scene {
     return stageDef(this.stage);
   }
 
-  // Dados explícitos para recomeçar (o Phaser reaproveita os do último reinício): a Arena recomeça a luta; a campanha, a fase 1.
+  // Dados explícitos para recomeçar (o Phaser reaproveita os do último reinício): a Arena recomeça a luta; a campanha, na fase em que a Roo perdeu.
   restartData(): StageData {
-    return this.arena ? { stage: ARENA_STAGE, arena: this.arena } : { stage: 1 };
+    return retryData(this.stage, this.arena, ARENA_STAGE);
   }
 
   get isBossStage(): boolean {
