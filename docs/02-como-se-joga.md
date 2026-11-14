@@ -4,7 +4,7 @@
 
 O jogo tem **quatro fases**:
 
-1. **Laboratório:** pegar **3 gemas** e chegar à **porta** em 90 segundos. A porta só abre com as 3 gemas. Inimigos: sapos magos.
+1. **Laboratório:** pegar **3 gemas** e chegar à **porta** em 100 segundos. A porta só abre com as 3 gemas. Inimigos: sapos magos.
 2. **Salão dos fantasmas:** igual ao laboratório (3 gemas e a porta), em 100 segundos, com **fantasmas** e um sapo.
 3. **Duelo:** derrotar a bruxa **Belladona** (10 de vida; fogo e éter tiram 2, água e terra tiram 1) em 120 segundos.
 4. **Jardim:** fora do castelo. Pegar 3 gemas e chegar ao **portão** em 100 segundos, entre sapos magos e **flores do mal**. Cruzar o portão encerra o jogo.
@@ -30,7 +30,7 @@ O botão **?** fica no topo, ao lado do botão de som. A ajuda **pausa o jogo** 
 
 ## Regras
 
-- **Tempo:** 90 s no laboratório, 100 s no salão e no jardim e 120 s no duelo. O item +15 s soma tempo (até o dobro do tempo da fase).
+- **Tempo:** 100 s no laboratório, no salão e no jardim e 120 s no duelo. O item +15 s soma tempo (até o dobro do tempo da fase).
 - **Vida:** uma barra contínua de 24 pontos, como a dos chefes. O contato com inimigo ou chefe tira 4. Uma explosão tira pelo elemento: **fogo 6** (a fraqueza, inclusive as poções dela), **água 2** (a resistência), terra e éter 4. Depois de um golpe há 1,5 s de proteção. Cada coração cura 4.
 - **Poções ao mesmo tempo:** começa com 2; cada +frasco soma 1, até 5.
 - **Caixotes:** ao quebrar, podem deixar um item. Caixotes e muralhas bloqueiam a explosão.

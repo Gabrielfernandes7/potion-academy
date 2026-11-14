@@ -6,7 +6,7 @@ Equilibrar é escolher os números para o jogo ser **calmo, mas com desafio**. T
 
 1. Cada poção precisa ter um motivo para ser usada (nenhuma melhor em tudo).
 2. Liberar as 3 poções da loja deve levar **cerca de 6 a 7 partidas**.
-3. A fase 1 deve ser vencível em 90 s por quem está aprendendo, sem pressa constante.
+3. A fase 1 deve ser vencível em 100 s por quem está aprendendo, sem pressa constante.
 4. A Belladona deve ser vencida em **2 a 4 tentativas**, e perder deve parecer erro do jogador (por isso todo ataque tem aviso).
 
 ## Poções
@@ -57,7 +57,7 @@ Ficam em `STAGES` e `ENEMY_TYPES` (`src/config.ts`); `tests/stages.test.ts` guar
 
 | Número | Valor | Efeito de mudar |
 |---|---|---|
-| tempo do laboratório / salão / jardim | 90 / 100 / 100 s | o salão e o jardim têm mais perigo, então mais tempo |
+| tempo do laboratório / salão / jardim | 100 / 100 / 100 s | o salão e o jardim têm mais perigo, mas o laboratório também precisa de folga para quem está aprendendo |
 | `moveInterval` do sapo / fantasma | 0,8 / 1,5 s | o fantasma atravessa paredes, então precisa ser bem mais lento |
 | fantasmas no salão | 2 no início, até 4 | mais que 4 fecha o mapa |
 | flores no jardim | 5, fixas | cada flor bloqueia uma casa |

@@ -12,7 +12,7 @@ export const VALE: ChapterSpec = {
     {
       kind: 'lab', name: 'O CHAMADO', place: 'Laboratório do Caldeirão',
       story: 'O laboratório do mestre agora é de Belladona, e as gemas que fixam as transformações estão trancadas nos caixotes. Lá fora, o vale passa fome.',
-      chest: CHEST_COMMON, time: 90000, blockChance: 0.7, door: true, theme: 'stone', block: 'wood', track: 'alambique',
+      chest: CHEST_COMMON, time: 100000, blockChance: 0.7, door: true, theme: 'stone', block: 'wood', track: 'alambique',
       enemies: [{ kind: 'frog', start: 2, max: 5, every: 8 }],
     },
     {
