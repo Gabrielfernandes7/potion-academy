@@ -58,6 +58,7 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
     { speaker: ROO, text: 'Ele escreveu "a terra é de quem a cultiva", riscou e escreveu de novo. Nunca o vi hesitar diante de uma fórmula.' },
   ],
   2: [
+    { speaker: ROO, text: 'Os fantasmas deste salão não têm alma. São ecos: o que foi estudado sem cuidado, repetindo-se nas paredes.' },
     { speaker: MESTRE, text: '...hoje a bolha não estourou. Dentro dela, algo respira. Diga ao Anselmo que eu...' },
     { speaker: ROO, text: 'A voz se perde entre as colunas. Dizem que nasci de uma bolha; sempre achei fábula de ninar. Por que o mestre guardaria esta página?' },
     { speaker: BELLADONA, text: 'Você chegou até aqui, e ele também chegou, uma vez. Depois pediu que eu parasse de ler. Eu não parei.' },
@@ -76,7 +77,7 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
   ],
   7: [
     { speaker: ROO, text: 'Na antecâmara, os frascos brilham com um pó que cheira a farinha. Belladona tentou fazer pão com a Obra.' },
-    { speaker: BELLADONA, text: 'Entre, canguru. Quantas pessoas morreram de fome enquanto o mestre hesitava? Eu contei. Você sabe quantas? Anselmo guarda palavras em cofres enquanto o pão acaba.' },
+    { speaker: BELLADONA, text: 'Entre, cachorro. Quantas pessoas morreram de fome enquanto o mestre hesitava? Eu contei. Você sabe quantas? Anselmo guarda palavras em cofres enquanto o pão acaba.' },
   ],
   9: [
     { speaker: ROO, text: 'Desço o vale com o frasco vazio. A estrada é a mesma da ida, mas agora sei o que o mestre temia.' },

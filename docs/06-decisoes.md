@@ -133,7 +133,7 @@ Novas decisões entram no fim.
 
 ## Roo é masculino; cartas são o formato atual
 - **Motivo:** a carta de Anselmo já trata a Roo como "filho"; o gênero estava em aberto nos documentos.
-- **Consequência:** Roo é "o bruxo-canguru" e usa "ele" em todos os textos (docs, livro e cartas). Belladona continua feminina. Os cartões de história seguem como estão; no futuro podem ser trocados por um vídeo da história da Roo.
+- **Consequência:** Roo é "o bruxo-cachorro" e usa "ele" em todos os textos (docs, livro e cartas). Belladona continua feminina. Os cartões de história seguem como estão; no futuro podem ser trocados por um vídeo da história da Roo.
 - **Em aberto:** o gênero da Roo deixa de ser pergunta; restam os nomes das etapas da Obra e a bolha no último quadro.
 
 ## Moeda vira OURO; moedas e baús rendem menos

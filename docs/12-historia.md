@@ -19,6 +19,7 @@
 4. **O mestre amava a Roo.** A busca dele nasce do medo de perdê-la, não de ganância.
 5. **A Roo é um presente, não um produto.** Ninguém nunca soube explicar a origem dele; o jogo não explica.
 6. **A pergunta final é do jogador:** "o que você vai fazer com o que encontrou?"
+7. **Toda mudança de fato entra em `history.html`, na seção "Versões da história"**, com o que era antes e o que passou a ser. Ajuste de texto sem mudança de fato não entra.
 
 ## O mundo: Vale das Fórmulas e os anos magros
 
@@ -59,7 +60,7 @@ Nasceu no Caldeirão, de uma bolha. Os alquimistas do vale o chamam de "filho do
 
 ## Origem da Roo: a bolha
 
-Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Materia com o sabão de lixívia que o laboratório usa para purificar os vidros e soprou por um tubo de vidro. Subiu uma bolha iridescente, que refletiu o laboratório, o caldeirão e o rosto dele, e não estourou. Pousou na bolsa de uma capa pendurada num gancho e estourou sem ruído. Na bolsa respirava uma criatura pequena, de orelhas grandes: a Roo. Ninguém soube explicar por que um canguru. O mestre escreveu *"a matéria responde ao que não sabemos pedir"* e riscou.
+Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Materia com o sabão de lixívia que o laboratório usa para purificar os vidros e soprou por um tubo de vidro. Subiu uma bolha iridescente, que refletiu o laboratório, o caldeirão e o rosto dele, e não estourou. Pousou na bolsa de uma capa pendurada num gancho e estourou sem ruído. Na bolsa respirava uma criatura pequena, de orelhas grandes: a Roo. Ninguém soube explicar por que um cachorro. O mestre escreveu *"a matéria responde ao que não sabemos pedir"* e riscou.
 
 **Por que isso não abre furo de roteiro:**
 
@@ -71,7 +72,7 @@ Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Ma
 
 **Cena animada:** em `history.html` (capítulo II, botão "Ver a cena do nascimento"), em pixel art com a Roo do próprio jogo: o mestre sopra, a bolha flutua até a bolsa da capa, estoura e a Roo respira. Código em `src/birthScene.ts`; serve de rascunho para uma cena do jogo.
 
-**Cuidados:** não explicar por que canguru; a Roo não é "de laboratório", não tem valor menor por isso; o final não deve revelar que ele pode estourar.
+**Cuidados:** não explicar por que cachorro; a Roo não é "de laboratório", não tem valor menor por isso; o final não deve revelar que ele pode estourar.
 
 ## As escrituras: três ecos
 
@@ -89,8 +90,8 @@ Cada ato recebe o nome de uma etapa da Grande Obra, como cor e tema (os nomes do
 
 | Ato | Etapa | O que acontece | Estado no jogo |
 |---|---|---|---|
-| **I. O Chamado** | Nigredo (escurecer, separar) | A carta de Anselmo; o laboratório do mestre agora é de Belladona; notícias da fome | Carta e fase 1 existem; falta a fome na carta e no cartão da fase |
-| **II. O Caminho** | Albedo (purificar, limpar) | O Salão dos Fantasmas; ecos de experimentos; páginas do mestre, entre elas "hoje a bolha não estourou" | Passagem 2 existe; falta a bolha e as páginas |
+| **I. O Chamado** | Nigredo (escurecer, separar) | A carta de Anselmo; o laboratório do mestre agora é de Belladona; notícias da fome | Aplicado: a carta e o cartão da fase falam da fome |
+| **II. O Caminho** | Albedo (purificar, limpar) | O Salão dos Fantasmas; ecos de experimentos; páginas do mestre, entre elas "hoje a bolha não estourou" | Aplicado: passagem 2 com a bolha e a frase dos ecos. Em aberto: a página do mestre no manuscrito |
 | **III. O Duelo** | Citrinitas (iluminar) | Belladona expõe a razão dela e acusa Anselmo de guardar palavras enquanto o povo morre; Roo a vence, e ela não se converte | Duelo existe; falas a reescrever |
 | **IV. O Retorno** | Rubedo (consumar) | O portão, a confissão, as cópias, o frasco vazio, o Caldeirão | Existe; confissão a acrescentar |
 
