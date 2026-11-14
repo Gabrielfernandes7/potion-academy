@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <b>Potion Academy</b> é um jogo de alquimia indie desenvolvido para navegador. Jogue com a <b>Roo</b>, uma bruxa-canguru de capa roxa, enquanto ela atravessa quatro fases (o laboratório, o salão dos fantasmas, o duelo com a temível Belladona e o jardim do castelo), lançando poções de quatro elementos e quebrando caixotes.
+  <b>Potion Academy</b> é um jogo de alquimia indie desenvolvido para navegador. Jogue com a <b>Roo</b>, uma bruxo-cachorro de capa roxa, enquanto ela atravessa quatro fases (o laboratório, o salão dos fantasmas, o duelo com a temível Belladona e o jardim do castelo), lançando poções de quatro elementos e quebrando caixotes.
 </p>
 
 <p align="center">

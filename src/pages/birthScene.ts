@@ -17,7 +17,7 @@ const CAPTIONS: ReadonlyArray<readonly [number, string]> = [
   [12.5, 'Flutua até a capa pendurada no gancho.'],
   [14.5, 'Pousa na bolsa e estoura, sem ruído, como quem suspira.'],
   [16, 'Na bolsa, alguém respira.'],
-  [18.5, 'Ninguém soube explicar por que um canguru.'],
+  [18.5, 'Ninguém soube explicar por que um cachorro.'],
 ];
 
 type Sprites = Record<string, HTMLCanvasElement>;
@@ -227,7 +227,7 @@ export async function playBirthScene(canvas: HTMLCanvasElement, caption: HTMLEle
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (still) {
     render(ctx, 19, roo);
-    caption.textContent = 'Na bolsa da capa, alguém respira. Ninguém soube explicar por que um canguru.';
+    caption.textContent = 'Na bolsa da capa, alguém respira. Ninguém soube explicar por que um cachorro.';
     return;
   }
   await new Promise<void>(resolve => {

@@ -38,7 +38,7 @@ export const GRUPOS: Record<ManuscritoGroup, string> = {
 
 export const MANUSCRITO: readonly ManuscritoEntry[] = [
   {
-    id: 'roo', nome: 'Roo', titulo: 'Bruxo-canguru, aprendiz do Caldeirão', grupo: 'heroi', perfil: 'roo',
+    id: 'roo', nome: 'Roo', titulo: 'Bruxo-cachorro, aprendiz do Caldeirão', grupo: 'heroi', perfil: 'roo',
     secao: 'farmaceutica',
     sprite: { frames: ['roo_down_0', 'roo_down_1', 'roo_down_2', 'roo_down_3'], zoom: 5 },
     visto: 'Laboratório do Caldeirão', fase: 1,

@@ -15,7 +15,7 @@ Use sempre estes nomes, em qualquer tela, texto ou conversa.
 | Caixote | o bloco de madeira destrutível | bloco (na conversa) |
 | Muralha | a parede de pedra indestrutível | parede |
 | Porta | a saída, aberta com 3 gemas (no jardim, o **portão**) | saída |
-| Roo | a personagem | canguru, bruxo (na tela) |
+| Roo | a personagem | cachorro, bruxo (na tela) |
 | Belladona | a bruxa chefe da fase 3 | vilã, bruxa má |
 | Fase | cada etapa do jogo, com o nome do ato: 1 O CHAMADO, 2 O CAMINHO, 3 O DUELO, 4 O RETORNO | nível |
 | Frei Anselmo | o monge que pede as escrituras de volta | padre, irmão |

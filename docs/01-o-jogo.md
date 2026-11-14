@@ -1,6 +1,6 @@
 # O jogo
 
-**Potion Academy** é um jogo de labirinto, no navegador, em que um bruxo-canguru
+**Potion Academy** é um jogo de labirinto, no navegador, em que um bruxo-cachorro
 chamado Roo explora um laboratório de alquimia. Ele coloca poções que explodem,
 destrói caixotes de madeira, coleta gemas para abrir a porta e foge antes que o
 tempo acabe.

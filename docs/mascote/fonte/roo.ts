@@ -1,4 +1,4 @@
-// Broomstick Roo: canguru bruxa com chapéu, varinha e manto.
+// Broomstick Roo: cachorro bruxo com chapéu, varinha e manto.
 //
 // Poses:
 // - 'awake': 4 frames de caminhada por direção (idle usa frames 0 e 1).
@@ -376,7 +376,7 @@ function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPo
 
   // de frente
   function drawFront(): void {
-    // pés grandes de canguru
+    // pés grandes de cachorro
     g.fillStyle(0xe89040);
     g.fillEllipse(cx - 5.5 + legL * 0.22, cy + 10, 6.5, 5.5);
     g.fillEllipse(cx + 5.5 + legR * 0.22, cy + 10, 6.5, 5.5);
