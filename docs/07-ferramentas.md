@@ -17,7 +17,7 @@ Para ver os controles de toque no computador, abra `/?touch`.
 ## Como testar
 
 ```bash
-npm run test       # testes da lógica pura (regras, loja, faixas de música)
+npm run test       # testes da lógica pura (regras, faixas de música)
 npm run typecheck  # confere os tipos
 npm run build      # confere tudo e gera a versão final em dist/
 ```

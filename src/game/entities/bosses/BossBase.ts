@@ -11,6 +11,7 @@ import { rooOriginY } from '../../../textures/rooGeometry';
 import { readTheme } from '../../../ui/theme';
 import type { MainScene } from '../../../scenes/MainScene';
 import { BossPhase, Tile, phaseFor } from './common';
+import { fxPool } from '../../fx/particlePool';
 
 export type { BossPhase, Tile };
 export type BossPose = 'idle' | 'cast' | 'hurt' | 'talk' | 'defeat';
@@ -42,6 +43,9 @@ export abstract class BossBase {
   phase: BossPhase = 1;
   state: BossState = 'idle';
   readonly sprite: Phaser.GameObjects.Sprite;
+
+  /** No duelo da Arena (game/duel.ts): o chefe adversário. Os ataques miram nele, e não na Roo. */
+  foe: BossBase | null = null;
 
   protected hidden = false;
   protected moveMs: number;
@@ -99,6 +103,18 @@ export abstract class BossBase {
     return this.state === 'defeated';
   }
 
+  /** A casa que os ataques e o passo miram: a Roo (padrão) ou o chefe adversário (duelo). */
+  protected targetTile(): Tile {
+    return this.foe ? { x: this.foe.gridX, y: this.foe.gridY } : this.scene.playerTile();
+  }
+
+  /** Muda a casa onde o chefe está (o duelo põe cada um num canto). */
+  placeAt(x: number, y: number): void {
+    this.gridX = x;
+    this.gridY = y;
+    this.sprite.setPosition(center(x), center(y));
+  }
+
   // Chamado a cada explosão de poção da jogadora, com as casas atingidas.
   onExplosion(tiles: Tile[], element: ElementId = 'fire'): void {
     if (this.hidden || this.invulnMs > 0 || this.state === 'defeated') return;
@@ -119,8 +135,8 @@ export abstract class BossBase {
     this.invulnMs = Math.max(0, this.invulnMs - delta);
     if (this.aura) this.aura.setPosition(this.sprite.x, this.sprite.y - 12);
 
-    // encostar na jogadora também machuca (como os outros inimigos)
-    if (!this.hidden) {
+    // encostar na jogadora também machuca (como os outros inimigos); no duelo não há jogadora
+    if (!this.hidden && !this.foe) {
       const d = Phaser.Math.Distance.Between(
         this.sprite.x, this.sprite.y, this.scene.playerSprite.x, this.scene.playerSprite.y,
       );
@@ -183,25 +199,23 @@ export abstract class BossBase {
   }
 
   protected burst(x: number, y: number, texture: string, tint: number[], count: number, speed = 90): void {
-    const e = this.scene.add.particles(x, y, texture, {
+    fxPool(this.scene).burst(`boss:${texture}:${tint.join('-')}:${speed}`, texture, {
       speed: { min: 20, max: speed },
       lifespan: { min: 350, max: 800 },
       scale: { start: 1.5, end: 0 },
       alpha: { start: 1, end: 0 },
       blendMode: 'ADD',
       tint,
-      emitting: false,
-    }).setDepth(14);
-    e.explode(count);
-    this.scene.time.delayedCall(1000, () => e.destroy());
+    }, x, y, count, 14);
   }
 
-  protected isOpen = (x: number, y: number): boolean => this.scene.getTile(x, y) === EMPTY;
+  // casa aberta para um golpe: chão vazio e sem o muro de sal da Roo Terra (que barra os golpes, como uma parede)
+  protected isOpen = (x: number, y: number): boolean => this.scene.getTile(x, y) === EMPTY && !this.scene.forms?.isSaltWall(x, y);
 
   // ---------- movimento ----------
 
   protected move(): void {
-    const player = this.scene.playerTile();
+    const player = this.targetTile();
     const options: Array<readonly [number, number]> = [];
     for (const [dx, dy] of DIRS) {
       const nx = this.gridX + dx;
@@ -273,6 +287,9 @@ export abstract class BossBase {
     for (const t of tiles) this.scene.bombSystem.spawnExplosion(t.x, t.y, el.color, el.glow, element, lite);
     this.scene.play('explosion', element);
     this.scene.cameras.main.shake(80, 0.004);
+    // duelo: a explosão machuca o adversário se ele estiver numa das casas (com a tabela de dano dele)
+    const foe = this.foe;
+    if (foe && !foe.defeated && tiles.some(t => t.x === foe.gridX && t.y === foe.gridY)) foe.onExplosion(tiles, element);
   }
 
   // ---------- dano, fúria e derrota ----------
@@ -348,6 +365,6 @@ export abstract class BossBase {
     // sem girar nem encolher: o chefe fica de pé, cabeça baixa, e só se apaga quando a Roo parte
     if (this.aura) this.aura.destroy();
     this.scene.play('door');
-    this.after(1500, () => this.onDefeated());
+    this.after(1500, () => (this.foe ? this.scene.onDuelEnd() : this.onDefeated()));
   }
 }

@@ -4,9 +4,9 @@ Cada personagem e item tem uma ficha curta: o que é, o que faz e um detalhe que
 
 ## Personagens
 
-**Roo, o bruxo-canguru** (jogador)
+**Roo, o bruxo-cachorro** (jogador)
 - *Quer:* sair do laboratório com as gemas e vencer a rival.
-- *Sabe fazer:* colocar poções e explodir as etéreas de longe. Com a tecla T vira **Roo Fire** (poções de fogo mais fortes, brasas, Labareda, luz na névoa; resiste ao fogo, fraca à água e sem a Poção Aqua) e com a tecla Y vira **Roo Aqua** (imune à água, poções de água mais fortes e a Bolha de sabão que prende inimigos). Cada forma dura 20 s (ver `02-como-se-joga.md`).
+- *Sabe fazer:* colocar poções e explodir as etéreas de longe. Com a tecla T vira **Roo Fire** (poções de fogo mais fortes, brasas, Labareda, luz na névoa; resiste ao fogo, fraca à água e sem a Poção Aqua) e com a tecla Y vira **Roo Água** (imune à água, poções de água mais fortes e a Bolha de sabão que prende inimigos). Cada forma dura 20 s (ver `02-como-se-joga.md`).
 - *Detalhe:* manto roxo com barra dourada, chapéu e varinha. Parada, ele cochila.
 - *Vida e dano:* barra de 24 pontos. **Fraca ao fogo** (as próprias poções machucam mais: 6), **resiste à água** (2); terra e éter, 4.
 - *Frase:* "Mais uma poção e a porta é minha."
@@ -15,7 +15,7 @@ Cada personagem e item tem uma ficha curta: o que é, o que faz e um detalhe que
 - *Quer:* o laboratório e as gemas só para ele.
 - *Sabe fazer:* arremessar poções, fazer chover gotas e sumir em névoa.
 - *Detalhe:* roupa verde-escura com detalhes verde-limão, chapéu torto com faixa magenta, cabelo carmim, olhos verde-limão.
-- *Vida:* 8. *Frase:* "Essas poções são minhas, canguru!"
+- *Vida:* 8. *Frase:* "Essas poções são minhas, cachorro!"
 
 ### Habilidades da Belladona
 
@@ -72,8 +72,7 @@ Cada fase da campanha tem um bloco destrutível próprio (`game/stages/blockStyl
 
 | Item | Efeito | Limite |
 |---|---|---|
-| Moeda | +1 OURO | |
-| Baú | OURO sorteado (5 a 50, conforme a fase); não cura | |
+| Baú | guarda um item (coração ou power-up), conforme a fase; não cura sozinho | |
 | Coração | +4 de vida (um golpe neutro) | até 24 de vida |
 | Gema | conta para abrir a porta | 3 por fase |
 | +Frasco | +1 poção ao mesmo tempo, **só da poção do elemento do item** | até 5 por poção |
@@ -86,12 +85,12 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 ## Inimigos
 
 **Sapo mago** (laboratório e jardim)
-- *Faz:* anda sem rumo, com pulinhos, e tira 1 de vida ao encostar. Morre com uma explosão e deixa uma moeda.
+- *Faz:* anda sem rumo, com pulinhos, e tira 1 de vida ao encostar. Morre com uma explosão.
 - *Detalhe:* no laboratório aparecem mais conforme você quebra caixotes (2 no início, até 5). No jardim são 2, até 3.
 - *Limite:* não persegue.
 
 **Fantasma** (salão dos fantasmas)
-- *Faz:* flutua sem rumo (um passo a cada 1,5 s), **atravessa muralhas, caixotes e poções** e tira 1 de vida ao encostar. Deixa uma moeda.
+- *Faz:* flutua sem rumo (um passo a cada 1,5 s), **atravessa muralhas, caixotes e poções** e tira 1 de vida ao encostar. Morre sem deixar nada.
 - *Detalhe:* dentro de uma muralha fica meio transparente e a explosão não o alcança. Começam 2, até 4 (mais um a cada 10 caixotes).
 - *Limite:* não persegue nem sai da sala.
 - *Imune:* só a Telúrica (terra). Água, fogo e éter o derrotam. Também aparece na Torre da Belladona (2 no início, até 3).
@@ -110,7 +109,6 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 - **Arena do duelo (fase 3):** menos caixotes (a arena é mais aberta).
 - **Jardim do castelo (fase 4):** fora do castelo. Grama, sebes no lugar das muralhas, canteiros de flores no lugar dos caixotes e um portão no lugar da porta.
 - **Sala de Música:** a tela onde a Roo de maestro (casaca e cabelo de Beethoven) deixa escolher a música.
-- **Caldeirão de Magia:** a loja.
 - **Menu:** a Roo mexe uma poção no caldeirão. De tempos em tempos ele aponta a varinha para um frasco da prateleira, ele levita e voa guiado por ele até o caldeirão, que reage de um jeito próprio de cada elemento (labareda, respingo, pedras ou redemoinho de névoa). Clicar num frasco da prateleira o chama na hora.
 
 
@@ -121,7 +119,7 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 - *Bote:* some e salta sobre a sua casa, com um abalo em cruz. Depois fica **exposto** por 2,2 s e leva +2 de dano.
 - *Dissolver:* um ácido verde corre pela linha da sua casa (furioso, também pela coluna) e **dissolve as suas poções** que estiverem no caminho.
 - *Rugido (fúria):* atinge quase o campo todo; as casas verdes são seguras.
-- *História:* nos manuscritos alquímicos o Leão Verde aparece devorando o sol, porque dissolve até o ouro. Guarda a Biblioteca Proibida, o capítulo ainda selado; por enquanto só se luta com ele na Arena.
+- *História:* nos manuscritos alquímicos o Leão Verde aparece devorando o sol, porque dissolve até o ouro. Guarda a Biblioteca Proibida: é o chefe da última fase do capítulo, e também está na Arena.
 
 ## Quimera de Mercúrio (chefe do Vale)
 

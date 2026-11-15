@@ -1,10 +1,11 @@
 // Efeitos de ser atingido por um elemento (inimigo ou Roo): partículas e cor própria de cada um.
 import Phaser from 'phaser';
 import type { ElementId } from '../../config';
+import { fxPool } from '../fx/particlePool';
 
 // Efeito de quem é atingido, por elemento: o que sobra depois da explosão.
 // fogo: brasas e fumaça subindo; água: respingos que caem; terra: lascas de pedra e poeira;
-// éter: faíscas que giram no ar.
+// ar: faíscas que giram no ar.
 const HIT_FX: Record<ElementId, {
   texture: string; speed: { min: number; max: number }; angle: { min: number; max: number };
   gravity: number; life: { min: number; max: number }; size: number; count: number; tint: number[]; blend: string;
@@ -23,10 +24,10 @@ export const HIT_TINT: Record<ElementId, number> = {
   air: 0xe0d8ff,
 };
 
-// Punhado de partículas do elemento: brasas (fogo), gotas (água), pedriscos (terra), brilhos (éter).
+// Punhado de partículas do elemento: brasas (fogo), gotas (água), pedriscos (terra), brilhos (ar).
 export function hitFx(scene: Phaser.Scene, px: number, py: number, element: ElementId): void {
   const c = HIT_FX[element];
-  const emitter = scene.add.particles(px, py, c.texture, {
+  fxPool(scene).burst(`hit:${element}`, c.texture, {
     speed: c.speed,
     angle: c.angle,
     gravityY: c.gravity,
@@ -35,8 +36,5 @@ export function hitFx(scene: Phaser.Scene, px: number, py: number, element: Elem
     alpha: { start: 1, end: 0 },
     tint: c.tint,
     blendMode: c.blend,
-    emitting: false,
-  }).setDepth(10);
-  emitter.explode(c.count);
-  scene.time.delayedCall(1000, () => emitter.destroy());
+  }, px, py, c.count, 10);
 }

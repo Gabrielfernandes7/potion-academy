@@ -30,14 +30,17 @@ Game state is persisted in `localStorage` under `bombroo_bank` (coins) and `bomb
 ## Project Layout
 
 ```
-index.html                 # markup: topbar, canvas + menu, controles de toque, overlays (loja, pausa, game over)
+index.html                 # markup: topbar, canvas + menu, controles de toque, overlays (pausa, game over)
 manuscrito.html              # manuscrito do alquimista (botão MANUSCRITO do menu); script em src/pages/manuscrito.ts
+livro.html                # O Livro de Roo: a história como manuscrito animado (botão O LIVRO do menu); texto em src/game/livro.ts, cenas em src/pages/livroScenes.ts, docs/22-livro.md; a mensagem do jogo (Jesus, pobres, viúvas, órfãos) vai sem citar versículo
 history.html              # livro da história em prosa (/history.html); script em src/pages/history.ts, cena do nascimento da Roo em src/pages/birthScene.ts, roteiro em docs/12-historia.md
 src/
   main.ts                  # layout (vars CSS do canvas, modo toque), botões do DOM, nome da faixa
   config.ts                # CONFIG, CANVAS, ELEMENTS, BOMB_TYPES, BOMB_ORDER (balanceamento)
   storage.ts               # Storage, Bank, owned bombs (localStorage)
-  audio/AudioEngine.ts     # WebAudio: cadeia suave + reverb, efeitos calmos, música por faixas (playTrack)
+  audio/AudioEngine.ts     # motor: contexto, flags, agendador da música (playTrack), API `audio` (fachada)
+  audio/synth.ts           # primitivas WebAudio: cadeia + reverb, voz, grão de ruído, sopro (sem regra de jogo)
+  audio/sounds.ts          # qual som toca para cada efeito (playSfx), por elemento, e as fanfarras
   audio/tracks.ts          # 6 faixas procedurais (uma por parte do jogo, SCENE_TRACKS) e gerador de compassos (puro)
   input/touch.ts           # entrada por toque (d-pad e botões em DOM -> jogo)
   textures/                # texturas procedurais (terrain, potions, roo, entities, hud, menu)
@@ -52,34 +55,40 @@ src/
   game/types.ts            # interfaces de Player, Bomb, Pickup, Enemy, Explosion
   game/rewards.ts          # tabela de drop (rollReward), texturas e brilho dos itens
   game/hudState.ts         # contrato de eventos MainScene <-> HudScene, timerView
-  game/shopRules.ts        # estados dos cartões da loja (puro, testável)
   game/story.ts            # textos da história (cartões, passagens)
+  game/stageArt.ts         # qual gravura do Livro de Roo abre cada fase (puro, testado); pages/placas.ts desenha as 16 gravuras (as 12 cenas do livro + poço, torre, biblioteca, observatório)
+  ui/stageIntro.ts         # o cartão de entrada de fase em DOM (#intro-overlay): gravura animada + lugar, nome, história e dica; ligado em StoryDirector.showBanner()
   game/manuscrito.ts          # páginas do Manuscrito do Alquimista (textos; números vêm de profiles.ts), puro e testado
   game/voynich.ts          # decoração à moda do Voynich (puro): seções, fólios, palavras em escrita não decifrada (EVA)
   game/arena.ts + loadout.ts # Arena de treino (chefes, fase montada na hora) e quais poções valem (todas na Arena)
+  game/duel.ts             # duelo de chefes na Arena (100 s, a Roo só assiste; regra do vencedor), puro e testado
   game/stages/blockStyles.ts # o bloco destrutível de cada fase (textures/blocks.ts, terrain.ts, garden.ts)
-  game/forms/              # as transformações da Roo (puro): registry.ts (uma linha por forma), RooForm.ts (máquina de estados), fire.ts, water.ts
+  game/forms/              # as transformações da Roo (puro): registry.ts (uma linha por forma), RooForm.ts (máquina de estados), fire.ts, water.ts, earth.ts, air.ts, defense.ts (a defesa V de cada forma)
+  game/learning.ts         # o que a Roo aprende na jornada: poções (fim de fase) e lições das formas (FORM_LESSONS), puro
   game/RooFormSystem.ts    # as formas na partida (Phaser): habilidade, brasas, bolhas, sprite, luz; a MainScene só delega
   game/StoryDirector.ts    # a direção da história na partida: cartão de fase, passagens, final, despedida dos chefes
-  textures/rooFire.ts + rooWater.ts + rooFormTextures.ts # sprites de cada forma por estágio (768 texturas geradas no boot, só no jogo)
+  textures/enemiesNew.ts   # sprites dos 8 inimigos novos (lanterna, relógio, toupeira, coruja, gosma, sentinela, ratinho, salamandra)
+  textures/ouroboros.ts + mestre.ts # o Ouroboros (chefe do Observatório) e o mestre em sombra (página do Manuscrito)
+  textures/rooFire.ts + rooWater.ts + rooEarth.ts + rooAir.ts + rooRecolor.ts + rooFormTextures.ts # sprites de cada forma por estágio (1536 texturas geradas no boot, só no jogo)
   game/entities/roo.ts     # vida da Roo: barra contínua, dano por elemento, cura (puro)
   game/balance.ts          # regra de equilíbrio das poções (testável)
   game/upgrades.ts         # power-ups por poção: alcance e frascos valem só para a poção escolhida (puro)
   game/blast.ts            # alcance de uma explosão, como gerador (puro, testável)
   game/BombSystem.ts + PickupSystem.ts + SleepSystem.ts  # sistemas tirados da MainScene (regras puras em *Rules.ts)
+  game/fx/                 # partículas e objetos reaproveitados (particlePool.ts, objectPool.ts): o que evita o lag das explosões
   game/events.ts + launcher.ts  # eventos globais; cria o Phaser.Game e navega menu/partida
   game/entities/           # personagens que sofrem dano: inimigos e chefes (ver docs/14-estrutura-do-codigo.md)
   game/entities/damage.ts  # regra pura de dano por elemento (multiplicadores, damageTo, hitsToKill)
   game/entities/profiles.ts # tabela de personagens: vida, atributo, fraqueza, resistência, imunidade
   game/entities/hitEffects.ts # efeito visual de acerto por elemento
   game/entities/enemies/   # defs.ts (dados), enemyRules.ts (puro), EnemySystem.ts (Phaser)
-  game/entities/bosses/    # defs.ts (LISTA ÚNICA de chefes, pura), registry.ts (fábrica), BossBase.ts, common.ts e uma pasta por chefe (Controller, rules, lines)
+  game/entities/bosses/    # (cinco chefes: Belladona, Mandrágora, Quimera, Leão Verde e Ouroboros) defs.ts (LISTA ÚNICA de chefes, pura), registry.ts (fábrica), BossBase.ts, common.ts e uma pasta por chefe (Controller, rules, lines)
   game/effects/            # efeitos de tela com regra pura própria: Fog.ts (névoa) e fogRules.ts
   lab/                     # só dev: experimentos de ideias (/lab.html); ver docs/15-lab.md
-  game/stages/upcoming.ts  # capítulos selados que já aparecem no mapa (Biblioteca Proibida, Observatório): sem fases e sem acesso
+  game/stages/upcoming.ts  # capítulos selados que já aparecem no mapa (hoje nenhum: o Observatório entrou na campanha)
   game/stages/             # fases e capítulos: index.ts (STAGES, CHAPTERS), types.ts, chests.ts, mapRules.ts, chapters/<capítulo>.ts
   ui/arena.ts              # janela da Arena de treino (um cartão por chefe)
-  ui/elementIcons.ts       # ícones SVG dos atributos (Enxofre, Mercúrio, Sal, Éter) e o filtro de tinta #rough
+  ui/elementIcons.ts       # ícones SVG dos atributos (Enxofre, Mercúrio, Sal, Ar) e o filtro de tinta #rough
   ui/ornaments.ts          # ornamentos SVG das seções do manuscrito e a estrela de parágrafo
   ui/dom.ts                # helpers de DOM (byId, setShown)
   ui/theme.ts              # lê cores/fontes das variáveis CSS para o canvas
@@ -89,7 +98,6 @@ src/
   ui/dialogue.ts           # cartões de diálogo com retrato (confissão de Anselmo)
   ui/letter.ts             # carta de Anselmo antes da fase 1
   ui/overlays.ts           # pausa e game over
-  ui/shop.ts               # Caldeirão de Magia (loja)
   pages/                   # scripts das páginas de apoio (sprites, manuscrito, história, ideias): shared.ts tem o boot compartilhado
   manuscrito.html + src/pages/manuscrito.ts + styles/manuscrito.css # Manuscrito do Alquimista (/manuscrito.html): uma carta por personagem
   textures/outline.ts      # contorno escuro de 1 px em texturas prontas (Roo)
@@ -99,14 +107,14 @@ tests/                     # testes unitários (lógica pura, storage, toque, fa
 
 ## UI
 
-- **Fluxo de telas**: `Boot` -> `Menu` (animada, título e botões em DOM por cima) -> `Main` (+ `Hud` em paralelo). O `Phaser.Game` é criado ao abrir a página (`bootGame()`); `startGame()` troca Menu por Main; `showMenu()` volta (pausa, game over e loja têm botão para o menu). No menu, `Enter` inicia o jogo; na partida, `Enter` é pausa.
+- **Fluxo de telas**: `Boot` -> `Menu` (animada, título e botões em DOM por cima) -> `Main` (+ `Hud` em paralelo). O `Phaser.Game` é criado ao abrir a página (`bootGame()`); `startGame()` troca Menu por Main; `showMenu()` volta (pausa e game over têm botão para o menu). No menu, `Enter` inicia o jogo; na partida, `Enter` é pausa.
 - **HUD no canvas** (`HudScene`): faixa de `CONFIG.hudHeight` px acima da grade. O canvas tem `CANVAS.height = grade + HUD`. A `MainScene` desloca a câmera com `setViewport(0, hudHeight, ...)`; as coordenadas de mundo da grade continuam começando em (0,0). Para posicionar algo no centro do mundo use `CONFIG.cols/rows * tile / 2`, **não** `camera.centerX/Y` (que inclui o offset do viewport).
 - A `MainScene` envia o estado por `game.events` (`HUD_UPDATE`); a HUD devolve a escolha de frasco por `HUD_SELECT_BOMB` (toque/clique nos slots 1-4).
 - **Escala responsiva**: `Phaser.Scale.FIT` dentro de `#game`, cujo tamanho é definido por CSS (`--canvas-w/--canvas-h` vêm de `CANVAS`, em `main.ts`).
-- **Telas de menu** (menu, loja, pausa, game over) são DOM. Cores e fontes vivem em variáveis CSS (`:root`); o canvas as lê via `ui/theme.ts`, então mude as cores só no CSS.
+- **Telas de menu** (menu, pausa, game over) são DOM. Cores e fontes vivem em variáveis CSS (`:root`); o canvas as lê via `ui/theme.ts`, então mude as cores só no CSS.
 - **Toque**: `data-touch="up|down|left|right|bomb|push|detonate|pause"` nos botões; `input/touch.ts` guarda o estado e `MainScene.handleInput()` o consome junto com o teclado.
-- **Glossário** (use estes nomes em toda a UI): **POÇÃO** = moeda; **FRASCOS** = bombas ativas/limite (ex.: "+1 FRASCO"); **GEMAS**; **BLOCOS**; **TEMPO**; **VIDA** (barra contínua). Os 4 tipos continuam "Poção de Fogo/Aqua/Telúrica/Etérea".
-- Sem emojis na UI. Os símbolos alquímicos (△ ▽ ◇ ☿) são glifos do tema e ficam.
+- **Glossário** (use estes nomes em toda a UI): **FRASCOS** = bombas ativas/limite (ex.: "+1 FRASCO"); **GEMAS**; **BLOCOS**; **TEMPO**; **VIDA** (barra contínua). Os 4 tipos são "Poção de Fogo/Água/Terra/Ar". O OURO foi tirado do jogo.
+- Sem emojis na UI. Os símbolos alquímicos (△ ▽ 🜁 🜃, da tabela de símbolos da alquimia) são glifos do tema e ficam.
 
 ## Estado do trabalho
 
@@ -128,7 +136,7 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 
 **Scenes**: `MainScene` launches `HudScene`. `scene.restart()` re-runs `MainScene.init()`, which resets all per-run state (hides the pause overlay, clears touch input and picks a new music track). `HudScene` persists across restarts and is stopped together with `Main` when going back to the menu.
 
-**Game flow**: `MainScene.update()` returns early while the shop is open (`isShopOpen()`) and does nothing after `gameOver`/`won` except handle `R`. Keep that guard order when editing `update()`/`handleInput()`.
+**Game flow**: `MainScene.update()` waits while the stage intro card is open (`introOpen`, closed by Enter or a tap) and does nothing after `gameOver`/`won` except handle `R`. Keep that guard order when editing `update()`/`handleInput()`.
 
 **Movimento da Roo**: não usa tween. `stepPlayerMove(delta)` interpola entre casas e guarda o tempo que sobra (`moveCarry`) para o passo seguinte; o ciclo de caminhada (4 quadros) dura 2 casas e só vira "parada" quando ela de fato para. Não volte a usar `playIdle()` ao fim de cada casa: reinicia a animação e parece pulo.
 
@@ -138,7 +146,7 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 - *Roo* (`textures/roo.ts`): poses `awake` (walk, 4 frames x 3 directions), `sleep` and `stir` (menu). The texture is `ROO_HEAD_ROOM` px taller than the tile so ears and hat are not clipped; the player sprite therefore uses `setOrigin(0.5, rooOriginY(tile))`. The cape is drawn *after* the body so it covers it (front: two flaps with the pouch showing; back: full cloak; side: hangs from the shoulders). The wand is held at the side, never over the face.
 - *Power-ups* (`textures/entities.ts`): round tokens with a colored rim (`POWERUP_COLORS`) and a symbol. Power-ups and gems get a soft pulsing halo (`PICKUP_HALO`, created in `spawnPickupSprite`, destroyed in `collectPickup`).
 
-**Audio Engine**: `AudioEngine` synthesizes everything with WebAudio, aiming for calm: only sine/triangle voices with slow attacks, a low-pass filter, a generated-impulse reverb and a gentle compressor. Music (`enabled`/`playing`) and sound effects (`sfx`) are independent flags. The player's choice is kept in `audio/prefs.ts` (`bombroo_audio`, default both on) and applied by `main.ts` (`applyMusicPref`/`applySfxPref`); the top bar has MÚSICA and EFEITOS buttons. `audio.unlock()` runs on any pointer or key press. Effects: `play('bomb'|'explosion'|'pickup'|'powerup'|'hurt'|'door', element?)`. The explosion sound depends on the element (`elementSound()`): fire = flame hiss and crackles (sulfur), water = heavy drops (mercury), earth = crystal crackle (salt), air = soft hum of a glowing gas (ether). Win/game-over jingles: `playWinMusic()` / `playGameOverMusic()`.
+**Audio Engine**: `AudioEngine` synthesizes everything with WebAudio, aiming for calm: only sine/triangle voices with slow attacks, a low-pass filter, a generated-impulse reverb and a gentle compressor. Music (`enabled`/`playing`) and sound effects (`sfx`) are independent flags. The player's choice is kept in `audio/prefs.ts` (`bombroo_audio`, default both on) and applied by `main.ts` (`applyMusicPref`/`applySfxPref`); the top bar has MÚSICA and EFEITOS buttons. `audio.unlock()` runs on any pointer or key press. Effects: `play('bomb'|'explosion'|'pickup'|'powerup'|'hurt'|'door', element?)`. Sound design lives in `audio/sounds.ts` (primitives in `audio/synth.ts`). The explosion sound depends on the element (`elementSound()`): fire = flame hiss and crackles (sulfur), water = heavy drops (mercury), earth = crystal crackle (salt), air = soft hum of a glowing gas (ether). Win/game-over jingles: `playWinMusic()` / `playGameOverMusic()`.
 - *Music*: `audio/tracks.ts` holds six tracks, one per part of the game (`SCENE_TRACKS`: menu/letter, stages 1-4, ending). `audio.playTrack(id)` switches with a fade (no-op if already playing it). Menu starts on the first gesture; `MainScene.init` plays `def.track`; the ending plays `vesperas`. Each play uses a new random seed, so a track never sounds the same twice. The topbar shows the current track name (`audio.onTrackChange`). No random track picking and no player-chosen track: the Music Room only previews.
 
 **Game Constants**: Tuning lives in `src/config.ts`: `CONFIG`, `ELEMENTS`, `BOMB_TYPES`, `BOMB_ORDER`. Modify these when balancing.
@@ -146,8 +154,8 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 ## Known Gaps / Ideas (not implemented)
 
 - Elements react only through bomb chains (`game/chain.ts`): fire ignites, water neutralizes fire, earth is immune. Fire explosions leave no lasting flames yet. Bombs are limited to 2 at a time (up to 5 with power-ups), and the remote bomb counts toward that limit until detonated.
-- Four stages with a story ending (Anselmo's confession at the garden gate, `game/story.ts`); stage progress is saved (`bombroo_stages_completed`) and gates the map. No high score; shop has only 3 one-time items.
-- Enemies don't chase (frog, ghost, flower). There is no per-stage unlock of potions: the Aqua potion must be bought in the shop to use the new water mechanic.
+- The campaign has 20 stages in 5 chapters (Vale, Torre, Biblioteca, Observatório, Retorno; five bosses) and a story ending (Anselmo's confession at the garden gate, `game/story.ts`); stage progress is saved (`bombroo_stages_completed`) and gates the map. No high score.
+- Enemies don't chase (frog, ghost, flower, lantern, clock...); the rat only runs to pickups and away from Roo. Potions are learned in the journey (game/learning.ts): water after stage 1, earth after stage 3, air after stage 4. There is no shop and no gold (OURO).
 - HUD text is drawn in the canvas, so it is pixel-scaled on very large screens.
 - The Phaser bundle is ~1.2 MB (full build); could be trimmed by importing only the used modules.
 - Audio levels were verified with an analyser, not by ear: tune `master`/`MUSIC_LEVEL` in `AudioEngine.ts` if it feels too quiet or loud.
@@ -156,6 +164,10 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 
 Antes de acrescentar um chefe, uma forma da Roo, uma fase ou uma página, leia `docs/16-guia-de-extensao.md`: cada tipo de coisa tem uma **lista única** (registro) e uma receita curta. Depois de qualquer mudança rode `npm run check` (tipos, testes e build); `PW=... npm run smoke` abre o jogo num navegador e confere os caminhos principais. Regra de jogo vive em arquivo puro com teste; o arquivo do Phaser só desenha e liga.
 
+## Desempenho (regra de código)
+
+Veja `docs/21-desempenho.md`. Em resumo: **não crie um emissor de partículas, uma imagem ou um texto por efeito** (use `game/fx/particlePool.ts` e `objectPool.ts`); um `Graphics` só é limpo e redesenhado quando há o que mostrar; não use `fps.limit` (piora telas de 60 Hz). O jogo roda na taxa da tela, então o trabalho por quadro é o que importa.
+
 ## Respeito à fé (regra de conteúdo)
 
-O jogo trata temas cristãos com reverência. **Nenhuma cruz em objeto destrutível, inimigo, bloco ou ficha**; a cruz só no hábito de frei Anselmo e no mosteiro. Nada que ridicularize a fé. Veja `docs/16-guia-de-extensao.md`.
+O jogo trata temas cristãos com reverência. **Não se citam versículos nem capítulos** (nem no jogo, nem no livro, nem nos docs): a fé aparece em gestos e em falas curtas. A mensagem é dita pouco e em cada parte: o verdadeiro evangelho é dedicar a vida a Jesus e servir os mais pobres, as viúvas e os órfãos, como Belladona passa a fazer (`docs/12-historia.md`, testado em `tests/desfecho.test.ts`). **Nenhuma cruz em objeto destrutível, inimigo, bloco ou ficha**; a cruz só no hábito de frei Anselmo e no mosteiro. Nada que ridicularize a fé. Veja `docs/16-guia-de-extensao.md`.

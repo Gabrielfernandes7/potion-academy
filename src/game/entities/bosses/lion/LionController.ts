@@ -1,7 +1,7 @@
 // Leão Verde, guardião da Biblioteca Proibida: habilidades e falas. O resto (vida, fases, tempos, avisos,
 // dano e derrota) vem de BossBase. As regras puras estão em rules.ts e são testadas.
 //
-// É o solvente universal: dissolve tudo, até as poções da Roo. A terra é imune; o éter o fere muito.
+// É o solvente universal: dissolve tudo, até as poções da Roo. A terra é imune; o ar o fere muito.
 // Habilidades (cada uma mostra um aviso no chão antes de acontecer; ver docs/03-mundo.md):
 //   pounce  : some e salta sobre a casa em que você está, com um abalo em cruz. Depois fica EXPOSTO.
 //   dissolve: um ácido verde corre pela linha da sua casa (furioso, também pela coluna) e dissolve
@@ -87,7 +87,7 @@ export class LionController extends BossBase {
     this.scene.play('door');
     this.burst(this.sprite.x, this.sprite.y - 10, 'menu_puff', [0x4f8a3a, 0xffffff], 12, 70);
     this.scene.tweens.add({ targets: this.sprite, alpha: 0, duration: 300 });
-    const target = this.scene.playerTile();
+    const target = this.targetTile();
     const tiles = blastTiles(target.x, target.y, 1, this.isOpen);
     const ms = 1500;
     this.telegraph(tiles, 'earth', target, ms);
@@ -112,7 +112,7 @@ export class LionController extends BossBase {
   private castDissolve(): void {
     this.setPose('cast');
     this.scene.play('powerup');
-    const target = this.scene.playerTile();
+    const target = this.targetTile();
     const horizontal = Math.random() < 0.5;
     const tiles = dissolveTiles(target, horizontal, this.phase === 2, this.isOpen);
     const ms = CONFIG.bossTelegraphMs + 200;
@@ -131,7 +131,7 @@ export class LionController extends BossBase {
   private castRoar(): void {
     this.setPose('cast');
     this.scene.play('powerup');
-    const player = this.scene.playerTile();
+    const player = this.targetTile();
     const open: Tile[] = [];
     for (let y = 1; y < CONFIG.rows - 1; y++) {
       for (let x = 1; x < CONFIG.cols - 1; x++) if (this.isOpen(x, y)) open.push({ x, y });

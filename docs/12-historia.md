@@ -19,10 +19,11 @@
 4. **O mestre amava a Roo.** A busca dele nasce do medo de perdê-la, não de ganância.
 5. **A Roo é um presente, não um produto.** Ninguém nunca soube explicar a origem dele; o jogo não explica.
 6. **A pergunta final é do jogador:** "o que você vai fazer com o que encontrou?"
+7. **Toda mudança de fato entra em `history.html`, na seção "Log da história", como um commit** (o que era antes e o que passou a ser). Enquanto não houver commit, a entrada fica como "working tree". Ajuste de texto sem mudança de fato não entra.
 
 ## O mundo: Vale das Fórmulas e os anos magros
 
-Vale das Fórmulas é um vale onde a alquimia é ofício comum: destilam-se poções de Fogo, Aqua, Telúrica e Etérea, vendidas no **Caldeirão de Magia**. Há três anos de colheitas ruins, e o vale sofre:
+Vale das Fórmulas é um vale onde a alquimia é ofício comum: destilam-se poções de Fogo, Aqua, Telúrica e Etérea, vendidas na praça da cidade. Há três anos de colheitas ruins, e o vale sofre:
 
 - chuvas demais, trigo que apodrece em pé, pão caro;
 - celeiros reservados a quem pode pagar; pequenos produtores perdem a terra por dívida;
@@ -57,9 +58,32 @@ Monge, confessor do mestre. Sabe que a caridade do mosteiro não resolve tudo e 
 ### Roo
 Nasceu no Caldeirão, de uma bolha. Os alquimistas do vale o chamam de "filho do Caldeirão". Ele acha que a história da bolha é uma fábula de ninar. Não é.
 
+## Por que a Roo parte (o motivo)
+
+A Roo não é um soldado que busca algo "porque sim". Parte por **três razões pessoais**, todas ditas na carta e no cartão do primeiro nível:
+1. **Come da mesma sopa.** O mestre partiu há três invernos sem dizer para onde, e a Roo faz a mesma fila do mosteiro que o vale inteiro. A fome é dela também.
+2. **O lar foi tomado.** Belladona ocupou o laboratório do mestre (o Caldeirão, a casa da Roo) e levou as escrituras.
+3. **Uma noite que ela não conhece.** Anselmo sabe como a Roo nasceu e só conta a quem vier ouvi-lo no mosteiro. A Roo vai atrás de quem é.
+
+O arco: ela parte para **saber o que é** (acha que pode ser só um resultado, uma "prova" do mestre) e volta sabendo **o que fazer com o que recebeu** (é uma dádiva, e dádiva se reparte).
+
+## O desfecho (o que acontece depois)
+
+Cada fio que a história abre ganha uma resposta no fim, mesmo quando a resposta é "ainda não". Está no jogo (`ENDING_CARDS`, `CAULDRON_LINES`) e no livro animado (abertura "A primavera").
+
+| Fio | Resposta no fim |
+|---|---|
+| **A fome** | Sem milagre: nenhuma poção a vence. Os celeiros do vale se abrem um a um, o primeiro o do senhor que ouviu o frei; a semente seca é repartida; na colheita seguinte "o pão não sobrou: deu para todos". |
+| **A peste (a febre)** | Recua das casas da beira da charneca. Nem todos são salvos; os que se foram são lembrados pelo nome. |
+| **Belladona** | Perdeu a luta, mas o trauma ganha caminho: na derrota diz "agora não sei o que faço"; no portão do mosteiro diz "eu sei destilar a febre" e fica para trabalhar na enfermaria (Anselmo não a absolve: "não é o meu ofício"). Escreve o nome da mãe no primeiro frasco que destila. Ainda conta os mortos; agora conta também os alimentados. |
+| **As escrituras** | Não voltam ao cofre: copiadas em três mosteiros e lidas em voz alta nas aldeias. Anselmo parte o pão à porta. |
+| **O mestre** | Sem notícia. A última página dele, achada no Observatório, responde à pergunta da Roo: "não foi prova: foi dádiva". A Roo deixa uma vela na janela do Caldeirão. |
+| **O que a Roo aprendeu** | Dito por ela no portão: "não nasci para provar nada; escolho, todos os dias, ficar ao lado de quem tem fome". |
+| **O Caldeirão** | Que nunca fez pão, ferve sopa pela primeira vez, mexido por muitas mãos (a de Belladona, a dos monges, a das famílias). |
+
 ## Origem da Roo: a bolha
 
-Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Materia com o sabão de lixívia que o laboratório usa para purificar os vidros e soprou por um tubo de vidro. Subiu uma bolha iridescente, que refletiu o laboratório, o caldeirão e o rosto dele, e não estourou. Pousou na bolsa de uma capa pendurada num gancho e estourou sem ruído. Na bolsa respirava uma criatura pequena, de orelhas grandes: a Roo. Ninguém soube explicar por que um canguru. O mestre escreveu *"a matéria responde ao que não sabemos pedir"* e riscou.
+Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Materia com o sabão de lixívia que o laboratório usa para purificar os vidros e soprou por um tubo de vidro. Subiu uma bolha iridescente, que refletiu o laboratório, o caldeirão e o rosto dele, e não estourou. Pousou na bolsa de uma capa pendurada num gancho e estourou sem ruído. Na bolsa respirava uma criatura pequena, de orelhas grandes: a Roo. Ninguém soube explicar por que um cachorro. O mestre escreveu *"a matéria responde ao que não sabemos pedir"* e riscou.
 
 **Por que isso não abre furo de roteiro:**
 
@@ -71,7 +95,7 @@ Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Ma
 
 **Cena animada:** em `history.html` (capítulo II, botão "Ver a cena do nascimento"), em pixel art com a Roo do próprio jogo: o mestre sopra, a bolha flutua até a bolsa da capa, estoura e a Roo respira. Código em `src/birthScene.ts`; serve de rascunho para uma cena do jogo.
 
-**Cuidados:** não explicar por que canguru; a Roo não é "de laboratório", não tem valor menor por isso; o final não deve revelar que ele pode estourar.
+**Cuidados:** não explicar por que cachorro; a Roo não é "de laboratório", não tem valor menor por isso; o final não deve revelar que ele pode estourar.
 
 ## As escrituras: três ecos
 
@@ -79,9 +103,9 @@ As escrituras aparecem como objeto e como tema. Nenhum dos três ecos é ensinad
 
 | Texto | Como aparece | O que mostra |
 |---|---|---|
-| **A multiplicação dos pães** (João 6) | Belladona o lê como técnica reproduzível; Anselmo lê como compaixão, partilha e Pão da Vida | O erro dela não é querer alimentar os famintos, é querer ser dona do poder que alimenta |
-| **O Bom Samaritano** (Lucas 10,25–37) | Anselmo ao fim: "fica ao lado dessa pessoa" | Saber muito não basta; cuidar de quem está ferido, sim |
-| **O rico e Lázaro** (Lucas 16,19–31) | Celeiros trancados; Lázaro à porta, o portão do jardim | A fome não é só falta de comida, é também como se reparte |
+| **A multiplicação dos pães** | Belladona o lê como técnica reproduzível; Anselmo lê como compaixão, partilha e Pão da Vida | O erro dela não é querer alimentar os famintos, é querer ser dona do poder que alimenta |
+| **O Bom Samaritano** | Anselmo ao fim: "fica ao lado dessa pessoa" | Saber muito não basta; cuidar de quem está ferido, sim |
+| **O rico e Lázaro** | Celeiros trancados; Lázaro à porta, o portão do jardim | A fome não é só falta de comida, é também como se reparte |
 
 ## A Grande Obra: os quatro atos
 
@@ -89,8 +113,8 @@ Cada ato recebe o nome de uma etapa da Grande Obra, como cor e tema (os nomes do
 
 | Ato | Etapa | O que acontece | Estado no jogo |
 |---|---|---|---|
-| **I. O Chamado** | Nigredo (escurecer, separar) | A carta de Anselmo; o laboratório do mestre agora é de Belladona; notícias da fome | Carta e fase 1 existem; falta a fome na carta e no cartão da fase |
-| **II. O Caminho** | Albedo (purificar, limpar) | O Salão dos Fantasmas; ecos de experimentos; páginas do mestre, entre elas "hoje a bolha não estourou" | Passagem 2 existe; falta a bolha e as páginas |
+| **I. O Chamado** | Nigredo (escurecer, separar) | A carta de Anselmo; o laboratório do mestre agora é de Belladona; notícias da fome | Aplicado: a carta e o cartão da fase falam da fome |
+| **II. O Caminho** | Albedo (purificar, limpar) | O Salão dos Fantasmas; ecos de experimentos; páginas do mestre, entre elas "hoje a bolha não estourou" | Aplicado: passagem 2 com a bolha e a frase dos ecos. Em aberto: a página do mestre no manuscrito |
 | **III. O Duelo** | Citrinitas (iluminar) | Belladona expõe a razão dela e acusa Anselmo de guardar palavras enquanto o povo morre; Roo a vence, e ela não se converte | Duelo existe; falas a reescrever |
 | **IV. O Retorno** | Rubedo (consumar) | O portão, a confissão, as cópias, o frasco vazio, o Caldeirão | Existe; confissão a acrescentar |
 
@@ -119,7 +143,7 @@ A cena final fica como está: o frasco sobre a mesa, o Caldeirão morno, silênc
 | Manuscrito do Alquimista | `game/manuscrito.ts` | Substituiu o Diário da Roo: uma página por personagem, não por fase |
 | Tela final | "Jornada cumprida" | Mantida |
 
-> **Para a revisão de roteiro (a fazer):** a campanha tem 12 fases em 3 capítulos (O Vale, A Torre / Duelo, O Retorno) e 3 chefes, mais a Quimera, que é a prata do mestre. O roteiro foi escrito para 4 atos; aqui o Ato I (Nigredo) cobre O Vale inteiro, o Ato II (Albedo) a Torre até a Antecâmara, o Ato III (Citrinitas) o Duelo e o Ato IV (Rubedo) O Retorno. O Leão Verde e os capítulos selados (Biblioteca Proibida, Observatório) ainda não têm lugar na história. Furos conhecidos para revisar: por que Belladona guarda um laboratório com fantasmas e uma Quimera; como a Quimera se liga à busca do mestre; o que a Mandrágora faz no mosteiro; por que o mosteiro volta a ter um frasco vazio.
+> **Para a revisão de roteiro (a fazer):** a campanha tem 20 fases em 5 capítulos (O Vale, A Torre / Duelo, A Biblioteca Proibida, O Observatório, O Retorno) e 5 chefes (Quimera, Belladona, Leão Verde, Ouroboros e Mandrágora). A Quimera é a prata do mestre. O roteiro foi escrito para 4 atos; aqui o Ato I (Nigredo) cobre O Vale inteiro, o Ato II (Albedo) a Torre até a Antecâmara, o Ato III (Citrinitas) o Duelo e o Ato IV (Rubedo) O Retorno. A Biblioteca e o Observatório entram como interlúdios entre o Ato III e o Ato IV (ver o livro). Furos resolvidos em 2026-11-15 (cartões do jogo e capítulo VI do livro): por que Belladona guarda um laboratório com fantasmas e uma Quimera (o que o mestre não soube descartar); como a Quimera se liga à busca do mestre (a prata que ele tentou virar pão); o que a Mandrágora faz no mosteiro (guarda plantada por Belladona); por que o frasco vazio está no mosteiro (era do mestre, deixado com Anselmo).
 
 ### Falas propostas (rascunho para aplicar depois)
 
@@ -132,8 +156,10 @@ Anselmo, na confissão (cartão novo): *"Ele me contou o que fez naquela noite. 
 ## Decisões em aberto
 
 - **Os nomes das etapas da Obra** (Nigredo, Albedo, Citrinitas, Rubedo) como subtítulo dos atos: usar ou deixar só como cor e tom?
-- **A bolha no último quadro:** sim ou não?
-- **Companheiros** (boticário cético, criatura transformada por Belladona): adiados (dependem do Ato II ampliado; ver `task.md`).
+- **A bolha no último quadro:** **sim** (aplicado em `EndScene`, 2026-11-15): uma bolha iridescente sobe do caldeirão, sem explicação.
+- **Companheiros** (boticário cético, criatura transformada por Belladona) e o Ato II ampliado: **adiados para a versão 2** (decisão de 2026-11-15; ver `task.md`).
+- **Biblioteca e Observatório:** já têm lugar na história (interlúdios no livro; `chapters/biblioteca.ts` e `chapters/observatorio.ts`). O Observatório termina no Ouroboros, a serpente do ciclo.
+- **As lições pela alquimia:** seguem as **operações** (calcinação, solução, coagulação, sublimação), não as etapas da Obra.
 
 ## Inspiração: *Jornada ao Oeste*
 

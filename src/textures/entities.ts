@@ -1,7 +1,7 @@
 // Texturas de inimigo e itens coletáveis.
 //
 // Os 4 power-ups (+frasco, +raio, +velocidade, +tempo) são "fichas" redondas com aro colorido e um
-// símbolo no centro; moeda, gema, coração e baú são itens soltos. Assim, de longe, dá para
+// símbolo no centro; gema, coração e baú são itens soltos. Assim, de longe, dá para
 // distinguir o que melhora a personagem do que é só recompensa.
 import type { DrawFn, MakeFn } from './make';
 import { GARDEN_PALETTE as P } from './gardenPalette';
@@ -127,21 +127,6 @@ export function drawEntities(make: MakeFn): void {
   });
 
   // ------------------------------------------------------------ itens soltos
-
-  make('pickup_coin', g => {
-    // moeda de POÇÃO: ouro com um frasco gravado
-    g.fillStyle(0x000000, 0.25); g.fillCircle(20, 22, 12.5);
-    g.fillStyle(0xb8862b); g.fillCircle(20, 20, 12.5);
-    g.fillStyle(0xffd54f); g.fillCircle(20, 20, 10.5);
-    g.fillStyle(0xffe58a); g.fillEllipse(16, 15, 9, 4);
-    g.fillStyle(0xb8862b);
-    g.fillRect(18.6, 12, 2.8, 3.5);
-    g.fillTriangle(18.6, 15, 21.4, 15, 25, 25);
-    g.fillTriangle(18.6, 15, 15, 25, 25, 25);
-    g.fillStyle(0xffd54f);
-    g.fillTriangle(18.4, 20.5, 21.6, 20.5, 23.5, 24.2);
-    g.fillTriangle(18.4, 20.5, 16.5, 24.2, 23.5, 24.2);
-  });
 
   make('pickup_gem', g => {
     // gema facetada

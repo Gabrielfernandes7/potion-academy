@@ -6,7 +6,7 @@ Registro do mascote como ele ficou no jogo, guardado para mostrar no futuro como
 
 ## Quem é
 
-Uma canguru alquimista de pelo laranja, orelhas altas com miolo claro, chapéu de bruxo e manto roxos com ferragens douradas, bolsa clara na barriga, olhos escuros com a faixa de sobrancelha. Pixel art indie no estilo Super Bomberman 3/5: escala inteira, contorno escuro de 1 px, sem degradês suaves.
+um cachorro alquimista de pelo laranja, orelhas altas com miolo claro, chapéu de bruxo e manto roxos com ferragens douradas, bolsa clara na barriga, olhos escuros com a faixa de sobrancelha. Pixel art indie no estilo Super Bomberman 3/5: escala inteira, contorno escuro de 1 px, sem degradês suaves.
 
 ## O que está aqui
 

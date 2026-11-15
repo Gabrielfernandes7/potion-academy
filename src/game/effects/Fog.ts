@@ -26,6 +26,10 @@ export class Fog {
   private radiusTiles: number;
   private darkness: number;
   private breathe = true;
+  private lastX = NaN;
+  private lastY = NaN;
+  private lastR = NaN;
+  private lastDark = NaN;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -53,6 +57,13 @@ export class Fog {
   // Redesenha a névoa com o círculo claro em (x, y), em pixels do mundo.
   update(x: number, y: number): void {
     const r = fogRadiusPx(this.radiusTiles, this.tile, this.scene.time.now, this.breathe);
+    // a névoa é uma textura do tamanho do jogo inteiro: refazê-la todo quadro pesa no celular. Só se refaz quando a posição
+    // ou o raio (em passos de 2 px, que ninguém percebe) mudou.
+    const rq = Math.round(r / 2) * 2;
+    const xq = Math.round(x);
+    const yq = Math.round(y);
+    if (xq === this.lastX && yq === this.lastY && rq === this.lastR && this.darkness === this.lastDark) return;
+    this.lastX = xq; this.lastY = yq; this.lastR = rq; this.lastDark = this.darkness;
     this.rt.clear();
     this.rt.fill(this.color, this.darkness);
     this.brush.setPosition(x, y).setScale(r / BRUSH_R);

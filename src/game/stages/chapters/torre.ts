@@ -10,22 +10,22 @@ export const TORRE: ChapterSpec = {
   stages: [
     {
       kind: 'crypt', name: 'A ESCADARIA', place: 'Escadaria da Torre',
-      story: 'Degraus de pedra subindo na escuridão. Os fantasmas daqui não têm cheiro, só frio.',
-      chest: CHEST_RICH, tip: 'O fantasma só resiste à Poção Telúrica.',
+      story: 'Degraus de pedra subindo na escuridão. Os fantasmas daqui não têm cheiro, só frio. Belladona também foi órfã: a torre guarda o que ela fez da dor.',
+      chest: CHEST_RICH, tip: 'O fantasma só resiste à Poção de Terra. A sentinela de cera derrete no fogo.',
       time: 100000, blockChance: 0.6, door: true, theme: 'crypt', block: 'slab', track: 'ecos',
-      enemies: [{ kind: 'ghost', start: 2, max: 3, every: 8 }],
+      enemies: [{ kind: 'ghost', start: 2, max: 3, every: 8 }, { kind: 'sentinel', start: 1, max: 1 }],
     },
     {
       kind: 'crypt', name: 'O CORREDOR', place: 'Corredor dos Selos',
       story: 'Portas com selos de cera. Atrás de uma delas, uma voz conhecida.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.55, door: true, theme: 'crypt', block: 'wax', track: 'ecos',
-      enemies: [{ kind: 'ghost', start: 2, max: 3, every: 8 }],
+      enemies: [{ kind: 'ghost', start: 1, max: 2, every: 9 }, { kind: 'sentinel', start: 2, max: 2 }],
     },
     {
       kind: 'crypt', name: 'A ANTECÂMARA', place: 'Antecâmara da Torre',
-      story: 'Frascos cheios de um pó que brilha e cheira a farinha. A próxima sala é a de Belladona.',
+      story: 'Frascos cheios de um pó que brilha e cheira a farinha. A próxima sala é a de Belladona, que jurou nunca mais esperar, órfã de mãe e de irmão.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'crypt', block: 'flasks', track: 'ecos',
-      enemies: [{ kind: 'ghost', start: 2, max: 3, every: 8 }],
+      enemies: [{ kind: 'ghost', start: 2, max: 3, every: 8 }, { kind: 'sentinel', start: 1, max: 2, every: 12 }],
     },
     {
       kind: 'boss', boss: 'belladonna', name: 'O DUELO', place: 'Torre de Belladona',

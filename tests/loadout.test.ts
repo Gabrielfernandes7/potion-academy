@@ -1,25 +1,32 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { canUseBomb, forbiddenElement, isBannedBomb, setArenaLoadout, setForbiddenElement } from '../src/game/loadout';
+import { canUseBomb, currentFormElement, isBlockedBomb, setArenaLoadout, setFormElement } from '../src/game/loadout';
 
-afterEach(() => { setArenaLoadout(false); setForbiddenElement(null); });
+afterEach(() => { setArenaLoadout(false); setFormElement(null); });
 
 describe('poções que a Roo pode usar', () => {
-  it('a forma de fogo proíbe a Poção Aqua, mesmo na Arena, e libera de novo ao acabar', () => {
+  it('na forma de água, só a Poção de Água funciona (mesmo na Arena); ao acabar, todas voltam', () => {
     setArenaLoadout(true);
     expect(canUseBomb('mega')).toBe(true);
-    setForbiddenElement('water');
-    expect(forbiddenElement()).toBe('water');
-    expect(isBannedBomb('mega')).toBe(true);
-    expect(canUseBomb('mega')).toBe(false);
-    for (const t of ['normal', 'pierce', 'remote'] as const) expect(canUseBomb(t), t).toBe(true);
-    setForbiddenElement(null);
-    expect(canUseBomb('mega')).toBe(true);
+    setFormElement('water');
+    expect(currentFormElement()).toBe('water');
+    expect(isBlockedBomb('mega')).toBe(false);
+    for (const t of ['normal', 'pierce', 'remote'] as const) {
+      expect(isBlockedBomb(t), t).toBe(true);
+      expect(canUseBomb(t), t).toBe(false);
+    }
+    setFormElement(null);
+    for (const t of ['normal', 'mega', 'pierce', 'remote'] as const) expect(canUseBomb(t), t).toBe(true);
   });
-  it('fora da Arena, a proibição soma com o que não foi comprado', () => {
-    setForbiddenElement('fire');
-    expect(canUseBomb('normal')).toBe(false); // a Poção de Fogo é do elemento proibido
-    setForbiddenElement(null);
+
+  it('na forma de fogo, só a Poção de Fogo funciona', () => {
+    setArenaLoadout(true);
+    setFormElement('fire');
     expect(canUseBomb('normal')).toBe(true);
-    expect(canUseBomb('remote')).toBe(false); // não comprada
+    expect(canUseBomb('mega')).toBe(false);
+  });
+
+  it('fora da Arena, a poção precisa ser aprendida e não pode estar bloqueada pela forma', () => {
+    expect(canUseBomb('remote')).toBe(false); // ainda não aprendida (o storage vazio só tem o fogo)
+    expect(canUseBomb('normal')).toBe(true);
   });
 });

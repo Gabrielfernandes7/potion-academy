@@ -55,8 +55,8 @@ describe('regras dos inimigos', () => {
 });
 
 describe('regras dos itens', () => {
-  it('sem porta, a gema sorteada vira moeda', () => {
-    expect(resolveRewardType('gem', false)).toBe('coin');
+  it('sem porta, a gema sorteada não nasce (null)', () => {
+    expect(resolveRewardType('gem', false)).toBeNull();
     expect(resolveRewardType('gem', true)).toBe('gem');
     expect(resolveRewardType('heart', false)).toBe('heart');
   });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BASE_HIT, damageTo, hitsToKill } from '../../src/game/entities/damage';
 import { PROFILES } from '../../src/game/entities/profiles';
-import { HEART_HEAL, ROO_MAX_HP, damageToRoo, healRoo, hpBarView } from '../../src/game/entities/roo';
+import { HEART_HEAL, HP_GREEN, HP_RED, HP_YELLOW, ROO_MAX_HP, damageToRoo, healRoo, hpBarView, hpColor } from '../../src/game/entities/roo';
 import { CONFIG } from '../../src/config';
 
 describe('vida da Roo', () => {
@@ -37,11 +37,31 @@ describe('vida da Roo', () => {
     expect(healRoo(ROO_MAX_HP - 1)).toBe(ROO_MAX_HP);
   });
   it('a barra: proporção contínua e aviso de vida baixa (um quarto ou menos)', () => {
-    expect(hpBarView(24, 24)).toEqual({ ratio: 1, low: false });
+    expect(hpBarView(24, 24)).toEqual({ ratio: 1 });
     expect(hpBarView(13, 24).ratio).toBeCloseTo(13 / 24);
-    expect(hpBarView(6, 24).low).toBe(true);
-    expect(hpBarView(7, 24).low).toBe(false);
-    expect(hpBarView(0, 24)).toEqual({ ratio: 0, low: false });
+    expect(hpBarView(0, 24)).toEqual({ ratio: 0 });
     expect(hpBarView(99, 24).ratio).toBe(1);
+  });
+});
+
+describe('cor da barra de vida', () => {
+  it('verde com a vida cheia, amarela na metade, vermelha perto de zero', () => {
+    expect(hpColor(1)).toBe(HP_GREEN);
+    expect(hpColor(0.5)).toBe(HP_YELLOW);
+    expect(hpColor(0)).toBe(HP_RED);
+  });
+
+  it('entre o cheio e a metade, a cor migra de verde para amarelo; abaixo, de amarelo para vermelho', () => {
+    const g = (hpColor(0.75) >> 8) & 0xff; // canal verde
+    expect(g).toBeGreaterThan((HP_GREEN >> 8) & 0xff); // entre o verde e o amarelo
+    expect(g).toBeLessThan((HP_YELLOW >> 8) & 0xff);
+    const r = (hpColor(0.25) >> 16) & 0xff; // canal vermelho
+    expect(r).toBeGreaterThan((HP_RED >> 16) & 0xff);
+    expect(r).toBeLessThan((HP_YELLOW >> 16) & 0xff);
+  });
+
+  it('valores fora de 0 a 1 são limitados', () => {
+    expect(hpColor(2)).toBe(HP_GREEN);
+    expect(hpColor(-1)).toBe(HP_RED);
   });
 });

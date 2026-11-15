@@ -7,10 +7,11 @@ import type Phaser from 'phaser';
 import { drawChimeraTextures } from '../../../textures/chimera';
 import { drawLionTextures } from '../../../textures/greenLion';
 import { drawMandrakeTextures } from '../../../textures/mandrake';
+import { drawOuroborosTextures } from '../../../textures/ouroboros';
 import { drawWitchTextures } from '../../../textures/witch';
 import type { BlockStyle } from '../../stages/blockStyles';
 import type { BossId, StageTheme } from '../../stages/types';
-import { BELLADONA_CARDS, CHIMERA_CARDS, MANDRAKE_CARDS, type StoryCard } from '../../story';
+import { BELLADONA_CARDS, CHIMERA_CARDS, LION_CARDS, MANDRAKE_CARDS, OUROBOROS_CARDS, type StoryCard } from '../../story';
 import type { EntityId } from '../profiles';
 
 export interface BossDef {
@@ -33,7 +34,7 @@ export const BOSS_DEFS: Record<BossId, BossDef> = {
     spawn: 'bottom', after: 'next', farewell: CHIMERA_CARDS,
     arena: {
       nome: 'Quimera de Mercúrio', lugar: 'Poço de Prata, fim do Vale',
-      dica: 'A água escorre por ela. A Poção Telúrica a prende.', theme: 'stone', block: 'barrel',
+      dica: 'A água escorre por ela. A Poção de Terra a prende.', theme: 'stone', block: 'barrel',
     },
   },
   belladonna: {
@@ -42,7 +43,7 @@ export const BOSS_DEFS: Record<BossId, BossDef> = {
     spawn: 'bottom', after: 'next', farewell: BELLADONA_CARDS,
     arena: {
       nome: 'Belladona', lugar: 'Torre de Belladona',
-      dica: 'Fogo e éter a ferem muito. Todo golpe avisa no chão.', theme: 'stone', block: 'scroll',
+      dica: 'Fogo e ar a ferem muito. Todo golpe avisa no chão.', theme: 'stone', block: 'scroll',
     },
   },
   mandrake: {
@@ -54,13 +55,22 @@ export const BOSS_DEFS: Record<BossId, BossDef> = {
       dica: 'O fogo a fere muito; terra e água quase nada.', theme: 'garden', block: 'garden',
     },
   },
+  ouroboros: {
+    id: 'ouroboros', profile: 'ouroboros',
+    sprite: { prefix: 'ouro', draw: drawOuroborosTextures },
+    spawn: 'bottom', after: 'next', farewell: OUROBOROS_CARDS,
+    arena: {
+      nome: 'Ouroboros', lugar: 'Cúpula do Observatório',
+      dica: 'A fraqueza gira a cada ciclo: o brilho em volta dele mostra o elemento que o fere agora. O oposto ele devora.', theme: 'observatory', block: 'brick',
+    },
+  },
   lion: {
     id: 'lion', profile: 'lion',
     sprite: { prefix: 'lion', draw: drawLionTextures },
-    spawn: 'bottom', after: 'next', farewell: [],
+    spawn: 'bottom', after: 'next', farewell: LION_CARDS,
     arena: {
-      nome: 'Leão Verde', lugar: 'Biblioteca Proibida (selada)',
-      dica: 'Imune à terra; o éter o fere muito. O ácido dissolve as suas poções.', theme: 'crypt', block: 'books',
+      nome: 'Leão Verde', lugar: 'Biblioteca Proibida',
+      dica: 'Imune à terra; o ar o fere muito. O ácido dissolve as suas poções.', theme: 'crypt', block: 'books',
     },
   },
 };

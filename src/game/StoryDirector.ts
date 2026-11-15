@@ -2,58 +2,47 @@
 // com frei Anselmo e a despedida dos chefes. Os textos estão em game/story.ts e nas fases (stages/chapters);
 // o que cada chefe faz ao ser vencido está no registro (entities/bosses/defs.ts: `after` e `farewell`).
 // A MainScene cria um destes em create() e só delega.
-import Phaser from 'phaser';
-import { CONFIG } from '../config';
 import { audio } from '../audio/AudioEngine';
 import { SCENE_TRACKS } from '../audio/tracks';
-import { Bank, markArenaWin, markStageCompleted } from '../storage';
+import { markArenaWin, markStageCompleted } from '../storage';
 import { showDialogue } from '../ui/dialogue';
-import { readTheme } from '../ui/theme';
+import { hideStageIntro, showStageIntro } from '../ui/stageIntro';
 import type { MainScene } from '../scenes/MainScene';
 import { BOSS_DEFS } from './entities/bosses/defs';
 import { LAST_STAGE } from './stages/index';
 import { ANSELMO, ENDING_CARDS, PASSAGE_CARDS, type StoryCard } from './story';
 
 export class StoryDirector {
-  constructor(private readonly scene: MainScene) {}
+  private bannerOpen = false;
+
+  constructor(private readonly scene: MainScene) {
+    // se a fase reinicia ou a partida vai ao menu com o cartão aberto, a gravura some junto
+    scene.events.once('shutdown', () => { this.bannerOpen = false; hideStageIntro(); });
+  }
 
   // Cartão de entrada da fase: número e lugar, nome, uma frase da história e (se houver) a dica.
+  // Fica na tela até a jogadora começar (ENTER ou toque): `dismissBanner()`. A fase espera por isso.
   showBanner(): void {
     const s = this.scene;
     const def = s.def;
-    const theme = readTheme();
-    const cx = (CONFIG.cols * CONFIG.tile) / 2;
-    const cy = (CONFIG.rows * CONFIG.tile) / 2;
-    const textW = CONFIG.cols * CONFIG.tile - 48;
-    const items: Phaser.GameObjects.GameObject[] = [];
-    const bandH = def.tip ? 150 : 124;
-    items.push(s.add.rectangle(cx, cy, CONFIG.cols * CONFIG.tile, bandH, 0x120d08, 0.78).setDepth(29));
-    let y = cy - bandH / 2 + 22;
     const head = def.chapter ? `${def.chapter} · ${def.part ?? ''}`.replace(/ · $/, '') : `FASE ${s.stage}`;
-    items.push(s.add.text(cx, y, `${head} · ${def.place.toUpperCase()}`, {
-      fontFamily: theme.fontDisplay, fontSize: '12px', color: theme.textMuted, fontStyle: '700',
-    }).setOrigin(0.5).setDepth(30));
-    y += 28;
-    items.push(s.add.text(cx, y, def.name, {
-      fontFamily: theme.fontDisplay, fontSize: '26px', color: '#f0c674', fontStyle: '700',
-      stroke: '#000000', strokeThickness: 3,
-    }).setOrigin(0.5).setDepth(30));
-    y += 22;
-    const story = s.add.text(cx, y, def.story, {
-      fontFamily: theme.fontBody, fontSize: '13px', fontStyle: 'italic', color: '#f1e6c9',
-      align: 'center', wordWrap: { width: textW },
-    }).setOrigin(0.5, 0).setDepth(30);
-    items.push(story);
-    if (def.tip) {
-      items.push(s.add.text(cx, y + story.height + 8, def.tip, {
-        fontFamily: theme.fontBody, fontSize: '12px', color: '#c9b98f',
-        align: 'center', wordWrap: { width: textW },
-      }).setOrigin(0.5, 0).setDepth(30));
-    }
-    s.tweens.add({
-      targets: items, alpha: 0, delay: 3200, duration: 600,
-      onComplete: () => items.forEach(i => i.destroy()),
+    this.bannerOpen = true;
+    showStageIntro({
+      textures: s.textures,
+      stage: s.arena ? 0 : s.stage, // a Arena e o duelo usam a gravura do duelo
+      head: `${head} · ${def.place.toUpperCase()}`,
+      name: def.name,
+      story: def.story,
+      tip: def.tip,
+      onStart: () => s.endIntro(),
     });
+  }
+
+  // Fecha o cartão de entrada: a fase começa.
+  dismissBanner(): void {
+    if (!this.bannerOpen) return;
+    this.bannerOpen = false;
+    hideStageIntro();
   }
 
   // Passagem entre fases: a Roo lê ou ouve algo (se a fase tem cartões) e só então segue.
@@ -90,13 +79,11 @@ export class StoryDirector {
   gateReached(): void {
     const s = this.scene;
     s.floatingText(s.player.gridX, s.player.gridY, 'O PORTÃO SE ABRE', '#9be564');
-    s.coins += CONFIG.gardenVictoryBonus;
-    Bank.add(CONFIG.gardenVictoryBonus);
     s.time.delayedCall(900, () => { void this.ending(); });
   }
 
-  // Um chefe foi derrotado. Na Arena: só guarda a vitória e mostra o resultado (sem ouro nem despedida). Na campanha:
-  // ouro, a queda dele, a despedida em cartões e então 'next' (segue para a fase seguinte) ou 'gate' (abre o portão).
+  // Um chefe foi derrotado. Na Arena: só guarda a vitória e mostra o resultado (sem despedida). Na campanha:
+  // a queda dele, a despedida em cartões e então 'next' (segue para a fase seguinte) ou 'gate' (abre o portão).
   bossDefeated(): void {
     const s = this.scene;
     if (s.gameOver || s.transitioning) return;
@@ -109,8 +96,6 @@ export class StoryDirector {
       return;
     }
     const boss = s.def.boss ? BOSS_DEFS[s.def.boss] : null;
-    s.coins += CONFIG.bossVictoryBonus;
-    Bank.add(CONFIG.bossVictoryBonus);
     s.floatingText(gridX, gridY, `${s.boss?.name ?? 'CHEFE'} DERROTADA!`, '#9be564');
     if (boss?.after === 'gate') {
       // o último chefe: depois da despedida o portão (onde Anselmo espera) se abre

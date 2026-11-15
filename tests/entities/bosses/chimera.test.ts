@@ -9,7 +9,7 @@ import { hitsToKill } from '../../../src/game/entities/damage';
 const open = (x: number, y: number): boolean => x >= 1 && x <= 13 && y >= 1 && y <= 11;
 
 describe('Quimera: dano por elemento', () => {
-  it('a terra é a fraqueza, a água escorre (imune) e fogo e éter machucam normal', () => {
+  it('a terra é a fraqueza, a água escorre (imune) e fogo e ar machucam normal', () => {
     expect(PROFILES.chimera.weak).toEqual(['earth']);
     expect(PROFILES.chimera.immune).toEqual(['water']);
     expect(CHIMERA_DAMAGE.water).toBe(0);

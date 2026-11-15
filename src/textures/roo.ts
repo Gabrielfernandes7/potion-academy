@@ -1,4 +1,4 @@
-// Broomstick Roo: canguru bruxo com chapéu, varinha e manto.
+// Broomstick Roo: cachorro bruxo com chapéu, varinha e manto.
 //
 // Poses:
 // - 'awake': 4 frames de caminhada por direção (idle usa frames 0 e 1).
@@ -114,16 +114,18 @@ function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPo
     g.strokePath();
   };
 
-  // orelha alta (marca registrada)
+  // orelha caída de cachorro: nasce no alto da cabeça, sobe um pouco e tomba para fora e para baixo. (Antes eram duas
+  // orelhas altas e retas, que liam como coelho; a Roo é um cachorro.) A ponta escura balança com o passo.
   const drawEar = (ex: number, ey: number, flip: boolean): void => {
     const s = flip ? -1 : 1;
+    const sway = earTwitch * 0.35;
     g.fillStyle(0xe07820);
-    g.fillEllipse(ex, ey - 2 + earTwitch * 0.3, 5, 11);
-    g.fillEllipse(ex + s * 0.5, ey - 8 + earTwitch, 4, 5);
+    g.fillEllipse(ex + s * 0.3, ey - 3.6, 4.6, 5.4); // a raiz, no alto da cabeça
+    g.fillEllipse(ex + s * 2.6, ey + 1.6 + sway, 4.8, 10.4); // o corpo, pendendo ao lado do rosto
     g.fillStyle(0xffd8a0);
-    g.fillEllipse(ex, ey - 1 + earTwitch * 0.2, 2.6, 7);
-    g.fillStyle(0xc06018);
-    g.fillCircle(ex + s * 0.3, ey - 11 + earTwitch, 1.8);
+    g.fillEllipse(ex + s * 2.2, ey + 1.2 + sway, 2, 6.4); // o rosado por dentro
+    g.fillStyle(0xb85a14);
+    g.fillEllipse(ex + s * 2.9, ey + 6.4 + sway, 3.6, 3.4); // a ponta, mais escura
   };
 
   const drawHatBrim = (x: number, y: number, w: number): void => {
@@ -376,7 +378,7 @@ function drawRooFrame(g: Gfx, T: number, frame: number, dir: RooDir, pose: RooPo
 
   // de frente
   function drawFront(): void {
-    // pés grandes de canguru
+    // pés grandes de cachorro
     g.fillStyle(0xe89040);
     g.fillEllipse(cx - 5.5 + legL * 0.22, cy + 10, 6.5, 5.5);
     g.fillEllipse(cx + 5.5 + legR * 0.22, cy + 10, 6.5, 5.5);

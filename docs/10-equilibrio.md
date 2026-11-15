@@ -5,8 +5,8 @@ Equilibrar é escolher os números para o jogo ser **calmo, mas com desafio**. T
 ## Metas
 
 1. Cada poção precisa ter um motivo para ser usada (nenhuma melhor em tudo).
-2. Liberar as 3 poções da loja deve levar **cerca de 6 a 7 partidas**.
-3. A fase 1 deve ser vencível em 90 s por quem está aprendendo, sem pressa constante.
+2. Aprender as 3 poções (água, terra e ar) deve levar **cerca de 6 a 7 partidas**.
+3. A fase 1 deve ser vencível em 100 s por quem está aprendendo, sem pressa constante.
 4. A Belladona deve ser vencida em **2 a 4 tentativas**, e perder deve parecer erro do jogador (por isso todo ataque tem aviso).
 
 ## Poções
@@ -28,14 +28,14 @@ Antes, a Aqua tinha alcance 4 e a Telúrica e a Etérea alcance 3, então a Aqua
 | +Raio | 4 níveis | 3 | alcance 3 + 3 níveis já cobre quase o mapa |
 | +Velocidade | 3 níveis | 2 | com 3 níveis a Roo corria mais que os inimigos o tempo todo |
 | Passo base da Roo | 220 ms por casa | 300 ms | a Roo parecia rápida demais; 300 ms é igual ao sapo, e +2 velocidade (~143 ms) ainda fica mais rápida que ele. Teste: se ficar lenta demais, use 260 ms |
-| Baú | +2 vida | 0 | só os corações curam; o baú dá OURO |
+| Baú | +2 vida | 0 | só os corações curam; o baú guarda um item |
 | Vida da Roo | 5 corações, 1 por golpe | barra de 24 pontos: contato 4, fogo 6, água 2, terra e éter 4 | a Roo ganha perfil de fraqueza (fogo) e resistência (água); 24 mantém 6 golpes neutros e dá 4 contra fogo. Coração cura 4. Testar com a Belladona, que usa fogo em 65% dos ataques |
 | Formas da Roo (T fogo, Y água) | 12 s só no fogo | **20 s** (era 12, depois 16) em 4 degraus de 5 s; espera comum de 25 s; poções do próprio elemento +50% (cai por degrau). **Fogo:** resiste ao fogo (2), fraca à água (6), **sem Poção Aqua**; Labareda 3 casas. **Água:** imune à água, fraca ao fogo, todas as poções; Bolha de sabão: 4 casas, prende por 1,75 a 4 s. As duas habilidades custam 2 s e esperam 3,5 s | `game/forms/`; valores de teste, ainda a jogar |
 | Leão Verde (Arena) | não existia | 28 de vida: terra imune, éter 6, fogo 4, água 2; Bote com exposição de 2,2 s (+2 de dano); Dissolver 1,4 s de aviso; Rugido só na fúria; espera de 3,6 s (2,5 s na fúria) | o fogo o vence em 7 golpes, o éter em 5; só na Arena, ainda a testar jogando |
 
 ## Economia (estimativa)
 
-- Uma partida boa rende cerca de **60 OURO** (moedas ≈ 18, baús ≈ 20, inimigos ≈ 6, estimativa). Moedas e baús foram reduzidos (OURO acumulava sem ter o que comprar); os preços da loja não mudaram.
+- O OURO foi tirado do jogo (não havia o que comprar com ele). Baús guardam um item; moedas soltas não existem mais.
 - Liberar tudo custa 60 + 90 + 120 = **270** → 3 a 4 partidas. Vencer a Belladona dá **+80**.
 
 ## Chefe
@@ -57,14 +57,11 @@ Ficam em `STAGES` e `ENEMY_TYPES` (`src/config.ts`); `tests/stages.test.ts` guar
 
 | Número | Valor | Efeito de mudar |
 |---|---|---|
-| tempo do laboratório / salão / jardim | 90 / 100 / 100 s | o salão e o jardim têm mais perigo, então mais tempo |
+| tempo do laboratório / salão / jardim | 100 / 100 / 100 s | o salão e o jardim têm mais perigo, mas o laboratório também precisa de folga para quem está aprendendo |
 | `moveInterval` do sapo / fantasma | 0,8 / 1,5 s | o fantasma atravessa paredes, então precisa ser bem mais lento |
 | fantasmas no salão | 2 no início, até 4 | mais que 4 fecha o mapa |
 | flores no jardim | 5, fixas | cada flor bloqueia uma casa |
 | `flowerLashCycleMs` / `flowerWarnMs` | 3,2 s / 0,8 s | o aviso não pode ser menor que 0,6 s (justo) |
-| `gardenVictoryBonus` | 60 OURO | prêmio por zerar o jogo |
-| `bossVictoryBonus` | 80 OURO | prêmio por vencer a Belladona |
-| `coinPickupValue` | 1 OURO | valor de cada moeda solta |
 
 Reações entre poções (`src/game/chain.ts`): só o fogo acende outras poções. Isso deixa a água com um papel claro (apaga o fogo) e a terra com outro (estável).
 
@@ -72,7 +69,7 @@ Reações entre poções (`src/game/chain.ts`): só o fogo acende outras poçõe
 
 1. Mude **um** número em `config.ts`.
 2. Rode `npm run test` (os testes de equilíbrio avisam se algo ficou desbalanceado).
-3. Jogue 5 partidas e anote: tempo, vida restante, OURO ganho.
+3. Jogue 5 partidas e anote: tempo, vida restante, itens dos baús.
 4. Compare com as metas acima.
 
 ## O que ainda não foi medido
@@ -93,3 +90,24 @@ Fonte: `src/game/entities/damage.ts` (`PROFILES`). Dano-base de toda poção: 4.
 | Mandrágora | 28 | fogo | terra, água | – | 5 / 14 / 14 / 7 |
 
 O teste `tests/damage.test.ts` garante: todo personagem tem fraqueza, nenhuma poção é a melhor contra todos e nenhum personagem exige mais de 14 golpes.
+
+## Velocidade (atualizado)
+- Casa base: 260 ms (antes 300). Cada ponto de velocidade (máximo 2) encurta a casa em 12% (`SPEED_STEP` em `game/movement.ts`): 260 → ~232 → ~210 ms. Antes, 55% por ponto deixava o primeiro power-up quase 35% mais rápido.
+
+## Como equilibrar com a Arena (2026-11-15)
+
+Dois instrumentos que não dependem de jogar a campanha inteira:
+
+1. **Treino com a transformação à escolha.** Na Arena, o seletor "Transformação para treinar" põe a Roo transformada no auge, sem fim (só as esperas das habilidades). Treine cada forma contra cada chefe e anote quantos golpes e quanta vida cada defesa economiza.
+2. **Duelo de chefes** (100 s, a Roo só assiste). Serve para comparar a força dos chefes entre si e achar um que está fora da curva.
+
+**Linha de base do duelo** (simulação de 100 s de jogo, cada lado em cada canto; Quimera com 28 de vida e a Onda de vapor de ar):
+
+| Chefe | Resultado |
+|---|---|
+| Belladona, Leão Verde | vencem quase todos |
+| Mandrágora | vence a Quimera; perde para o Leão e a Belladona |
+| Quimera | a mais frágil (resiste de 45 a 76 s), o que combina com o primeiro chefe |
+| Ouroboros | entra no duelo como o resto; a fraqueza dele gira (ver `bosses/ouroboros/rules.ts`) |
+
+Nenhum duelo chegou ao tempo: todos terminaram em nocaute. Se mudar vida, tempos ou dano de um chefe, rode a simulação de novo (`scripts/` não tem o roteiro; está em `task.md`, "Como testar por script").

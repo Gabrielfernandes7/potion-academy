@@ -17,7 +17,7 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 | a tabela de drop dos caixotes | `src/game/rewards.ts` |
 | a HUD (vida, tempo, seletor, Roo Fire; sem legendas, em ícones) | `src/scenes/HudScene.ts` |
 | o menu animado (caldeirão e Roo) | `src/scenes/MenuScene.ts` |
-| o menu, pausa, loja e fim de jogo (telas em texto) | `index.html` e `src/ui/` |
+| o menu, pausa e fim de jogo (telas em texto) | `index.html` e `src/ui/` |
 | as cores e fontes | `src/styles/main.css` (variáveis em `:root`) |
 | a Belladona (movimento, habilidades, vida) | `src/game/entities/bosses/belladonna/BelladonnaController.ts` |
 | as regras do chefe (escolha de ataque, áreas, alvos) | `src/game/entities/bosses/belladonna/rules.ts` |
@@ -26,7 +26,7 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 | os números de equilíbrio | `src/config.ts` (veja `10-equilibrio.md`) |
 | ver todos os sprites | abra `/sprites.html` (veja `09-sprites.md`) |
 | a música e os sons | `src/audio/AudioEngine.ts` e `src/audio/tracks.ts` |
-| o que se guarda entre partidas (moedas, poções) | `src/storage.ts` |
+| o que se guarda entre partidas (poções aprendidas, fases) | `src/storage.ts` |
 | os controles do celular | `src/input/touch.ts` |
 
 ## Peças que se conversam

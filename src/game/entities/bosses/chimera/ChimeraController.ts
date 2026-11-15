@@ -6,7 +6,7 @@
 //   spit  : cospe um jato de prata em linha reta, passando pela casa em que você está.
 //   drops : gotas de prata caem, uma depois da outra; a primeira, na sua casa.
 //   slide : vira poça (protegida), escorre e ressurge perto de você, com um respingo.
-//   wave  : (só furiosa) uma onda varre o campo em faixas; a linha verde fica seca.
+//   wave  : (só furiosa) uma onda de vapor de mercúrio (ar) varre o campo em faixas; a linha verde fica seca.
 import { CONFIG, ElementId } from '../../../../config';
 import type { MainScene } from '../../../../scenes/MainScene';
 import { BossBase, center } from '../BossBase';
@@ -79,7 +79,7 @@ export class ChimeraController extends BossBase {
     this.setPose('cast');
     this.scene.play('powerup');
     const from = { x: this.gridX, y: this.gridY };
-    const target = this.scene.playerTile();
+    const target = this.targetTile();
     const tiles = spitTiles(from, target, this.isOpen);
     // furiosa: um segundo jato, do outro lado da jogadora, em cruz com o primeiro
     if (this.phase === 2) {
@@ -99,7 +99,7 @@ export class ChimeraController extends BossBase {
     this.setPose('cast');
     this.scene.play('powerup');
     const count = this.phase === 2 ? 5 : 3;
-    const targets = rainTargets(this.scene.playerTile(), count, this.isOpen);
+    const targets = rainTargets(this.targetTile(), count, this.isOpen);
     targets.forEach((t, i) => {
       const ms = CONFIG.bossTelegraphMs - 100 + i * DROP_STEP_MS;
       this.telegraph([t], 'water', t, ms);
@@ -109,7 +109,7 @@ export class ChimeraController extends BossBase {
   }
 
   private castSlide(): void {
-    const player = this.scene.playerTile();
+    const player = this.targetTile();
     const dest = slideDestination(player, this.isOpen);
     if (!dest) { this.state = 'idle'; this.cooldownMs = 1000; return; }
     this.state = 'blinking';
@@ -137,7 +137,7 @@ export class ChimeraController extends BossBase {
   private castWave(): void {
     this.setPose('cast');
     this.scene.play('powerup');
-    const player: Tile = this.scene.playerTile();
+    const player: Tile = this.targetTile();
     const gapY = waveGapRow(player, CONFIG.rows, this.isOpen);
     const fromLeft = this.sprite.x > (CONFIG.cols * CONFIG.tile) / 2; // varre a partir do lado oposto ao dela
     const bands = waveBands(CONFIG.cols, CONFIG.rows, fromLeft, gapY, this.isOpen);
@@ -147,8 +147,9 @@ export class ChimeraController extends BossBase {
     this.markTiles(safe, 0x9be564, first + (bands.length - 1) * WAVE_STEP_MS);
     bands.forEach((band, i) => {
       const ms = first + i * WAVE_STEP_MS;
-      this.telegraph(band, 'water', undefined, ms);
-      this.after(ms, () => { if (this.state !== 'defeated') this.explode(band, 'water'); });
+      // a onda é o vapor do mercúrio: ar, não água (a água escorria inútil contra quem a resiste e curava a Mandrágora)
+      this.telegraph(band, 'air', undefined, ms);
+      this.after(ms, () => { if (this.state !== 'defeated') this.explode(band, 'air'); });
     });
     this.after(first + (bands.length - 1) * WAVE_STEP_MS + 200, () => this.endCast());
   }

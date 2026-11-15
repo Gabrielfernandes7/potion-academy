@@ -4,6 +4,7 @@ import type { PickupType } from './rewards';
 import type { Upgrades } from './upgrades';
 import type { EnemyKind } from './entities/enemies/defs';
 import type { BossId } from './stages/types';
+import type { FormId } from './forms/types';
 
 export type Facing = 'up' | 'down' | 'left' | 'right';
 
@@ -37,7 +38,7 @@ export interface Pickup {
   gridX: number;
   gridY: number;
   type: PickupType;
-  value?: number; // moedas do baú (sorteadas ao nascer)
+  prize?: PickupType; // item que o baú guarda (sorteado ao nascer)
   potion?: BombId; // power-up de alcance/frasco: a poção que ele fortalece (sorteada ao nascer)
   sprite: Phaser.GameObjects.Image;
   halo?: Phaser.GameObjects.Image;
@@ -57,7 +58,14 @@ export interface Enemy {
   hopY: boolean; // o passo é na vertical: o pulo é maior
   phase: number;
   lashMs: number; // flor do mal: tempo até o próximo chicote de espinhos
-  trapMs: number; // preso numa bolha de sabão da Roo Aqua: não anda, não machuca e não chicoteia até estourar
+  dir: { x: number; y: number }; // patrulha: o sentido do passo
+  steps: number; // patrulha: passos dados desde a última pausa
+  actMs: number; // toupeira/coruja: tempo até a próxima ação (afundar, mergulhar)
+  state: 'walk' | 'burrowed' | 'aim'; // toupeira: debaixo da terra; coruja: marcando a casa
+  target: { x: number; y: number } | null; // casa onde brota ou onde mergulha
+  loot: { type: PickupType; prize?: PickupType; potion?: BombId } | null; // ratinho: o item que roubou
+  used: boolean; // salamandra: já aqueceu a Roo nesta fase
+  trapMs: number; // preso numa bolha de sabão da Roo Água: não anda, não machuca e não chicoteia até estourar
   fxCooldown: number; // evita repetir o aviso "IMUNE" e o dano a cada quadro enquanto a explosão dura
   hp: number;
   maxHp: number;
@@ -82,11 +90,10 @@ export interface PowerupCounts {
 }
 
 // O que a jogadora leva da fase 1 para a fase 2.
-interface Carry {
+export interface Carry {
   hp: number;
   upgrades: Upgrades;
   speedUp: number;
-  coins: number;
   bombType: import('../config').BombId;
 }
 
@@ -95,4 +102,6 @@ export interface StageData {
   stage?: number;
   carry?: Carry;
   arena?: BossId; // treino na Arena contra este chefe (stage = ARENA_STAGE; nada vale para a campanha)
+  form?: FormId; // na Arena: a transformação fixa em que a Roo luta (sem fim; só para treinar)
+  duel?: BossId; // com `arena`: duelo de chefes (arena contra duel, sem a Roo; game/duel.ts)
 }

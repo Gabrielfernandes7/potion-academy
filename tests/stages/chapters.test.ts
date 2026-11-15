@@ -4,7 +4,7 @@ import type { ChapterSpec, StageSpec } from '../../src/game/stages';
 
 const stub = (name: string, kind: StageSpec['kind'] = 'crypt'): StageSpec => ({
   kind, name, place: 'p', story: 's', time: 1, blockChance: 0.5, door: kind !== 'boss',
-  enemies: [], theme: 'stone', track: 'ecos', chest: [{ chance: 1, coins: 1 }],
+  enemies: [], theme: 'stone', track: 'ecos', chest: [{ chance: 1, prize: 'heart' }],
 });
 
 describe('capítulos', () => {

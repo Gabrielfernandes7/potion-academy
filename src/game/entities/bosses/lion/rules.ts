@@ -2,7 +2,7 @@
 // estão em lines.ts e o comportamento visual em LionController.ts. Ver docs/03-mundo.md e docs/06-decisoes.md.
 //
 // O Leão Verde é o solvente universal da alquimia: dissolve tudo, até o ouro (o sol). Nos manuscritos ele
-// aparece devorando o sol. A terra (o sal) é imune; o éter (a quintessência) é a fraqueza.
+// aparece devorando o sol. A terra (o sal) é imune; o ar (a quintessência) é a fraqueza.
 import { ElementId } from '../../../../config';
 import { damageTo } from '../../damage';
 import { PROFILES } from '../../profiles';

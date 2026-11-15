@@ -3,12 +3,14 @@
 // Para um capítulo novo: crie chapters/<nome>.ts e acrescente-o em CHAPTER_LIST.
 import { VALE } from './chapters/vale';
 import { RETORNO } from './chapters/retorno';
+import { OBSERVATORIO } from './chapters/observatorio';
+import { BIBLIOTECA } from './chapters/biblioteca';
 import { TORRE } from './chapters/torre';
 import type { ChapterDef, ChapterSpec, StageDef } from './types';
 
 export type { ChapterDef, ChapterSpec, StageDef, StageKind, StageTheme, StageSpec, BossId, ChestOdd, EnemyRule } from './types';
 
-export const CHAPTER_LIST: readonly ChapterSpec[] = [VALE, TORRE, RETORNO];
+export const CHAPTER_LIST: readonly ChapterSpec[] = [VALE, TORRE, BIBLIOTECA, OBSERVATORIO, RETORNO];
 
 // Capítulo e posição de cada fase de um capítulo agrupado: "1/4", "2/4"... e "chefe" na fase de chefe.
 export function buildStages(chapters: readonly ChapterSpec[]): StageDef[] {

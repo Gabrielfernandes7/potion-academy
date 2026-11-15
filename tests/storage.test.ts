@@ -16,34 +16,33 @@ describe('storage (chaves de persistência)', () => {
     vi.resetModules();
   });
 
-  it('começa com 100 de OURO e só a poção de fogo', async () => {
+  it('começa só com a poção de fogo', async () => {
     installLocalStorage();
     const s = await import('../src/storage');
-    expect(s.Bank.get()).toBe(100);
     expect(s.hasBombType('normal')).toBe(true);
     expect(s.hasBombType('mega')).toBe(false);
   });
 
-  it('compra desconta o saldo e marca a poção como possuída', async () => {
+  it('aprender uma poção a torna da Roo, e não duplica', async () => {
     installLocalStorage();
     const s = await import('../src/storage');
-    expect(s.buyBombType('mega')).toBe(true);
-    expect(s.Bank.get()).toBe(40);
+    s.grantBombType('mega');
     expect(s.hasBombType('mega')).toBe(true);
-    expect(s.buyBombType('mega')).toBe(false); // já comprada
+    s.grantBombType('mega'); // de novo não duplica
+    expect(JSON.parse(localStorage.getItem('bombroo_owned')!).filter((x: string) => x === 'mega')).toHaveLength(1);
   });
 
-  it('não compra sem saldo suficiente', async () => {
-    installLocalStorage({ bombroo_bank: '50' });
+  it('concluir a fase em que a poção é aprendida a concede (learning.ts)', async () => {
+    installLocalStorage();
     const s = await import('../src/storage');
-    expect(s.buyBombType('pierce')).toBe(false); // custa 90
-    expect(s.Bank.get()).toBe(50);
+    expect(s.hasBombType('mega')).toBe(false);
+    s.markStageCompleted(1);
+    expect(s.hasBombType('mega')).toBe(true);
   });
 
   it('lê o progresso salvo com as chaves originais', async () => {
-    installLocalStorage({ bombroo_bank: '250', bombroo_owned: '["normal","remote"]' });
+    installLocalStorage({ bombroo_owned: '["normal","remote"]' });
     const s = await import('../src/storage');
-    expect(s.Bank.get()).toBe(250);
     expect(s.hasBombType('remote')).toBe(true);
   });
 });
@@ -58,11 +57,11 @@ describe('storage: migração do progresso das fases', () => {
     expect(s.isStageCompleted(3)).toBe(false); // a Névoa (nova) ainda não foi vencida
     expect(s.isStageCompleted(4)).toBe(false); // nem o Poço (chefe do Vale)
     expect(s.isStageCompleted(5)).toBe(true);  // a antiga 3 (Escadaria) agora é a 5
-    expect(JSON.parse(localStorage.getItem('bombroo_stages_schema')!)).toBe(3);
+    expect(JSON.parse(localStorage.getItem('bombroo_stages_schema')!)).toBe(5);
   });
 
   it('com a versão atual não renumera de novo', async () => {
-    installLocalStorage({ bombroo_stages_completed: JSON.stringify([1, 2, 3]), bombroo_stages_schema: '3' });
+    installLocalStorage({ bombroo_stages_completed: JSON.stringify([1, 2, 3]), bombroo_stages_schema: '5' });
     const s = await import('../src/storage');
     expect(s.isStageCompleted(3)).toBe(true);
     expect(s.isStageCompleted(4)).toBe(false);
@@ -83,9 +82,8 @@ describe('storage: vitórias na Arena', () => {
     expect(JSON.parse(localStorage.getItem('bombroo_arena_wins')!)).toEqual(['lion', 'chimera']);
   });
   it('um valor estranho salvo não quebra a leitura, e o progresso antigo não muda', async () => {
-    installLocalStorage({ bombroo_arena_wins: '"lixo"', bombroo_bank: '250' });
+    installLocalStorage({ bombroo_arena_wins: '"lixo"' });
     const s = await import('../src/storage');
     expect(s.arenaWins()).toEqual([]);
-    expect(s.Bank.get()).toBe(250);
   });
 });

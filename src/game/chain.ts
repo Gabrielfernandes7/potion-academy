@@ -5,7 +5,7 @@
 // - Água apaga: a explosão de água neutraliza uma poção de fogo armada (ela se desfaz em vapor, sem
 //   explodir). A explosão de água continua machucando quem estiver no caminho.
 // - Terra é estável: nunca é acesa nem neutralizada; só explode pelo próprio fusível.
-// - Água, terra e éter não acendem outras poções.
+// - Água, terra e ar não acendem outras poções.
 import type { ElementId } from '../config';
 
 export type ChainOutcome = 'trigger' | 'neutralize' | 'ignore';

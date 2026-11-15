@@ -3,8 +3,8 @@ import type { EnemyKind } from '../entities/enemies/defs';
 import type { BlockStyle } from './blockStyles';
 
 export type StageKind = 'lab' | 'crypt' | 'boss' | 'garden';
-export type StageTheme = 'stone' | 'crypt' | 'garden';
-export type BossId = 'belladonna' | 'mandrake' | 'chimera' | 'lion';
+export type StageTheme = 'stone' | 'crypt' | 'garden' | 'observatory';
+export type BossId = 'belladonna' | 'mandrake' | 'chimera' | 'lion' | 'ouroboros';
 
 // Quantos inimigos de um tipo: `start` no início; se houver `every`, mais um a cada N caixotes quebrados, até `max`.
 export interface EnemyRule {
@@ -14,9 +14,9 @@ export interface EnemyRule {
   every?: number;
 }
 
-// Quantas moedas um baú pode trazer, com a chance de cada valor (as chances somam 1).
+// O item que um baú pode guardar, com a chance de cada um (as chances somam 1).
 // Regra: quanto maior a recompensa, menor a chance.
-export interface ChestOdd { chance: number; coins: number }
+export interface ChestOdd { chance: number; prize: 'heart' | 'bomb_up' | 'fire_up' | 'speed_up' | 'time_up' }
 
 // O que se escreve na definição de uma fase (capítulo e posição vêm do capítulo, ver chapters).
 export interface StageSpec {
@@ -34,7 +34,7 @@ export interface StageSpec {
   theme: StageTheme;
   block?: BlockStyle; // o bloco destrutível da fase (ver game/stages/blockStyles.ts); sem ele, madeira ou canteiro
   track: string; // faixa de música da fase (ver SCENE_TRACKS em audio/tracks.ts)
-  chest: ReadonlyArray<ChestOdd>; // sorteio do baú (moedas) nesta fase
+  chest: ReadonlyArray<ChestOdd>; // sorteio do item do baú nesta fase
 }
 
 // A fase como o jogo a usa: a definição mais o capítulo e a posição nele (preenchidos em stages/index.ts).

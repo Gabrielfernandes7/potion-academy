@@ -9,7 +9,7 @@ import { PROFILES } from '../../../src/game/entities/profiles';
 const open = (x: number, y: number): boolean => x >= 1 && x <= 13 && y >= 1 && y <= 11;
 
 describe('Leão Verde: dano por elemento', () => {
-  it('o éter o fere muito, a terra não o toca, a água o dilui, o fogo é neutro', () => {
+  it('o ar o fere muito, a terra não o toca, a água o dilui, o fogo é neutro', () => {
     expect(PROFILES.lion.weak).toEqual(['air']);
     expect(PROFILES.lion.immune).toEqual(['earth']);
     expect(LION_DAMAGE.earth).toBe(0);
@@ -17,7 +17,7 @@ describe('Leão Verde: dano por elemento', () => {
     expect(LION_DAMAGE.fire).toBeGreaterThan(LION_DAMAGE.water);
     expect(LION_DAMAGE.water).toBeGreaterThanOrEqual(1);
   });
-  it('o fogo (poção inicial) o vence em poucos golpes, o éter em menos, a terra nunca', () => {
+  it('o fogo (poção inicial) o vence em poucos golpes, o ar em menos, a terra nunca', () => {
     expect(hitsToKill(PROFILES.lion, 'earth')).toBe(Infinity);
     expect(hitsToKill(PROFILES.lion, 'fire')).toBeLessThanOrEqual(8);
     expect(hitsToKill(PROFILES.lion, 'air')).toBeLessThan(hitsToKill(PROFILES.lion, 'fire'));

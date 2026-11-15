@@ -32,6 +32,6 @@ describe('ícones dos atributos', () => {
     expect(elementIconSvg('fire')).toContain('url(#rough)');
   });
   it('cada atributo tem o nome latino do manuscrito', () => {
-    expect(LATIN).toEqual({ fire: 'sulphur', water: 'mercurius', earth: 'sal', air: 'aether' });
+    expect(LATIN).toEqual({ fire: 'sulphur', water: 'mercurius', earth: 'sal', air: 'aer' });
   });
 });

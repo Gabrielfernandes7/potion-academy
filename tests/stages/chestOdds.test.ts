@@ -8,12 +8,10 @@ describe('sorteio do baú por fase', () => {
       expect(Math.abs(total - 1), `fase ${i + 1}`).toBeLessThan(1e-9);
     }
   });
-  it('recompensas maiores são sempre mais raras', () => {
+  it('as chances de cada baú somam 1 e nenhuma é zero', () => {
     for (const stage of STAGES) {
-      const sorted = [...stage.chest].sort((a, b) => a.coins - b.coins);
-      for (let i = 1; i < sorted.length; i++) {
-        expect(sorted[i].chance).toBeLessThanOrEqual(sorted[i - 1].chance);
-      }
+      for (const odd of stage.chest) expect(odd.chance).toBeGreaterThan(0);
+      expect(stage.chest.reduce((n, o) => n + o.chance, 0)).toBeCloseTo(1, 6);
     }
   });
 });

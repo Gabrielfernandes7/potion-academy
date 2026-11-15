@@ -84,7 +84,7 @@ export class MandrakeController extends BossBase {
   private castRoots(): void {
     this.setPose('cast');
     this.scene.play('powerup');
-    const target = this.scene.playerTile();
+    const target = this.targetTile();
     const horizontal = Math.random() < 0.5;
     const tiles = lineTiles(target.x, target.y, horizontal, this.isOpen);
     // furiosa: raízes nos dois sentidos, em cruz
@@ -120,7 +120,7 @@ export class MandrakeController extends BossBase {
     this.scene.play('door');
     this.burst(this.sprite.x, this.sprite.y - 10, 'menu_puff', [0x8d6e63, 0xffffff], 12, 60);
     this.scene.tweens.add({ targets: this.sprite, alpha: 0, duration: 300 });
-    const target = this.scene.playerTile();
+    const target = this.targetTile();
     const tiles = blastTiles(target.x, target.y, 1, this.isOpen);
     const ms = 1500;
     this.telegraph(tiles, 'earth', target, ms);
@@ -145,7 +145,7 @@ export class MandrakeController extends BossBase {
   private castShriek(): void {
     this.setPose('cast');
     this.scene.play('powerup');
-    const player = this.scene.playerTile();
+    const player = this.targetTile();
     const open: Tile[] = [];
     for (let y = 1; y < CONFIG.rows - 1; y++) {
       for (let x = 1; x < CONFIG.cols - 1; x++) if (this.isOpen(x, y)) open.push({ x, y });

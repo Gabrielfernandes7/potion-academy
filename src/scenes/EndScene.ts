@@ -65,6 +65,7 @@ export class EndScene extends Phaser.Scene {
     let i = 0;
     const show = (): void => {
       text.setText(CAULDRON_LINES[i]);
+      if (i === CAULDRON_LINES.length - 1) this.riseBubble(cx, FLOOR_Y - 12); // o último quadro: uma bolha sobe do caldeirão
       this.tweens.add({
         targets: text, alpha: 1, duration: 900,
         onComplete: () => {
@@ -94,6 +95,34 @@ export class EndScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.input.keyboard?.off('keydown-ENTER', skip);
       this.input.keyboard?.off('keydown-SPACE', skip);
+    });
+  }
+
+  // A bolha iridescente que sobe do caldeirão no último quadro, sem explicação: a mesma de onde a Roo nasceu. Anéis de
+  // cores diferentes (rosa, amarelo, ciano, violeta, verde), balanço leve, e some sem estourar, devagar.
+  private riseBubble(x: number, y: number): void {
+    const g = this.add.graphics().setDepth(5);
+    const colors = [0xffa8e0, 0xfff1a0, 0x9ff0ff, 0xc9b0ff, 0xa8ffd0];
+    const draw = (r: number, shift: number): void => {
+      g.clear();
+      g.fillStyle(0xdaf4ff, 0.14).fillCircle(0, 0, r);
+      for (let k = 0; k < 12; k++) {
+        const a0 = (k / 12) * Math.PI * 2;
+        g.lineStyle(2.4, colors[(k + shift) % colors.length], 0.95).beginPath().arc(0, 0, r, a0, a0 + Math.PI / 6 + 0.05).strokePath();
+      }
+      g.fillStyle(0xffffff, 0.95).fillRect(Math.round(-r * 0.55), Math.round(-r * 0.65), 3, 2);
+    };
+    g.setPosition(x, y);
+    draw(5, 0);
+    const state = { t: 0 };
+    this.tweens.add({
+      targets: state, t: 1, duration: 9000, ease: 'Sine.easeOut',
+      onUpdate: () => {
+        draw(5 + 13 * Math.min(1, state.t * 2), Math.floor(state.t * 40));
+        g.setPosition(x + Math.sin(state.t * 9) * 10, y - 190 * state.t);
+        g.setAlpha(state.t < 0.8 ? 1 : (1 - state.t) / 0.2);
+      },
+      onComplete: () => g.destroy(),
     });
   }
 

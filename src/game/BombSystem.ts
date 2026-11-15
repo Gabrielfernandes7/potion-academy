@@ -2,12 +2,16 @@
 // A cena (MainScene) guarda o estado da partida e chama este sistema; as regras de reação
 // entre poções ficam em game/chain.ts. Ver docs/ARCH.md.
 import Phaser from 'phaser';
-import { BLOCK, BOMB_TYPES, CONFIG, ELEMENTS, ElementId } from '../config';
+import { BLOCK, BOMB_TYPES, CONFIG, ELEMENTS, ElementId, WALL } from '../config';
 import { chainOutcome } from './chain';
 import { walkBlast } from './blast';
 import { blastRadius, canPlace } from './upgrades';
 import type { Bomb, Explosion } from './types';
 import type { MainScene } from '../scenes/MainScene';
+import { fxPool } from './fx/particlePool';
+import { ObjectPool } from './fx/objectPool';
+
+const FLASH_MS = 420; // duração do miolo e do anel de cada casa de uma explosão
 
 const EXPLOSION_FX: Record<ElementId, {
   texture: string; speed: { min: number; max: number }; angle: { min: number; max: number };
@@ -22,6 +26,13 @@ const EXPLOSION_FX: Record<ElementId, {
 export class BombSystem {
   bombs: Bomb[] = [];
   explosions: Explosion[] = [];
+
+  // imagens das explosões, reaproveitadas (o miolo e o anel de cada casa atingida)
+  private readonly corePool = new ObjectPool(() => this.scene.add.image(0, 0, 'menu_puff').setBlendMode(Phaser.BlendModes.ADD).setDepth(8));
+  private readonly ringPool = new ObjectPool(() => this.scene.add.image(0, 0, 'fx_ring').setDepth(9));
+
+  // as explosões em andamento (miolo e anel de cada casa): crescem e somem em FLASH_MS
+  private flashes: Array<{ core: Phaser.GameObjects.Image; ring: Phaser.GameObjects.Image; t: number }> = [];
 
   constructor(private readonly scene: MainScene) {}
 
@@ -73,7 +84,9 @@ export class BombSystem {
     const type = BOMB_TYPES[bomb.type];
     const radius = blastRadius(this.scene.player.upgrades, bomb.type, type.radius);
     const tiles: Array<{ x: number; y: number }> = [];
-    for (const t of walkBlast(bomb.gridX, bomb.gridY, radius, !!type.pierce, (x, y) => this.scene.getTile(x, y))) {
+    // o muro de sal da Roo Terra barra a explosão como uma parede (até a Poção de Terra, que atravessa caixotes, para nele)
+    const tileAt = (x: number, y: number): number | null => (this.scene.forms?.isSaltWall(x, y) ? WALL : this.scene.getTile(x, y));
+    for (const t of walkBlast(bomb.gridX, bomb.gridY, radius, !!type.pierce, tileAt)) {
       if (!t.origin) {
         // reação entre poções: fogo acende, água apaga o fogo, terra é imune (ver game/chain.ts)
         const chainBomb = this.bombs.find(b => b !== bomb && b.gridX === t.x && b.gridY === t.y && !b.detonated);
@@ -119,6 +132,12 @@ export class BombSystem {
     this.scene.cameras.main.shake(60, 0.003);
   }
 
+  /** O estouro da Raiz da Roo Terra: terra rachando nas casas ao redor de onde ela brotou. */
+  earthBlast(tiles: Array<{ x: number; y: number }>): void {
+    this.applyBlast(tiles, 'earth');
+    this.scene.play('explosion', 'earth');
+  }
+
   neutralizeBomb(bomb: Bomb, label = 'APAGADA'): void {
     if (bomb.detonated) return;
     bomb.detonated = true;
@@ -127,17 +146,14 @@ export class BombSystem {
     bomb.sprite.destroy();
     bomb.halo.destroy();
     bomb.fx.destroy();
-    const steam = this.scene.add.particles(x, y, 'menu_puff', {
+    fxPool(this.scene).burst('steam', 'menu_puff', {
       speed: { min: 8, max: 30 },
       angle: { min: -120, max: -60 },
       lifespan: { min: 700, max: 1100 },
       scale: { start: 0.35, end: 1.1 },
       alpha: { start: 0.55, end: 0 },
       tint: [0xe3f2fd, 0xb0bec5, 0xffffff],
-      emitting: false,
-    }).setDepth(10);
-    steam.explode(7);
-    this.scene.time.delayedCall(1300, () => steam.destroy());
+    }, x, y, 7, 10);
     this.scene.floatingText(Math.floor(x / CONFIG.tile), Math.floor(y / CONFIG.tile), label, '#a8e6f5');
     this.scene.play('fizzle');
   }
@@ -163,31 +179,36 @@ export class BombSystem {
 
   updateExplosions(delta: number): void {
     this.explosions = this.explosions.filter(e => (e.timer -= delta) > 0);
+    // anima o miolo e o anel de cada casa: escala 0,9 -> 1,9 (miolo) e 1 -> 1,9 (anel), e a transparência a zero
+    for (const f of this.flashes) {
+      f.t += delta;
+      const k = Math.min(1, f.t / FLASH_MS);
+      const ease = 1 - (1 - k) * (1 - k); // freia no fim, como o antigo tween
+      f.core.setScale(0.9 + 1.0 * ease).setAlpha(0.95 * (1 - k));
+      f.ring.setScale(1 + 0.9 * ease).setAlpha(0.9 * (1 - k));
+    }
+    if (this.flashes.some(f => f.t >= FLASH_MS)) {
+      for (const f of this.flashes) if (f.t >= FLASH_MS) { this.corePool.release(f.core); this.ringPool.release(f.ring); }
+      this.flashes = this.flashes.filter(f => f.t < FLASH_MS);
+    }
   }
 
   // `lite` pula as partículas (para explosões em muitas casas ao mesmo tempo, como o Grito da Mandrágora).
   spawnExplosion(x: number, y: number, color: number, glow: number, element: ElementId = 'fire', lite = false, fromRoo = false): void {
     const px = x * CONFIG.tile + CONFIG.tile / 2;
     const py = y * CONFIG.tile + CONFIG.tile / 2;
-    const core = this.scene.add.image(px, py, 'menu_puff').setTint(color)
-      .setBlendMode(Phaser.BlendModes.ADD).setDepth(8).setScale(0.9).setAlpha(0.95);
-    const ring = this.scene.add.circle(px, py, 10, color, 0.18)
-      .setStrokeStyle(2, glow, 0.95).setDepth(9);
-    this.scene.tweens.add({
-      targets: core, alpha: 0, scale: 1.9, duration: 420,
-      onComplete: () => core.destroy(),
-    });
-    this.scene.tweens.add({
-      targets: ring, scale: 2.2, alpha: 0, duration: 380,
-      onComplete: () => ring.destroy(),
-    });
+    // dois desenhos por casa (o miolo e o anel), vindos de um reservatório e animados no update (sem tweens: eram 2 por casa)
+    const core = this.corePool.acquire().setPosition(px, py).setTint(color).setScale(0.9).setAlpha(0.95);
+    const ring = this.ringPool.acquire().setPosition(px, py).setTint(glow).setScale(1).setAlpha(0.9);
+    this.flashes.push({ core, ring, t: 0 });
     if (!lite) this.explosionFx(px, py, color, glow, element);
     this.explosions.push({ x, y, timer: 380, key: `${x},${y}`, hitPlayer: false, element, fromRoo });
   }
 
+  // Partículas do elemento: um emissor por elemento e por cor, compartilhado (ver fx/particlePool.ts).
   private explosionFx(px: number, py: number, color: number, glow: number, element: ElementId): void {
     const c = EXPLOSION_FX[element];
-    const emitter = this.scene.add.particles(px, py, c.texture, {
+    fxPool(this.scene).burst(`blast:${element}:${color}`, c.texture, {
       speed: c.speed,
       angle: c.angle,
       gravityY: c.gravity,
@@ -196,10 +217,7 @@ export class BombSystem {
       alpha: { start: 1, end: 0 },
       tint: [color, glow, ...c.extra],
       blendMode: c.blend,
-      emitting: false,
-    }).setDepth(9);
-    emitter.explode(c.count);
-    this.scene.time.delayedCall(1100, () => emitter.destroy());
+    }, px, py, c.count, 9);
   }
 
   // Atualização por quadro: avança os pavios e depois as explosões.

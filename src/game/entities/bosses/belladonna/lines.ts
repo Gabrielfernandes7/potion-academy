@@ -3,7 +3,7 @@
 export type BossLine = 'fire' | 'rain' | 'blink' | 'hurt' | 'furious' | 'defeat';
 
 export const BOSS_LINES: Record<BossLine, readonly string[]> = {
-  fire: ['Arde!', 'Queima, canguru!'],
+  fire: ['Arde!', 'Queima, cachorro!'],
   rain: ['Chova, então!', 'Molhe-se!'],
   blink: ['Não me encontra.', 'Procura de novo.'],
   hurt: ['Ainda não!', 'Eu contei quem morreu.'],

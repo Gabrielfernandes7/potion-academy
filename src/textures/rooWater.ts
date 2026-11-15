@@ -1,4 +1,4 @@
-// Roo Aqua (a transformação de água): recolore a capa da Roo para azul e pinta bolhas de sabão, gotas e ondas
+// Roo Água (a transformação de água): recolore a capa da Roo para azul e pinta bolhas de sabão, gotas e ondas
 // por cima das texturas prontas. Mesmo molde de rooFire.ts: o estágio vai de 1 (capa azul) a 4 (bolhas
 // iridescentes e ondas aos pés); a fase do tremor (0 a 7) faz as bolhas girarem e as gotas caírem.
 // Sem Phaser: só canvas 2D.

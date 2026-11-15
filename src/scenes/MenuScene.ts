@@ -70,7 +70,7 @@ const REACTIONS: Record<ElementId, Reaction> = {
   water: { texture: 'menu_bubble', speed: { min: 60, max: 170 }, angle: { min: -160, max: -20 }, gravity: 320, life: { min: 600, max: 1000 }, size: { start: 1.5, end: 0.2 }, count: 28, tint: [0x4fc3f7, 0xb3e5fc, 0xffffff], blend: 'NORMAL', lean: -3, hop: 12, shake: 0 },
   // terra: pedras que saltam; a Roo pisa e a câmera treme
   earth: { texture: 'menu_spark', speed: { min: 80, max: 190 }, angle: { min: -150, max: -30 }, gravity: 480, life: { min: 450, max: 800 }, size: { start: 2.2, end: 0.6 }, count: 16, tint: [0x8d6e63, 0x6d4c41, 0xa1887f], blend: 'NORMAL', lean: 0, hop: 6, shake: 0.0025 },
-  // éter: redemoinho de brilhos que sobe; a Roo flutua
+  // ar: redemoinho de brilhos que sobe; a Roo flutua
   air: { texture: 'menu_spark', speed: { min: 30, max: 90 }, angle: { min: 0, max: 360 }, gravity: -90, life: { min: 900, max: 1500 }, size: { start: 1.8, end: 0 }, count: 24, tint: [0xffffff, 0xe0d8ff, 0xb3e5fc], blend: 'ADD', lean: 5, hop: 20, shake: 0 },
 };
 

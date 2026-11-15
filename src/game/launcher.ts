@@ -11,7 +11,6 @@ import { EndScene } from '../scenes/EndScene';
 import { MapScene } from '../scenes/MapScene';
 import { TEXTURES_READY } from './events';
 import { hideGameOver, setPauseVisible } from '../ui/overlays';
-import { closeShop } from '../ui/shop';
 import { setMenuVisible } from '../ui/menu';
 import { ensureFonts } from '../ui/fonts';
 import { showLetter } from '../ui/letter';
@@ -19,6 +18,8 @@ import { audio } from '../audio/AudioEngine';
 import { SCENE_TRACKS } from '../audio/tracks';
 import { ARENA_STAGE } from './arena';
 import type { BossId } from './stages/types';
+import type { FormId } from './forms/types';
+import type { StageData } from './types';
 
 let phaserGame: Phaser.Game | null = null;
 let texturesReady: Promise<void> = Promise.resolve();
@@ -33,6 +34,8 @@ export function bootGame(): void {
     powerPreference: 'high-performance',
     pixelArt: true,
     antialias: false,
+    // Sem `fps.limit`: medido, um limite de 60 numa tela de 60 Hz deixa o Phaser com 42 atualizações por segundo (ele
+    // descarta quadros por ruído de tempo). Em telas de 120 Hz o jogo roda a 120; o trabalho por quadro é que foi reduzido.
     parent: 'game',
     audio: { noAudio: true }, // o áudio é todo do AudioEngine (WebAudio próprio)
     // o canvas se ajusta ao contêiner #game (CSS), em qualquer tela
@@ -53,7 +56,7 @@ export function textureDataUrl(key: string): string | null {
   return url || null;
 }
 
-// Começa (ou reinicia) uma partida a partir do menu, da loja ou do fim de jogo.
+// Começa (ou reinicia) uma partida a partir do menu ou do fim de jogo.
 let startingGame = false;
 
 export async function startGame(): Promise<void> {
@@ -63,7 +66,6 @@ export async function startGame(): Promise<void> {
   await texturesReady;
   await ensureFonts(); // a HUD no canvas precisa das fontes já carregadas
   const game = phaserGame as Phaser.Game;
-  closeShop();
   hideGameOver();
   setMenuVisible(false);
   await showLetter(textureDataUrl('anselmo_retrato'));
@@ -84,15 +86,16 @@ export function retryGame(): void {
 }
 
 // Começa uma luta de treino na Arena, a partir do menu. Não toca na carta nem no progresso da campanha.
-export async function startArena(boss: BossId): Promise<void> {
+// Com `duel`, é um duelo entre dois chefes (a Roo só assiste; game/duel.ts).
+export async function startArena(boss: BossId, duel?: BossId, form?: FormId): Promise<void> {
   if (!phaserGame) bootGame();
   await texturesReady;
   await ensureFonts();
   const game = phaserGame as Phaser.Game;
-  closeShop();
   hideGameOver();
   setMenuVisible(false);
-  const data = { stage: ARENA_STAGE, arena: boss };
+  // `form`: a Roo luta transformada e fixa nessa forma (só para treinar)
+  const data: StageData = duel ? { stage: ARENA_STAGE, arena: boss, duel } : { stage: ARENA_STAGE, arena: boss, ...(form ? { form } : {}) };
   if (game.scene.isActive('Main')) {
     game.scene.getScene('Main').scene.restart(data);
   } else {
@@ -101,12 +104,11 @@ export async function startArena(boss: BossId): Promise<void> {
   }
 }
 
-// Volta ao menu principal (da pausa, do fim de jogo ou da loja).
+// Volta ao menu principal (da pausa ou do fim de jogo).
 export function showMenu(): void {
   const game = phaserGame;
   if (!game) return;
   hideGameOver();
-  closeShop();
   setPauseVisible(false);
   game.scene.stop('Hud');
   game.scene.stop('Main');
@@ -120,7 +122,6 @@ export function showMenu(): void {
 export function showMap(): void {
   const game = phaserGame;
   if (!game) return;
-  closeShop();
   setMenuVisible(false);
   if (game.scene.isActive('Main')) {
     game.scene.stop('Hud');

@@ -27,16 +27,18 @@ const SEAL = 0x7a2f22;
 
 // Papel de cada mapa. O pergaminho do vale é o padrão; cada capítulo troca a cor e o desenho de fundo.
 // A tinta (INK) é a mesma em todos, para o texto ler igual. Os desenhos são blocos de pixels inteiros.
-type MapPattern = 'parchment' | 'moor' | 'stone' | 'garden';
+type MapPattern = 'parchment' | 'moor' | 'stone' | 'library' | 'astral' | 'garden';
 interface MapLook { paper: number; paperDark: number; pattern: MapPattern; mark: number; markLight: number }
 const LOOKS: Record<string, MapLook> = {
   world: { paper: PARCH, paperDark: PARCH_DARK, pattern: 'parchment', mark: 0x8c9a5b, markLight: 0xbfa874 },
   vale: { paper: 0xdad8ae, paperDark: 0xb4b182, pattern: 'moor', mark: 0x7f9a5a, markLight: 0xf4f3dc },
   torre: { paper: 0xc2c8d4, paperDark: 0x959fb4, pattern: 'stone', mark: 0x6b7388, markLight: 0xe4e8f0 },
+  biblioteca: { paper: 0xe2d2ae, paperDark: 0xb59869, pattern: 'library', mark: 0x7a4f2e, markLight: 0xf3e2b3 },
+  observatorio: { paper: 0xc9cee4, paperDark: 0x8e97c0, pattern: 'astral', mark: 0x4f5a92, markLight: 0xf1eccd },
   retorno: { paper: 0xd8e3b6, paperDark: 0xaac488, pattern: 'garden', mark: 0x5f9a4a, markLight: 0xf4e6c0 },
 };
 // Ícone do lugar de cada capítulo no mapa do vale.
-const CHAPTER_ICON: Record<string, string> = { vale: 'lab', torre: 'boss', retorno: 'garden' };
+const CHAPTER_ICON: Record<string, string> = { vale: 'lab', torre: 'boss', biblioteca: 'library', observatorio: 'observatory', retorno: 'garden' };
 
 // Número pseudo-aleatório fixo por posição: o fundo é o mesmo toda vez que o mapa abre.
 function hash(x: number, y: number): number {
@@ -55,6 +57,8 @@ function zigzag(i: number, n: number): { fx: number; fy: number } {
   return { fx, fy: i % 2 === 0 ? 0.64 : 0.42 };
 }
 
+// Sufixo do subtítulo do vale conforme quantos capítulos ainda estão selados.
+const sealedNote = (n: number): string => (n === 0 ? '' : n === 1 ? ', e um capítulo ainda selado' : `, e ${n} capítulos ainda selados`);
 const chapterById = (id: string): ChapterDef | undefined => CHAPTERS.find(c => c.id === id);
 
 export class MapScene extends Phaser.Scene {
@@ -89,19 +93,31 @@ export class MapScene extends Phaser.Scene {
     const title = this.chapter ? this.chapter.name : 'VALE DAS FÓRMULAS';
     const sub = this.chapter
       ? `${this.chapter.place}: quatro fases, e a última é o chefe ou o desfecho`
-      : 'Do Caldeirão ao Mosteiro de São Tomás, e dois capítulos ainda selados';
-    this.add.text(w / 2, h * 0.085, title, {
+      : `Do Caldeirão ao Mosteiro de São Tomás${sealedNote(UPCOMING_CHAPTERS.length)}`;
+    const titleText = this.add.text(w / 2, h * 0.085, title, {
       fontFamily: theme.fontDisplay, fontSize: '30px', color: INK_CSS, fontStyle: '700',
     }).setOrigin(0.5).setDepth(10);
-    this.add.text(w / 2, h * 0.085 + 28, sub, {
+    const subText = this.add.text(w / 2, h * 0.085 + 28, sub, {
       fontFamily: theme.fontBody, fontSize: '13px', color: INK_SOFT_CSS, fontStyle: 'italic',
     }).setOrigin(0.5).setDepth(10);
+    this.plate([titleText, subText], 9, 14, 4);
 
     const now = nextStage(isStageCompleted);
     this.spots.forEach(spot => this.buildSpot(spot, this.containsStage(spot, now), theme));
     this.buildTokens(now);
     this.buildFooter(w, h, theme);
     this.bindKeys();
+  }
+
+  // Placa de papel atrás de um texto: o desenho do mapa (tijolos, estantes, névoa) nunca cobre um nome. Fica uma
+  // camada abaixo do texto e acompanha o tamanho dele (com uma folga). Devolve o retângulo, para quem precisar.
+  private plate(texts: Phaser.GameObjects.Text[], depth: number, padX = 8, padY = 3): Phaser.Geom.Rectangle {
+    const box = texts.map(t => t.getBounds()).reduce((a, b) => Phaser.Geom.Rectangle.Union(a, b, new Phaser.Geom.Rectangle()));
+    const g = this.add.graphics().setDepth(depth);
+    const x = Math.round(box.x - padX), y = Math.round(box.y - padY), w = Math.round(box.width + padX * 2), h = Math.round(box.height + padY * 2);
+    g.fillStyle(this.look.paper, 0.9).fillRect(x, y, w, h);
+    g.lineStyle(1, INK, 0.28).strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    return new Phaser.Geom.Rectangle(x, y, w, h);
   }
 
   // ---------- lugares e capítulos ----------
@@ -214,6 +230,33 @@ export class MapScene extends Phaser.Scene {
           if (r < 0.08) g.fillStyle(0x9a6aa0, 0.7).fillRect(x + 8, y - 2, 4, 4);
         }
       }
+    } else if (look.pattern === 'library') {
+      // prateleiras em fileiras: tábua escura e lombadas de livros em alturas diferentes
+      const spines = [0x8c3b52, 0x3a6a8c, 0xc9812a, 0x4d8a7a, 0x7a2f22, 0xd9a21b];
+      for (let y = y0 + 52; y < y1; y += 68) {
+        for (let x = x0 + 4; x < x1 - 8; x += 8) {
+          const r = hash(x, y);
+          if (r > 0.82) continue; // vão na prateleira
+          const bh = 16 + Math.floor(r * 20);
+          g.fillStyle(spines[Math.floor(hash(y, x) * spines.length)], 0.22).fillRect(x, y - bh, 6, bh);
+        }
+        g.fillStyle(look.mark, 0.45).fillRect(x0, y, x1 - x0, 4);
+        g.fillStyle(INK, 0.14).fillRect(x0, y + 4, x1 - x0, 2);
+      }
+    } else if (look.pattern === 'astral') {
+      // céu de manuscrito: pontos de estrelas, algumas em cruz de quatro pontas (sem cruz de fé: são estrelas de raios
+      // diagonais), e arcos de órbita em degraus
+      for (let y = y0 + 6; y < y1; y += 22) {
+        for (let x = x0 + 6; x < x1; x += 22) {
+          const r = hash(x, y);
+          if (r > 0.3) continue;
+          g.fillStyle(look.markLight, 0.9).fillRect(x, y, 3, 3);
+          if (r < 0.08) g.fillStyle(look.markLight, 0.7).fillRect(x - 3, y + 1, 9, 1).fillRect(x + 1, y - 3, 1, 9);
+        }
+      }
+      for (const [fx, fy, rr] of [[0.5, 0.55, 190], [0.5, 0.55, 130]] as Array<[number, number, number]>) {
+        g.lineStyle(2, look.mark, 0.22).strokeCircle(fx * (x0 + x1), fy * (y0 + y1), rr);
+      }
     } else if (look.pattern === 'garden') {
       // treliça de folhas pequenas e uma videira em cada borda
       for (let y = y0 + 6; y < y1; y += 28) {
@@ -274,6 +317,38 @@ export class MapScene extends Phaser.Scene {
         g.fillStyle(INK, 0.75).fillRect(x - 6, y - 14, 12, 26);
         g.fillStyle(look.markLight, 0.5).fillRect(x - 4, y - 12, 4, 8);
         g.fillStyle(INK, 0.85).fillRect(x - 9, y + 12, 18, 3);
+      }
+    } else if (look.pattern === 'astral') {
+      // cúpula do observatório ao fundo e astrolábios no chão, longe dos caminhos
+      const dx = w * 0.9, dy = h * 0.14;
+      g.fillStyle(look.mark, 0.85).fillRect(dx - 26, dy, 52, 70);
+      g.fillStyle(0x56648a, 1).beginPath().arc(dx, dy, 26, Math.PI, 0, false).closePath().fillPath();
+      g.lineStyle(2, INK, 0.7).strokeRect(dx - 26, dy, 52, 70).beginPath().arc(dx, dy, 26, Math.PI, 0, false).strokePath();
+      g.fillStyle(0x1c2238, 1).fillRect(dx - 3, dy - 26, 6, 26);
+      g.fillStyle(0xf0c674, 0.95).fillRect(dx - 5, dy + 24, 10, 14);
+      for (const [fx, fy] of [[0.08, 0.5], [0.3, 0.3], [0.52, 0.34], [0.74, 0.6], [0.9, 0.62], [0.34, 0.8], [0.6, 0.82], [0.14, 0.3]]) {
+        const x = fx * w, y = fy * h;
+        if (!free(x, y, 60)) continue;
+        g.lineStyle(1.5, INK, 0.65).strokeCircle(x, y, 14).strokeCircle(x, y, 8);
+        g.fillStyle(0xe8c36a, 0.9).fillCircle(x, y, 3);
+        g.beginPath().moveTo(x - 14, y).lineTo(x + 14, y).moveTo(x, y - 14).lineTo(x, y + 14).strokePath();
+      }
+    } else if (look.pattern === 'library') {
+      // estantes altas com correntes e velas de cera entre elas
+      for (const [fx, fy] of [[0.07, 0.5], [0.3, 0.3], [0.52, 0.34], [0.74, 0.58], [0.9, 0.62], [0.34, 0.8], [0.6, 0.82], [0.14, 0.3]]) {
+        const x = fx * w, y = fy * h;
+        if (!free(x, y, 60)) continue;
+        g.fillStyle(look.mark, 0.95).fillRect(x - 15, y - 20, 30, 40);
+        g.lineStyle(1.5, INK, 0.7).strokeRect(x - 15, y - 20, 30, 40);
+        for (const sy of [y - 10, y + 2, y + 14]) g.fillStyle(look.markLight, 0.9).fillRect(x - 13, sy, 26, 2);
+        g.fillStyle(0x8c3b52, 1).fillRect(x - 12, y - 17, 4, 7).fillStyle(0x3a6a8c, 1).fillRect(x - 6, y - 15, 4, 5).fillStyle(0xc9812a, 1).fillRect(x + 2, y - 17, 4, 7);
+        g.lineStyle(2, 0x2a2a38, 0.85).beginPath().moveTo(x - 15, y - 20).lineTo(x + 15, y + 20).strokePath();
+      }
+      for (const [fx, fy] of [[0.2, 0.62], [0.44, 0.6], [0.84, 0.3]]) {
+        const x = fx * w, y = fy * h;
+        if (!free(x, y, 40)) continue;
+        g.fillStyle(0xf5e6c0, 1).fillRect(x - 3, y - 4, 6, 12);
+        g.fillStyle(0xf0c674, 1).fillRect(x - 2, y - 10, 4, 6);
       }
     } else {
       // sebes e canteiros de flores ao longo do caminho
@@ -375,12 +450,19 @@ export class MapScene extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(6);
 
     // nome e lugar
+    // o nome e o lugar ficam sobre uma placa de papel e nunca esmaecem (só o ícone esmaece se está trancado)
     const label = this.add.text(x, y + R + 10, name, {
       fontFamily: theme.fontDisplay, fontSize: '14px', color: INK_CSS, fontStyle: '700', align: 'center', wordWrap: { width: 150 },
-    }).setOrigin(0.5, 0).setDepth(6).setAlpha(dim);
-    this.add.text(x, label.y + label.height + 2, place, {
-      fontFamily: theme.fontBody, fontSize: '12px', color: INK_SOFT_CSS, fontStyle: 'italic',
-    }).setOrigin(0.5, 0).setDepth(6).setAlpha(dim);
+    }).setOrigin(0.5, 0).setDepth(6).setAlpha(open ? 1 : 0.82);
+    const placeText = this.add.text(x, label.y + label.height + 2, place, {
+      fontFamily: theme.fontBody, fontSize: '12px', color: INK_CSS, fontStyle: 'italic',
+    }).setOrigin(0.5, 0).setDepth(6).setAlpha(open ? 1 : 0.82);
+    // dentro da moldura: o rótulo de um lugar perto da borda desliza para dentro
+    const half = Math.max(label.width, placeText.width) / 2 + 8;
+    const cx = Math.min(CANVAS.width - 30 - half, Math.max(30 + half, x));
+    label.setX(cx);
+    placeText.setX(cx);
+    this.plate([label, placeText], 5.5);
 
     if (done) {
       // selo de "vencida"
@@ -496,9 +578,10 @@ export class MapScene extends Phaser.Scene {
     btn.on('pointerover', () => label.setColor('#f0c674'));
     btn.on('pointerout', () => label.setColor('#f1e6c9'));
 
-    this.add.text(w / 2, h - 84, `Toque num lugar, ou use as teclas 1 a ${this.spots.length}. Enter entra na fase marcada.`, {
-      fontFamily: theme.fontBody, fontSize: '12px', color: INK_SOFT_CSS, fontStyle: 'italic',
+    const hint = this.add.text(w / 2, h - 84, `Toque num lugar, ou use as teclas 1 a ${this.spots.length}. Enter entra na fase marcada.`, {
+      fontFamily: theme.fontBody, fontSize: '12px', color: INK_CSS, fontStyle: 'italic',
     }).setOrigin(0.5).setDepth(10);
+    this.plate([hint], 9);
 
     this.toast = this.add.text(w / 2, h * 0.19, '', {
       fontFamily: theme.fontBody, fontSize: '14px', color: '#f5e6c0', fontStyle: '700',

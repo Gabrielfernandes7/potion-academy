@@ -5,7 +5,7 @@ export const LION_LINES: Record<LionLine, readonly string[]> = {
   pounce: ['Bote!', 'Sinto o seu cheiro.'],
   dissolve: ['Tudo se dissolve.', 'Verde que consome.'],
   roar: ['RAAAAR!', 'Escute a biblioteca.'],
-  hurt: ['Que luz é essa?', 'O éter queima!'],
+  hurt: ['Que luz é essa?', 'O ar queima!'],
   furious: ['Devoro o sol!'],
   defeat: ['Os livros esperam.'],
 };

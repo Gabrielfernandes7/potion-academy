@@ -1,6 +1,6 @@
 # O jogo
 
-**Potion Academy** é um jogo de labirinto, no navegador, em que um bruxo-canguru
+**Potion Academy** é um jogo de labirinto, no navegador, em que um bruxo-cachorro
 chamado Roo explora um laboratório de alquimia. Ele coloca poções que explodem,
 destrói caixotes de madeira, coleta gemas para abrir a porta e foge antes que o
 tempo acabe.
@@ -24,5 +24,5 @@ explorar com calma. Não exige reflexo rápido: a maior parte do desafio é plan
 ## Estado atual
 
 Quatro fases em sequência (laboratório, salão dos fantasmas, duelo com a Belladona e jardim), com um fim.
-Há um menu, uma loja de poções (o Caldeirão de Magia), uma Sala de Música, e a partida funciona no computador, no tablet e no celular (em pé ou deitado).
+Há um menu, uma Sala de Música, um Manuscrito e um Log da história, e a partida funciona no computador, no tablet e no celular (em pé ou deitado).
 A história ainda não foi escrita.

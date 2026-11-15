@@ -4,7 +4,9 @@ import { describe, expect, it } from 'vitest';
 import indexHtml from '../../index.html?raw';
 import manuscritoHtml from '../../manuscrito.html?raw';
 import spritesHtml from '../../sprites.html?raw';
+import livroHtml from '../../livro.html?raw';
 import manuscritoTs from '../../src/pages/manuscrito.ts?raw';
+import livroTs from '../../src/pages/livro.ts?raw';
 import spritesTs from '../../src/pages/sprites.ts?raw';
 import { SPRITE_GROUPS, groupOf } from '../../src/textures/groups';
 import { MANUSCRITO } from '../../src/game/manuscrito';
@@ -31,7 +33,7 @@ describe('contrato do HTML', () => {
   });
 
   it('as páginas de apoio encontram os ids delas', () => {
-    const pages: Array<[string, string, string]> = [['manuscrito.html', manuscritoHtml, manuscritoTs], ['sprites.html', spritesHtml, spritesTs]];
+    const pages: Array<[string, string, string]> = [['manuscrito.html', manuscritoHtml, manuscritoTs], ['sprites.html', spritesHtml, spritesTs], ['livro.html', livroHtml, livroTs]];
     for (const [name, html, ts] of pages) {
       const have = ids(html);
       for (const m of ts.matchAll(/getElementById\(\s*'([\w-]+)'/g)) {
@@ -41,7 +43,8 @@ describe('contrato do HTML', () => {
   });
 
   it('cada página .html da raiz aponta para um script que existe', () => {
-    const entries = Object.entries(rootHtml);
+    // as páginas de erro (404, 500) são estáticas, sem jogo: não entram aqui
+    const entries = Object.entries(rootHtml).filter(([f]) => !/\/(404|500)\.html$/.test(f));
     expect(entries.length).toBeGreaterThanOrEqual(5);
     for (const [file, html] of entries) {
       const m = html.match(/<script type="module" src="([^"]+)"/);

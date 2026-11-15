@@ -86,7 +86,7 @@ describe('chuva e teletransporte', () => {
 
 describe('dano por elemento na Belladona', () => {
   const b = PROFILES.belladonna;
-  it('todo elemento causa pelo menos 1 de dano e fogo/éter causam mais que água/terra', () => {
+  it('todo elemento causa pelo menos 1 de dano e fogo/ar causam mais que água/terra', () => {
     for (const el of ['fire', 'water', 'earth', 'air'] as const) expect(damageTo(b, el)).toBeGreaterThanOrEqual(1);
     expect(damageTo(b, 'fire')).toBeGreaterThan(damageTo(b, 'water'));
     expect(damageTo(b, 'air')).toBeGreaterThan(damageTo(b, 'earth'));
