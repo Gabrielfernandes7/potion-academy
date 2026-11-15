@@ -14,7 +14,6 @@ import { touch } from './input/touch';
 import { byId } from './ui/dom';
 import { bindMenuButtons, isMenuVisible } from './ui/menu';
 import { closeMusicRoom, initMusicRoom, isMusicRoomOpen, openMusicRoom } from './ui/musicRoom';
-import { isShopOpen, openShop, renderShop } from './ui/shop';
 import { bindHelp } from './ui/help';
 import { bindArena, isArenaOpen, openArena } from './ui/arena';
 
@@ -109,7 +108,7 @@ function bindButtons(): void {
 
   // o manuscrito do alquimista é uma página própria (manuscrito.html), no mesmo molde do livro da história
   const openManuscript = (): void => { location.assign('/manuscrito.html'); };
-  bindMenuButtons({ play, shop: openShop, music: openMusicRoom, map: showMap, arena: openArena, manuscript: openManuscript });
+  bindMenuButtons({ play, music: openMusicRoom, map: showMap, arena: openArena, manuscript: openManuscript });
   bindArena();
   byId('music-overlay').addEventListener('keydown', e => { if (e.key === 'Escape') closeMusicRoom(); });
   bindHelp();
@@ -118,10 +117,7 @@ function bindButtons(): void {
     const chip = (e.target as HTMLElement).closest('.chip-btn');
     if (chip instanceof HTMLElement && chip.id !== 'help-btn') chip.blur();
   });
-  byId('play-btn').onclick = play;
-  byId('shop-back-btn').onclick = showMenu;
   byId('retry-btn').onclick = () => retryGame();
-  byId('shop-btn').onclick = () => openShop();
   byId('menu-btn').onclick = showMenu;
   byId('pause-menu-btn').onclick = showMenu;
   byId('resume-btn').onclick = () => touch.press('pause'); // consumido pela cena no próximo frame
@@ -131,7 +127,7 @@ function bindButtons(): void {
 
   // Enter inicia o jogo, mas só enquanto o menu está na tela (na partida, Enter é pausa)
   window.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && isMenuVisible() && !isShopOpen() && !isMusicRoomOpen() && !isArenaOpen()) {
+    if (e.key === 'Enter' && isMenuVisible() && !isMusicRoomOpen() && !isArenaOpen()) {
       e.preventDefault();
       play();
     }
@@ -150,5 +146,4 @@ setMusicButton(prefs.music);
 setSfxButton(prefs.sfx);
 audio.sfx = prefs.sfx;
 audio.enabled = prefs.music;
-renderShop();
 bootGame();

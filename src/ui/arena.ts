@@ -2,6 +2,8 @@
 // desenho, a vida, a fraqueza e a imunidade (da tabela de personagens) e leva à luta. As vitórias ficam salvas.
 import { ELEMENTS, ElementId } from '../config';
 import { ARENA_BOSSES } from '../game/arena';
+import { validDuel } from '../game/duel';
+import type { BossId } from '../game/stages/types';
 import { PROFILES } from '../game/entities/profiles';
 import { startArena, textureDataUrl } from '../game/launcher';
 import { arenaWins } from '../storage';
@@ -81,9 +83,30 @@ function renderCards(): void {
   }
 }
 
+// O duelo de chefes: dois seletores e o botão. O segundo começa no chefe seguinte ao primeiro.
+function fillDuel(): void {
+  const a = byId('duel-a') as HTMLSelectElement;
+  const b = byId('duel-b') as HTMLSelectElement;
+  if (a.options.length === 0) {
+    for (const sel of [a, b]) for (const boss of ARENA_BOSSES) sel.add(new Option(boss.nome, boss.id));
+    b.selectedIndex = Math.min(1, ARENA_BOSSES.length - 1);
+  }
+  const go = byId('duel-go') as HTMLButtonElement;
+  const sync = (): void => {
+    const ok = validDuel(a.value as BossId, b.value as BossId);
+    go.disabled = !ok;
+    go.title = ok ? '' : 'Escolha dois chefes diferentes';
+  };
+  a.onchange = sync;
+  b.onchange = sync;
+  go.onclick = () => { closeArena(); void startArena(a.value as BossId, b.value as BossId); };
+  sync();
+}
+
 export function openArena(): void {
   if (!document.getElementById('rough')) document.body.insertAdjacentHTML('afterbegin', ROUGH_FILTER); // tinta dos ícones
   renderCards();
+  fillDuel();
   setShown('arena-overlay', true);
   (byId('arena-grid').querySelector('button') as HTMLElement | null)?.focus();
 }

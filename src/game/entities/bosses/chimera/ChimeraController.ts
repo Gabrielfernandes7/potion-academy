@@ -79,7 +79,7 @@ export class ChimeraController extends BossBase {
     this.setPose('cast');
     this.scene.play('powerup');
     const from = { x: this.gridX, y: this.gridY };
-    const target = this.scene.playerTile();
+    const target = this.targetTile();
     const tiles = spitTiles(from, target, this.isOpen);
     // furiosa: um segundo jato, do outro lado da jogadora, em cruz com o primeiro
     if (this.phase === 2) {
@@ -99,7 +99,7 @@ export class ChimeraController extends BossBase {
     this.setPose('cast');
     this.scene.play('powerup');
     const count = this.phase === 2 ? 5 : 3;
-    const targets = rainTargets(this.scene.playerTile(), count, this.isOpen);
+    const targets = rainTargets(this.targetTile(), count, this.isOpen);
     targets.forEach((t, i) => {
       const ms = CONFIG.bossTelegraphMs - 100 + i * DROP_STEP_MS;
       this.telegraph([t], 'water', t, ms);
@@ -109,7 +109,7 @@ export class ChimeraController extends BossBase {
   }
 
   private castSlide(): void {
-    const player = this.scene.playerTile();
+    const player = this.targetTile();
     const dest = slideDestination(player, this.isOpen);
     if (!dest) { this.state = 'idle'; this.cooldownMs = 1000; return; }
     this.state = 'blinking';
@@ -137,7 +137,7 @@ export class ChimeraController extends BossBase {
   private castWave(): void {
     this.setPose('cast');
     this.scene.play('powerup');
-    const player: Tile = this.scene.playerTile();
+    const player: Tile = this.targetTile();
     const gapY = waveGapRow(player, CONFIG.rows, this.isOpen);
     const fromLeft = this.sprite.x > (CONFIG.cols * CONFIG.tile) / 2; // varre a partir do lado oposto ao dela
     const bands = waveBands(CONFIG.cols, CONFIG.rows, fromLeft, gapY, this.isOpen);

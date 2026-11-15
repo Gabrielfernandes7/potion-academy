@@ -11,7 +11,7 @@ export const ENDING_CARDS: StoryCard[] = [
   { speaker: ANSELMO, text: 'Não vou guardá-las de novo. Vou mandar copiá-las muitas vezes e levá-las às aldeias de Vale. Tesouro escondido não serve a ninguém: serve o pão partido.' },
   { speaker: ANSELMO, text: 'E devo confessar uma coisa. Fui confessor do teu mestre. Vi que ele se perdia atrás da pedra filosofal e não o detive. Na noite da bolha, ele me contou o que fez. Eu lhe disse que o que nasceu em suas mãos não era obra dele, era dádiva. Ele chorou. Não acreditou, e eu não insisti. A culpa é minha.' },
   { speaker: ANSELMO, text: 'Não te peço perdão. Peço que não repitas. Quando alguém procurar sem saber o que procura, fica ao lado dessa pessoa.' },
-  { speaker: ANSELMO, text: 'Leva o frasco de volta. Ele nunca foi feito para encher. Nem tudo se enche, Roo. O que farás com ele?' },
+  { speaker: ANSELMO, text: 'O frasco era do mestre: deixou-o comigo na última confissão, vazio. Leva-o de volta. Ele nunca foi feito para encher. Nem tudo se enche, Roo. O que farás com ele?' },
   { speaker: 'FIM DA JORNADA', text: 'Frei Anselmo volta ao scriptorium. Roo regressa ao Caldeirão, com o frasco vazio nas mãos.' },
 ];
 
@@ -34,6 +34,7 @@ export const LION_CARDS: StoryCard[] = [
 
 export const CHIMERA_CARDS: StoryCard[] = [
   { speaker: CHIMERA, text: 'Eu era o que o mestre derramou quando não soube mais o que guardar: prata sem forma, sem dono.' },
+  { speaker: CHIMERA, text: 'Ele quis que eu virasse pão, e eu fiquei no meio do caminho. Belladona me guardou aqui para estudar o que restou.' },
   { speaker: CHIMERA, text: 'Você me prendeu com terra, não com ódio. Poucos sabem a diferença.' },
   { speaker: CHIMERA, text: 'Siga. A torre fica depois da charneca. Lá, quem lê demais espera por você.' },
   { speaker: CHIMERA, text: "Leve o sopro que eu guardava. O ar não se prende, e por isso sempre volta." },
@@ -65,9 +66,11 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
     { speaker: ROO, text: 'Ao sair do laboratório, encontro no chão uma página rasgada. A letra é do mestre, a mesma das minhas lições.' },
     { speaker: ROO, text: 'Ele escreveu "a terra é de quem a cultiva", riscou e escreveu de novo. Nunca o vi hesitar diante de uma fórmula.' },
     { speaker: ROO, text: "No caixote do laboratório há um frasco de água do mestre. Aprendo a usá-lo: a água apaga o fogo, e o fogo não apaga a água." },
+    { speaker: ROO, text: 'A água é a mesma em que eu nasci, a bolha. Quando a chamo de volta, ela me envolve de novo.' },
   ],
   2: [
     { speaker: ROO, text: 'Os fantasmas deste salão não têm alma. São ecos: o que foi estudado sem cuidado, repetindo-se nas paredes.' },
+    { speaker: ROO, text: 'Belladona guardou aqui o que o mestre não soube descartar: experiências que ainda respondem.' },
     { speaker: MESTRE, text: '...hoje a bolha não estourou. Dentro dela, algo respira. Diga ao Anselmo que eu...' },
     { speaker: ROO, text: 'A voz se perde entre as colunas. Dizem que nasci de uma bolha; sempre achei fábula de ninar. Por que o mestre guardaria esta página?' },
     { speaker: BELLADONA, text: 'Você chegou até aqui, e ele também chegou, uma vez. Depois pediu que eu parasse de ler. Eu não parei.' },
@@ -76,6 +79,7 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
     { speaker: ROO, text: 'A névoa se abre devagar. Atrás de mim, a charneca desaparece como se nunca tivesse existido.' },
     { speaker: ROO, text: 'No chão, uma poça de prata respira. Ao redor, a pedra tem a letra do mestre gravada. Chego mais perto.' },
     { speaker: ROO, text: "Um frasco de terra, pesado como sal. Quando cai, a terra prende o que tenta escapar." },
+    { speaker: ROO, text: 'Respeitar a terra era a terceira lição do mestre. O frasco pesa nas minhas mãos como uma promessa.' },
   ],
   5: [
     { speaker: ROO, text: 'A torre se ergue sobre o vale. Os degraus são frios, e os fantasmas daqui não têm cheiro, só silêncio.' },

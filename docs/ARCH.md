@@ -9,7 +9,7 @@ O jogo é uma aplicação web feita com **Phaser 3** (motor 2D) em **TypeScript*
 Há duas camadas de interface, que convivem:
 
 - **Canvas (Phaser):** o mundo da partida, a HUD (`HudScene`), o fundo animado do menu e o mapa.
-- **DOM (HTML/CSS):** menu principal, loja, pausa, game over, carta, ajuda, sala de música e controles de toque. Ficam por cima do canvas.
+- **DOM (HTML/CSS):** menu principal, pausa, game over, carta, ajuda, sala de música e controles de toque. Ficam por cima do canvas.
 
 ```
 index.html ──► src/main.ts ──► game/launcher.ts (cria o Phaser.Game uma vez)
@@ -29,7 +29,7 @@ index.html ──► src/main.ts ──► game/launcher.ts (cria o Phaser.Game 
 | `HudScene` | `scenes/HudScene.ts` | a faixa da HUD no canvas; roda em paralelo com `MainScene` |
 | `MapScene` | `scenes/MapScene.ts` | mapa do castelo com o progresso das fases |
 
-Fluxo de telas: `Boot → Menu → (carta) → Main + Hud`. Ao vencer uma fase, `Main` avança para a próxima (`advanceStage`). Pausa, game over e loja têm botão para voltar ao menu (`showMenu()` em `launcher.ts`).
+Fluxo de telas: `Boot → Menu → (carta) → Main + Hud`. Ao vencer uma fase, `Main` avança para a próxima (`advanceStage`). Pausa e game over têm botão para voltar ao menu (`showMenu()` em `launcher.ts`).
 
 Navegação em `game/launcher.ts`: `startGame()` (sempre com `{ stage: 1 }` explícito), `retryGame()`, `showMenu()`, `showMap()`.
 
@@ -66,7 +66,6 @@ A lógica de regra fica em arquivos sem dependência do Phaser, para os testes e
 | `game/chain.ts` | reação entre poções (fogo acende, água apaga, terra é estável) |
 | `game/balance.ts` | regra de equilíbrio das poções (nenhuma domina outra) |
 | `game/rewards.ts` | tabela de drop e sorteio de baús |
-| `game/shopRules.ts` | estados dos cartões da loja |
 | `game/entities/bosses/belladonna/lines.ts` | textos e sorteio das falas da Belladona |
 | `textures/rooGeometry.ts` | constantes de tamanho do sprite da Roo |
 | `audio/tracks.ts` | faixas, gerador de compassos e sementes (`mulberry32`) |
@@ -107,7 +106,7 @@ Os testes de regra não usam o navegador. Verificação de jogo (FPS, sons, sens
 | regras da fase | `src/scenes/MainScene.ts` (e `game/*` quando puro) |
 | chefe | `src/game/entities/bosses/belladonna/BelladonnaController.ts`, `src/game/entities/bosses/belladonna/rules.ts`, `src/game/entities/bosses/belladonna/lines.ts` |
 | sprites | `src/textures/*.ts` (ver `docs/09-sprites.md`) |
-| menu, loja, pausa | `src/scenes/MenuScene.ts`, `src/ui/*`, `index.html` |
+| menu, pausa | `src/scenes/MenuScene.ts`, `src/ui/*`, `index.html` |
 | música e sons | `src/audio/AudioEngine.ts`, `src/audio/tracks.ts` |
 | cores e layout | `src/styles/main.css` |
 

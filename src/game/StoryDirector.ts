@@ -15,9 +15,12 @@ import { LAST_STAGE } from './stages/index';
 import { ANSELMO, ENDING_CARDS, PASSAGE_CARDS, type StoryCard } from './story';
 
 export class StoryDirector {
+  private banner: Phaser.GameObjects.GameObject[] = [];
+
   constructor(private readonly scene: MainScene) {}
 
   // Cartão de entrada da fase: número e lugar, nome, uma frase da história e (se houver) a dica.
+  // Fica na tela até a jogadora começar (ENTER ou toque): `dismissBanner()`. A fase espera por isso.
   showBanner(): void {
     const s = this.scene;
     const def = s.def;
@@ -26,7 +29,8 @@ export class StoryDirector {
     const cy = (CONFIG.rows * CONFIG.tile) / 2;
     const textW = CONFIG.cols * CONFIG.tile - 48;
     const items: Phaser.GameObjects.GameObject[] = [];
-    const bandH = def.tip ? 150 : 124;
+    this.banner = items;
+    const bandH = (def.tip ? 150 : 124) + 26;
     items.push(s.add.rectangle(cx, cy, CONFIG.cols * CONFIG.tile, bandH, 0x120d08, 0.78).setDepth(29));
     let y = cy - bandH / 2 + 22;
     const head = def.chapter ? `${def.chapter} · ${def.part ?? ''}`.replace(/ · $/, '') : `FASE ${s.stage}`;
@@ -50,8 +54,18 @@ export class StoryDirector {
         align: 'center', wordWrap: { width: textW },
       }).setOrigin(0.5, 0).setDepth(30));
     }
-    s.tweens.add({
-      targets: items, alpha: 0, delay: 3200, duration: 600,
+    items.push(s.add.text(cx, cy + bandH / 2 - 16, 'ENTER (ou toque na tela) para começar a fase', {
+      fontFamily: theme.fontDisplay, fontSize: '12px', color: '#f0c674', fontStyle: '700',
+    }).setOrigin(0.5).setDepth(30));
+  }
+
+  // Fecha o cartão de entrada: a fase começa.
+  dismissBanner(): void {
+    const items = this.banner;
+    this.banner = [];
+    if (items.length === 0) return;
+    this.scene.tweens.add({
+      targets: items, alpha: 0, duration: 400,
       onComplete: () => items.forEach(i => i.destroy()),
     });
   }

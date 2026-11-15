@@ -107,6 +107,7 @@ export class EnemySystem {
       this.scene.tweens.add({ targets: enemy.sprite, alpha: 0.55, duration: 90, yoyo: true, repeat: 1 });
       return;
     }
+    if (fromRoo) this.scene.forms.noteHit(element); // conta para a lição da forma desse elemento (game/learning.ts)
     enemy.hp -= damage;
     if (enemy.hp <= 0) {
       this.killEnemy(enemy, element);

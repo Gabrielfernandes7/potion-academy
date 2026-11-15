@@ -39,7 +39,6 @@
         <button class="big-btn" id="menu-play" type="button">JOGAR</button>
         <button class="big-btn alt" id="menu-map" type="button">MAPA</button>
         <button class="big-btn alt" id="menu-arena" type="button">ARENA</button>
-        <button class="big-btn alt" id="menu-shop" type="button">CALDEIRÃO</button>
         <button class="big-btn alt" id="menu-manuscript" type="button">MANUSCRITO</button>
         <button class="big-btn alt" id="menu-music" type="button">SALA DE MÚSICA</button>
         <a class="big-btn alt" id="menu-versions" href="/history.html#log">LOG DA HISTÓRIA</a>
@@ -58,9 +57,9 @@
     <div class="actions">
       <button type="button" class="act bomb" data-touch="bomb">POÇÃO</button>
       <button type="button" class="act" data-touch="detonate">DETONAR</button>
-      <button type="button" class="act fire" data-touch="transformFire">ROO FIRE</button>
-      <button type="button" class="act aqua" data-touch="transformWater">ROO AQUA</button>
+      <button type="button" class="act fire" data-touch="transform">TRANSFORMAR</button>
       <button type="button" class="act form" data-touch="ability" id="ability-btn">HABILIDADE</button>
+      <button type="button" class="act form" data-touch="ability2" id="ability2-btn" hidden>HABILIDADE 2</button>
       <button type="button" class="act" data-touch="cycle" aria-label="Trocar tipo de frasco">TROCAR FRASCO</button>
       <button type="button" class="act small" data-touch="pause">PAUSA</button>
     </div>
@@ -88,41 +87,21 @@
   </div>
 </div>
 
-<!-- Caldeirão de Magia (loja) -->
-<div id="shop-overlay" class="overlay" role="dialog" aria-labelledby="shop-title">
-  <div class="shop">
-    <div class="shop-hero" aria-hidden="true">
-      <div class="bubbles"><i></i><i></i><i></i><i></i><i></i></div>
-      <svg class="cauldron" viewBox="0 0 160 124" focusable="false">
-        <g class="flames">
-          <path d="M56 118c-7-11 2-15 0-24 9 4 13 13 9 24z" fill="#ff7043"/>
-          <path d="M80 120c-8-13 3-18 0-28 11 5 15 16 10 28z" fill="#ff9800"/>
-          <path d="M104 118c-7-11 2-15 0-24 9 4 13 13 9 24z" fill="#ff7043"/>
-        </g>
-        <path d="M42 100l-7 16h11l5-14zM118 100l7 16h-11l-5-14z" fill="#2a2b33"/>
-        <path d="M24 54c0 38 19 56 56 56s56-18 56-56z" fill="#23262e"/>
-        <path d="M31 62c4 28 21 41 49 41" fill="none" stroke="#3d424f" stroke-width="3" stroke-linecap="round"/>
-        <path d="M22 56c-11 0-11 15 0 15M138 56c11 0 11 15 0 15" fill="none" stroke="#3b3f4a" stroke-width="4" stroke-linecap="round"/>
-        <ellipse cx="80" cy="54" rx="58" ry="12" fill="#3b3f4a"/>
-        <ellipse cx="80" cy="54" rx="50" ry="8.5" fill="#4fdc8a"/>
-        <ellipse cx="80" cy="53" rx="37" ry="5" fill="#9ff5c0" opacity=".55"/>
-      </svg>
-    </div>
-    <h2 id="shop-title">CALDEIRÃO DE MAGIA</h2>
-    <p class="shop-sub">As poções que a Roo já aprendeu aparecem aqui. Os elementos vêm na jornada.</p>
-    <div class="shop-grid" id="shop-items"></div>
-    <div class="btn-row">
-      <button class="big-btn alt" id="shop-back-btn" type="button">VOLTAR</button>
-      <button class="big-btn" id="play-btn" type="button">COMEÇAR</button>
-    </div>
-  </div>
-</div>
-
 <!-- Arena de treino: enfrente os chefes quando quiser -->
 <div id="arena-overlay" class="overlay" role="dialog" aria-labelledby="arena-title">
   <div class="panel arena">
     <h2 id="arena-title">ARENA DE TREINO</h2>
     <p class="letter-note">Enfrente os chefes quando quiser. Todas as poções estão liberadas, o tempo é de sobra e nada aqui conta para a jornada.</p>
+    <div class="arena-duel" id="arena-duel">
+      <h3>DUELO DE CHEFES</h3>
+      <p class="arena-tip">Dois chefes lutam entre si, em 100 s, e você só assiste. Perde quem cair primeiro; se ninguém cair, perde quem tiver menos vida. Serve para testar o equilíbrio.</p>
+      <div class="arena-duel-row">
+        <select id="duel-a" aria-label="Primeiro chefe"></select>
+        <span class="arena-duel-vs">contra</span>
+        <select id="duel-b" aria-label="Segundo chefe"></select>
+        <button type="button" class="big-btn" id="duel-go">DUELAR</button>
+      </div>
+    </div>
     <div class="arena-grid" id="arena-grid"></div>
     <div class="btn-row">
       <button class="big-btn alt" id="arena-close" type="button">VOLTAR</button>
@@ -176,9 +155,9 @@
         <tbody>
           <tr><td>Andar</td><td><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></td><td>botões de direção</td></tr>
           <tr><td>Colocar poção</td><td><kbd>Espaço</kbd></td><td>POÇÃO</td></tr>
-          <tr><td>Transformar em Roo Fire (20 s)</td><td><kbd>T</kbd></td><td>ROO FIRE</td></tr>
-          <tr><td>Transformar em Roo Aqua (20 s)</td><td><kbd>Y</kbd></td><td>ROO AQUA</td></tr>
-          <tr><td>Habilidade da forma: Labareda ou Bolha de sabão</td><td><kbd>X</kbd></td><td>HABILIDADE</td></tr>
+          <tr><td>Transformar na forma da poção que você segura (20 s): fogo vira Roo Fire, água vira Roo Água, terra vira Roo Terra e ar vira Roo Ar. Cada forma é aprendida na jornada, e só a poção dela funciona enquanto dura.</td><td><kbd>T</kbd></td><td>TRANSFORMAR</td></tr>
+          <tr><td>Habilidade da forma: Labareda, Bolha de sabão, Muro de sal ou Sopro</td><td><kbd>X</kbd></td><td>HABILIDADE</td></tr>
+          <tr><td>Segunda habilidade (só Roo Terra e Roo Ar): Raiz, em que a Roo afunda e nasce até 4 casas à frente, ou Salto de vento</td><td><kbd>C</kbd></td><td>HABILIDADE 2</td></tr>
           <tr><td>Explodir poção de ar</td><td><kbd>D</kbd></td><td>DETONAR</td></tr>
           <tr><td>Escolher frasco</td><td><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></td><td>toque no seletor</td></tr>
           <tr><td>Pausar</td><td><kbd>Enter</kbd></td><td>PAUSA</td></tr>
@@ -246,7 +225,6 @@
     <p class="hint">Pressione <kbd>R</kbd> para jogar de novo</p>
     <div class="btn-row">
       <button class="big-btn" id="retry-btn" type="button">TENTAR NOVAMENTE</button>
-      <button class="big-btn alt" id="shop-btn" type="button">CALDEIRÃO</button>
       <button class="big-btn alt" id="menu-btn" type="button">MENU</button>
     </div>
   </div>

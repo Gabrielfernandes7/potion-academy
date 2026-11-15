@@ -1,83 +1,55 @@
 # Potion Academy: estado do trabalho
 
-Este arquivo é a memória do projeto entre sessões. Leia antes de começar, e atualize ao terminar cada tarefa.
-Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo). O histórico do que já foi feito está em `solved.md`.
+Este arquivo é a memória do projeto entre sessões: **só o que está em aberto**. Leia antes de começar e atualize ao terminar cada tarefa.
+O que já foi feito (e o histórico por rodada) está em `solved.md`. Para o "como funciona", veja `CLAUDE.md` (técnico) e `docs/` (jogo).
 
-Última atualização: 2026-11-11 (parte 10: história em passagens, música por fase, README). Alterações das partes 6 a 10 ainda **sem commit**.
+Última atualização: 2026-11-15. Tudo das últimas rodadas está **sem commit** (ver `git status`).
 
-## História nova (parte 11): só o roteiro, ainda não aplicada no jogo
+## Aguardando você: jogar e dizer
 
-- Escrito: `docs/12-historia.md` (roteiro) e `history.html` (livro). Direção: fome, Belladona com razão, mestre que busca a pedra por medo de perder a Roo, Roo nascida de uma bolha, ecos cristãos sem pregação.
-- Falta aplicar no jogo, na ordem sugerida: `BELLADONA_CARDS`, `ENDING_CARDS` (cartão da bolha), carta (`index.html`), `STAGES`, `PASSAGE_CARDS`, `DIARY`. Tabela completa em `history.html#jogo`.
-- Cena do nascimento da Roo (bolha iridescente) pronta em `history.html`; ver no navegador e dizer o que ajustar (ritmo, cores, enquadramento). Pode virar cena do jogo depois.
-- Sprites novos: Roo bebê na bolha iridescente, em duas poses: fetal (deitadinha de lado, dormindo, sem chapéu) e observando (acordada, olhando em volta, mão na bolha). Laço de 16 quadros em `src/textures/rooBubble.ts` (texturas `roo_bubble_{fetal,observe}_0..15`); GIFs em `docs/img/roo-bolha-*.gif` (cópia em `public/img/`), gerados por `scripts/bubble-gif.mjs` (ffmpeg + `npm i --no-save @napi-rs/canvas`). Na `history.html`: capa = observando, capítulo II = fetal. Mascote arquivado em `docs/mascote/`.
-- Decisões suas: gênero da Roo (carta diz "filho"), nomes das etapas da Obra como subtítulo, bolha no último quadro.
+Eu só verifico por script (regra pura, testes, e o jogo rodando num navegador de teste). Sensação de jogo, som e olho são seus.
 
-## Feito em 2026-11-14
-- **Páginas de erro e versões no menu:** `404.html` e `500.html` (estáticas, publicadas pelo Vite); em desenvolvimento, um middleware em `vite.config.ts` responde 404 de verdade para endereços sem extensão. Botão LOG DA HISTÓRIA no menu (leva a `history.html#log`). Testes em `tests/contracts/errorPages.test.ts`. `vite.config.ts` saiu do typecheck (`tsconfig`). **Falta**: o hospedeiro precisa mandar 404 para `404.html` e erros 5xx para `500.html`; o 500 de verdade só existe se o servidor falhar.
-- **Log da história:** seção "Log da história" em `history.html` (antes e depois de cada fato, por commit: working tree e 42af0e3, e o que vem antes). Regra 7 em `docs/12-historia.md`: toda mudança de fato entra lá como commit.
-- **history.html** atualizado ao jogo: status (aplicado, em aberto), apêndice reescrito, Diário trocado por Manuscrito. Doenças e capítulos selados marcados como em aberto.
-- **Derrota recomeça na fase perdida:** `retryData` (`src/game/retry.ts`, usado por `MainScene.restartData`); a campanha volta à fase em que a Roo perdeu, a Arena recomeça a luta. Teste em `tests/retry.test.ts`. Antes, a campanha sempre voltava à fase 1.
-- **Manuscrito lento no celular:** o ruído do papel era um filtro SVG (feTurbulence) refeito a cada repintura, e o body tinha `background-attachment: fixed`. Agora o grão é gerado uma vez em canvas (`setPaperGrain` em `src/pages/manuscrito.ts`). Medido com CPU 6x no Chromium headless: a troca de página já era ~30 ms, então o ganho real só se confirma num aparelho: **falta testar num celular de verdade**. Suspeito restante: os 12 ícones com `feDisplacementMap` (filtro #rough) por página.
-- **Fase 1 com 100 s** (era 90 s), com a doc de tempo atualizada.
-- **Roteiro:** o status das pendências estava desatualizado. Aplicados: carta e cartão da fase com a fome, falas da Belladona, confissão do Anselmo. Novo: frase dos fantasmas-ecos na passagem 2. Em aberto: página do mestre no manuscrito, bolha no último quadro, e os capítulos selados (ver `12-historia.md`).
-- **Problemas vistos no celular, sem correção:** a legenda "Visto em" fica sob o sprite no medalhão; o sprite ainda lê como coelho.
+- **Roo Terra e Roo Ar (novas, 2026-11-15):** equilíbrio (20% de peso e de leveza, muro de 4 s, Raiz de 4 casas, Salto de 3, Sopro de 2, lição de 3 golpes); se os sprites leem bem em 40 px; sons (transformação, muro, sopro, raiz). Rodei no navegador: troca de textura, muro, Sopro empurrando inimigo e poção, Raiz por baixo de uma parede, Salto por cima de um sapo, lições da Terra (fase 4) e da água (3 golpes). Não joguei uma partida inteira.
+- **Duelo de chefes (Arena):** a simulação (12 combinações, 100 s de jogo) mostra a **Quimera perdendo de todos** e Belladona e Leão Verde dominando; nenhum duelo foi ao tempo. É um sinal para você decidir se rebalanceia os chefes (vida, tempos, dano) antes de ajustar a Roo.
+- **Mapas:** conferi no navegador as 5 telas (vale e os 4 capítulos). Os nomes das fases ficam sobre uma placa de papel e não esmaecem; falta só você olhar no celular.
+- **Roo Fire e Roo Aqua:** bônus de 50%, espera de 25 s, custo da Labareda, a Bolha de sabão.
+- **Vida da Roo** (24 pontos, fraca ao fogo) e o ritmo das fases agora que sapo e fantasma levam 1 a 3 golpes (`docs/10-equilibrio.md`). Fase 1 com 100 s.
+- **Chefes:** Quimera (24 de vida, tempos, faixa própria, sprite), Mandrágora (14 de vida, água cura 1, fogo 3), Leão Verde (a fase da Biblioteca usa a arena já existente), Belladona na Torre.
+- **Power-ups por poção** (`+1 RAIO`, `+1 FRASCO` só para a poção escolhida): fica fácil demais? Alternativa: limitar o total de frascos. Velocidade gradual (`SPEED_STEP` 0,12).
+- **Caminhada da Roo:** o passo à mão (`stepPlayerMove`). Se ainda parecer pulo, diga a tela e se é 60 ou 120 Hz; o próximo passo seria um ciclo de 6 a 8 quadros (arte nova).
+- **Músicas** (6 faixas, nenhuma ouvida) e sons dos elementos: clima, andamento, volume (`docs/13-musica.md`). **Passagens** entre fases (`PASSAGE_CARDS`): ritmo e português.
+- **Equilíbrio com pessoas:** 5 a 10 partidas, anotar e ajustar (roteiro em `docs/10-equilibrio.md`). A estimativa de economia de lá (80 POÇÃO por partida) é do tempo do OURO: reescrever.
+- **"Som não toca" (relato antigo):** causa no seu computador não confirmada. Preciso de navegador, sistema e de quando o som para.
+- **Manuscrito lento no celular:** o ruído do papel já é um canvas gerado uma vez; falta testar num celular de verdade. Suspeito restante: os 12 ícones com `feDisplacementMap` (filtro `#rough`) por página.
+- **Vistos no celular, sem correção:** a legenda "Visto em" fica sob o sprite no medalhão; o sprite ainda lê como coelho.
+- **Contorno escuro da Roo no jardim**, dano `-2` na Belladona, menu em pixel art, `EndScene`, cartões de despedida: nunca vistos por uma pessoa.
 
-## Feito nesta rodada (2026-11-13)
+## Decisões suas
 
-- Roo masculina na prosa de `docs/12-historia.md` e `history.html` (revisado frase a frase).
-- Torre da Belladona (teste): é o chefe do capítulo 1, com só fantasmas (2 no início, até 3). Fantasma imune só à Telúrica. Testes ajustados (105 passam). Falta jogar.
-- **Pendente:** o jardim tem chefe? (a Belladona agora é o chefe da Torre). Ver item abaixo.
-- **Pendente:** Belladona como chefe do jardim. Falta decidir o que acontece com a fase da Torre (duelo): (a) vira fase normal, e a campanha fica com 3 fases + chefe; (b) sai da campanha.
-- **Pendente:** gasto que se repete (depois de conversar); barra de vida contínua (ver item acima).
+- **Mapeamento das lições pela Obra:** operações (recomendado) ou etapas (`docs/18-transformacoes.md`, "Pontos em aberto").
+- **Nome "Roo Aqua"** (código, Manuscrito) → "Roo Água"? Só trocar o texto; as chaves das texturas ficam.
+- **Muro de sal:** deve barrar também a onda das explosões? Hoje barra só quem anda.
+- **Fogo e Água com uma segunda habilidade (C)?** Ideias em `docs/18-transformacoes.md` (onda de brasas; poça que escorrega).
+- **Inimigos novos:** qual vai primeiro? Revisão em `docs/19-criaturas.md`, seção 6 (sugestão: lanterna viva, toupeira de sal, gosma de mercúrio, sentinela de cera). Fogo não tem nenhum inimigo hoje e a Torre só tem fantasmas.
+- **O Observatório** (único capítulo ainda selado no mapa): quando e como entra na história. A Biblioteca já é capítulo de verdade.
+- **Boticário** (quem é, se é jogável; sugestão: não jogável na primeira versão) e **Ato II** (puzzle de recomposição das páginas, fase nova entre 2 e 3; sugestão: adiar para a versão 2). D3, P5 e P6 (companheiros, criatura transformada, mestre em sombra) dependem disso.
+- **Licença** do projeto (o README segue sem) e **endereço final** do site (`og:image` absoluto).
+- **Hospedagem:** o servidor precisa mandar 404 para `404.html` e erros 5xx para `500.html`.
+- **Música (R6):** orçamento medido ou reverberação mais curta.
+- **Gasto que se repete** (depois de conversar) e capítulo narrado da Biblioteca no livro (`history.html`): sem decisão.
 
-- Mandrágora (chefe do jardim, 4/4 de O Retorno) e classe-pai `BossBase`: feitas e testadas por script (115 testes; fase rodada em navegador sem erros). **Falta jogar**: equilíbrio (14 de vida, água cura 1, fogo 3), sprite e as falas dela.
+## Roteiro (`docs/12-historia.md`)
 
-- Dano por elemento (`game/entities/damage.ts`): todos os personagens têm barra de vida, fraqueza e resistência; Mandrágora sem cura pela água; chefes em `game/bosses/`. 122 testes passam. **Falta jogar**: o ritmo das fases agora que sapo e fantasma levam 1 a 3 golpes (números em `docs/10-equilibrio.md`).
-
-- Reorganização (2026-11-13): `src/game/entities/` (enemies, bosses, damage, profiles) e `src/game/stages/` (capítulos em `chapters/`, `index.ts` calcula numeração, capítulo e posição). Guia em `docs/14-estrutura-do-codigo.md`. 128 testes passam.
-- Power-ups `+1 RAIO` e `+1 FRASCO` agora elementais (carregam a poção que fortalecem). **Falta jogar** para ver se o sorteio uniforme entre as poções que a Roo tem agrada.
-- **Roo (2026-11-13):** habilidade de empurrar removida do código (X, botão EMPURRAR, `pushAbility`). Decisões em `06-decisoes.md`. Falta: nova habilidade que substitui o empurrão, perfil e barra de vida da Roo, transformação de fogo (12 s, desvanecendo). Ideias guardadas em `docs/ides.md`.
-- **Quimera de Mercúrio (2026-11-13):** chefe do Vale pronta como fase 4 (O POÇO), com sprite, 4 habilidades, falas, despedida, diário e migração do progresso (12 fases, `STAGE_SCHEMA` 3). 157 testes passam; rodei a fase em navegador (chefe, dano por elemento, habilidades, despedida) sem erros. **Falta jogar**: equilíbrio (24 de vida, tempos), faixa própria (usa "Duelo na Torre") e ajuste fino do sprite. Decisão em `06-decisoes.md`.
-- **Roo (2026-11-13, parte 2):** vida contínua (24 pontos, `PROFILES.roo`, fraca ao fogo, `game/entities/roo.ts`, barra na HUD); Roo Fire no lab (`/lab.html?exp=fire-roo`, T transforma, 12 s, Brasas) com regras puras em `game/rooFire.ts`; Manuscrito do Alquimista no lugar do Diário (`/manuscrito.html`, botão MANUSCRITO); mapas por capítulo com papel próprio; Quimera com cabeça de bode. 180 testes passam. **Falta jogar**: o equilíbrio da vida (24, fogo 6) e de Roo Fire; decidir como a transformação entra na `MainScene`.
-- **Manuscrito e capítulos selados (2026-11-13):** o Caderno virou **Manuscrito do Alquimista** com estética do Voynich (fólio, seção, ornamento SVG e legenda em voynichês); o mapa do vale ganhou **A Biblioteca Proibida** e **O Observatório**, selados e sem fases (`game/stages/upcoming.ts`). 196 testes passam. **Falta**: criar os capítulos de verdade (fases, chefes, papel de mapa de manuscrito).
-- **Roo Fire no jogo (2026-11-13):** T transforma (12 s, 4 degraus, espera de 25 s); poções de fogo +50%; Brasas; **Labareda (X)**; **Luz de chama** na névoa; perfil de dano que muda (resiste ao fogo, fraca à água); medidor na HUD; botões de toque; ajuda. Regras em `game/rooFire.ts` (203 testes), sprites em `textures/rooFireTextures.ts`. Rodado no navegador (fase 1 e A Névoa): sem erros. **Falta jogar**: equilíbrio (bônus de 50%, espera de 25 s, custo da Labareda), sons próprios e decidir como o poder é obtido (hoje nasce com a Roo).
-- **Rodada grande (2026-11-13):** HUD refeita (ícones, sem legendas); blocos próprios por fase (12 estilos + livros); **Leão Verde** (chefe, só na Arena) e **Arena de treino** (menu ARENA, todas as poções, vitória abre a página no Manuscrito); Manuscrito ganhou **Roo Fire** e **Leão Verde**; **história aplicada** ao jogo (carta, fases, passagens, Belladona, confissão); verificação de **celular** em 360, 390, 844 deitado e tablet (transbordo do Manuscrito corrigido, menu em 2 colunas, botões de 36 a 38 px). 229 testes passam. **Falta**: o autor revisar os furos de roteiro (ver `12-historia.md`); jogar o equilíbrio do Leão Verde e da Roo Fire; criar de verdade a Biblioteca Proibida e o Observatório.
-- **Estrutura e formas (2026-11-13):** cruzes removidas de blocos/fichas (regra permanente em `CLAUDE.md`); formas da Roo generalizadas em `game/forms/` (**16 s**; **Roo Fire** sem Poção Aqua; **Roo Aqua** imune à água, Bolha de sabão que prende inimigos; sons novos); registros (`bosses/defs.ts`, `forms/registry.ts`), `RooFormSystem` e `StoryDirector` fora da `MainScene`; páginas em `src/pages/`; testes de contrato (`tests/contracts/`); `npm run check` e `npm run smoke`. Guia em `docs/16-guia-de-extensao.md`. **Falta**: jogar o equilíbrio das formas; revisar os furos de roteiro.
-- **Próximo:** inimigo novo no primeiro capítulo (começa pelo perfil em `profiles.ts` e `enemies/defs.ts`) e blocos visuais próprios por capítulo (hoje só há três temas: stone, crypt, garden).
-
-- Capítulo 1 (O Vale) ganhou a fase A NÉVOA (fase 3; 11 fases no total) com `fog: { radius: 3 }`; progresso salvo migra sozinho (`bombroo_stages_schema`). `src/lab/` criado (experimentos `fog` e `fire-roo`; `docs/15-lab.md`). 136 testes passam. **Falta jogar** a Névoa (raio, escuridão, dificuldade com fantasmas) e **definir o chefe do capítulo 1**.
-
-## Aguardando você (nada aqui eu consigo fechar sozinho)
-
-**Ver e ouvir no navegador** (eu só verifico por script; sensação de jogo, som e olho são seus):
-- Caminhada da Roo: agora o passo é feito à mão (`stepPlayerMove`), com o tempo que sobra carregado de uma casa para a outra e um ciclo de 4 quadros a cada 2 casas. Medido por script: 3,03 px por quadro, constante, sem quadro de "parada" entre casas. Se ainda parecer pulo, diga em que tela e se é com o jogo em 60 ou 120 Hz; o próximo passo seria um ciclo de 6 a 8 quadros (arte nova da Roo).
-- Roo é masculino (decidido, `docs/06-decisoes.md`): textos de `docs/`, `history.html` e carta usam "ele". Revisado em 2026-11-13 frase a frase em `docs/12-historia.md` e `history.html`; "ela" restante é a Belladona. Os cartões ficam por ora; no futuro, um vídeo da história da Roo no lugar.
-- Contorno escuro da Roo no jardim; dano `-2` na Belladona; página do Diário depois de vencer fases; menu em pixel art; `EndScene`; cartões de despedida.
-- **Power-ups por poção** (`game/upgrades.ts`): confirmado pelo usuário, `+1 RAIO` e `+1 FRASCO` valem só para a poção escolhida. Falta jogar e dizer se fica fácil demais (alternativa: limitar o total de frascos).
-- **Vida em barra contínua (proposta, não decidida):** trocar os corações por uma barra de vida contínua, e cada poção causar um efeito diferente sobre ela. Perguntas: (1) o que cada elemento faz na barra (dano, cura, outro efeito)? (2) quanto vale a barra inteira (hoje são 5 corações)?
-- Músicas (6 faixas, nenhuma ouvida): clima, andamento e volume. Parâmetros de cada uma e o arco da tensão em `docs/13-musica.md`; o duelo foi para 80 BPM. Sons dos elementos (fogo, água, terra, éter) também.
-- Passagens entre fases (`PASSAGE_CARDS`, fases 1 e 2): ver se o ritmo do jogo não quebra e se o texto soa natural em português.
-- Chance dos baús: confirmado, quanto maior o prêmio, menor a chance (`CHEST_COMMON`/`CHEST_RICH` em `config.ts`). Os números atuais ficam como estão.
-- "Som não toca" (relato antigo): causa no seu computador não confirmada. Preciso do navegador, do sistema e de quando o som para.
-- Equilíbrio com pessoas (roteiro em `docs/10-equilibrio.md`): 5 a 10 partidas, anotar e ajustar (era a D4).
-- Licença do projeto: **sua decisão** (o README continua sem licença). Endereço final do site (`og:image` absoluto).
-- Regras e recompensas nos documentos: conferido em 2026-11-13 (baú em `docs/03-mundo.md` corrigido: dava "+5 e +1 vida", agora POÇÃO sorteada e sem cura, como no código). Ainda não conferido: a estimativa de economia de `docs/10-equilibrio.md` (80 POÇÃO por partida).
-
-**Ideia para depois: Roo com fogo (decisão de desenho, sem código ainda):**
-- Power-up de fogo (`+1 RAIO`) muda a aparência da Roo enquanto o efeito dura.
-- Perguntas em aberto: (1) só o de fogo para testar, ou todos com a sua cor? (2) (a) capa com bordas laranja e vermelhas e chapéu amarelo, ou (b) a Roo inteira com brilho de chama? Recomendação: (a) e começar só pelo fogo, por ser mais legível em 40 px.
-
-**Decisões suas, em segundo plano:**
-- **Boticário**: quem é (Anselmo ou outro?), se é jogável. Minha sugestão: não jogável na primeira versão, personagem de história e da loja. Com isso sai o meta prompt (P4).
-- Ato II (puzzle de recomposição das páginas, D1): vira fase nova entre 2 e 3? Padrão: sim, sala-puzzle; jardim da confissão; 5 fases. É a maior tarefa que sobra e muda a duração do jogo; você disse que quer uma primeira versão curta e bem trabalhada, então sugiro **adiar** para a versão 2.
-- D3, P5, P6 (companheiros, criatura transformada, mestre em sombra) dependem do Boticário e da D1: adiar junto.
-- R6: música com orçamento medido ou reverberação mais curta.
+- Falta: página do mestre no Manuscrito; a bolha no último quadro; os capítulos selados; o fantasma-eco já está na passagem 2.
+- Você revisa os furos de roteiro (a Roo é masculina na prosa; os cartões ficam por ora, e no futuro um vídeo da história no lugar).
+- Teclas **U e I** (pendência antiga, sem descrição; confirmar se ainda vale).
 
 ## Fila técnica (o que sobrou e eu posso fazer)
 
-- Fotos do catálogo: `docs/img/sprites.png` e `sprites/bosses.png` estão atualizadas; as outras sete de `docs/img/sprites/` não mudaram de conteúdo, mas o script de recorte por categoria não achou os seletores (`sprites.html` não tem `id` por categoria). Se mudar sprite de outra categoria, recortar à mão.
-- HUD desenhada no canvas fica serrilhada em telas muito grandes (decisão visual: o estilo é pixel art; mudar só se você quiser texto nítido).
+- Fotos do catálogo: `docs/img/sprites.png` e `sprites/bosses.png` estão atualizadas; as outras sete de `docs/img/sprites/` não mudaram de conteúdo, mas o script de recorte não achou os seletores (`sprites.html` não tem `id` por categoria). Também faltam as fotos de Roo Terra e Roo Ar no catálogo.
+- 1536 texturas de forma são geradas no boot (eram 768). Se o menu demorar a abrir em aparelho fraco, gerar cada forma só na primeira transformação (`addRooFormTextures(scene, { forms: [id] })` já aceita isso).
+- A habilidade de empurrar da Roo foi removida; o Sopro do ar faz um papel parecido (só em inimigos comuns). Ideias guardadas em `docs/ides.md`.
+- HUD no canvas fica serrilhada em telas muito grandes (decisão visual do estilo pixel art; mudar só se você quiser texto nítido).
 
 ## Descartado (com motivo)
 
@@ -125,7 +97,7 @@ Não entregue código Phaser nem imagem gerada por IA.
 
 ## Como trabalhar neste projeto
 
-- **Commits:** só quando o usuário pedir. Sem linha `Co-Authored-By`. Mensagens em inglês, no padrão `tipo(escopo): descrição`, como o histórico.
+- **Commits:** só quando o usuário pedir. Mensagens em inglês, no padrão `tipo(escopo): descrição`, como o histórico.
 - **Idioma:** textos do jogo e documentação em português (PT-BR). Código e comentários em português, como o resto.
 - **Verificar antes de dizer que está pronto:** `npm run typecheck`, `npm run test` e `npm run build`. Para visual e comportamento, abrir no navegador de teste (ver "Ferramentas de teste").
 - **Não mencionar pessoas pessoais no projeto.** O projeto é um legado para uma pessoa específica, mas nada disso deve aparecer em código, docs ou commits.
@@ -135,8 +107,8 @@ Não entregue código Phaser nem imagem gerada por IA.
 
 - `npm run dev` abre em `http://localhost:5173`. O jogo fica em `window.__game` (só em dev).
 - `/sprites.html`: catálogo com todos os sprites ampliados.
-- Testes automáticos: `tests/` (Vitest, 47 testes). Lógica pura: regras, loja, faixas de música, chefe, equilíbrio, geometria da Roo.
-- Playwright e Chromium ficam **fora do projeto**, na pasta de scratchpad da sessão (`/private/tmp/claude-501/.../scratchpad/pw/`). Não instalar dentro do repositório.
+- Testes automáticos: `tests/` (Vitest, 348 testes). Lógica pura: regras, formas, lições, faixas de música, chefes, equilíbrio, geometria da Roo; `tests/contracts/` confere que registros, HTML e textos continuam ligados.
+- Playwright e Chromium ficam **fora do projeto**. O Chromium já está em `~/Library/Caches/ms-playwright/` e o módulo `playwright-core` no cache do `npx`; `PW=... npm run smoke` os usa. Não instalar dentro do repositório. Para testar por script, depois de `scene.start('Main', ...)` chame `endIntro()`: com o cartão de entrada aberto, a `update` não roda e nada anda (nem `forms.update`).
 - Áudio não pode ser ouvido em teste: medir com `AnalyserNode` (ver histórico da sessão) e pedir feedback ao usuário.
 
 ## Armadilhas já encontradas (não repetir)
@@ -154,19 +126,14 @@ Não entregue código Phaser nem imagem gerada por IA.
 | Quero mudar | Arquivo |
 |---|---|
 | números do jogo | `src/config.ts` |
-| regras da fase | `src/scenes/MainScene.ts`, `src/game/{Bomb,Pickup,Enemy,Sleep}System.ts` |
+| regras da fase | `src/scenes/MainScene.ts`, `src/game/{Bomb,Pickup,Sleep}System.ts`, `src/game/entities/enemies/EnemySystem.ts` |
 | movimento e animação da Roo | `MainScene.stepPlayerMove`, `createHeroAnims` |
 | power-ups por poção | `src/game/upgrades.ts` |
-| chefe | `src/game/entities/bosses/belladonna/BelladonnaController.ts`, `src/game/entities/bosses/belladonna/rules.ts` |
+| chefes | `src/game/entities/bosses/defs.ts` (lista única) e uma pasta por chefe |
+| transformações da Roo | `src/game/forms/` (regras), `src/game/RooFormSystem.ts` (jogo), `src/game/learning.ts` (quando se aprende), `src/textures/roo{Fire,Water,Earth,Air}.ts` |
+| mapas (campanha) | `src/scenes/MapScene.ts` (`LOOKS`, `CHAPTER_ICON`, `drawPattern`, `drawChapterScenery`), `src/game/stages/` |
 | sprites | `src/textures/*.ts` (ver `docs/09-sprites.md`) |
 | menu | `src/scenes/MenuScene.ts` e `index.html` (`#menu`) |
-| loja | `src/ui/shop.ts`, `src/game/shopRules.ts` |
 | música e sons | `src/audio/AudioEngine.ts`, `src/audio/tracks.ts` |
 | textos de ajuda | `index.html` (`#help-overlay`) |
 | cores e layout | `src/styles/main.css` |
-
-## Biblioteca, aprendizado de poções e velocidade (2026-11-15)
-- **Biblioteca Proibida** é capítulo da campanha: `game/stages/chapters/biblioteca.ts` (4 fases, Leão Verde no fim), entre a Torre e o Retorno. Migração de progresso `STAGE_SCHEMA` 4. Testes: `tests/stages/*`, `tests/storyMusic.test.ts`, `tests/tracks.test.ts`.
-- **Poções aprendidas, não compradas:** `game/learning.ts` (água na fase 1, terra na 3, ar na 4). `storage.markStageCompleted` concede a poção. A loja não vende mais nada (`game/shopRules.ts`). O OURO segue sem uso: decidir.
-- **Velocidade gradual:** `SPEED_STEP` = 0,12 por ponto; casa base 260 ms. Ver `docs/10-equilibrio.md`.
-- **Pendências:** o que fazer com o OURO; a forma "Roo Aqua"; as quatro transformações (a discutir); conferir o Leão no jogo (a fase do Leão usa a arena já existente).

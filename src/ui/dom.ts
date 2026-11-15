@@ -1,4 +1,4 @@
-// Helpers de DOM. Toda a interface fora do canvas (HUD, overlays, loja) passa por aqui.
+// Helpers de DOM. Toda a interface fora do canvas (HUD, overlays, menus) passa por aqui.
 
 export function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   const el = document.getElementById(id);

@@ -110,3 +110,49 @@ Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
 - Mapa conferido por script em 390x844 com fases 1 e 2 vencidas: progresso lido de `bombroo_stages_completed` e mostrado certo.
 - Fotos `docs/img/sprites.png` e `sprites/bosses.png` refeitas.
 - Tentativa de R5 (bundle menor) descartada, motivo em `task.md`.
+
+## Rodada de 2026-11-13 (movida de `task.md` em 2026-11-15)
+
+- **Capítulo 1 e Névoa:** A NÉVOA (fase 3, `fog: { radius: 3 }`) e o chefe **Quimera de Mercúrio** (fase 4, O POÇO, com sprite, 4 habilidades, falas, despedida e diário); progresso salvo migra sozinho (`bombroo_stages_schema`, `STAGE_SCHEMA`). `src/lab/` criado (`docs/15-lab.md`).
+- **Torre da Belladona** como capítulo com só fantasmas e a Belladona de chefe; **Mandrágora** (chefe do jardim, 4/4 de O Retorno) e a classe-pai `BossBase`.
+- **Dano por elemento** (`game/entities/damage.ts`): todos os personagens têm barra de vida, fraqueza e resistência (`profiles.ts`); chefes em `game/entities/bosses/`.
+- **Reorganização:** `game/entities/` e `game/stages/` (capítulos em `chapters/`); registros (`bosses/defs.ts`, `forms/registry.ts`); `RooFormSystem` e `StoryDirector` fora da `MainScene`; páginas em `src/pages/`; testes de contrato (`tests/contracts/`); `npm run check` e `npm run smoke`. Guia em `docs/16-guia-de-extensao.md`.
+- **Roo:** habilidade de empurrar removida; **vida contínua** (24 pontos, fraca ao fogo, `game/entities/roo.ts`, barra na HUD); **Roo Fire** (T, 20 s em 4 degraus, bônus de 50% nas poções de fogo, Brasas, Labareda no X, Luz de chama na névoa); **Roo Aqua** (imune à água, Bolha de sabão que prende inimigos, sons novos); sprites por forma e estágio.
+- **Manuscrito do Alquimista** no lugar do Diário (`/manuscrito.html`, estética do Voynich); Roo Fire, Leão Verde e depois as outras formas ganharam página.
+- **Leão Verde** (chefe) e **Arena de treino** (menu ARENA, todas as poções, vencer abre a página no Manuscrito).
+- **História aplicada ao jogo:** carta, fases, passagens, falas da Belladona, confissão do Anselmo; HUD refeita (ícones, sem legendas); blocos próprios por fase (12 estilos + livros); **cruzes removidas** de blocos e fichas (regra permanente em `CLAUDE.md`); verificação de celular em 360, 390, 844 deitado e tablet.
+- **Power-ups elementais:** `+1 RAIO` e `+1 FRASCO` carregam a poção que fortalecem (confirmado por você).
+- **Baús:** quanto maior o prêmio, menor a chance (`CHEST_COMMON`/`CHEST_RICH`), números mantidos. Documentos de regras e recompensas conferidos em 2026-11-13 (baú em `docs/03-mundo.md` corrigido).
+- **Roo masculina** na prosa de `docs/12-historia.md`, `history.html` e carta, revisada frase a frase (o "ela" que sobra é a Belladona).
+- **História nova (parte 11):** roteiro (`docs/12-historia.md`) e livro (`history.html`); cena do nascimento da Roo na bolha iridescente; sprites da Roo bebê (`src/textures/rooBubble.ts`, GIFs em `docs/img/`). Decisões: gênero da Roo, nomes das etapas da Obra como subtítulo.
+- **Caminhada da Roo:** o passo à mão (`stepPlayerMove`) com o tempo que sobra levado ao passo seguinte (3,03 px por quadro, medido por script).
+- **Descartados** (motivo em `task.md`): redução do bundle do Phaser (R5); commits intermediários e músicas novas.
+
+## Rodada de 2026-11-14 (movida de `task.md` em 2026-11-15)
+
+- **Páginas 404 e 500** (`404.html`, `500.html`; em dev, middleware em `vite.config.ts`; testes em `tests/contracts/errorPages.test.ts`) e botão LOG DA HISTÓRIA no menu (`history.html#log`).
+- **Log da história** em `history.html`, com a regra 7 em `docs/12-historia.md`: toda mudança de fato entra lá como commit.
+- **`history.html`** atualizado ao jogo (status, apêndice, Diário trocado por Manuscrito).
+- **Derrota recomeça na fase perdida** (`game/retry.ts`, `tests/retry.test.ts`); antes a campanha sempre voltava à fase 1.
+- **Manuscrito mais leve no celular:** o ruído do papel virou um canvas gerado uma vez (`setPaperGrain`), e saiu o `background-attachment: fixed`. (Falta confirmar num aparelho.)
+- **Fase 1 com 100 s** (era 90 s). Roteiro: status das pendências corrigido; frase dos fantasmas-ecos na passagem 2.
+
+## Rodada de 2026-11-15 (movida de `task.md`)
+
+- **Biblioteca Proibida** é capítulo da campanha (`stages/chapters/biblioteca.ts`, 4 fases, Leão Verde no fim, entre a Torre e o Retorno); `STAGE_SCHEMA` 4.
+- **Poções aprendidas, não compradas** (`game/learning.ts`: água depois da fase 1, terra depois da 3, ar depois da 4). **Loja removida** (`ui/shop.ts`, `game/shopRules.ts`, overlay, botões, CSS, testes). **OURO saiu do jogo** (`bombroo_bank` não é mais lida nem gravada; baús guardam um item).
+- **Velocidade gradual:** `SPEED_STEP` 0,12; casa base 260 ms (`docs/10-equilibrio.md`).
+- **Entrada da fase:** o cartão fica até ENTER ou toque (`StoryDirector.showBanner/dismissBanner`, `MainScene.introOpen`). Furos de roteiro corrigidos em `story.ts`, `vale.ts`, `retorno.ts` e no capítulo VI de `history.html`.
+- **Tecla T** transforma na forma do elemento da poção na mão (`formForElement`); a Y saiu; o botão TRANSFORMAR de toque substitui ROO FIRE e ROO AQUA. Enquanto a forma dura, só a poção do elemento dela funciona (`game/loadout.ts`). **Barra de vida** verde, amarela e vermelha (`hpColor`).
+- **Mapas da campanha:** a Biblioteca ganhou papel próprio (velino, prateleiras e lombadas), cenário (estantes com correntes e velas) e o ícone da estante acorrentada (antes aparecia com o mosteiro e a cruz); o subtítulo do vale conta os capítulos ainda selados (hoje, só o Observatório). `MapScene.ts` (`LOOKS`, `CHAPTER_ICON`, padrão `library`).
+- **Roo Terra e Roo Ar** (`game/forms/earth.ts` e `air.ts`, sprites `rooEarth.ts`, `rooAir.ts`, `rooRecolor.ts`; sons de transformação, de fim, `wall` e `gust`; ícones e cores na HUD; ajuda; páginas no Manuscrito). Terra: imune à terra no auge, 20% mais lenta, Muro de sal. Ar: resiste ao ar, sem névoa e sem baús, Sopro.
+- **Quando se aprende cada forma** (`FORM_LESSONS`): água no meio da fase 2 (3 golpes da Poção de Água), terra ao começar a fase 4 (antes da Quimera), ar no meio da fase 5 (3 golpes da Poção de Ar); se a Roo vencer a fase sem chegar lá, aprende ao fim; save novo `bombroo_forms`, e saves antigos que já passaram da fase contam como aprendidos. Decisão em `docs/06-decisoes.md`, desenho em `docs/18-transformacoes.md`.
+- **Verificado:** typecheck, `npm run check` (348 testes e build) e, num navegador de teste, as quatro formas, o muro, o sopro, o peso da Terra, a Roo Ar sem baús e as duas lições. Sem erros de página.
+
+## Rodada de 2026-11-15, parte 2
+
+- **Duelo de chefes na Arena** (`game/duel.ts`, `MainScene.setupDuel/updateDuel/onDuelEnd`, `BossBase.foe`/`targetTile`/`placeAt`, seletor em `ui/arena.ts`, resultado em `ui/overlays.ts`, duas barras na HUD): dois chefes diferentes se enfrentam por 100 s, sem a Roo (ela só assiste). Perde quem cair primeiro; sem nocaute, perde quem tiver menos vida; vida igual é empate. Cada ataque mira o outro chefe e fere com a tabela de dano dele. Perder ou apertar R refaz o mesmo duelo (`retryData`). Testes em `tests/duel.test.ts`. Rodado em todas as 12 combinações (100 s de jogo cada), sem erros.
+- **Mapas legíveis:** título, subtítulo, rótulos de fase e a dica ficam sobre uma placa de papel (`MapScene.plate`); os rótulos de fases trancadas não esmaecem mais; o rótulo perto da borda desliza para dentro da moldura. Conferido nas 5 telas.
+- **Roo Terra, Raiz (C):** a Roo afunda e viaja por baixo da terra (invisível, invulnerável, passa sob paredes, caixotes e inimigos) e nasce na casa livre mais distante de uma linha de 4 casas, rachando a terra nas casas vizinhas. **Roo Ar mais útil:** leveza (20% mais rápida), Sopro que também desliza as poções e atordoa os inimigos, **Salto de vento (C)**; saiu a regra de não pegar baús. Segunda habilidade em `FormDef.ability2` / `RooForm.useAbility2`, tecla C, botão de toque HABILIDADE 2 (aparece só quando a forma tem), ajuda, Manuscrito e sons (`root`).
+- **Inimigos novos:** revisão da proposta em `docs/19-criaturas.md` (seção 6), com os furos do elenco e a ordem sugerida. Nenhum foi construído ainda.
+

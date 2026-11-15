@@ -4,11 +4,13 @@
 
 import { BombId } from './config';
 import { STAGE_SCHEMA, migrateCompleted } from './game/stages/migration';
-import { learnedAfter } from './game/learning';
+import { FORM_LESSONS, learnedAfter, type LessonForm } from './game/learning';
+import type { FormId } from './game/forms/types';
 
 const OWNED_KEY = 'bombroo_owned';
 const STAGES_KEY = 'bombroo_stages_completed';
 const STAGES_SCHEMA_KEY = 'bombroo_stages_schema'; // versão da numeração das fases (game/stages/migration.ts)
+const FORMS_KEY = 'bombroo_forms'; // transformações aprendidas (chave nova; o fogo é de nascença)
 const ARENA_KEY = 'bombroo_arena_wins'; // chefes já vencidos na Arena (chave nova; não mexe no progresso antigo)
 
 export const Storage = {
@@ -80,4 +82,22 @@ export function markArenaWin(boss: string): void {
     wins.push(boss);
     Storage.set(ARENA_KEY, wins);
   }
+}
+
+// Transformações: o fogo é de nascença. As outras são aprendidas na lição da fase (game/learning.ts) e ficam
+// guardadas; quem já concluiu a fase da lição conta como tendo aprendido (saves antigos não perdem nada).
+export function knowsForm(f: FormId): boolean {
+  if (f === 'fire') return true;
+  const list = Storage.get<unknown>(FORMS_KEY, []);
+  if (Array.isArray(list) && list.includes(f)) return true;
+  return isStageCompleted(FORM_LESSONS[f as LessonForm].stage);
+}
+
+export function learnForm(f: FormId): void {
+  if (f === 'fire') return;
+  const list = Storage.get<unknown>(FORMS_KEY, []);
+  const have = Array.isArray(list) ? list.filter((x): x is string => typeof x === 'string') : [];
+  if (have.includes(f)) return;
+  have.push(f);
+  Storage.set(FORMS_KEY, have);
 }

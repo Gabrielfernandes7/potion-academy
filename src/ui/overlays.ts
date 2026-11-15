@@ -1,4 +1,4 @@
-// Overlays de tela cheia em DOM: pausa e game over (a loja fica em shop.ts).
+// Overlays de tela cheia em DOM: pausa e game over .
 import { byId, setShown } from './dom';
 
 export interface GameOverData {
@@ -46,4 +46,33 @@ export function showGameOver(d: GameOverData): void {
 
 export function hideGameOver(): void {
   setShown('gameover-overlay', false);
+}
+
+export interface DuelResultData {
+  winner: string | null; // nome do vencedor; null = empate
+  reason: 'ko' | 'time' | 'draw';
+  a: { name: string; hp: number; maxHp: number };
+  b: { name: string; hp: number; maxHp: number };
+  timeLeft: number;
+}
+
+const DUEL_REASON: Record<DuelResultData['reason'], string> = {
+  ko: 'NOCAUTE',
+  time: 'NO TEMPO: MAIS VIDA',
+  draw: 'VIDA IGUAL',
+};
+
+/** O resultado de um duelo de chefes na Arena (usa a mesma janela do fim de jogo). */
+export function showDuelResult(d: DuelResultData): void {
+  const title = byId('go-title');
+  title.textContent = d.winner ? `${d.winner.toUpperCase()} VENCEU` : 'EMPATE';
+  title.className = 'win';
+  byId('go-story').hidden = true;
+  byId('go-stats').innerHTML = [
+    tile(d.a.name.toUpperCase(), `${d.a.hp}/${d.a.maxHp}`),
+    tile(d.b.name.toUpperCase(), `${d.b.hp}/${d.b.maxHp}`),
+    tile('RESULTADO', DUEL_REASON[d.reason]),
+    tile('TEMPO', `${Math.ceil(d.timeLeft / 1000)} s`),
+  ].join('');
+  setShown('gameover-overlay', true);
 }

@@ -109,7 +109,6 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 - **Arena do duelo (fase 3):** menos caixotes (a arena é mais aberta).
 - **Jardim do castelo (fase 4):** fora do castelo. Grama, sebes no lugar das muralhas, canteiros de flores no lugar dos caixotes e um portão no lugar da porta.
 - **Sala de Música:** a tela onde a Roo de maestro (casaca e cabelo de Beethoven) deixa escolher a música.
-- **Caldeirão de Magia:** a loja.
 - **Menu:** a Roo mexe uma poção no caldeirão. De tempos em tempos ele aponta a varinha para um frasco da prateleira, ele levita e voa guiado por ele até o caldeirão, que reage de um jeito próprio de cada elemento (labareda, respingo, pedras ou redemoinho de névoa). Clicar num frasco da prateleira o chama na hora.
 
 

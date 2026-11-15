@@ -10,7 +10,6 @@ Use sempre estes nomes, em qualquer tela, texto ou conversa.
 | BLOCOS | caixotes destruídos (contador) | caixas |
 | TEMPO | o tempo que sobra na fase | timer |
 | VIDA | a barra de vida (24 pontos) | HP, corações |
-| Caldeirão de Magia | a loja | shop |
 | Caixote | o bloco de madeira destrutível | bloco (na conversa) |
 | Muralha | a parede de pedra indestrutível | parede |
 | Porta | a saída, aberta com 3 gemas (no jardim, o **portão**) | saída |

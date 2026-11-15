@@ -31,7 +31,13 @@ describe('manuscrito do alquimista', () => {
   });
   it('as páginas abrem pelo progresso; as da fase 1 já estão abertas', () => {
     const nada = (): boolean => false;
-    expect(MANUSCRITO.filter(e => isEntryOpen(e, nada)).map(e => e.id)).toEqual(['roo', 'roo-fire', 'roo-aqua', 'anselmo', 'sapo']);
+    expect(MANUSCRITO.filter(e => isEntryOpen(e, nada)).map(e => e.id)).toEqual(['roo', 'roo-fire', 'anselmo', 'sapo']);
+    expect(isEntryOpen(entryById('roo-aqua')!, s => s <= 1)).toBe(false); // a água é aprendida na fase 2
+    expect(isEntryOpen(entryById('roo-aqua')!, s => s <= 2)).toBe(true);
+    expect(isEntryOpen(entryById('roo-terra')!, s => s <= 3)).toBe(false);
+    expect(isEntryOpen(entryById('roo-terra')!, s => s <= 4)).toBe(true);
+    expect(isEntryOpen(entryById('roo-ar')!, s => s <= 4)).toBe(false);
+    expect(isEntryOpen(entryById('roo-ar')!, s => s <= 5)).toBe(true);
     expect(isEntryOpen(entryById('quimera')!, s => s <= 4)).toBe(true);
     expect(isEntryOpen(entryById('mandragora')!, s => s <= 4)).toBe(false);
   });
@@ -94,6 +100,28 @@ describe('manuscrito: ligação com a Arena', () => {
   });
 });
 
+describe('manuscrito: Roo Terra e Roo Ar', () => {
+  it('Terra: imune à terra, fraca ao ar, com o Muro de sal', () => {
+    const e = entryById('roo-terra')!;
+    const s = statsOf(e)!;
+    expect(s.forca.imune).toEqual(['earth']);
+    expect(s.fraqueza).toEqual(['air']);
+    expect(e.habilidades.map(h => h.nome).join(' ')).toMatch(/Muro de sal/);
+    expect(e.habilidades.map(h => h.nome).join(' ')).toMatch(/Raiz/);
+    expect(e.sprite.frames[0]).toBe('roo_earth_4_down_0_0');
+  });
+  it('Ar: resiste ao ar, fraca à terra, com o Sopro e a visão de cima', () => {
+    const e = entryById('roo-ar')!;
+    const s = statsOf(e)!;
+    expect(s.forca.resiste).toEqual(['air']);
+    expect(s.fraqueza).toEqual(['earth']);
+    expect(e.habilidades.map(h => h.nome).join(' ')).toMatch(/Sopro/);
+    expect(e.habilidades.map(h => h.nome).join(' ')).toMatch(/visão de cima/);
+    expect(e.habilidades.map(h => h.nome).join(' ')).toMatch(/Salto de vento/);
+    expect(e.sprite.frames[0]).toBe('roo_air_4_down_0_0');
+  });
+});
+
 describe('manuscrito: Roo Aqua', () => {
   it('mostra o perfil da forma de água: imune à água, fraca ao fogo, com a Bolha de sabão', () => {
     const e = entryById('roo-aqua')!;
@@ -106,7 +134,7 @@ describe('manuscrito: Roo Aqua', () => {
     expect(e.sprite.frames).toHaveLength(8);
     expect(e.sprite.frames[0]).toBe('roo_water_4_down_0_0');
   });
-  it('a página do fogo diz que a chama recusa a água', () => {
-    expect(entryById('roo-fire')!.habilidades.map(h => h.nome).join(' ')).toMatch(/recusa a água/);
+  it('a página do fogo diz que só a Poção de Fogo responde à forma', () => {
+    expect(entryById('roo-fire')!.habilidades.map(h => h.nome).join(' ')).toMatch(/Só a chama/);
   });
 });

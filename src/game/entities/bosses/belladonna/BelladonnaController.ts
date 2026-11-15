@@ -71,7 +71,7 @@ export class BelladonnaController extends BossBase {
     this.scene.play('powerup');
     const throwOne = (): void => {
       if (this.state === 'defeated') return;
-      const target = this.scene.playerTile();
+      const target = this.targetTile();
       const tiles = blastTiles(target.x, target.y, 1, this.isOpen);
       this.telegraph(tiles, 'fire', target);
       this.throwPotion('fire', target, tiles);
@@ -84,7 +84,7 @@ export class BelladonnaController extends BossBase {
   private castRain(): void {
     this.setPose('cast');
     this.scene.play('powerup');
-    const targets = rainTargets(this.scene.playerTile(), CONFIG.bossRainDrops, this.isOpen);
+    const targets = rainTargets(this.targetTile(), CONFIG.bossRainDrops, this.isOpen);
     targets.forEach((tile, i) => {
       this.telegraph([tile], 'water', tile);
       // gota caindo do alto até a casa
@@ -110,7 +110,7 @@ export class BelladonnaController extends BossBase {
     this.scene.tweens.add({ targets: this.sprite, alpha: 0, duration: 300 });
     this.after(CONFIG.bossBlinkHideMs, () => {
       if (this.state === 'defeated') return;
-      const player = this.scene.playerTile();
+      const player = this.targetTile();
       const free: Tile[] = [];
       for (let y = 1; y < CONFIG.rows - 1; y++) {
         for (let x = 1; x < CONFIG.cols - 1; x++) {

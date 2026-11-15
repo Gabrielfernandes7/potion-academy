@@ -1,4 +1,5 @@
-// Capítulos que já aparecem no mapa do vale, mas ainda estão selados: não têm fases, não entram em
+// Capítulos que já aparecem no mapa do vale, mas ainda estão selados (hoje, só o Observatório;
+// a Biblioteca Proibida já é um capítulo de verdade em chapters/biblioteca.ts): não têm fases, não entram em
 // STAGES nem em CHAPTER_LIST, e tocá-los só mostra o aviso de selado. Quando um deles for criado de
 // verdade, vire um `ChapterSpec` em chapters/<nome>.ts, acrescente em CHAPTER_LIST e tire-o daqui.
 export interface UpcomingChapter {

@@ -23,7 +23,7 @@
 
 ## O mundo: Vale das Fórmulas e os anos magros
 
-Vale das Fórmulas é um vale onde a alquimia é ofício comum: destilam-se poções de Fogo, Aqua, Telúrica e Etérea, vendidas no **Caldeirão de Magia**. Há três anos de colheitas ruins, e o vale sofre:
+Vale das Fórmulas é um vale onde a alquimia é ofício comum: destilam-se poções de Fogo, Aqua, Telúrica e Etérea, vendidas na praça da cidade. Há três anos de colheitas ruins, e o vale sofre:
 
 - chuvas demais, trigo que apodrece em pé, pão caro;
 - celeiros reservados a quem pode pagar; pequenos produtores perdem a terra por dívida;
@@ -120,7 +120,7 @@ A cena final fica como está: o frasco sobre a mesa, o Caldeirão morno, silênc
 | Manuscrito do Alquimista | `game/manuscrito.ts` | Substituiu o Diário da Roo: uma página por personagem, não por fase |
 | Tela final | "Jornada cumprida" | Mantida |
 
-> **Para a revisão de roteiro (a fazer):** a campanha tem 12 fases em 3 capítulos (O Vale, A Torre / Duelo, O Retorno) e 3 chefes, mais a Quimera, que é a prata do mestre. O roteiro foi escrito para 4 atos; aqui o Ato I (Nigredo) cobre O Vale inteiro, o Ato II (Albedo) a Torre até a Antecâmara, o Ato III (Citrinitas) o Duelo e o Ato IV (Rubedo) O Retorno. O Leão Verde e os capítulos selados (Biblioteca Proibida, Observatório) ainda não têm lugar na história. Furos conhecidos para revisar: por que Belladona guarda um laboratório com fantasmas e uma Quimera; como a Quimera se liga à busca do mestre; o que a Mandrágora faz no mosteiro; por que o mosteiro volta a ter um frasco vazio.
+> **Para a revisão de roteiro (a fazer):** a campanha tem 12 fases em 3 capítulos (O Vale, A Torre / Duelo, O Retorno) e 3 chefes, mais a Quimera, que é a prata do mestre. O roteiro foi escrito para 4 atos; aqui o Ato I (Nigredo) cobre O Vale inteiro, o Ato II (Albedo) a Torre até a Antecâmara, o Ato III (Citrinitas) o Duelo e o Ato IV (Rubedo) O Retorno. O Leão Verde e os capítulos selados (Biblioteca Proibida, Observatório) ainda não têm lugar na história. Furos resolvidos em 2026-11-15 (cartões do jogo e capítulo VI do livro): por que Belladona guarda um laboratório com fantasmas e uma Quimera (o que o mestre não soube descartar); como a Quimera se liga à busca do mestre (a prata que ele tentou virar pão); o que a Mandrágora faz no mosteiro (guarda plantada por Belladona); por que o frasco vazio está no mosteiro (era do mestre, deixado com Anselmo).
 
 ### Falas propostas (rascunho para aplicar depois)
 

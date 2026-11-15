@@ -10,9 +10,8 @@ export function isMenuVisible(): boolean {
   return isShown('menu');
 }
 
-export function bindMenuButtons(handlers: { play: () => void; shop: () => void; music: () => void; map?: () => void; arena?: () => void; manuscript?: () => void }): void {
+export function bindMenuButtons(handlers: { play: () => void; music: () => void; map?: () => void; arena?: () => void; manuscript?: () => void }): void {
   byId('menu-play').onclick = handlers.play;
-  byId('menu-shop').onclick = handlers.shop;
   byId('menu-music').onclick = handlers.music;
   if (handlers.manuscript) byId('menu-manuscript').onclick = handlers.manuscript;
   if (handlers.map) byId('menu-map').onclick = handlers.map;

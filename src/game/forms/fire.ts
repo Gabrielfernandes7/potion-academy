@@ -1,6 +1,6 @@
-// Roo Fire (puro): o perfil, as Brasas, a Labareda e a Luz de chama. Está no jogo (tecla T).
+// Roo Fire (puro): o perfil, as Brasas, a Labareda e a Luz de chama. Transforma com T, segurando a poção de fogo.
 //   Degraus 4 e 3: resiste ao fogo, fraca à água. Degraus 2 e 1: esfriando, sem fraqueza nem resistência.
-//   Degrau 0: a Roo normal. Poções de fogo +50% no auge. NÃO pode usar poção de água enquanto transformada.
+//   Degrau 0: a Roo normal. Poções de fogo +50% no auge. só usa poção de fogo enquanto transformada.
 // Brasas: a explosão de fogo deixa brasas; queimam inimigos comuns (chefes são imunes), nunca machucam a Roo,
 //   duram menos a cada degrau, e a água as apaga.
 // Labareda (X): jato de fogo de 3 casas à frente; custa 2 s da forma, espera 3,5 s.
@@ -16,10 +16,8 @@ export const FIRE_FORM: FormDef = {
   id: 'fire',
   nome: 'Roo Fire',
   element: 'fire',
-  transformKey: 'T',
   profile: (stage: FormStage): DamageProfile => (stage >= 3 ? FULL : stage >= 1 ? COOLING : PROFILES.roo),
   boost: 0.5,
-  forbids: 'water', // a chama recusa a água
   ability: { id: 'flame', nome: 'Labareda', short: 'LABAREDA', costMs: 2000, cooldownMs: 3500, range: 3 },
 };
 

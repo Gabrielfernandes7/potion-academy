@@ -17,6 +17,7 @@ export interface HudState {
   selected: BombId;
   stage: number;
   boss: { hp: number; maxHp: number; name: string } | null;
+  boss2?: { hp: number; maxHp: number; name: string } | null; // duelo de chefes: o segundo chefe
   form: FormView; // transformação da Roo: forma, tempo, espera e habilidade
 }
 

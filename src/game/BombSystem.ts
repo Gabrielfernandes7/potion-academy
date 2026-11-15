@@ -119,6 +119,12 @@ export class BombSystem {
     this.scene.cameras.main.shake(60, 0.003);
   }
 
+  /** O estouro da Raiz da Roo Terra: terra rachando nas casas ao redor de onde ela brotou. */
+  earthBlast(tiles: Array<{ x: number; y: number }>): void {
+    this.applyBlast(tiles, 'earth');
+    this.scene.play('explosion', 'earth');
+  }
+
   neutralizeBomb(bomb: Bomb, label = 'APAGADA'): void {
     if (bomb.detonated) return;
     bomb.detonated = true;

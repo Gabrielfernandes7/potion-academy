@@ -1,6 +1,6 @@
-// Roo Aqua (puro): o perfil e a Bolha de sabão. Está no jogo (tecla Y).
+// Roo Aqua (puro): o perfil e a Bolha de sabão. Transforma com T, segurando a poção de água.
 //   Degraus 4 e 3: IMUNE à água (mas segue fraca ao fogo). Degraus 2 e 1: esfriando, resiste à água e sem
-//   fraqueza. Degrau 0: a Roo normal. Poções de água +50% no auge. Pode usar todas as poções.
+//   fraqueza. Degrau 0: a Roo normal. Poções de água +50% no auge. Só usa poções de água enquanto transformada.
 // Bolha de sabão (X): a Roo sopra uma bolha que flutua devagar até 4 casas à frente. Se alcança um inimigo
 //   comum, o prende dentro dela: ele não anda, não machuca e não chicoteia, até a bolha estourar (mais tempo
 //   nos degraus altos). Chefes são imunes (a bolha só estoura). Custa 2 s da forma, espera 3,5 s. A Roo nasceu
@@ -16,7 +16,6 @@ export const WATER_FORM: FormDef = {
   id: 'water',
   nome: 'Roo Aqua',
   element: 'water',
-  transformKey: 'Y',
   profile: (stage: FormStage): DamageProfile => (stage >= 3 ? FULL : stage >= 1 ? COOLING : PROFILES.roo),
   boost: 0.5,
   ability: { id: 'bubble', nome: 'Bolha de sabão', short: 'BOLHA', costMs: 2000, cooldownMs: 3500, range: 4 },

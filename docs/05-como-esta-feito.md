@@ -17,7 +17,7 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 | a tabela de drop dos caixotes | `src/game/rewards.ts` |
 | a HUD (vida, tempo, seletor, Roo Fire; sem legendas, em ícones) | `src/scenes/HudScene.ts` |
 | o menu animado (caldeirão e Roo) | `src/scenes/MenuScene.ts` |
-| o menu, pausa, loja e fim de jogo (telas em texto) | `index.html` e `src/ui/` |
+| o menu, pausa e fim de jogo (telas em texto) | `index.html` e `src/ui/` |
 | as cores e fontes | `src/styles/main.css` (variáveis em `:root`) |
 | a Belladona (movimento, habilidades, vida) | `src/game/entities/bosses/belladonna/BelladonnaController.ts` |
 | as regras do chefe (escolha de ataque, áreas, alvos) | `src/game/entities/bosses/belladonna/rules.ts` |

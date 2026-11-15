@@ -3,19 +3,19 @@
 // - player/enemy.gridX/gridY mudam quando o movimento COMEÇA; o sprite interpola depois.
 // - Dano usa a posição visual do sprite (o que o jogador vê bate com o que acontece).
 // - Pickups, bombas e vitória usam coordenadas de grade.
-// - update() retorna cedo com a loja aberta e, após gameOver/won, só trata a tecla R.
+// - update() espera o cartão de entrada da fase (ENTER ou toque) e, após gameOver/won, só trata a tecla R.
 import Phaser from 'phaser';
 import { BLOCK, BOMB_ORDER, BombId, CANVAS, CONFIG, ElementId, EMPTY, WALL } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
-import { ARENA_STAGE, arenaStageDef } from '../game/arena';
-import { canUseBomb, isBannedBomb, setArenaLoadout } from '../game/loadout';
+import { ARENA_STAGE, arenaStageDef, duelStageDef } from '../game/arena';
+import { duelOutcome, validDuel } from '../game/duel';
+import { canUseBomb, isBlockedBomb, setArenaLoadout } from '../game/loadout';
 import { rooOriginY } from '../textures/rooGeometry';
 import type { Facing, Player, PowerupCounts, StageData } from '../game/types';
 import { retryData } from '../game/retry';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
 import { touch } from '../input/touch';
-import { hideGameOver, setPauseVisible, showGameOver } from '../ui/overlays';
-import { isShopOpen } from '../ui/shop';
+import { hideGameOver, setPauseVisible, showDuelResult, showGameOver } from '../ui/overlays';
 import { isHelpOpen } from '../ui/help';
 import { Fog } from '../game/effects/Fog';
 import { BossBase } from '../game/entities/bosses/BossBase';
@@ -38,7 +38,7 @@ import { buildTiles, cellKey, doorCell, isPassable, isSpawnSafe, tileAt } from '
 import { advanceStep, beginStep, facingFor, lerp, moveDurationMs, tileCenter, walkTimeScale, type StepState } from '../game/movement';
 import { carryForward, doorOutcome, startingState } from '../game/stageFlow';
 
-type MainKeys = Record<'space' | 'x' | 't' | 'y' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
+type MainKeys = Record<'space' | 'x' | 'c' | 't' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
 
 // Aparência de cada fase: texturas do chão, da muralha, do caixote e da porta (e um tom, se houver).
 interface Look {
@@ -88,8 +88,9 @@ export class MainScene extends Phaser.Scene {
   boss: BossBase | null = null;
   fog: Fog | null = null; // névoa da fase (se a fase tiver `fog`)
   transitioning = false; // passando de fase: ignora entrada
+  introOpen = false; // o cartão de entrada da fase está na tela
   private helpPaused = false;
-  // As transformações da Roo (T: fogo, Y: água; X: a habilidade da forma). Criado em create().
+  // As transformações da Roo (T: a forma da poção na mão; X: a habilidade da forma). Criado em create().
   forms!: RooFormSystem;
   // A direção da história (cartão de fase, passagens, final, despedida dos chefes). Criado em create().
   story!: StoryDirector;
@@ -100,16 +101,20 @@ export class MainScene extends Phaser.Scene {
 
   // Treino na Arena: o chefe escolhido (ou null na campanha). A luta é uma fase montada na hora (game/arena.ts).
   arena: BossId | null = null;
+  // Duelo de chefes na Arena (game/duel.ts): o segundo chefe (o primeiro é `arena`). A Roo só assiste.
+  duel: BossId | null = null;
+  boss2: BossBase | null = null;
+  private duelDone = false;
   private arenaDef: StageDef | null = null;
 
   get def(): StageDef {
-    if (this.arena) return (this.arenaDef ??= arenaStageDef(this.arena));
+    if (this.arena) return (this.arenaDef ??= this.duel ? duelStageDef(this.arena, this.duel) : arenaStageDef(this.arena));
     return stageDef(this.stage);
   }
 
   // Dados explícitos para recomeçar (o Phaser reaproveita os do último reinício): a Arena recomeça a luta; a campanha, na fase em que a Roo perdeu.
   restartData(): StageData {
-    return retryData(this.stage, this.arena, ARENA_STAGE);
+    return retryData(this.stage, this.arena, ARENA_STAGE, this.duel);
   }
 
   get isBossStage(): boolean {
@@ -118,6 +123,9 @@ export class MainScene extends Phaser.Scene {
 
   init(data?: StageData): void {
     this.arena = data?.arena ?? null;
+    this.duel = this.arena && validDuel(this.arena, data?.duel) ? data?.duel ?? null : null;
+    this.boss2 = null;
+    this.duelDone = false;
     this.arenaDef = null;
     setArenaLoadout(!!this.arena); // na Arena, todas as poções estão liberadas
     this.stage = this.arena ? ARENA_STAGE : (data?.stage ?? 1);
@@ -190,6 +198,7 @@ export class MainScene extends Phaser.Scene {
     this.story = new StoryDirector(this);
     if (this.def.fog) this.fog = new Fog(this, CONFIG.cols * CONFIG.tile, CONFIG.rows * CONFIG.tile, this.def.fog.radius, CONFIG.tile);
     if (this.def.boss) this.boss = createBoss(this.def.boss, this);
+    if (this.duel && this.boss) this.setupDuel(this.boss, createBoss(this.duel, this));
     if (this.stage > 1) this.cameras.main.fadeIn(600, 8, 14, 12);
     // a grade é desenhada abaixo da faixa da HUD (cena 'Hud', por cima)
     this.cameras.main.setViewport(0, CONFIG.hudHeight, CANVAS.width, CONFIG.rows * CONFIG.tile);
@@ -201,6 +210,11 @@ export class MainScene extends Phaser.Scene {
     this.updateHud();
     this.playIdle();
     this.story.showBanner();
+    // a fase espera a jogadora começar (ENTER ou toque no cartão de entrada)
+    this.introOpen = true;
+    const onTap = (): void => this.endIntro();
+    this.input.on('pointerdown', onTap);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.input.off('pointerdown', onTap));
     if (!this.scene.isActive('Hud')) this.scene.launch('Hud');
   }
 
@@ -274,7 +288,7 @@ export class MainScene extends Phaser.Scene {
   setBomb(type: BombId): void {
     if (!canUseBomb(type)) {
       // a chama recusa a água; as outras poções só estão bloqueadas por não terem sido compradas
-      this.floatingText(this.player.gridX, this.player.gridY, isBannedBomb(type) ? 'A CHAMA RECUSA A ÁGUA' : 'BLOQUEADA', '#bfae8a', 12, 900);
+      this.floatingText(this.player.gridX, this.player.gridY, isBlockedBomb(type) ? 'SÓ A POÇÃO DA FORMA' : 'BLOQUEADA', '#bfae8a', 12, 900);
       return;
     }
     this.bombType = type;
@@ -286,7 +300,8 @@ export class MainScene extends Phaser.Scene {
 
   // Sorteio e regras da grade em game/grid.ts; aqui só cria os sprites.
   buildGrid(): void {
-    const bossSpawn = this.def.boss ? BOSS_DEFS[this.def.boss].spawn : undefined;
+    // no duelo, os dois cantos de frente um para o outro ficam livres: a Roo (que só assiste) e o canto de baixo
+    const bossSpawn = this.duel ? 'bottom' : this.def.boss ? BOSS_DEFS[this.def.boss].spawn : undefined;
     const { tiles } = buildTiles(
       CONFIG.cols, CONFIG.rows, this.def.blockChance,
       (x, y) => isSpawnSafe(x, y, CONFIG.cols, CONFIG.rows, bossSpawn),
@@ -362,6 +377,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   isFree(x: number, y: number): boolean {
+    if (this.forms?.isSaltWall(x, y)) return false; // muro de sal da Roo Terra
     return isPassable({
       tile: this.getTile(x, y),
       bomb: this.hasBomb(x, y),
@@ -453,6 +469,7 @@ export class MainScene extends Phaser.Scene {
 
   // Dano à Roo; o efeito do elemento vive em game/entities/hitEffects.ts.
   damagePlayer(bypassInvuln = false, element?: ElementId): void {
+    if (this.duel) return; // a Roo só assiste ao duelo
     if (!bypassInvuln && this.player.invulnerable > 0) return;
     const damage = damageToRoo(element, this.forms.profile()); // transformada, o que a machuca muda
     this.player.hp -= damage;
@@ -491,7 +508,7 @@ export class MainScene extends Phaser.Scene {
   // ---------- Movimento e entrada ----------
 
   moveDuration(): number {
-    return moveDurationMs(CONFIG.baseMoveDuration, this.player.speedUp);
+    return moveDurationMs(CONFIG.baseMoveDuration, this.player.speedUp) * (this.forms?.walkFactor() ?? 1); // Roo Terra: o peso
   }
 
   tweenSpriteTo(
@@ -558,13 +575,21 @@ export class MainScene extends Phaser.Scene {
     this.movePlayerTo(nx, ny, this.moveDuration());
   }
 
+  // Começa a fase: fecha o cartão de entrada (ver StoryDirector.showBanner).
+  endIntro(): void {
+    if (!this.introOpen) return;
+    this.introOpen = false;
+    this.story.dismissBanner();
+    this.forms.onStageBegin(); // lições que vêm ao começar a fase (Roo Terra, antes da Quimera)
+  }
+
   setupInput(): void {
     const keyboard = this.input.keyboard;
     if (!keyboard) throw new Error('Teclado não disponível');
     this.cursors = keyboard.createCursorKeys();
     const K = Phaser.Input.Keyboard.KeyCodes;
     this.keys = keyboard.addKeys({
-      space: K.SPACE, x: K.X, t: K.T, y: K.Y, d: K.D, r: K.R,
+      space: K.SPACE, x: K.X, c: K.C, t: K.T, d: K.D, r: K.R,
       one: K.ONE, two: K.TWO, three: K.THREE, four: K.FOUR,
       enter: K.ENTER,
     }) as unknown as MainKeys;
@@ -626,9 +651,9 @@ export class MainScene extends Phaser.Scene {
 
     if (JD(this.keys.space) || touch.consumeAction('bomb')) this.bombSystem.placeBomb();
     if (touch.consumeAction('cycle')) this.cycleBomb();
-    if (JD(this.keys.t) || touch.consumeAction('transformFire')) this.forms.transform('fire');
-    if (JD(this.keys.y) || touch.consumeAction('transformWater')) this.forms.transform('water');
+    if (JD(this.keys.t) || touch.consumeAction('transform')) this.forms.transform();
     if (JD(this.keys.x) || touch.consumeAction('ability')) this.forms.useAbility();
+    if (JD(this.keys.c) || touch.consumeAction('ability2')) this.forms.useAbility2();
     if (JD(this.keys.d) || touch.consumeAction('detonate')) this.bombSystem.detonateRemote();
     if (JD(this.keys.one)) this.setBomb('normal');
     if (JD(this.keys.two)) this.setBomb('mega');
@@ -653,6 +678,7 @@ export class MainScene extends Phaser.Scene {
       selected: this.bombType,
       stage: this.stage,
       boss: this.boss ? this.boss.hudView() : null,
+      boss2: this.boss2 ? this.boss2.hudView() : null,
       form: this.forms.hudView(),
     };
   }
@@ -730,7 +756,7 @@ export class MainScene extends Phaser.Scene {
     audio.play(name, variant);
   }
 
-  // ---------- Roo Fire e Roo Aqua (as transformações: ver game/RooFormSystem.ts) ----------
+  // ---------- Roo Fire, Aqua, Terra e Ar (as transformações: ver game/RooFormSystem.ts) ----------
 
   // Bônus de dano da forma para as explosões da Roo (poção e Labareda); chamado por inimigos e chefes.
   boostBlast(base: number, element: ElementId): number {
@@ -740,6 +766,57 @@ export class MainScene extends Phaser.Scene {
   // Uma explosão da Roo: o fogo acende brasas (forma de fogo) e a água as apaga.
   onRooBlast(tiles: Array<{ x: number; y: number }>, element: ElementId): void {
     this.forms.onBlast(tiles, element);
+  }
+
+  // ---------- Duelo de chefes (Arena) ----------
+
+  // Os dois chefes nos cantos opostos, cada um mirando no outro; a Roo some da tela.
+  private setupDuel(a: BossBase, b: BossBase): void {
+    a.foe = b;
+    b.foe = a;
+    a.placeAt(1, 1);
+    b.placeAt(CONFIG.cols - 2, CONFIG.rows - 2);
+    this.boss2 = b;
+    this.playerSprite.setVisible(false);
+  }
+
+  private updateDuel(delta: number): void {
+    const JD = Phaser.Input.Keyboard.JustDown;
+    if (this.duelDone) return;
+    if (JD(this.keys.enter) || touch.consumeAction('pause')) this.togglePause();
+    if (this.isPaused) return;
+    this.timeLeft -= delta;
+    this.updateTimerHud();
+    this.bombSystem.update(delta);
+    this.enemySystem.update(delta);
+    this.boss?.update(delta);
+    this.boss2?.update(delta);
+    const a = this.boss;
+    const b = this.boss2;
+    if (!a || !b) return;
+    // um nocaute espera a queda (1,5 s) e chama onDuelEnd; o tempo esgotado decide na hora
+    if (this.timeLeft <= 0) this.onDuelEnd(true);
+  }
+
+  /** O duelo terminou (um chefe caiu ou o tempo acabou): mostra quem venceu. */
+  onDuelEnd(timeUp = false): void {
+    const a = this.boss;
+    const b = this.boss2;
+    if (this.duelDone || !a || !b) return;
+    const outcome = duelOutcome({ hp: a.hp, defeated: a.defeated }, { hp: b.hp, defeated: b.defeated }, timeUp || this.timeLeft <= 0);
+    if (!outcome) return;
+    this.duelDone = true;
+    this.gameOver = true;
+    this.isPaused = false;
+    setPauseVisible(false);
+    audio.playWinMusic();
+    showDuelResult({
+      winner: outcome.winner === null ? null : [a, b][outcome.winner].name,
+      reason: outcome.reason,
+      a: { name: a.name, hp: Math.max(0, a.hp), maxHp: a.maxHp },
+      b: { name: b.name, hp: Math.max(0, b.hp), maxHp: b.maxHp },
+      timeLeft: Math.max(0, this.timeLeft),
+    });
   }
 
   // ---------- Janela de ajuda ----------
@@ -767,7 +844,6 @@ export class MainScene extends Phaser.Scene {
   // ---------- Loop principal ----------
 
   update(_time: number, delta: number): void {
-    if (isShopOpen()) return;
     if (isHelpOpen()) {
       this.holdForHelp();
       return;
@@ -778,6 +854,14 @@ export class MainScene extends Phaser.Scene {
       setPauseVisible(false);
       // dados explícitos: sem eles o Phaser reaproveita os do último reinício (e voltaria à fase 2)
       this.scene.restart(this.restartData());
+      return;
+    }
+    if (this.introOpen) {
+      if (Phaser.Input.Keyboard.JustDown(this.keys.enter)) this.endIntro();
+      return; // o mundo espera: tempo, inimigos e a Roo
+    }
+    if (this.duel) {
+      this.updateDuel(delta);
       return;
     }
     if (!this.isPaused) this.stepPlayerMove(delta);

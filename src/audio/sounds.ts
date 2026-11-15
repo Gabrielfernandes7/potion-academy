@@ -11,7 +11,7 @@ import { breath, crackle, grain, voice, type Graph } from './synth';
 
 export type SfxName =
   | 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door' | 'fizzle'
-  | 'transform' | 'formEnd' | 'flame' | 'bubble' | 'pop'; // transformações da Roo (variante = o elemento da forma)
+  | 'transform' | 'formEnd' | 'flame' | 'bubble' | 'pop' | 'wall' | 'gust' | 'root'; // transformações da Roo (variante = o elemento da forma)
 
 // Som da explosão de uma poção, conforme o elemento.
 function elementSound(g: Graph, element: ElementId, t: number): void {
@@ -46,6 +46,21 @@ function elementSound(g: Graph, element: ElementId, t: number): void {
 //   fogo : rugido que cresce, estalos de brasa e um acorde quente (sol, si, ré)
 //   água : borbulhar que sobe, gotas em escala e um acorde claro (mi, lá, si)
 function transformSound(g: Graph, element: ElementId, t: number): void {
+  if (element === 'earth') {
+    // terra: um estrondo grave que assenta, cascalho caindo e um acorde de pedra (ré, lá, ré)
+    breath(g, t, 0.8, 0.07, 140, 900, 0.2);
+    voice(g, 55, t, 1.0, { gain: 0.1, type: 'sine', attack: 0.04, glideTo: 82, glideTime: 0.6, send: 0.2 });
+    crackle(g, t + 0.1, 14, 0.7, 1800, 0.05);
+    [147, 220, 294].forEach((f, i) => voice(g, f, t + 0.55 + i * 0.06, 1.2, { gain: 0.032, type: 'triangle', attack: 0.07, send: 0.6 }));
+    return;
+  }
+  if (element === 'air') {
+    // ar: um vento que sobe, sinos leves e um acorde aberto (lá, mi, si)
+    breath(g, t, 1.0, 0.06, 500, 4200, 0.6);
+    [0, 0.12, 0.24, 0.38].forEach((d, i) => voice(g, 880 * Math.pow(1.26, i), t + d, 0.5, { gain: 0.022, type: 'sine', attack: 0.01, send: 0.8 }));
+    [440, 659, 988].forEach((f, i) => voice(g, f, t + 0.55 + i * 0.05, 1.2, { gain: 0.028, type: 'sine', attack: 0.09, send: 0.75 }));
+    return;
+  }
   if (element === 'water') {
     breath(g, t, 0.9, 0.06, 300, 3000, 0.5);
     [0, 0.1, 0.2, 0.32, 0.45, 0.6].forEach((d, i) => {
@@ -98,7 +113,13 @@ export function playSfx(g: Graph, name: SfxName, t: number, variant?: ElementId)
       break;
     case 'formEnd':
       // a forma se desfaz: o mesmo timbre, descendo e se apagando
-      if (variant === 'water') {
+      if (variant === 'earth') {
+        voice(g, 110, t, 0.9, { gain: 0.06, type: 'sine', attack: 0.01, glideTo: 45, glideTime: 0.8, send: 0.2 });
+        crackle(g, t, 8, 0.6, 1400, 0.035);
+      } else if (variant === 'air') {
+        breath(g, t, 0.9, 0.04, 3600, 400, 0.6);
+        voice(g, 880, t, 0.6, { gain: 0.02, type: 'sine', attack: 0.01, glideTo: 440, glideTime: 0.5, send: 0.8 });
+      } else if (variant === 'water') {
         breath(g, t, 0.8, 0.04, 2200, 300, 0.5);
         [0, 0.12, 0.26, 0.42].forEach((d, i) => voice(g, 700 - i * 110, t + d, 0.22, { gain: 0.03, type: 'sine', attack: 0.004, glideTo: 380 - i * 40, glideTime: 0.14, send: 0.5 }));
       } else {
@@ -117,6 +138,22 @@ export function playSfx(g: Graph, name: SfxName, t: number, variant?: ElementId)
       breath(g, t, 0.35, 0.03, 700, 2600, 0.5);
       voice(g, 520, t + 0.05, 0.3, { gain: 0.035, type: 'sine', attack: 0.01, glideTo: 940, glideTime: 0.22, send: 0.6 });
       voice(g, 1040, t + 0.14, 0.4, { gain: 0.016, type: 'sine', attack: 0.01, send: 0.7 });
+      break;
+    case 'wall':
+      // o muro de sal sobe: um tranco grave e cristais estalando
+      voice(g, 70, t, 0.35, { gain: 0.09, type: 'sine', attack: 0.004, glideTo: 48, glideTime: 0.25, send: 0.2 });
+      crackle(g, t + 0.02, 12, 0.4, 3000, 0.05);
+      break;
+    case 'root':
+      // a Roo afunda na terra: um ronco grave que desliza e cascalho
+      breath(g, t, 0.7, 0.07, 120, 700, 0.2);
+      voice(g, 90, t, 0.7, { gain: 0.08, type: 'sine', attack: 0.02, glideTo: 50, glideTime: 0.6, send: 0.2 });
+      crackle(g, t + 0.05, 10, 0.5, 1500, 0.04);
+      break;
+    case 'gust':
+      // o sopro: uma lufada que passa de um lado a outro
+      breath(g, t, 0.55, 0.08, 400, 3800, 0.5);
+      voice(g, 330, t, 0.4, { gain: 0.02, type: 'sine', attack: 0.05, glideTo: 660, glideTime: 0.35, send: 0.7 });
       break;
     case 'pop':
       // a bolha estoura: um estalo seco e uma gotinha

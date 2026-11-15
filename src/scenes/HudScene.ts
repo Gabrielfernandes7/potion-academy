@@ -8,8 +8,8 @@ import Phaser from 'phaser';
 import { BOMB_ORDER, BOMB_TYPES, CANVAS, CONFIG, ELEMENTS, BombId } from '../config';
 import { canUseBomb } from '../game/loadout';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState, pipsView, segmentFill, timerView } from '../game/hudState';
-import { hpBarView } from '../game/entities/roo';
-import type { FormView } from '../game/forms';
+import { hpBarView, hpColor } from '../game/entities/roo';
+import type { FormId, FormView } from '../game/forms';
 import { readTheme, Theme } from '../ui/theme';
 import type { MainScene } from './MainScene';
 import { LAST_STAGE } from '../game/stages/index';
@@ -29,12 +29,20 @@ const SEP_1 = 188; // filetes entre as zonas
 const SEP_2 = 384;
 const TIMER_X = 204; // ampulheta e tempo
 const FIRE_X = 204; // medidor da Roo Fire (linha de baixo)
-const FIRE_BAR_X = FIRE_X + 26; // dois ícones (chama e gota) antes dos degraus
+const FIRE_BAR_X = FIRE_X + 54; // quatro ícones (chama, gota, terra e ar) antes dos degraus
 const FIRE_SEG_W = 22;
 const FIRE_SEG_GAP = 3;
 const GEM_X = 488; // gemas em losangos
 const BOSS_X = 462; // vida do chefe, no lugar das gemas
 const BOSS_W = 124;
+
+// Cores do medidor por forma: auge, meio, frio e a borda dos degraus.
+const FORM_HUD: Record<FormId, { hot: number; mid: number; cool: number; edge: number }> = {
+  fire: { hot: 0xff7043, mid: 0xffa94d, cool: 0xd6a04a, edge: 0x8a5a2a },
+  water: { hot: 0x4fc3f7, mid: 0x29a1e6, cool: 0x5a9fc4, edge: 0x3a7a9a },
+  earth: { hot: 0xb89a5a, mid: 0x8d7442, cool: 0x7a6a4a, edge: 0x6a5a3a },
+  air: { hot: 0xeaf3fa, mid: 0xc4d8e8, cool: 0x9db4c6, edge: 0x7a94a8 },
+};
 
 type Text = Phaser.GameObjects.Text;
 type Img = Phaser.GameObjects.Image;
@@ -48,13 +56,14 @@ export class HudScene extends Phaser.Scene {
   private gemGfx!: Phaser.GameObjects.Graphics;
   private hpTrail = 1; // faixa clara atrás da barra: segue devagar a vida de verdade
   private hpTween: Phaser.Tweens.Tween | null = null;
-  private hpView = { ratio: 1, low: false };
+  private hpView = { ratio: 1 };
   private emptyFlask!: Img;
   private lastHp: number | null = null;
   private timerText!: Text;
   private overtimeTween: Phaser.Tweens.Tween | null = null;
     private bossGfx!: Phaser.GameObjects.Graphics;
   private bossName!: Text;
+  private bossName2!: Text;
   private slotGfx!: Phaser.GameObjects.Graphics;
   private slotIcons: Img[] = [];
   private slotKeys: Text[] = [];
@@ -129,6 +138,7 @@ export class HudScene extends Phaser.Scene {
     this.gemGfx = this.add.graphics().setDepth(2);
     this.bossGfx = this.add.graphics().setDepth(2).setVisible(false);
     this.bossName = this.text(BOSS_X, ROW_A - 7, '', 10, '#9be564').setDepth(2).setVisible(false);
+    this.bossName2 = this.text(BOSS_X, ROW_B - 9, '', 10, '#9be564').setDepth(2).setVisible(false);
   }
 
   private createRowB(): void {
@@ -181,14 +191,14 @@ export class HudScene extends Phaser.Scene {
 
   private drawHp(): void {
     const g = this.hpGfx;
-    const { ratio, low } = this.hpView;
+    const { ratio } = this.hpView;
     g.clear();
     g.fillStyle(0x2a0f12, 1).fillRoundedRect(HP_X, HP_Y, HP_W, HP_H, 3);
     if (this.hpTrail > ratio) {
       g.fillStyle(0xffd0c8, 0.9).fillRoundedRect(HP_X + 1, HP_Y + 1, (HP_W - 2) * this.hpTrail, HP_H - 2, 2);
     }
     if (ratio > 0) {
-      g.fillStyle(low ? 0xff7043 : 0xe53935, 1).fillRoundedRect(HP_X + 1, HP_Y + 1, (HP_W - 2) * ratio, HP_H - 2, 2);
+      g.fillStyle(hpColor(ratio), 1).fillRoundedRect(HP_X + 1, HP_Y + 1, (HP_W - 2) * ratio, HP_H - 2, 2);
       g.fillStyle(0xffffff, 0.18).fillRect(HP_X + 2, HP_Y + 2, (HP_W - 4) * ratio, 2);
     }
     g.lineStyle(1, 0xff8a80, 0.9).strokeRoundedRect(HP_X, HP_Y, HP_W, HP_H, 3);
@@ -196,37 +206,41 @@ export class HudScene extends Phaser.Scene {
 
   // ---------- transformações ----------
 
-  // Medidor da transformação: a chama (T) e a gota (Y) e 4 degraus. Pronta: os dois ícones acesos e as duas teclas.
-  // Transformada: o ícone da forma e o tempo que resta, esfriando de degrau em degrau (azul na água, laranja no
-  // fogo), com o X quando a habilidade está pronta. Esfriando: enche devagar, tudo apagado.
+  // Medidor da transformação: os quatro ícones (chama, gota, cristal de sal e vento) e 4 degraus. Pronta: os ícones
+  // acesos e a tecla T. Transformada: só o ícone da forma acende e o tempo que resta esfria de degrau em degrau
+  // (a cor de cada forma), com o X quando a habilidade está pronta. Esfriando: enche devagar, tudo apagado.
   private drawForm(f: FormView): void {
     const g = this.fireGfx;
     g.clear();
-    const water = f.form === 'water';
     let ratio = 1;
+    let key = 'T';
+    const look = f.form ? FORM_HUD[f.form] : null;
     let color = 0xf0c674;
-    let key = 'T  Y';
-    if (f.active) {
+    if (f.active && look) {
       ratio = f.ratio;
-      color = water
-        ? (f.stage >= 3 ? 0x4fc3f7 : f.stage === 2 ? 0x29a1e6 : 0x5a9fc4)
-        : (f.stage >= 3 ? 0xff7043 : f.stage === 2 ? 0xffa94d : 0xd6a04a); // vai esfriando com os degraus
-      key = f.abilityReady ? 'X' : '';
+      color = f.stage >= 3 ? look.hot : f.stage === 2 ? look.mid : look.cool; // vai esfriando com os degraus
+      key = [f.abilityReady ? 'X' : '', f.ability2Ready ? 'C' : ''].filter(Boolean).join(' ');
     } else if (f.cooldownRatio > 0) {
       ratio = 1 - f.cooldownRatio;
       color = 0x7a5a3a;
       key = '';
     }
     const lit = f.active || ratio >= 1;
-    // ícones: chama (fogo) e gota (água), acesos conforme a forma
-    const flameOn = lit && (!f.active || !water);
-    const dropOn = lit && (!f.active || water);
+    const on = (id: FormId): boolean => lit && (!f.active || f.form === id);
     const fx = FIRE_X - 3;
-    g.fillStyle(flameOn ? 0xd6452f : 0x4a3426).fillTriangle(fx - 4, ROW_B + 6, fx, ROW_B - 7, fx + 4, ROW_B + 6);
-    g.fillStyle(flameOn ? 0xffa94d : 0x5a4030).fillTriangle(fx - 2, ROW_B + 6, fx, ROW_B - 1, fx + 2, ROW_B + 6);
+    g.fillStyle(on('fire') ? 0xd6452f : 0x4a3426).fillTriangle(fx - 4, ROW_B + 6, fx, ROW_B - 7, fx + 4, ROW_B + 6);
+    g.fillStyle(on('fire') ? 0xffa94d : 0x5a4030).fillTriangle(fx - 2, ROW_B + 6, fx, ROW_B - 1, fx + 2, ROW_B + 6);
     const dx = FIRE_X + 12;
-    g.fillStyle(dropOn ? 0x29a1e6 : 0x2f3a44).fillTriangle(dx - 4, ROW_B + 1, dx, ROW_B - 7, dx + 4, ROW_B + 1).fillCircle(dx, ROW_B + 2.5, 4);
-    g.fillStyle(dropOn ? 0xb7ecff : 0x4a5560).fillRect(dx - 2, ROW_B, 1.5, 3);
+    g.fillStyle(on('water') ? 0x29a1e6 : 0x2f3a44).fillTriangle(dx - 4, ROW_B + 1, dx, ROW_B - 7, dx + 4, ROW_B + 1).fillCircle(dx, ROW_B + 2.5, 4);
+    g.fillStyle(on('water') ? 0xb7ecff : 0x4a5560).fillRect(dx - 2, ROW_B, 1.5, 3);
+    // terra: um cristal de sal (losango com a face de baixo mais escura)
+    const ex = FIRE_X + 27;
+    g.fillStyle(on('earth') ? 0xf6f2e2 : 0x4a4538).fillTriangle(ex - 5, ROW_B, ex, ROW_B - 7, ex + 5, ROW_B);
+    g.fillStyle(on('earth') ? 0xb5a97f : 0x37332a).fillTriangle(ex - 5, ROW_B, ex, ROW_B + 7, ex + 5, ROW_B);
+    // ar: três fios de vento
+    const ax = FIRE_X + 42;
+    g.lineStyle(1.5, on('air') ? 0xe3f0fa : 0x44505a, 1);
+    for (const [ox, oy, len] of [[-5, -4, 9], [-5, 0, 11], [-5, 4, 8]]) g.beginPath().moveTo(ax + ox, ROW_B + oy).lineTo(ax + ox + len, ROW_B + oy).strokePath();
     // 4 degraus
     for (let i = 0; i < 4; i++) {
       const x = FIRE_BAR_X + i * (FIRE_SEG_W + FIRE_SEG_GAP);
@@ -234,9 +248,9 @@ export class HudScene extends Phaser.Scene {
       g.fillStyle(0x2a1a10, 1).fillRoundedRect(x, y, FIRE_SEG_W, 8, 2);
       const fill = segmentFill(ratio, i);
       if (fill > 0) g.fillStyle(color, 1).fillRoundedRect(x, y, Math.max(2, FIRE_SEG_W * fill), 8, 2);
-      g.lineStyle(1, lit ? (water ? 0x3a7a9a : 0x8a5a2a) : 0x4a3426, 1).strokeRoundedRect(x, y, FIRE_SEG_W, 8, 2);
+      g.lineStyle(1, lit ? (look?.edge ?? 0x8a5a2a) : 0x4a3426, 1).strokeRoundedRect(x, y, FIRE_SEG_W, 8, 2);
     }
-    this.fireKey.setText(key).setColor(f.abilityReady ? '#ffd9a8' : '#ffe9c4');
+    this.fireKey.setText(key).setColor(f.abilityReady || f.ability2Ready ? '#ffd9a8' : '#ffe9c4');
   }
 
   // ---------- frascos, gemas, chefe ----------
@@ -272,21 +286,27 @@ export class HudScene extends Phaser.Scene {
     }
   }
 
-  // Na fase do chefe, esconde as gemas e mostra a vida dele.
+  // Na fase do chefe, esconde as gemas e mostra a vida dele. No duelo, duas barras: uma em cada linha.
   private applyBoss(s: HudState): void {
-    const boss = s.boss;
+    const bosses = [s.boss, s.boss2 ?? null].filter((x): x is NonNullable<HudState['boss']> => !!x);
+    const boss = bosses[0];
     this.drawGems(s.gems, s.gemsForDoor, !boss);
     this.bossGfx.setVisible(!!boss);
     this.bossName.setVisible(!!boss);
+    this.bossName2.setVisible(bosses.length > 1);
     this.bossGfx.clear();
     if (!boss) return;
-    const y = ROW_A - 1;
+    const duel = bosses.length > 1;
     const h = 9;
-    const ratio = Math.max(0, boss.hp / boss.maxHp);
-    this.bossGfx.fillStyle(0x0b2420, 1).fillRoundedRect(BOSS_X, y, BOSS_W, h, 3);
-    if (ratio > 0) this.bossGfx.fillStyle(ratio <= 0.5 ? 0xd81b60 : 0x76d83a, 1).fillRoundedRect(BOSS_X + 1, y + 1, (BOSS_W - 2) * ratio, h - 2, 2);
-    this.bossGfx.lineStyle(1, 0x9be564, 0.9).strokeRoundedRect(BOSS_X, y, BOSS_W, h, 3);
-    this.bossName.setText(boss.name);
+    bosses.forEach((b, i) => {
+      const y = duel ? (i === 0 ? ROW_A - 4 : ROW_B - 3) : ROW_A - 1;
+      const ratio = Math.max(0, b.hp / b.maxHp);
+      this.bossGfx.fillStyle(0x0b2420, 1).fillRoundedRect(BOSS_X, y, BOSS_W, h, 3);
+      if (ratio > 0) this.bossGfx.fillStyle(ratio <= 0.5 ? 0xd81b60 : 0x76d83a, 1).fillRoundedRect(BOSS_X + 1, y + 1, (BOSS_W - 2) * ratio, h - 2, 2);
+      this.bossGfx.lineStyle(1, 0x9be564, 0.9).strokeRoundedRect(BOSS_X, y, BOSS_W, h, 3);
+    });
+    this.bossName.setText(boss.name).setY(duel ? ROW_A - 10 : ROW_A - 7);
+    if (duel) this.bossName2.setText(bosses[1].name).setY(ROW_B - 9);
   }
 
   private apply(s: HudState): void {

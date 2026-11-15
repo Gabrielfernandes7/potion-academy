@@ -300,3 +300,20 @@ Novas decisões entram no fim.
 - **Motivo:** o OURO acumulava sem ter o que comprar desde que a loja deixou de vender poções (as poções agora são aprendidas na jornada).
 - **Decisão:** não há mais moedas soltas: a fatia de 45% que caía como moeda vira bloco vazio. Os baús guardam um item (coração ou power-up, conforme a fase), dado ao ser pisado. Os inimigos não deixam mais nada, e os bônus de vitória (Belladona, portão) saíram. A HUD e a tela de fim não mostram mais OURO.
 - **Save:** a chave `bombroo_bank` não é mais lida nem gravada. Saves antigos só deixam essa chave sem uso; nenhuma outra chave mudou.
+
+## Roo Terra, Roo Ar e as lições das formas
+- **Decisão:** a forma de cada elemento é uma lição, aprendida na fase seguinte à da poção (água no meio da fase 2, ar no meio da fase 5) ou, no caso da terra, ao começar a fase 4, antes da Quimera (a fase seguinte à poção é o chefe). O meio da fase é marcado por 3 golpes da poção em inimigos. Se a Roo vencer sem chegar lá, aprende ao fim.
+- **Motivo:** a poção vem como prêmio, a forma como lição: o jogador usa a poção, entende, e só depois ganha a transformação. Espaça as novidades.
+- **Terra:** imune à terra no auge (as flores do mal não a ferem), 20% mais lenta, Muro de sal. **Ar:** resiste ao ar, sem névoa e sem baús, Sopro. Detalhes em `docs/18-transformacoes.md`.
+- **Save:** chave nova `bombroo_forms`; quem já concluiu a fase da lição conta como tendo aprendido. Nenhuma chave antiga mudou.
+- **Em aberto:** equilíbrio das duas formas (por jogar), o nome "Roo Aqua" e se o muro deve barrar explosões.
+
+## Segunda habilidade (C) da Terra e do Ar; o Ar sem punição de baús
+- **Motivo:** o Ar parecia quase inutilizável (sem baús e só um empurrão). Dar mais jogo às formas é melhor do que castigá-las.
+- **Decisão:** a tecla C vale uma segunda habilidade: **Raiz** (Terra: a Roo afunda, viaja por baixo da terra e nasce em outro lugar, como a Mandrágora) e **Salto de vento** (Ar: pulo curto e invulnerável). O Ar ganhou **leveza** (20% mais rápido) e o Sopro agora também desliza as poções e atordoa os empurrados. Saiu a regra "não pega baús". O Fogo e a Água ficam com uma habilidade (ideias em `docs/18-transformacoes.md`).
+- **Em aberto:** equilíbrio de tudo (por jogar).
+
+## Duelo de chefes na Arena
+- **Motivo:** testar equilíbrio sem depender de uma pessoa jogando: dois chefes lutam entre si e o resultado diz quem é mais forte contra quem.
+- **Decisão:** na Arena, dois chefes diferentes se enfrentam por 100 s, sem a Roo (ela só assiste). Perde quem cair primeiro; se ninguém cair, perde quem tiver menos vida (em pontos); vida igual é empate (`game/duel.ts`). Cada ataque de um chefe mira o outro e fere com a tabela de dano de quem o recebe. O duelo não conta para a jornada nem para o Manuscrito.
+- **Resultado de referência** (simulação de 100 s de jogo, cada lado em cada canto): Belladona e Leão Verde vencem quase todos; Mandrágora vence a Quimera; a Quimera perde de todos. Nenhum duelo foi ao tempo: todos terminaram em nocaute (18 a 90 s).

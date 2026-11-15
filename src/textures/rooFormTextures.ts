@@ -1,4 +1,4 @@
-// Texturas das transformações da Roo para o jogo: um conjunto por forma (fogo, água), estágio (1 a 4), direção,
+// Texturas das transformações da Roo para o jogo: um conjunto por forma (fogo, água, terra, ar), estágio (1 a 4), direção,
 // quadro do corpo (0 a 3) e fase do tremor (0 a 7), geradas a partir dos quadros normais da Roo (depois do
 // contorno). Chave: `roo_<forma>_<estágio>_<direção>_<quadro>_<tremor>`. O estágio 0 é a Roo normal, sem textura aqui.
 // A lógica dos estágios está em game/forms/. Para uma forma nova, acrescente o gerador em FORM_PAINTERS.
@@ -6,6 +6,8 @@ import Phaser from 'phaser';
 import type { FormId } from '../game/forms/types';
 import { makeFireRoo, type FireDir } from './rooFire';
 import { makeWaterRoo } from './rooWater';
+import { makeEarthRoo } from './rooEarth';
+import { makeAirRoo } from './rooAir';
 
 export const FORM_DIRS: readonly FireDir[] = ['down', 'up', 'side'];
 export const FORM_TREMOR_STEPS = 8; // fases do tremor
@@ -18,6 +20,8 @@ interface Paint { dir: FireDir; frame: number; tick: number; stage: number }
 const FORM_PAINTERS: Record<FormId, (src: Src, p: Paint) => HTMLCanvasElement> = {
   fire: (src, p) => makeFireRoo(src, { ...p, intensity: 'high' }),
   water: (src, p) => makeWaterRoo(src, p),
+  earth: (src, p) => makeEarthRoo(src, p),
+  air: (src, p) => makeAirRoo(src, p),
 };
 
 export function formTextureKey(form: FormId, stage: number, dir: string, frame: number | string, tremor: number): string {
@@ -26,7 +30,7 @@ export function formTextureKey(form: FormId, stage: number, dir: string, frame: 
 
 export interface FormTextureOptions { forms?: FormId[]; stages?: number[]; dirs?: FireDir[]; frames?: number[] }
 
-/** Gera as texturas das formas: por padrão todas (2 formas x 4 estágios x 3 direções x 4 quadros x 8 fases). */
+/** Gera as texturas das formas: por padrão todas (4 formas x 4 estágios x 3 direções x 4 quadros x 8 fases). */
 export function addRooFormTextures(scene: Phaser.Scene, o: FormTextureOptions = {}): void {
   const forms = o.forms ?? (Object.keys(FORM_PAINTERS) as FormId[]);
   const stages = o.stages ?? [1, 2, 3, 4];

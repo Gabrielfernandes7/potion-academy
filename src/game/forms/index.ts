@@ -9,8 +9,10 @@ export * from './types';
 export * from './stages';
 export * from './fire';
 export * from './water';
+export * from './earth';
+export * from './air';
 export * from './RooForm';
-export { FORMS, FORM_IDS } from './registry';
+export { FORMS, FORM_IDS, formForElement } from './registry';
 
 /** O perfil de dano da Roo na forma e no degrau dados (sem forma, o normal). */
 export function profileOf(form: FormId | null, stage: FormStage): DamageProfile {

@@ -94,4 +94,5 @@ export interface StageData {
   stage?: number;
   carry?: Carry;
   arena?: BossId; // treino na Arena contra este chefe (stage = ARENA_STAGE; nada vale para a campanha)
+  duel?: BossId; // com `arena`: duelo de chefes (arena contra duel, sem a Roo; game/duel.ts)
 }

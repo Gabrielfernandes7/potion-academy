@@ -5,7 +5,7 @@ Equilibrar é escolher os números para o jogo ser **calmo, mas com desafio**. T
 ## Metas
 
 1. Cada poção precisa ter um motivo para ser usada (nenhuma melhor em tudo).
-2. Liberar as 3 poções da loja deve levar **cerca de 6 a 7 partidas**.
+2. Aprender as 3 poções (água, terra e ar) deve levar **cerca de 6 a 7 partidas**.
 3. A fase 1 deve ser vencível em 100 s por quem está aprendendo, sem pressa constante.
 4. A Belladona deve ser vencida em **2 a 4 tentativas**, e perder deve parecer erro do jogador (por isso todo ataque tem aviso).
 

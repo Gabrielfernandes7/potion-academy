@@ -15,7 +15,7 @@ Cada tipo de coisa que se multiplica tem **uma lista única**, escrita como `Rec
 | **Fases e capítulos** | `game/stages/chapters/<capítulo>.ts` e `CHAPTER_LIST` | numeração, mapa, música, bloco, inimigos |
 | **Capítulos ainda selados** | `game/stages/upcoming.ts` | mapa do vale (sem acesso) |
 | **Blocos** | `game/stages/blockStyles.ts` + `textures/blocks.ts` | um estilo por fase |
-| **Poções** | `config.ts` (`BOMB_TYPES`) | loja, HUD, explosão |
+| **Poções** | `config.ts` (`BOMB_TYPES`) | HUD, explosão, aprendizado (`learning.ts`) |
 | **Páginas do Manuscrito** | `game/manuscrito.ts` | tabs e cartas |
 | **Textos da história** | `game/story.ts` e o `story` de cada fase | cartões, passagens, final |
 
@@ -43,6 +43,7 @@ Não é preciso mexer em: `MainScene`, `textures/index.ts`, `arena.ts`, `sprites
 5. `index.html`: botão de toque `data-touch="transform<Forma>"` e a linha na ajuda; `input/touch.ts`: o nome em `TOUCH_NAMES`.
 6. `audio/AudioEngine.ts`: o timbre em `transformSound` e em `formEnd`.
 7. `game/manuscrito.ts`: a página com `forma: '<id>'`.
+8. `game/learning.ts`: a lição em `FORM_LESSONS` (em que fase e por quê). `HudScene.ts`: o ícone e as cores em `FORM_HUD`.
 
 ### Uma fase ou um capítulo novo
 Uma entrada em `stages` do capítulo (ou `chapters/<nome>.ts` + uma linha em `CHAPTER_LIST`, tirando o capítulo de `UPCOMING_CHAPTERS`). Inserir fases no meio **muda a numeração**: aumente `STAGE_SCHEMA` e acrescente o passo em `stages/migration.ts`. Texto: o `story` da fase e, se couber, uma passagem em `PASSAGE_CARDS`.

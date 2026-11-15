@@ -8,7 +8,7 @@ import { makeFireRoo, type FireDir, type FireIntensity } from '../../textures/ro
 import { ROO_HEAD_ROOM, rooOriginY } from '../../textures/rooGeometry';
 import { damageTo } from '../../game/entities/damage';
 import { PROFILES } from '../../game/entities/profiles';
-import { ROO_MAX_HP, hpBarView } from '../../game/entities/roo';
+import { ROO_MAX_HP, hpBarView, hpColor } from '../../game/entities/roo';
 import type { ElementId } from '../../config';
 import {
   EMBER_TICK_MS, EmberField, FORM_COOLDOWN_MS, FORM_MS, RooForm, boostedDamage, emberDamage, profileOf,
@@ -418,7 +418,7 @@ class FireRooScene extends Phaser.Scene {
     const fill = byId('hp-fill');
     if (fill) {
       fill.style.width = `${view.ratio * 100}%`;
-      fill.style.background = view.low ? '#ff7043' : '#e53935';
+      fill.style.background = '#' + hpColor(view.ratio).toString(16).padStart(6, '0');
     }
     const set = (id: string, text: string): void => { const el = byId(id); if (el) el.textContent = text; };
     set('hp-text', `${this.hp}/${ROO_MAX_HP}`);

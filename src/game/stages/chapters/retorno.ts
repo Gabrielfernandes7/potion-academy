@@ -28,7 +28,7 @@ export const RETORNO: ChapterSpec = {
     },
     {
       kind: 'garden', boss: 'mandrake', name: 'O JARDIM', place: 'Jardim do Mosteiro',
-      story: 'A Mandrágora guarda o portão do mosteiro. O fogo a ameaça muito; a terra e a água quase não a ferem.',
+      story: 'A Mandrágora guarda o portão do mosteiro. Os monges a cultivavam para o remédio; Belladona a plantou à porta. O fogo a ameaça muito; a terra e a água quase não a ferem.',
       chest: CHEST_RICH, tip: 'Mandrágora: o fogo a fere muito; a terra e a água quase nada.',
       time: 120000, blockChance: 0.4, door: true, theme: 'garden', block: 'garden', track: 'jardim',
       // sem gemas: o portão abre quando ela cai. As flores só nascem por habilidade dela.

@@ -122,7 +122,9 @@ export class PickupSystem {
 
   checkPickups(): void {
     if (this.scene.gameOver || this.scene.won) return;
-    const found = pickupAt(this.pickups, this.scene.player.gridX, this.scene.player.gridY);
-    if (found) this.collectPickup(found);
+    const { gridX, gridY } = this.scene.player;
+    const found = pickupAt(this.pickups, gridX, gridY);
+    if (!found) return;
+    this.collectPickup(found);
   }
 }
