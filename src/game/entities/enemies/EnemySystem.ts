@@ -5,7 +5,10 @@
 import Phaser from 'phaser';
 import { CONFIG, ElementId, EMPTY, WALL, DIRS } from '../../../config';
 import { damageTo } from '../damage';
-import { canSpawnEnemyAt, countKind, enemyMoveOptions } from './enemyRules';
+import {
+  CLOCK_PAUSE_MS, CLOCK_STEPS_BETWEEN_PAUSES, MOLE_BURROW_MS, MOLE_WALK_MS, OWL_AIM_MS, OWL_CYCLE_MS,
+  canSpawnEnemyAt, countKind, enemyMoveOptions, moleSpot, patrolDir,
+} from './enemyRules';
 import type { Enemy } from '../../types';
 import { hitFx } from '../hitEffects';
 import type { MainScene } from '../../../scenes/MainScene';
@@ -18,6 +21,10 @@ const MOTION: Record<EnemyKind, { hopV: number; hopH: number; bob: number; bobMs
   frog: { hopV: 7, hopH: 3, bob: 1.2, bobMs: 260 },
   ghost: { hopV: 0, hopH: 0, bob: 2.6, bobMs: 420 },
   flower: { hopV: 0, hopH: 0, bob: 0, bobMs: 500 },
+  lantern: { hopV: 0, hopH: 0, bob: 2, bobMs: 220 }, // a chama oscila
+  clock: { hopV: 2, hopH: 1.5, bob: 0.6, bobMs: 300 }, // passo pesado
+  mole: { hopV: 3, hopH: 2, bob: 0.8, bobMs: 320 },
+  owl: { hopV: 0, hopH: 0, bob: 3, bobMs: 360 }, // voa
 };
 
 export class EnemySystem {
@@ -76,6 +83,8 @@ export class EnemySystem {
         kind, gridX: x, gridY: y, sprite, moveTimer: def.moveInterval, alive: true,
         moveT: def.stepMs, fromX: sprite.x, fromY: sprite.y, hopY: false, phase: Math.random() * 1000,
         lashMs: CONFIG.flowerLashCycleMs * (0.5 + Math.random() * 0.5), fxCooldown: 0, trapMs: 0,
+        dir: Phaser.Utils.Array.GetRandom([{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }]), steps: 0,
+        actMs: def.behavior === 'dive' ? OWL_CYCLE_MS : MOLE_WALK_MS * (0.5 + Math.random() * 0.5), state: 'walk', target: null,
         hp: PROFILES[kind].maxHp, maxHp: PROFILES[kind].maxHp, bar: s.add.graphics().setDepth(12).setVisible(false),
       });
       return;
@@ -97,7 +106,7 @@ export class EnemySystem {
   // Uma explosão alcançou o inimigo: tira vida conforme a tabela de dano (game/entities/damage.ts). Fraqueza
   // tira mais, resistência menos, imunidade nada (flor do mal e a água, fantasma e a terra).
   hitEnemy(enemy: Enemy, element: ElementId, fromRoo = false): void {
-    if (enemy.fxCooldown > 0) return; // a explosão dura 380 ms; sem isso o golpe se repetiria a cada quadro
+    if (enemy.fxCooldown > 0 || enemy.state === 'burrowed') return; // a explosão dura 380 ms; debaixo da terra, nada o alcança
     enemy.fxCooldown = 700;
     const base = damageTo(PROFILES[enemy.kind], element);
     const damage = fromRoo ? this.scene.boostBlast(base, element) : base; // Roo Fire: poção de fogo mais forte
@@ -157,6 +166,10 @@ export class EnemySystem {
   moveEnemy(enemy: Enemy): void {
     const s = this.scene;
     const def = ENEMY_TYPES[enemy.kind];
+    if (def.behavior === 'patrol') {
+      this.patrolStep(enemy);
+      return;
+    }
     const valid = enemyMoveOptions({
       from: { x: enemy.gridX, y: enemy.gridY },
       passWalls: def.passWalls,
@@ -175,6 +188,99 @@ export class EnemySystem {
     enemy.moveT = 0;
     enemy.gridX += dx;
     enemy.gridY += dy;
+  }
+
+  // Patrulha: segue em linha reta; ao bater, volta (ou vira). O relógio de cobre trava por 2 s a cada volta.
+  private patrolStep(enemy: Enemy): void {
+    const s = this.scene;
+    const canEnter = (x: number, y: number): boolean => s.isFree(x, y)
+      && !(x === s.doorX && y === s.doorY)
+      && !this.enemies.some(e => e !== enemy && e.alive && e.gridX === x && e.gridY === y);
+    const d = patrolDir({ x: enemy.gridX, y: enemy.gridY }, enemy.dir, canEnter);
+    if (!d) return;
+    enemy.dir = d;
+    enemy.fromX = enemy.sprite.x;
+    enemy.fromY = enemy.sprite.y;
+    enemy.hopY = d.y !== 0;
+    enemy.moveT = 0;
+    enemy.gridX += d.x;
+    enemy.gridY += d.y;
+    if (enemy.kind === 'clock' && ++enemy.steps >= CLOCK_STEPS_BETWEEN_PAUSES) {
+      enemy.steps = 0;
+      enemy.actMs = CLOCK_PAUSE_MS; // marca a pausa; o update() a aplica ao intervalo do passo seguinte
+    }
+  }
+
+  // Toupeira: depois de andar um tempo, afunda e deixa um monte que avisa onde vai brotar (a 2 ou 3 casas da Roo).
+  private updateMole(enemy: Enemy, delta: number): boolean {
+    const s = this.scene;
+    const T = CONFIG.tile;
+    if (enemy.state === 'burrowed') {
+      enemy.actMs -= delta;
+      const t = enemy.target;
+      if (t) {
+        // o monte de terra no lugar onde ela vai brotar (xadrez de pixels que treme)
+        const wob = Math.floor(enemy.actMs / 90) % 2;
+        this.lashGfx.fillStyle(0x5d4228, 0.9).fillRect(t.x * T + 9, t.y * T + 20 + wob, 22, 11);
+        this.lashGfx.fillStyle(0x8d6e43, 0.95).fillRect(t.x * T + 13, t.y * T + 16 + wob, 14, 8);
+        this.lashGfx.lineStyle(2, 0xf0e6c8, 0.9).strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6);
+      }
+      if (enemy.actMs <= 0 && t) {
+        enemy.gridX = t.x;
+        enemy.gridY = t.y;
+        enemy.fromX = enemy.sprite.x = t.x * T + T / 2;
+        enemy.fromY = enemy.sprite.y = t.y * T + T / 2;
+        enemy.sprite.setVisible(true);
+        enemy.state = 'walk';
+        enemy.target = null;
+        enemy.actMs = MOLE_WALK_MS;
+        this.thornFx(enemy.sprite.x, enemy.sprite.y);
+      }
+      return true; // debaixo da terra: não anda nem machuca
+    }
+    enemy.actMs -= delta;
+    if (enemy.actMs > 0) return false;
+    const me = s.playerTile();
+    const spot = moleSpot(me, (x, y) => s.isFree(x, y) && !(x === s.doorX && y === s.doorY)
+      && !this.enemies.some(e => e !== enemy && e.alive && e.gridX === x && e.gridY === y), CONFIG.cols, CONFIG.rows, Math.random());
+    if (!spot) {
+      enemy.actMs = 1500; // sem lugar para brotar agora: tenta de novo daqui a pouco
+      return false;
+    }
+    enemy.state = 'burrowed';
+    enemy.target = spot;
+    enemy.actMs = MOLE_BURROW_MS;
+    enemy.sprite.setVisible(false);
+    enemy.bar.setVisible(false);
+    this.thornFx(enemy.sprite.x, enemy.sprite.y);
+    return true;
+  }
+
+  // Coruja: a cada 6 s marca a casa da Roo com um círculo que encolhe; 1 s depois, mergulha. Quem saiu da casa escapa.
+  private updateOwl(enemy: Enemy, delta: number): void {
+    const s = this.scene;
+    const T = CONFIG.tile;
+    enemy.actMs -= delta;
+    if (enemy.state === 'walk') {
+      if (enemy.actMs <= 0) {
+        enemy.state = 'aim';
+        enemy.target = s.playerTile();
+        enemy.actMs = OWL_AIM_MS;
+      }
+      return;
+    }
+    const t = enemy.target;
+    if (!t) { enemy.state = 'walk'; return; }
+    const k = Math.max(0, enemy.actMs / OWL_AIM_MS); // 1 -> 0
+    this.lashGfx.lineStyle(2, 0xeef4f8, 0.95).strokeCircle(t.x * T + T / 2, t.y * T + T / 2, 8 + 12 * k);
+    this.lashGfx.fillStyle(0xc9d6df, 0.18 + 0.25 * (1 - k)).fillRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6);
+    if (enemy.actMs > 0) return;
+    const me = s.playerTile();
+    this.thornFx(t.x * T + T / 2, t.y * T + T / 2);
+    if (me.x === t.x && me.y === t.y) s.damagePlayer(false, 'air');
+    enemy.state = 'walk';
+    enemy.target = null;
+    enemy.actMs = OWL_CYCLE_MS;
   }
 
   // Passo: desliza até a casa nova (sapo: com um pulinho; fantasma: flutuando); parado, balança de leve.
@@ -277,6 +383,8 @@ export class EnemySystem {
         this.updateFlower(enemy, delta);
         continue;
       }
+      if (def.behavior === 'burrow' && this.updateMole(enemy, delta)) continue;
+      if (def.behavior === 'dive') this.updateOwl(enemy, delta);
       const dist = Phaser.Math.Distance.Between(
         enemy.sprite.x, enemy.sprite.y, s.playerSprite.x, s.playerSprite.y,
       );
@@ -284,7 +392,9 @@ export class EnemySystem {
       enemy.moveTimer -= delta;
       if (enemy.moveTimer <= 0) {
         this.moveEnemy(enemy);
-        enemy.moveTimer = def.moveInterval;
+        const pause = enemy.kind === 'clock' && enemy.actMs === CLOCK_PAUSE_MS; // o relógio trava a cada volta
+        if (pause) enemy.actMs = 0;
+        enemy.moveTimer = pause ? CLOCK_PAUSE_MS : def.moveInterval;
       }
     }
   }

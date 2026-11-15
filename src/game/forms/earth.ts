@@ -6,12 +6,13 @@
 //   degraus baixos). Inimigos comuns não passam, a Roo também não, e ninguém coloca poção em cima. O fantasma
 //   atravessa (como atravessa qualquer parede). Não nasce na porta, nem onde há poção, inimigo ou a própria Roo.
 //   Custa 2 s da forma, espera 4 s.
-// Raiz (C): a Roo afunda no chão e nasce em outro lugar, como a Mandrágora: viaja por baixo da terra (passa sob
-//   paredes, caixotes, poções e inimigos) por 0,7 s, invulnerável, e brota na casa livre mais distante de uma linha
-//   de 4 casas à frente. Ao brotar, a terra racha nas casas ao redor e fere o que estiver nelas. Custa 2 s da forma,
+// Raiz (C): a Roo afunda no chão e nasce em outro lugar, como a Mandrágora: a jogadora ESCOLHE a casa (mira com as
+//   setas, dentro de 4 passos; C confirma, X cancela), a Roo viaja por baixo da terra (passa sob
+//   paredes, caixotes, poções e inimigos) por 0,7 s, invulnerável, e brota lá. Ao brotar, a terra racha nas casas ao redor e fere o que estiver nelas. Custa 2 s da forma,
 //   espera 5 s. Só brota em chão livre (sem poção, inimigo, chefe, muro de sal nem a porta fechada).
 import { PROFILES } from '../entities/profiles';
 import type { DamageProfile } from '../entities/damage';
+import { DEFENSE_EARTH } from './defense';
 import type { FormDef, FormStage } from './types';
 
 const FULL: DamageProfile = { element: 'earth', maxHp: PROFILES.roo.maxHp, weak: ['air'], resist: [], immune: ['earth'] };
@@ -23,6 +24,7 @@ export const EARTH_FORM: FormDef = {
   element: 'earth',
   profile: (stage: FormStage): DamageProfile => (stage >= 3 ? FULL : stage >= 1 ? COOLING : PROFILES.roo),
   boost: 0.5,
+  defense: DEFENSE_EARTH,
   ability: { id: 'salt', nome: 'Muro de sal', short: 'MURO', costMs: 2000, cooldownMs: 4000, range: 1 },
   ability2: { id: 'root', nome: 'Raiz', short: 'RAIZ', costMs: 2000, cooldownMs: 5000, range: 4 },
 };
@@ -44,6 +46,31 @@ export function rootTarget(
     if (landable(x, y)) return { x, y };
   }
   return null;
+}
+
+/** Todas as casas onde a Roo pode brotar: a até `range` passos (Manhattan) dela, e livres. */
+export function rootCandidates(
+  from: { x: number; y: number }, range: number, landable: (x: number, y: number) => boolean,
+): Array<{ x: number; y: number }> {
+  const out: Array<{ x: number; y: number }> = [];
+  for (let dy = -range; dy <= range; dy++) {
+    for (let dx = -range; dx <= range; dx++) {
+      const d = Math.abs(dx) + Math.abs(dy);
+      if (d >= 1 && d <= range && landable(from.x + dx, from.y + dy)) out.push({ x: from.x + dx, y: from.y + dy });
+    }
+  }
+  return out;
+}
+
+/** Move o cursor de mira um passo; não sai do alcance (Manhattan) da Roo nem da grade. */
+export function aimMove(
+  cursor: { x: number; y: number }, step: { x: number; y: number }, from: { x: number; y: number }, range: number,
+  inGrid: (x: number, y: number) => boolean,
+): { x: number; y: number } {
+  const x = cursor.x + step.x;
+  const y = cursor.y + step.y;
+  if (!inGrid(x, y) || Math.abs(x - from.x) + Math.abs(y - from.y) > range) return cursor;
+  return { x, y };
 }
 
 /** As casas que racham quando a Roo brota: as quatro vizinhas livres (a dela não entra). */
@@ -94,6 +121,11 @@ export class SaltWallField {
     const ms = saltWallMs(stage);
     if (ms <= 0) return;
     for (const t of tiles) this.tiles.set(this.key(t.x, t.y), now + ms);
+  }
+
+  /** Derruba o muro das casas dadas (a defesa de sal se desfaz). */
+  remove(tiles: ReadonlyArray<{ x: number; y: number }>): void {
+    for (const t of tiles) this.tiles.delete(this.key(t.x, t.y));
   }
 
   has(x: number, y: number, now: number): boolean {

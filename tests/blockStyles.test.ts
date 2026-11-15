@@ -5,10 +5,10 @@ import { STAGES } from '../src/game/stages/index';
 const STYLES = Object.keys(BLOCK_TEXTURE) as BlockStyle[];
 
 describe('blocos por fase', () => {
-  it('cada fase da campanha tem bloco; os livros são da Biblioteca (três fases), e o pergaminho se repete só no duelo e no scriptorium', () => {
+  it('cada fase da campanha tem bloco; os livros são da Biblioteca (três fases), e o pergaminho se repete no duelo, no scriptorium e na galeria do Observatório', () => {
     const styles = STAGES.map(s => blockStyleOf(s));
     expect(styles.filter(s => s === 'books')).toHaveLength(3);
-    expect(styles.filter(s => s === 'scroll')).toHaveLength(2);
+    expect(styles.filter(s => s === 'scroll')).toHaveLength(3);
     expect(STAGES.every(s => s.block !== undefined)).toBe(true);
   });
   it('todo estilo tem textura e nome, e as texturas não se repetem', () => {

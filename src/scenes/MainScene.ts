@@ -38,7 +38,7 @@ import { buildTiles, cellKey, doorCell, isPassable, isSpawnSafe, tileAt } from '
 import { advanceStep, beginStep, facingFor, lerp, moveDurationMs, tileCenter, walkTimeScale, type StepState } from '../game/movement';
 import { carryForward, doorOutcome, startingState } from '../game/stageFlow';
 
-type MainKeys = Record<'space' | 'x' | 'c' | 't' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
+type MainKeys = Record<'space' | 'x' | 'c' | 'v' | 't' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
 
 // Aparência de cada fase: texturas do chão, da muralha, do caixote e da porta (e um tom, se houver).
 interface Look {
@@ -51,6 +51,11 @@ const LOOKS: Record<StageTheme, Look> = {
   crypt: {
     floor1: 'floor1', floor2: 'floor2', wall: 'wall', block: 'block', door: ['door_closed', 'door_open'],
     floorTint: 0x8f96d4, wallTint: 0x8a88c0, blockTint: 0xb9aadb,
+  },
+  // observatório: a mesma pedra, azul-noite
+  observatory: {
+    floor1: 'floor1', floor2: 'floor2', wall: 'wall', block: 'block', door: ['door_closed', 'door_open'],
+    floorTint: 0xa8b6f0, wallTint: 0x7886c8, blockTint: 0xc8d0ee,
   },
   garden: { floor1: 'g_floor1', floor2: 'g_floor2', wall: 'g_wall', block: 'g_block', door: ['gate_closed', 'gate_open'] },
 };
@@ -471,7 +476,9 @@ export class MainScene extends Phaser.Scene {
   damagePlayer(bypassInvuln = false, element?: ElementId): void {
     if (this.duel) return; // a Roo só assiste ao duelo
     if (!bypassInvuln && this.player.invulnerable > 0) return;
-    const damage = damageToRoo(element, this.forms.profile()); // transformada, o que a machuca muda
+    const raw = damageToRoo(element, this.forms.profile()); // transformada, o que a machuca muda
+    const damage = this.forms.reduceDamage(raw); // com a defesa da forma de pé, o dano cai pela metade
+    if (damage < raw) this.floatingText(this.player.gridX, this.player.gridY - 1, 'DEFENDIDO', '#bfe6ff', 11, 700);
     this.player.hp -= damage;
     this.player.invulnerable = CONFIG.invulnTime;
     this.floatingText(this.player.gridX, this.player.gridY, `-${damage}`, '#ff8a80');
@@ -589,7 +596,7 @@ export class MainScene extends Phaser.Scene {
     this.cursors = keyboard.createCursorKeys();
     const K = Phaser.Input.Keyboard.KeyCodes;
     this.keys = keyboard.addKeys({
-      space: K.SPACE, x: K.X, c: K.C, t: K.T, d: K.D, r: K.R,
+      space: K.SPACE, x: K.X, c: K.C, v: K.V, t: K.T, d: K.D, r: K.R,
       one: K.ONE, two: K.TWO, three: K.THREE, four: K.FOUR,
       enter: K.ENTER,
     }) as unknown as MainKeys;
@@ -630,6 +637,14 @@ export class MainScene extends Phaser.Scene {
     const left = c.left.isDown || touch.held.left;
     const right = c.right.isDown || touch.held.right;
 
+    // mirando a Raiz da Roo Terra: as setas movem o cursor, C confirma, X ou V cancelam
+    if (this.forms.isAiming()) {
+      const confirm = JD(this.keys.c) || touch.consumeAction('ability2');
+      const cancel = JD(this.keys.x) || JD(this.keys.v) || touch.consumeAction('ability') || touch.consumeAction('defense');
+      this.forms.aimInput({ x: justLeft ? -1 : justRight ? 1 : 0, y: justUp ? -1 : justDown ? 1 : 0 }, confirm, cancel);
+      touch.clearJust();
+      return;
+    }
     if (justUp) this.lastDir = { x: 0, y: -1 };
     else if (justDown) this.lastDir = { x: 0, y: 1 };
     else if (justLeft) this.lastDir = { x: -1, y: 0 };
@@ -654,6 +669,7 @@ export class MainScene extends Phaser.Scene {
     if (JD(this.keys.t) || touch.consumeAction('transform')) this.forms.transform();
     if (JD(this.keys.x) || touch.consumeAction('ability')) this.forms.useAbility();
     if (JD(this.keys.c) || touch.consumeAction('ability2')) this.forms.useAbility2();
+    if (JD(this.keys.v) || touch.consumeAction('defense')) this.forms.useDefense();
     if (JD(this.keys.d) || touch.consumeAction('detonate')) this.bombSystem.detonateRemote();
     if (JD(this.keys.one)) this.setBomb('normal');
     if (JD(this.keys.two)) this.setBomb('mega');
@@ -742,7 +758,8 @@ export class MainScene extends Phaser.Scene {
       gx * CONFIG.tile + CONFIG.tile / 2,
       gy * CONFIG.tile + CONFIG.tile / 2,
       text,
-      { fontFamily: 'monospace', fontSize: `${size}px`, color, fontStyle: 'bold' },
+      // contorno escuro: o aviso lê sobre qualquer chão (o verde do jardim apagava o +1 e o -2)
+      { fontFamily: 'monospace', fontSize: `${size}px`, color, fontStyle: 'bold', stroke: '#14100c', strokeThickness: Math.max(3, Math.round(size / 4)) },
     ).setOrigin(0.5).setDepth(20);
     // sobe e some só depois da permanência
     this.tweens.add({

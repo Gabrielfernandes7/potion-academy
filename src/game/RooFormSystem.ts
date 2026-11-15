@@ -9,12 +9,14 @@ import { inArenaLoadout, setFormElement } from './loadout';
 import { FORM_LESSONS, formLearned, lessonReached, lessonsAtStart, lessonsForHit, type LessonForm } from './learning';
 import { knowsForm, learnForm } from '../storage';
 import { ENEMY_TYPES } from './entities/enemies/defs';
+import type { Enemy, Bomb } from './types';
 import {
   AIR_SIGHT_RADIUS, BUBBLE_STEP_MS, EmberField, SaltWallField, LEAP_MS, ROOT_MS, airSeesThroughFog, airWalkFactor, earthWalkFactor, gustPush, gustStunMs, gustTarget,
   gustTiles, leapTarget, rootBurstTiles, rootTarget, iridescent, FORMS, formForElement, FormId, FormView, RooForm, boostedDamage, bubbleAt, bubblePath, fireLight, flameTiles,
-  formView, profileOf, saltWallTiles, trapMs,
+  formView, guardedDamage, profileOf, saltWallTiles, trapMs, aimMove, rootCandidates, ringNeighbors, RING_PUSH_STEPS, WHIRL_PUSH_STEPS,
+  type FormDefense,
 } from './forms';
-import { NO_FORM_LABEL, setAbility2Label, setAbilityLabel } from '../ui/abilityButton';
+import { NO_FORM_LABEL, setAbility2Label, setAbilityLabel, setDefenseLabel } from '../ui/abilityButton';
 import { FORM_TREMOR_MS, FORM_TREMOR_STEPS, formTextureKey } from '../textures/rooFormTextures';
 import type { DamageProfile } from './entities/damage';
 
@@ -39,6 +41,10 @@ export class RooFormSystem {
   readonly embers = new EmberField();
   readonly walls = new SaltWallField();
   private gusts: Gust[] = [];
+  // Defesa (V): a que está de pé, quanto falta e as casas de sal do círculo (para desfazer junto)
+  private guard: { def: FormDefense; ms: number; walls: Array<{ x: number; y: number }> } | null = null;
+  // Mira da Raiz: o cursor, enquanto a jogadora escolhe onde brotar
+  private aim: { x: number; y: number } | null = null;
   private burrowMs = 0; // tempo que falta debaixo da terra (Roo Terra, Raiz)
   private lessonHits = new Map<LessonForm, number>(); // golpes da poção de cada lição, nesta partida
   private bubbles: Bubble[] = [];
@@ -51,15 +57,20 @@ export class RooFormSystem {
   private readonly bubbleGfx: Phaser.GameObjects.Graphics;
   private readonly wallGfx: Phaser.GameObjects.Graphics;
   private readonly gustGfx: Phaser.GameObjects.Graphics;
+  private readonly guardGfx: Phaser.GameObjects.Graphics;
+  private readonly aimGfx: Phaser.GameObjects.Graphics;
 
   constructor(private readonly scene: MainScene) {
     this.emberGfx = scene.add.graphics().setDepth(3);
     this.bubbleGfx = scene.add.graphics().setDepth(11);
     this.wallGfx = scene.add.graphics().setDepth(3);
     this.gustGfx = scene.add.graphics().setDepth(11);
+    this.guardGfx = scene.add.graphics().setDepth(11);
+    this.aimGfx = scene.add.graphics().setDepth(12);
     setFormElement(null);
     setAbilityLabel(NO_FORM_LABEL);
     setAbility2Label(null);
+    setDefenseLabel(null);
   }
 
   // ---------- leitura ----------
@@ -70,7 +81,7 @@ export class RooFormSystem {
   }
 
   hudView(): FormView {
-    return formView(this.form);
+    return { ...formView(this.form), guarding: !!this.guard };
   }
 
   /** Bônus das poções do elemento da forma para as explosões da Roo (poção e Labareda). */
@@ -158,6 +169,7 @@ export class RooFormSystem {
     this.syncFormElement();
     setAbilityLabel(def.ability.short);
     setAbility2Label(def.ability2?.short ?? null);
+    setDefenseLabel(def.defense.short);
     s.updateHud();
   }
 
@@ -220,20 +232,181 @@ export class RooFormSystem {
     if (s.player.moving) return;
     const from = { x: gridX, y: gridY };
     const land = (x: number, y: number): boolean => this.canLand(x, y);
-    const to = def.id === 'root'
-      ? rootTarget(from, dir, def.range, land)
-      : leapTarget(from, dir, def.range, (x, y) => s.getTile(x, y) === EMPTY, land);
+    if (def.id === 'root') {
+      this.startAim();
+      return;
+    }
+    const to = leapTarget(from, dir, def.range, (x, y) => s.getTile(x, y) === EMPTY, land);
     if (!to) {
-      s.floatingText(gridX, gridY - 1, def.id === 'root' ? 'SEM CHÃO LIVRE' : 'SEM ONDE POUSAR', '#bfae8a', 11, 900);
+      s.floatingText(gridX, gridY - 1, 'SEM ONDE POUSAR', '#bfae8a', 11, 900);
       return;
     }
     if (!this.form.useAbility2()) {
       s.floatingText(gridX, gridY - 1, 'ESPERA...', '#bfae8a', 12, 700);
       return;
     }
-    if (def.id === 'root') this.burrow(to);
-    else this.leap(to);
+    this.leap(to);
     s.updateHud();
+  }
+
+  // ---------- Raiz: a jogadora escolhe onde brotar ----------
+
+  isAiming(): boolean {
+    return this.aim !== null;
+  }
+
+  // Abre a mira: o cursor começa na casa livre mais distante à frente (o antigo comportamento) e as setas o movem.
+  private startAim(): void {
+    const s = this.scene;
+    const from = { x: s.player.gridX, y: s.player.gridY };
+    const range = this.form.def?.ability2?.range ?? 4;
+    if (!this.form.ability2Ready) {
+      s.floatingText(from.x, from.y - 1, 'ESPERA...', '#bfae8a', 12, 700);
+      return;
+    }
+    const spots = rootCandidates(from, range, (x, y) => this.canLand(x, y));
+    if (spots.length === 0) {
+      s.floatingText(from.x, from.y - 1, 'SEM CHÃO LIVRE', '#bfae8a', 11, 900);
+      return;
+    }
+    this.aim = rootTarget(from, s.player.dir, range, (x, y) => this.canLand(x, y)) ?? spots[0];
+    s.floatingText(from.x, from.y - 1, 'ESCOLHA ONDE BROTAR (C)', FORM_LOOK.earth.text, 11, 1400);
+  }
+
+  /** A mira recebe as setas (um passo), o C (confirma) e o X ou V (cancelam). */
+  aimInput(step: { x: number; y: number }, confirm: boolean, cancel: boolean): void {
+    const s = this.scene;
+    if (!this.aim) return;
+    const from = { x: s.player.gridX, y: s.player.gridY };
+    const range = this.form.def?.ability2?.range ?? 4;
+    if (cancel || !this.form.active) {
+      this.aim = null;
+      return;
+    }
+    if (step.x !== 0 || step.y !== 0) {
+      this.aim = aimMove(this.aim, step, from, range, (x, y) => s.getTile(x, y) !== null);
+      s.play('pickup');
+    }
+    if (!confirm) return;
+    const to = this.aim;
+    if (!this.canLand(to.x, to.y)) {
+      s.floatingText(to.x, to.y, 'OCUPADO', '#bfae8a', 11, 700);
+      return;
+    }
+    this.aim = null;
+    if (!this.form.useAbility2()) return;
+    this.burrow(to);
+    s.updateHud();
+  }
+
+  // ---------- Defesa (V) ----------
+
+  /** O dano que a Roo leva com a defesa de pé (cortado pela metade); sem defesa, o dano inteiro. */
+  reduceDamage(damage: number): number {
+    return guardedDamage(damage, !!this.guard, this.guard?.def.reduce);
+  }
+
+  /** V: levanta a defesa da forma; com ela de pé, desfaz. */
+  useDefense(): void {
+    const s = this.scene;
+    const { gridX, gridY } = s.player;
+    if (this.guard) {
+      this.endGuard();
+      s.updateHud();
+      return;
+    }
+    if (!this.form.active) {
+      s.floatingText(gridX, gridY - 1, 'T: TRANSFORMA-SE', '#bfae8a', 11, 1000);
+      return;
+    }
+    if (s.player.moving) return;
+    const def = this.form.useDefense();
+    if (!def) {
+      s.floatingText(gridX, gridY - 1, 'ESPERA...', '#bfae8a', 12, 700);
+      return;
+    }
+    this.guard = { def, ms: def.guardMs, walls: [] };
+    const me = { x: gridX, y: gridY };
+    const ring = ringNeighbors(me);
+    s.floatingText(gridX, gridY - 1, def.nome.toUpperCase(), FORM_LOOK[this.form.id ?? 'fire'].text, 12, 1000);
+    switch (def.id) {
+      case 'embers': {
+        const open = ring.filter(n => s.getTile(n.x, n.y) === EMPTY);
+        this.embers.ignite(open, this.clockMs, this.form.stage);
+        s.play('flame');
+        break;
+      }
+      case 'bubble':
+        s.play('bubble');
+        break;
+      case 'salt-ring': {
+        // empurra o que estava ao redor e levanta o muro nas casas que ficaram livres
+        for (const n of ring) this.pushAt(n.x, n.y, n.dir, RING_PUSH_STEPS, 0);
+        const free = ring.filter(n => this.canRaiseWall(n.x, n.y));
+        this.walls.raise(free, this.clockMs, this.form.stage);
+        this.guard.walls = free.map(n => ({ x: n.x, y: n.y }));
+        s.play('wall');
+        s.cameras.main.shake(80, 0.004);
+        break;
+      }
+      case 'whirl':
+        for (const n of ring) this.pushAt(n.x, n.y, n.dir, WHIRL_PUSH_STEPS, 0);
+        this.gusts.push({ tiles: ring.filter(n => s.getTile(n.x, n.y) === EMPTY), dir: { x: 0, y: -1 }, t: 0 });
+        s.play('gust');
+        break;
+    }
+    s.updateHud();
+  }
+
+  // Termina a defesa: o muro do círculo cai e o efeito some.
+  private endGuard(): void {
+    if (!this.guard) return;
+    this.walls.remove(this.guard.walls);
+    this.guard = null;
+    this.guardGfx.clear();
+    this.scene.updateHud();
+  }
+
+  // Empurra o que está numa casa (inimigo comum, poção) `steps` casas na direção; chefes e flores ficam.
+  private pushAt(x: number, y: number, dir: { x: number; y: number }, steps: number, stunMs: number): void {
+    const s = this.scene;
+    for (const e of s.enemySystem.enemies) {
+      if (e.alive && !ENEMY_TYPES[e.kind].rooted && e.gridX === x && e.gridY === y) this.pushEnemy(e, dir, steps, stunMs);
+    }
+    for (const b of s.bombSystem.bombs) {
+      if (!b.detonated && b.gridX === x && b.gridY === y) this.pushBomb(b, dir, steps);
+    }
+  }
+
+  private pushEnemy(e: Enemy, dir: { x: number; y: number }, steps: number, stunMs: number): void {
+    const s = this.scene;
+    const canEnter = (x: number, y: number): boolean => {
+      const passes = ENEMY_TYPES[e.kind].passWalls;
+      const tile = s.getTile(x, y);
+      const free = passes ? tile !== null && !(x === s.doorX && y === s.doorY && !s.doorOpen) : s.isFree(x, y);
+      return free && !s.enemySystem.enemies.some(o => o !== e && o.alive && o.gridX === x && o.gridY === y);
+    };
+    const to = gustTarget({ x: e.gridX, y: e.gridY }, dir, steps, canEnter);
+    if (to.x === e.gridX && to.y === e.gridY) return;
+    e.fromX = e.sprite.x;
+    e.fromY = e.sprite.y;
+    e.hopY = dir.y !== 0;
+    e.moveT = 0;
+    e.gridX = to.x;
+    e.gridY = to.y;
+    e.moveTimer += stunMs; // atordoado: demora a andar de novo
+    s.floatingText(to.x, to.y, 'AFASTADO!', '#e3f0fa', 11, 700);
+  }
+
+  private pushBomb(b: Bomb, dir: { x: number; y: number }, steps: number): void {
+    const s = this.scene;
+    const canEnter = (x: number, y: number): boolean => s.isFree(x, y) && !(s.playerTile().x === x && s.playerTile().y === y);
+    const to = gustTarget({ x: b.gridX, y: b.gridY }, dir, steps, canEnter);
+    if (to.x === b.gridX && to.y === b.gridY) return;
+    b.gridX = to.x;
+    b.gridY = to.y;
+    s.tweens.killTweensOf(b.sprite);
+    s.tweenSpriteTo(b.sprite, to.x, to.y, 220, 'Sine.easeOut');
   }
 
   // Uma casa onde a Roo pode pousar ou brotar: chão livre, sem poção, inimigo, chefe, muro de sal e sem a porta fechada.
@@ -377,6 +550,9 @@ export class RooFormSystem {
     if (was.active && !this.form.active && was.id) {
       s.play('formEnd', FORMS[was.id].element);
       setAbility2Label(null);
+      setDefenseLabel(null);
+      this.endGuard();
+      this.aim = null;
       if (was.id === 'air') s.floatingText(s.player.gridX, s.player.gridY - 1, 'DE VOLTA AO CHÃO', '#bfae8a', 11, 1000);
       setAbilityLabel(NO_FORM_LABEL);
     }
@@ -391,6 +567,8 @@ export class RooFormSystem {
     this.drawBubbles();
     this.drawWalls();
     this.drawGusts(delta);
+    this.updateGuard(delta);
+    this.drawAim();
     this.updateBurrow(delta); // depois do vento: os dois dividem o mesmo gráfico
     // Névoa: a luz de chama abre mais (+0,5 casa por degrau); a visão de cima do ar a dissipa de vez
     if (s.fog && s.def.fog) {
@@ -425,6 +603,66 @@ export class RooFormSystem {
       if (m) sprite.setTexture(base);
       this.applied = false;
     }
+  }
+
+  // A defesa de pé: conta o tempo, desenha o efeito da forma em volta da Roo e cai ao acabar (ou se a forma acabar).
+  private updateGuard(delta: number): void {
+    const g = this.guardGfx;
+    g.clear();
+    const guard = this.guard;
+    if (!guard) return;
+    guard.ms -= delta;
+    if (guard.ms <= 0 || !this.form.active) {
+      this.endGuard();
+      return;
+    }
+    const s = this.scene;
+    const x = s.playerSprite.x;
+    const y = s.playerSprite.y - 2;
+    if (guard.ms < 600 && Math.floor(this.clockMs / 90) % 2 === 0) return; // pisca quando está acabando
+    switch (guard.def.id) {
+      case 'bubble':
+        this.drawBubble(g, x, y, 24); // a bolha iridescente da Roo Água, grande em volta dela
+        break;
+      case 'embers': {
+        const phase = Math.floor(this.clockMs / 120);
+        for (let i = 0; i < 14; i++) {
+          const a = (i / 14) * Math.PI * 2 + phase * 0.15;
+          g.fillStyle(i % 2 === 0 ? 0xffa94d : 0xd6452f, 0.9).fillRect(Math.round(x + Math.cos(a) * 22) - 1, Math.round(y + Math.sin(a) * 20) - 1, 3, 3);
+        }
+        break;
+      }
+      case 'salt-ring':
+        g.lineStyle(2, 0xf6f2e2, 0.8).strokeCircle(x, y, 22);
+        g.fillStyle(0xf6f2e2, 0.12).fillCircle(x, y, 22);
+        break;
+      case 'whirl': {
+        const spin = this.clockMs / 160;
+        for (let i = 0; i < 3; i++) {
+          const a0 = spin + i * 2.1;
+          g.lineStyle(2, 0xeaf3fa, 0.9).beginPath().arc(x, y, 20 + i * 2, a0, a0 + 1.3).strokePath();
+        }
+        break;
+      }
+    }
+  }
+
+  // A mira da Raiz: as casas onde a Roo pode brotar em verde-claro, o cursor com borda forte.
+  private drawAim(): void {
+    const g = this.aimGfx;
+    g.clear();
+    const a = this.aim;
+    if (!a) return;
+    const s = this.scene;
+    const range = this.form.def?.ability2?.range ?? 4;
+    const from = { x: s.player.gridX, y: s.player.gridY };
+    for (const t of rootCandidates(from, range, (x, y) => this.canLand(x, y))) {
+      g.fillStyle(0xc9b27a, 0.22).fillRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6);
+    }
+    const ok = this.canLand(a.x, a.y);
+    const pulse = 0.65 + 0.35 * Math.sin(this.clockMs / 120);
+    g.fillStyle(ok ? 0x9be564 : 0xd6452f, 0.3 * pulse).fillRect(a.x * T + 2, a.y * T + 2, T - 4, T - 4);
+    g.lineStyle(3, ok ? 0xf5e6c0 : 0xff8a80, 1).strokeRect(a.x * T + 2, a.y * T + 2, T - 4, T - 4);
   }
 
   // Debaixo da terra: um monte de terra marca por onde a Roo passa; ao fim ela brota.

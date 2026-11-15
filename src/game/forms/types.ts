@@ -17,6 +17,17 @@ export interface FormAbility {
   range: number; // casas à frente
 }
 
+/** A defesa da forma (tecla V): reduz o dano por um tempo. Ver forms/defense.ts. */
+export interface FormDefense {
+  id: 'embers' | 'bubble' | 'salt-ring' | 'whirl';
+  nome: string;
+  short: string; // rótulo curto do botão de toque
+  costMs: number; // tempo da transformação que gasta
+  cooldownMs: number;
+  guardMs: number; // quanto tempo a defesa dura
+  reduce: number; // fração do dano que corta
+}
+
 export interface FormDef {
   id: FormId;
   nome: string;
@@ -28,4 +39,6 @@ export interface FormDef {
   ability: FormAbility;
   /** A segunda habilidade (tecla C), se a forma tiver: Raiz (terra) e Salto de vento (ar). */
   ability2?: FormAbility;
+  /** A defesa (tecla V): toda forma tem uma. */
+  defense: FormDefense;
 }

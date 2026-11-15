@@ -60,10 +60,11 @@ src/
   game/arena.ts + loadout.ts # Arena de treino (chefes, fase montada na hora) e quais poções valem (todas na Arena)
   game/duel.ts             # duelo de chefes na Arena (100 s, a Roo só assiste; regra do vencedor), puro e testado
   game/stages/blockStyles.ts # o bloco destrutível de cada fase (textures/blocks.ts, terrain.ts, garden.ts)
-  game/forms/              # as transformações da Roo (puro): registry.ts (uma linha por forma), RooForm.ts (máquina de estados), fire.ts, water.ts, earth.ts, air.ts
+  game/forms/              # as transformações da Roo (puro): registry.ts (uma linha por forma), RooForm.ts (máquina de estados), fire.ts, water.ts, earth.ts, air.ts, defense.ts (a defesa V de cada forma)
   game/learning.ts         # o que a Roo aprende na jornada: poções (fim de fase) e lições das formas (FORM_LESSONS), puro
   game/RooFormSystem.ts    # as formas na partida (Phaser): habilidade, brasas, bolhas, sprite, luz; a MainScene só delega
   game/StoryDirector.ts    # a direção da história na partida: cartão de fase, passagens, final, despedida dos chefes
+  textures/enemiesNew.ts   # sprites da lanterna viva, do relógio de cobre, da toupeira de sal e da coruja
   textures/rooFire.ts + rooWater.ts + rooEarth.ts + rooAir.ts + rooRecolor.ts + rooFormTextures.ts # sprites de cada forma por estágio (1536 texturas geradas no boot, só no jogo)
   game/entities/roo.ts     # vida da Roo: barra contínua, dano por elemento, cura (puro)
   game/balance.ts          # regra de equilíbrio das poções (testável)
@@ -79,7 +80,7 @@ src/
   game/entities/bosses/    # defs.ts (LISTA ÚNICA de chefes, pura), registry.ts (fábrica), BossBase.ts, common.ts e uma pasta por chefe (Controller, rules, lines)
   game/effects/            # efeitos de tela com regra pura própria: Fog.ts (névoa) e fogRules.ts
   lab/                     # só dev: experimentos de ideias (/lab.html); ver docs/15-lab.md
-  game/stages/upcoming.ts  # capítulos selados que já aparecem no mapa (hoje só o Observatório): sem fases e sem acesso
+  game/stages/upcoming.ts  # capítulos selados que já aparecem no mapa (hoje nenhum: o Observatório entrou na campanha)
   game/stages/             # fases e capítulos: index.ts (STAGES, CHAPTERS), types.ts, chests.ts, mapRules.ts, chapters/<capítulo>.ts
   ui/arena.ts              # janela da Arena de treino (um cartão por chefe)
   ui/elementIcons.ts       # ícones SVG dos atributos (Enxofre, Mercúrio, Sal, Ar) e o filtro de tinta #rough

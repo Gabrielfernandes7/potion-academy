@@ -6,6 +6,7 @@ import {
   EmberField, FORMS, FORM_COOLDOWN_MS, FORM_IDS, FORM_MS, FORM_STAGES, RooForm, boostFactor, boostedDamage,
   bubbleAt, bubblePath, emberDamage, emberMs, embersHurt, fireLight, flameTiles, formStage, formView, profileOf, trapMs,
   BUBBLE_STEP_MS, IRIDESCENT, iridescent, formForElement,
+  GUARD_COOLDOWN_MS, GUARD_MS, GUARD_REDUCE, RING_PUSH_STEPS, aimMove, guardedDamage, ringNeighbors, rootCandidates,
   AIR_SIGHT_RADIUS, LEAP_MS, ROOT_MS, SaltWallField, airSeesThroughFog, airWalkFactor, gustStunMs, leapTarget, rootBurstTiles, rootTarget, earthWalkFactor, gustPush, gustTarget, gustTiles, saltWallMs, saltWallTiles,
 } from '../../src/game/forms';
 
@@ -200,7 +201,7 @@ describe('a máquina das formas (uma por vez, espera comum)', () => {
   });
   it('o que a HUD vê: forma, tempo, espera e elemento da forma', () => {
     const f = new RooForm();
-    expect(formView(f)).toEqual({ form: null, active: false, stage: 0, ratio: 0, cooldownRatio: 0, abilityReady: false, ability2Ready: false, element: null });
+    expect(formView(f)).toEqual({ form: null, active: false, stage: 0, ratio: 0, cooldownRatio: 0, abilityReady: false, ability2Ready: false, defenseReady: false, guarding: false, element: null });
     f.start('fire');
     expect(formView(f)).toMatchObject({ form: 'fire', active: true, stage: 4, ratio: 1, abilityReady: true, element: 'fire' });
     f.tick(10000);
@@ -382,5 +383,75 @@ describe('Roo Ar', () => {
     const f = new RooForm();
     f.start('air');
     expect(f.formElement).toBe('air');
+  });
+});
+
+
+describe('defesa das formas (tecla V)', () => {
+  it('toda forma tem uma defesa que corta o dano pela metade por 3 s', () => {
+    for (const id of FORM_IDS) {
+      const d = FORMS[id].defense;
+      expect(d.nome.trim(), id).not.toBe('');
+      expect(d.reduce, id).toBeCloseTo(GUARD_REDUCE);
+      expect(d.guardMs, id).toBe(GUARD_MS);
+      expect(d.cooldownMs, id).toBeGreaterThan(d.guardMs);
+      expect(d.costMs, id).toBeGreaterThan(0);
+    }
+    expect(new Set(FORM_IDS.map(i => FORMS[i].defense.id)).size).toBe(FORM_IDS.length);
+    expect(GUARD_COOLDOWN_MS).toBeGreaterThan(GUARD_MS);
+  });
+  it('as defesas de cada elemento: brasas, bolha, círculo de sal e redemoinho', () => {
+    expect(FORMS.fire.defense.id).toBe('embers');
+    expect(FORMS.water.defense.id).toBe('bubble');
+    expect(FORMS.earth.defense.id).toBe('salt-ring');
+    expect(FORMS.air.defense.id).toBe('whirl');
+  });
+  it('o dano com a defesa cai pela metade (arredondado); sem defesa, inteiro; cura e zero não mudam', () => {
+    expect(guardedDamage(6, true)).toBe(3);
+    expect(guardedDamage(6, false)).toBe(6);
+    expect(guardedDamage(1, true)).toBe(1); // 0,5 arredonda para 1: nunca some um golpe mínimo de uma vez
+    expect(guardedDamage(0, true)).toBe(0);
+    expect(guardedDamage(4, true, 0.25)).toBe(3);
+  });
+  it('a defesa tem espera própria e gasta tempo da forma', () => {
+    const f = new RooForm();
+    expect(f.useDefense()).toBeNull(); // sem forma, não há defesa
+    f.start('water');
+    expect(f.defenseReady).toBe(true);
+    const d = f.useDefense();
+    expect(d?.id).toBe('bubble');
+    expect(f.defenseReady).toBe(false);
+    expect(f.useDefense()).toBeNull();
+    expect(f.remainingMs).toBe(FORM_MS - FORMS.water.defense.costMs);
+    f.tick(GUARD_COOLDOWN_MS);
+    expect(f.defenseReady).toBe(true);
+  });
+  it('o círculo tem as quatro casas vizinhas, cada uma com o sentido para longe da Roo', () => {
+    const ring = ringNeighbors({ x: 4, y: 4 });
+    expect(ring).toHaveLength(4);
+    for (const n of ring) {
+      expect(Math.abs(n.x - 4) + Math.abs(n.y - 4)).toBe(1);
+      expect(n.dir).toEqual({ x: n.x - 4, y: n.y - 4 });
+    }
+    expect(RING_PUSH_STEPS).toBe(2);
+  });
+});
+
+describe('Raiz: a jogadora escolhe onde brotar', () => {
+  const ok = (x: number, y: number): boolean => open(x, y);
+  it('as casas possíveis são as livres a até 4 passos (Manhattan), sem a da Roo', () => {
+    const spots = rootCandidates({ x: 4, y: 4 }, 4, ok);
+    expect(spots).not.toContainEqual({ x: 4, y: 4 });
+    for (const t of spots) expect(Math.abs(t.x - 4) + Math.abs(t.y - 4)).toBeLessThanOrEqual(4);
+    expect(spots).toContainEqual({ x: 8, y: 4 });
+    expect(spots).not.toContainEqual({ x: 8, y: 5 }); // 5 passos
+    expect(rootCandidates({ x: 4, y: 4 }, 4, (x, y) => ok(x, y) && x !== 5)).not.toContainEqual({ x: 5, y: 4 });
+  });
+  it('o cursor anda um passo por vez e não sai do alcance nem da grade', () => {
+    let c = { x: 4, y: 4 };
+    c = aimMove(c, { x: 1, y: 0 }, { x: 4, y: 4 }, 4, ok);
+    expect(c).toEqual({ x: 5, y: 4 });
+    expect(aimMove({ x: 8, y: 4 }, { x: 1, y: 0 }, { x: 4, y: 4 }, 4, ok)).toEqual({ x: 8, y: 4 }); // além do alcance
+    expect(aimMove({ x: 0, y: 4 }, { x: -1, y: 0 }, { x: 2, y: 4 }, 4, ok)).toEqual({ x: 0, y: 4 }); // fora da grade
   });
 });

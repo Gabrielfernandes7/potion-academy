@@ -57,11 +57,11 @@ describe('storage: migração do progresso das fases', () => {
     expect(s.isStageCompleted(3)).toBe(false); // a Névoa (nova) ainda não foi vencida
     expect(s.isStageCompleted(4)).toBe(false); // nem o Poço (chefe do Vale)
     expect(s.isStageCompleted(5)).toBe(true);  // a antiga 3 (Escadaria) agora é a 5
-    expect(JSON.parse(localStorage.getItem('bombroo_stages_schema')!)).toBe(4);
+    expect(JSON.parse(localStorage.getItem('bombroo_stages_schema')!)).toBe(5);
   });
 
   it('com a versão atual não renumera de novo', async () => {
-    installLocalStorage({ bombroo_stages_completed: JSON.stringify([1, 2, 3]), bombroo_stages_schema: '4' });
+    installLocalStorage({ bombroo_stages_completed: JSON.stringify([1, 2, 3]), bombroo_stages_schema: '5' });
     const s = await import('../src/storage');
     expect(s.isStageCompleted(3)).toBe(true);
     expect(s.isStageCompleted(4)).toBe(false);

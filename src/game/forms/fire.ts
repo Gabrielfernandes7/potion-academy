@@ -7,6 +7,7 @@
 // Luz de chama: mais visão na névoa (+0,5 casa por degrau).
 import { PROFILES } from '../entities/profiles';
 import { DamageProfile, damageTo } from '../entities/damage';
+import { DEFENSE_FIRE } from './defense';
 import type { FormDef, FormStage } from './types';
 
 const FULL: DamageProfile = { element: 'fire', maxHp: PROFILES.roo.maxHp, weak: ['water'], resist: ['fire'], immune: [] };
@@ -18,6 +19,7 @@ export const FIRE_FORM: FormDef = {
   element: 'fire',
   profile: (stage: FormStage): DamageProfile => (stage >= 3 ? FULL : stage >= 1 ? COOLING : PROFILES.roo),
   boost: 0.5,
+  defense: DEFENSE_FIRE,
   ability: { id: 'flame', nome: 'Labareda', short: 'LABAREDA', costMs: 2000, cooldownMs: 3500, range: 3 },
 };
 

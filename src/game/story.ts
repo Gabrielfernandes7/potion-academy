@@ -107,14 +107,30 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
     { speaker: ROO, text: "Solto o último elo. Do salão do leão vem um ronco baixo, e a porta range." },
   ],
   13: [
+    { speaker: ROO, text: 'Subo ao Observatório pelo pátio. As lanternas andam sozinhas, de um lado a outro, e nenhuma me olha: vigiam um céu que já não está lá.' },
+    { speaker: ROO, text: 'No chão, um astrolábio aponta para uma estrela que o mestre riscou num caderno. Fico um tempo parada, olhando para cima.' },
+  ],
+  14: [
+    { speaker: ROO, text: 'Cada relógio daqui marca uma hora. O mestre dizia que o tempo da colheita não espera ninguém, e que por isso ninguém devia ter pressa.' },
+    { speaker: ROO, text: 'Os autômatos de ronda param por um instante a cada volta. Aprendo o compasso deles e passo.' },
+  ],
+  15: [
+    { speaker: ROO, text: 'Na galeria, as estrelas estão desenhadas como manuscritos: cada constelação tem uma legenda numa letra que não decifro.' },
+    { speaker: ROO, text: 'Uma coruja me observa do alto e não ataca quem apenas olha. Só avisa, num círculo, quem fica parado.' },
+  ],
+  16: [
+    { speaker: ROO, text: 'A fenda da cúpula se abre sobre o céu inteiro. Procuro a estrela do caderno do mestre e não a encontro: ela se mudou, como tudo o que ele estudou.' },
+    { speaker: ROO, text: 'Aprendi aqui a esperar o aviso e a sair do círculo. Fecho o caderno e desço, em direção ao mosteiro.' },
+  ],
+  17: [
     { speaker: ROO, text: 'Desço o vale com o frasco vazio. A estrada é a mesma da ida, mas agora sei o que o mestre temia.' },
     { speaker: ROO, text: 'Não sei se volto para o Caldeirão ou se fico por aqui. Sigo, por enquanto.' },
   ],
-  14: [
+  18: [
     { speaker: ROO, text: 'As flores de Belladona crescem até na beira do riacho. Não as toco.' },
     { speaker: ROO, text: 'Do outro lado da ponte, os muros do mosteiro já aparecem.' },
   ],
-  15: [
+  19: [
     { speaker: ROO, text: 'O portão do mosteiro está à vista. À porta, famílias esperam a sopa. Anselmo deve estar do outro lado.' },
     { speaker: ROO, text: 'Ensaio o que vou dizer e percebo que não tenho nada a provar. Só levo o frasco.' },
   ],

@@ -219,7 +219,8 @@ export class HudScene extends Phaser.Scene {
     if (f.active && look) {
       ratio = f.ratio;
       color = f.stage >= 3 ? look.hot : f.stage === 2 ? look.mid : look.cool; // vai esfriando com os degraus
-      key = [f.abilityReady ? 'X' : '', f.ability2Ready ? 'C' : ''].filter(Boolean).join(' ');
+      key = [f.abilityReady ? 'X' : '', f.ability2Ready ? 'C' : '', f.defenseReady ? 'V' : ''].filter(Boolean).join(' ');
+      if (f.guarding) key = 'ESCUDO';
     } else if (f.cooldownRatio > 0) {
       ratio = 1 - f.cooldownRatio;
       color = 0x7a5a3a;
@@ -250,7 +251,7 @@ export class HudScene extends Phaser.Scene {
       if (fill > 0) g.fillStyle(color, 1).fillRoundedRect(x, y, Math.max(2, FIRE_SEG_W * fill), 8, 2);
       g.lineStyle(1, lit ? (look?.edge ?? 0x8a5a2a) : 0x4a3426, 1).strokeRoundedRect(x, y, FIRE_SEG_W, 8, 2);
     }
-    this.fireKey.setText(key).setColor(f.abilityReady || f.ability2Ready ? '#ffd9a8' : '#ffe9c4');
+    this.fireKey.setText(key).setColor(f.abilityReady || f.ability2Ready || f.defenseReady || f.guarding ? '#ffd9a8' : '#ffe9c4');
   }
 
   // ---------- frascos, gemas, chefe ----------

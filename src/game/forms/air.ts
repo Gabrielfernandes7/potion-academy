@@ -11,6 +11,7 @@
 //   forma, espera 2,5 s. É a esquiva: tira a Roo do aviso de uma explosão ou do corredor cercado.
 import { PROFILES } from '../entities/profiles';
 import type { DamageProfile } from '../entities/damage';
+import { DEFENSE_AIR } from './defense';
 import type { FormDef, FormStage } from './types';
 
 const FULL: DamageProfile = { element: 'air', maxHp: PROFILES.roo.maxHp, weak: ['earth'], resist: ['air'], immune: [] };
@@ -22,6 +23,7 @@ export const AIR_FORM: FormDef = {
   element: 'air',
   profile: (stage: FormStage): DamageProfile => (stage >= 3 ? FULL : stage >= 1 ? COOLING : PROFILES.roo),
   boost: 0.5,
+  defense: DEFENSE_AIR,
   ability: { id: 'gust', nome: 'Sopro', short: 'SOPRO', costMs: 2000, cooldownMs: 3500, range: 4 },
   ability2: { id: 'leap', nome: 'Salto de vento', short: 'SALTO', costMs: 1500, cooldownMs: 2500, range: 3 },
 };

@@ -13,3 +13,11 @@ export function setAbility2Label(label: string | null): void {
   el.hidden = label === null;
   if (label !== null && el.textContent !== label) el.textContent = label;
 }
+
+// O botão da defesa (V): aparece com qualquer forma ativa (ESCUDO, BOLHA, CÍRCULO, VENTO).
+export function setDefenseLabel(label: string | null): void {
+  const el = document.getElementById('defense-btn');
+  if (!el) return;
+  el.hidden = label === null;
+  if (label !== null && el.textContent !== label) el.textContent = label;
+}

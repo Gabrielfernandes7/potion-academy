@@ -148,6 +148,50 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
     nota: 'A Poção de Terra passa por ele como por névoa. A água, porém, o desfaz: lembra as bênçãos que Anselmo fazia.',
   },
   {
+    id: 'lanterna', nome: 'Lanterna viva', titulo: 'Chama de lamparina que aprendeu a andar', grupo: 'inimigo', perfil: 'lantern',
+    secao: 'farmaceutica',
+    sprite: { frames: ['enemy_lantern'], zoom: 6 },
+    visto: 'Estantes da Biblioteca e Pátio do Observatório', fase: 9,
+    habilidades: [
+      { nome: 'Patrulha', texto: 'Anda em linha reta e volta quando bate numa parede ou num caixote. Não persegue.' },
+      { nome: 'Contato', texto: 'Encostar nela machuca. A chama é pequena; o vidro, não.' },
+    ],
+    nota: 'São as lâmpadas que os copistas deixaram acesas, e que ainda procuram quem as apague. A água faz isso; o fogo, nunca.',
+  },
+  {
+    id: 'relogio', nome: 'Relógio de cobre', titulo: 'Autômato de ronda do Observatório', grupo: 'inimigo', perfil: 'clock',
+    secao: 'astronomica',
+    sprite: { frames: ['enemy_clock'], zoom: 6 },
+    visto: 'Salão dos Relógios e Cúpula', fase: 14,
+    habilidades: [
+      { nome: 'Ronda', texto: 'Anda sempre no mesmo ritmo, de ida e volta, em linha reta.' },
+      { nome: 'Dar corda', texto: 'A cada volta completa (8 passos) trava por 2 s: é a hora de passar.' },
+    ],
+    nota: 'O tempo das colheitas não espera ninguém, e este autômato também não. Mas aprendi o compasso: a água o enferruja, a terra escorre por ele.',
+  },
+  {
+    id: 'toupeira', nome: 'Toupeira de sal', titulo: 'Habitante das lajes do Observatório', grupo: 'inimigo', perfil: 'mole',
+    secao: 'herbaria',
+    sprite: { frames: ['enemy_mole'], zoom: 6 },
+    visto: 'Galeria das Cartas e Cúpula', fase: 15,
+    habilidades: [
+      { nome: 'Afundar', texto: 'Depois de andar um tempo, some debaixo da terra por 1,4 s. Nada a alcança lá.' },
+      { nome: 'Brotar', texto: 'Deixa um monte com a borda clara na casa onde vai sair, a 2 ou 3 casas da Roo. O Muro de sal fecha o buraco.' },
+    ],
+    nota: 'Cava como eu cavo, na Roo Terra. Mas ela avisa o lugar antes de sair, e eu agradeço. O ar a tira do buraco; a terra, que ela é, não a fere.',
+  },
+  {
+    id: 'coruja', nome: 'Coruja do scriptorium', titulo: 'Guardiã das escrituras', grupo: 'inimigo', perfil: 'owl',
+    secao: 'astronomica',
+    sprite: { frames: ['enemy_owl'], zoom: 6 },
+    visto: 'Scriptorium da Biblioteca e Galeria das Cartas', fase: 10,
+    habilidades: [
+      { nome: 'Voo', texto: 'Voa por cima de paredes e caixotes, devagar, sem rumo.' },
+      { nome: 'Mergulho', texto: 'A cada 6 s marca a casa onde você está com um círculo que encolhe. 1 s depois, mergulha. Quem saiu da casa escapa.' },
+    ],
+    nota: 'Vigia as escrituras, mas não ataca quem apenas lê. Só quem fica parado no círculo. O Salto de vento do ar é a esquiva dela; a terra a derruba.',
+  },
+  {
     id: 'quimera', nome: 'Quimera de Mercúrio', titulo: 'Prata viva derramada no poço', grupo: 'chefe', perfil: 'chimera',
     arenaId: 'chimera',
     secao: 'balneologica',
@@ -191,7 +235,7 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
     id: 'flor', nome: 'Flor do mal', titulo: 'Sentinela das margens', grupo: 'inimigo', perfil: 'flower',
     secao: 'herbaria',
     sprite: { frames: ['enemy_flower'], zoom: 6 },
-    visto: 'Ponte e jardim', fase: 14,
+    visto: 'Ponte e jardim', fase: 18,
     habilidades: [
       { nome: 'Raiz', texto: 'Fica fixa e bloqueia a casa. Não se mexe nem se multiplica.' },
       { nome: 'Chicote', texto: 'A cada 3,2 s avisa em rosa as quatro casas ao redor e, 0,8 s depois, chicoteia.' },
@@ -203,7 +247,7 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
     arenaId: 'mandrake',
     secao: 'herbaria',
     sprite: { frames: ['mandrake_idle_0', 'mandrake_idle_1'], zoom: 5 },
-    visto: 'Jardim do Mosteiro', fase: 16,
+    visto: 'Jardim do Mosteiro', fase: 20,
     habilidades: [
       { nome: 'Raízes', texto: 'Raízes sobem na linha e na coluna onde você está. Furiosa, em cruz.' },
       { nome: 'Maré', texto: 'Anéis de água se expandem um depois do outro. Uma faixa fica seca: o caminho seguro.' },

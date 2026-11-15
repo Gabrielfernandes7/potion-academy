@@ -3,27 +3,23 @@ import { CHAPTERS, CHAPTER_LIST, LAST_STAGE, STAGES } from '../src/game/stages/i
 import { SEALED_MESSAGE, UPCOMING_CHAPTERS, isUpcoming } from '../src/game/stages/upcoming';
 
 describe('capítulos selados no mapa', () => {
-  it("é um só: o observatório (a Biblioteca já entrou na campanha)", () => {
-    expect(UPCOMING_CHAPTERS.map(c => c.id)).toEqual(["observatorio"]);
-    expect(UPCOMING_CHAPTERS.map(c => c.icon)).toEqual(["observatory"]);
+  it('nenhum no momento: a Biblioteca e o Observatório já são capítulos da campanha', () => {
+    expect(UPCOMING_CHAPTERS).toHaveLength(0);
+    const ids = CHAPTER_LIST.map(c => c.id);
+    expect(ids).toContain('biblioteca');
+    expect(ids).toContain('observatorio');
+    expect(STAGES.map(s => s.chapter ?? '').join('|')).toMatch(/OBSERVAT/);
   });
-  it('não dão acesso a nada: sem fases, fora de CHAPTER_LIST e de CHAPTERS, e não mudam o fim do jogo', () => {
-    const real = new Set(CHAPTER_LIST.map(c => c.id));
-    for (const c of UPCOMING_CHAPTERS) {
-      expect(real.has(c.id), c.id).toBe(false);
-      expect(CHAPTERS.some(x => x.id === c.id)).toBe(false);
-      expect(isUpcoming(c.id)).toBe(true);
-    }
-    expect(STAGES.map(s => s.chapter ?? '').join('|')).not.toMatch(/OBSERVAT/);
+  it('o Observatório fica entre a Biblioteca e o Retorno, com 4 fases consecutivas (13 a 16)', () => {
+    const ids = CHAPTER_LIST.map(c => c.id);
+    expect(ids.indexOf('observatorio')).toBe(ids.indexOf('biblioteca') + 1);
+    expect(ids.indexOf('retorno')).toBe(ids.indexOf('observatorio') + 1);
+    expect(CHAPTERS.find(c => c.id === 'observatorio')).toMatchObject({ first: 13, last: 16 });
     expect(LAST_STAGE).toBe(STAGES.length);
-    expect(isUpcoming('vale')).toBe(false);
   });
-  it('têm nome, lugar, dica e o aviso de selado', () => {
-    for (const c of UPCOMING_CHAPTERS) {
-      expect(c.name.trim()).not.toBe('');
-      expect(c.place.trim()).not.toBe('');
-      expect(c.hint.length).toBeGreaterThan(20);
-    }
+  it('qualquer capítulo que voltar a ficar selado precisa de aviso e fora da campanha', () => {
+    for (const c of UPCOMING_CHAPTERS) expect(isUpcoming(c.id)).toBe(true);
+    expect(isUpcoming('vale')).toBe(false);
     expect(SEALED_MESSAGE).toContain('Selado');
   });
 });

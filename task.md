@@ -11,6 +11,8 @@ Eu só verifico por script (regra pura, testes, e o jogo rodando num navegador d
 
 - **Roo Terra e Roo Ar (novas, 2026-11-15):** equilíbrio (20% de peso e de leveza, muro de 4 s, Raiz de 4 casas, Salto de 3, Sopro de 2, lição de 3 golpes); se os sprites leem bem em 40 px; sons (transformação, muro, sopro, raiz). Rodei no navegador: troca de textura, muro, Sopro empurrando inimigo e poção, Raiz por baixo de uma parede, Salto por cima de um sapo, lições da Terra (fase 4) e da água (3 golpes). Não joguei uma partida inteira.
 - **Duelo de chefes (Arena):** a simulação (12 combinações, 100 s de jogo) mostra a **Quimera perdendo de todos** e Belladona e Leão Verde dominando; nenhum duelo foi ao tempo. É um sinal para você decidir se rebalanceia os chefes (vida, tempos, dano) antes de ajustar a Roo.
+- **Observatório e inimigos novos (2026-11-15):** equilíbrio das 4 fases (tempos, quantidades), se lanterna, relógio, toupeira e coruja leem bem e avisam a tempo; se o tema azul-noite agrada; texto das passagens 13 a 16. Rodei 30 s simulados na cúpula (toupeira afundou, coruja marcou, relógio travou, todos andaram) e conferi os sprites e o mapa.
+- **Defesa (V) em todas as formas e Raiz com mira:** a escolha do Escudo de brasas (fogo) e do Redemoinho (ar) foi minha; equilíbrio (corta 50%, 3 s, espera 6 s). Se o círculo de sal prende demais a Roo (3 s).
 - **Mapas:** conferi no navegador as 5 telas (vale e os 4 capítulos). Os nomes das fases ficam sobre uma placa de papel e não esmaecem; falta só você olhar no celular.
 - **Roo Fire e Roo Aqua:** bônus de 50%, espera de 25 s, custo da Labareda, a Bolha de sabão.
 - **Vida da Roo** (24 pontos, fraca ao fogo) e o ritmo das fases agora que sapo e fantasma levam 1 a 3 golpes (`docs/10-equilibrio.md`). Fase 1 com 100 s.
@@ -30,8 +32,8 @@ Eu só verifico por script (regra pura, testes, e o jogo rodando num navegador d
 - **Nome "Roo Aqua"** (código, Manuscrito) → "Roo Água"? Só trocar o texto; as chaves das texturas ficam.
 - **Muro de sal:** deve barrar também a onda das explosões? Hoje barra só quem anda.
 - **Fogo e Água com uma segunda habilidade (C)?** Ideias em `docs/18-transformacoes.md` (onda de brasas; poça que escorrega).
-- **Inimigos novos:** qual vai primeiro? Revisão em `docs/19-criaturas.md`, seção 6 (sugestão: lanterna viva, toupeira de sal, gosma de mercúrio, sentinela de cera). Fogo não tem nenhum inimigo hoje e a Torre só tem fantasmas.
-- **O Observatório** (único capítulo ainda selado no mapa): quando e como entra na história. A Biblioteca já é capítulo de verdade.
+- **Mais inimigos:** faltam gosma de mercúrio, sentinela de cera, ratinho do celeiro e salamandra amiga (`docs/19-criaturas.md`, seções 6 e 7). A Torre ainda só tem fantasmas.
+- **Chefe do Observatório:** o capítulo entrou sem chefe (a cúpula é o desfecho). Quer um chefe? Pede sprite, controlador, falas, perfil e página no Manuscrito.
 - **Boticário** (quem é, se é jogável; sugestão: não jogável na primeira versão) e **Ato II** (puzzle de recomposição das páginas, fase nova entre 2 e 3; sugestão: adiar para a versão 2). D3, P5 e P6 (companheiros, criatura transformada, mestre em sombra) dependem disso.
 - **Licença** do projeto (o README segue sem) e **endereço final** do site (`og:image` absoluto).
 - **Hospedagem:** o servidor precisa mandar 404 para `404.html` e erros 5xx para `500.html`.

@@ -11,6 +11,7 @@ export * from './fire';
 export * from './water';
 export * from './earth';
 export * from './air';
+export * from './defense';
 export * from './RooForm';
 export { FORMS, FORM_IDS, formForElement } from './registry';
 

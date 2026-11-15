@@ -55,3 +55,55 @@ export function enemyMoveOptions(c: MoveContext): Array<readonly [number, number
   }
   return valid;
 }
+
+// ---------- patrulha (lanterna viva, relógio de cobre) ----------
+
+export interface Dir2 { x: number; y: number }
+
+/**
+ * A direção do próximo passo de quem patrulha: segue em frente; se a casa não é livre, volta; se atrás também não,
+ * tenta as laterais. Null se estiver cercado.
+ */
+export function patrolDir(
+  from: { x: number; y: number }, dir: Dir2, canEnter: (x: number, y: number) => boolean,
+): Dir2 | null {
+  const neg = (n: number): number => (n === 0 ? 0 : -n); // sem -0
+  const tries: Dir2[] = [dir, { x: neg(dir.x), y: neg(dir.y) }, { x: dir.y, y: dir.x }, { x: neg(dir.y), y: neg(dir.x) }];
+  for (const d of tries) {
+    if (d.x === 0 && d.y === 0) continue;
+    if (canEnter(from.x + d.x, from.y + d.y)) return d;
+  }
+  return null;
+}
+
+/** Os passos do relógio de cobre entre as pausas: a cada volta completa, ele trava. */
+export const CLOCK_STEPS_BETWEEN_PAUSES = 8;
+export const CLOCK_PAUSE_MS = 2000;
+
+// ---------- toupeira de sal ----------
+
+export const MOLE_WALK_MS = 5000; // tempo andando antes de afundar
+export const MOLE_BURROW_MS = 1400; // tempo debaixo da terra (o monte avisa o lugar onde ela vai brotar)
+
+/**
+ * Onde a toupeira brota: uma casa livre a 2 ou 3 passos (Manhattan) da Roo, nunca a dela nem uma vizinha (o aviso
+ * precisa de tempo para a Roo reagir). Escolhe pelo sorteio `pick` (0 a 1). Null se não houver lugar.
+ */
+export function moleSpot(
+  player: { x: number; y: number }, canEnter: (x: number, y: number) => boolean, cols: number, rows: number, pick: number,
+): { x: number; y: number } | null {
+  const options: Array<{ x: number; y: number }> = [];
+  for (let y = 1; y < rows - 1; y++) {
+    for (let x = 1; x < cols - 1; x++) {
+      const d = Math.abs(x - player.x) + Math.abs(y - player.y);
+      if (d >= 2 && d <= 3 && canEnter(x, y)) options.push({ x, y });
+    }
+  }
+  if (options.length === 0) return null;
+  return options[Math.min(options.length - 1, Math.floor(pick * options.length))];
+}
+
+// ---------- coruja do scriptorium ----------
+
+export const OWL_CYCLE_MS = 6000; // de tempos em tempos, a coruja marca a casa da Roo
+export const OWL_AIM_MS = 1000; // o círculo avisa por 1 s; quem sair da casa não é atingido

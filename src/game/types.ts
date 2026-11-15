@@ -57,6 +57,11 @@ export interface Enemy {
   hopY: boolean; // o passo é na vertical: o pulo é maior
   phase: number;
   lashMs: number; // flor do mal: tempo até o próximo chicote de espinhos
+  dir: { x: number; y: number }; // patrulha: o sentido do passo
+  steps: number; // patrulha: passos dados desde a última pausa
+  actMs: number; // toupeira/coruja: tempo até a próxima ação (afundar, mergulhar)
+  state: 'walk' | 'burrowed' | 'aim'; // toupeira: debaixo da terra; coruja: marcando a casa
+  target: { x: number; y: number } | null; // casa onde brota ou onde mergulha
   trapMs: number; // preso numa bolha de sabão da Roo Aqua: não anda, não machuca e não chicoteia até estourar
   fxCooldown: number; // evita repetir o aviso "IMUNE" e o dano a cada quadro enquanto a explosão dura
   hp: number;

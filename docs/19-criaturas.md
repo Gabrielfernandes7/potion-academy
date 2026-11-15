@@ -1,6 +1,6 @@
 # Criaturas: o que há e o que propomos (proposta)
 
-Status: **proposta para discussão**. Nada aqui foi implementado (a seção 6, de 2026-11-15, é a mais recente). O jogo hoje tem três inimigos comuns e quatro chefes.
+Status: **quatro criaturas já estão no jogo** (lanterna viva, relógio de cobre, toupeira de sal e coruja do scriptorium, de 2026-11-15; ver a seção 7). As outras seguem em proposta. O jogo hoje tem três inimigos comuns e quatro chefes.
 
 ## 1. O que já existe
 
@@ -105,3 +105,14 @@ Cobertura de elementos depois disso: fogo (lanterna, salamandra), água (sapo, g
 5. Coruja, ratinho e salamandra por último.
 
 **Para construir uma:** o perfil em `game/entities/profiles.ts`, uma linha em `enemies/defs.ts` (`ENEMY_TYPES`), a textura em `src/textures/`, o movimento em `EnemySystem.ts` (`MOTION`), a regra própria em `enemies/enemyRules.ts` (puro, com teste) e as fases em `stages/chapters/`. A lista `EnemyKind` precisa de mais um nome por criatura.
+
+## 7. Construídas (2026-11-15)
+
+| Criatura | Sprite | Comportamento | Fraqueza / imune | Onde |
+|---|---|---|---|---|
+| **Lanterna viva** | `enemy_lantern` | patrulha em linha reta, volta ao bater | água / fogo | Estantes, Pátio, Salão dos Relógios, Cúpula |
+| **Relógio de cobre** | `enemy_clock` | patrulha; trava 2 s a cada 8 passos | água / terra | Salão dos Relógios, Cúpula |
+| **Toupeira de sal** | `enemy_mole` | afunda por 1,4 s e deixa um monte onde vai brotar (a 2 ou 3 casas da Roo); nada a alcança debaixo da terra | ar / terra | Galeria das Cartas, Cúpula |
+| **Coruja do scriptorium** | `enemy_owl` | voa por cima de paredes; a cada 6 s marca a casa da Roo com um círculo e mergulha 1 s depois | terra / — | Scriptorium, Galeria, Cúpula |
+
+Regras em `game/entities/enemies/enemyRules.ts` (`patrolDir`, `moleSpot`, constantes), o jogo em `EnemySystem.ts`, os sprites em `textures/enemiesNew.ts`. Ficam para depois: gosma de mercúrio, sentinela de cera, ratinho do celeiro e salamandra.

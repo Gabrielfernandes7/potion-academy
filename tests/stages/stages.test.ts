@@ -3,9 +3,9 @@ import { ENEMY_TYPES, isImmune } from '../../src/game/entities/enemies/defs';
 import { LAST_STAGE, STAGES, stageDef } from '../../src/game/stages/index';
 
 describe('fases', () => {
-  it('são dezesseis: Vale (três e o poço), Torre (três e o duelo), Biblioteca (três e o Leão), Retorno (três e o jardim)', () => {
-    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'garden']);
-    expect(LAST_STAGE).toBe(16);
+  it('são vinte: Vale (três e o poço), Torre (três e o duelo), Biblioteca (três e o Leão), Observatório (quatro, sem chefe), Retorno (três e o jardim)', () => {
+    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'crypt', 'crypt', 'crypt', 'crypt', 'garden']);
+    expect(LAST_STAGE).toBe(20);
   });
 
   it('a fase 1 não tem fantasmas nem flores do mal', () => {
@@ -18,7 +18,7 @@ describe('fases', () => {
     expect(stageDef(4).boss).toBe('chimera');
     expect(stageDef(8).boss).toBe('belladonna');
     expect(stageDef(12).boss).toBe('lion');
-    expect(stageDef(16).boss).toBe('mandrake');
+    expect(stageDef(20).boss).toBe('mandrake');
     expect(STAGES.filter(s => s.boss)).toHaveLength(4);
   });
 
@@ -30,8 +30,8 @@ describe('fases', () => {
   });
 
   it('o jardim só tem as flores que a Mandrágora faz brotar; o salão tem fantasmas', () => {
-    expect(stageDef(16).enemies.map(e => e.kind)).toEqual(['flower']);
-    expect(stageDef(16).enemies[0].start).toBe(0);
+    expect(stageDef(20).enemies.map(e => e.kind)).toEqual(['flower']);
+    expect(stageDef(20).enemies[0].start).toBe(0);
     expect(stageDef(2).enemies.map(e => e.kind)).toContain('ghost');
   });
 

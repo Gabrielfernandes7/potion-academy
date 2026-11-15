@@ -4,8 +4,8 @@ import { PASSAGE_CARDS, BELLADONA_CARDS, CHIMERA_CARDS, ENDING_CARDS } from '../
 import { STAGES, LAST_STAGE } from '../src/game/stages/index';
 
 describe('trilha por fase', () => {
-  it('Chamado, Caminho, Duelo e Estrada têm faixas próprias; a Névoa e as três da Torre dividem a do salão; o Poço usa a do duelo', () => {
-    const tracks = [0, 1, 7, 12].map(i => STAGES[i].track);
+  it('Chamado, Caminho, Duelo e Estrada (a do Retorno) têm faixas próprias; a Névoa e as três da Torre dividem a do salão; o Poço usa a do duelo', () => {
+    const tracks = [0, 1, 7, 16].map(i => STAGES[i].track);
     for (const i of [2, 4, 5, 6]) expect(STAGES[i].track).toBe(STAGES[1].track);
     expect(STAGES[3].track).toBe(STAGES[7].track);
     expect(new Set(tracks).size).toBe(tracks.length);

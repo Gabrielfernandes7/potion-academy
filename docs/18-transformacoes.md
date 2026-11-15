@@ -44,7 +44,7 @@ Cada forma segue o molde de `game/forms/types.ts`: três degraus de perfil, um b
 - **Perfil:** no auge, **imune à terra** (por isso as flores do mal, que chicoteiam com terra, não a ferem) e fraca ao ar. Ao esfriar, resiste à terra e não tem fraqueza.
 - **Bônus:** +50% nas poções de terra no auge.
 - **Passiva (o peso):** anda 20% mais devagar (`earthWalkFactor`, aplicado em `MainScene.moveDuration`).
-- **Habilidade C, "Raiz":** a Roo afunda e viaja por baixo da terra (invisível, invulnerável, por baixo de paredes, caixotes, poções e inimigos) por 0,7 s, e **nasce na casa livre mais distante** de uma linha de 4 casas, como a Mandrágora. Ao brotar, a terra racha nas quatro casas vizinhas e fere o que estiver nelas. Custa 2 s da forma, espera 5 s. Só nasce em chão livre.
+- **Habilidade C, "Raiz":** a Roo afunda e viaja por baixo da terra (invisível, invulnerável, por baixo de paredes, caixotes, poções e inimigos) por 0,7 s, e **nasce onde a jogadora escolher**, como a Mandrágora: C abre a mira (o cursor começa na casa mais distante à frente), as setas o movem dentro de 4 passos, C confirma e X ou V cancelam sem gastar nada. Ao brotar, a terra racha nas quatro casas vizinhas e fere o que estiver nelas. Custa 2 s da forma, espera 5 s. Só nasce em chão livre.
 - **Habilidade X, "Muro de sal":** levanta 3 casas de sal à frente, de lado a lado, por até 4 s (menos nos degraus baixos). Inimigos comuns e a própria Roo não passam, e nenhuma poção cabe em cima. **Fantasmas atravessam** (como atravessam qualquer parede). Não nasce na porta nem sobre poção, inimigo, chefe ou a Roo. A explosão **não** é barrada pelo muro. Custa 2 s da forma, espera 4 s.
 
 ### Roo Ar (`game/forms/air.ts`)
@@ -55,6 +55,19 @@ Cada forma segue o molde de `game/forms/types.ts`: três degraus de perfil, um b
 - **Passivas:** a **leveza** (anda 20% mais rápido; o preço é a fraqueza à terra) e a **visão de cima** (a névoa não esconde nada). *Antes, a forma não pegava baús; saiu, porque a punição tornava a forma quase inutilizável.*
 - **Habilidade X, "Sopro":** uma linha de vento de 4 casas empurra 2 casas (1 nos degraus baixos) os inimigos comuns, que ficam atordoados, **e as poções do chão, que deslizam** (dá para pôr uma poção contra um alvo). Flores e chefes não saem do lugar. Apaga as brasas. Custa 2 s da forma, espera 3,5 s.
 - **Habilidade C, "Salto de vento":** um pulo de até 3 casas por cima de inimigos, poções e muros de sal, invulnerável por 0,25 s. Não atravessa parede nem caixote. Custa 1,5 s da forma, espera 2,5 s. É a esquiva.
+
+### Defesa (tecla V), em todas as formas (`game/forms/defense.ts`)
+
+Toda forma tem uma defesa que dura 3 s, **corta o dano pela metade**, custa 2 s da forma e espera 6 s. V de novo desfaz antes da hora.
+
+| Forma | Defesa | Efeito além de cortar o dano |
+|---|---|---|
+| Fogo | Escudo de brasas | um anel de brasas nas 4 casas ao redor, que queima quem pisa |
+| Água | Bolha protetora | a bolha iridescente da Roo Água em volta dela |
+| Terra | Círculo de sal | muro nas 4 casas ao redor e, ao levantar, **empurra 2 casas** o que estava nelas (inimigos comuns e poções) |
+| Ar | Redemoinho | afasta 1 casa os inimigos vizinhos |
+
+A escolha de fogo e ar foi minha (a bolha e o muro foram pedidos): o fogo fica com o que ele faz de melhor (queimar quem chega perto) e o ar com o que ele faz de melhor (afastar).
 
 ### Regras comuns a todas as formas
 

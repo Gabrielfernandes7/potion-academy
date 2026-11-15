@@ -2,11 +2,11 @@
 // A lógica (estado/consumo) não toca no DOM, então é testável; só bind() usa o DOM.
 
 export type TouchDir = 'up' | 'down' | 'left' | 'right';
-export type TouchAction = 'bomb' | 'detonate' | 'cycle' | 'pause' | 'transform' | 'ability' | 'ability2';
+export type TouchAction = 'bomb' | 'detonate' | 'cycle' | 'pause' | 'transform' | 'ability' | 'ability2' | 'defense';
 
 const DIRS: TouchDir[] = ['up', 'down', 'left', 'right'];
 /** Todos os nomes que um botão de toque (data-touch) pode ter: os testes de contrato conferem o index.html com isto. */
-export const TOUCH_NAMES: readonly string[] = [...DIRS, 'bomb', 'detonate', 'cycle', 'pause', 'transform', 'ability', 'ability2'];
+export const TOUCH_NAMES: readonly string[] = [...DIRS, 'bomb', 'detonate', 'cycle', 'pause', 'transform', 'ability', 'ability2', 'defense'];
 
 export class TouchInput {
   held: Record<TouchDir, boolean> = { up: false, down: false, left: false, right: false };

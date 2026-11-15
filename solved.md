@@ -156,3 +156,12 @@ Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
 - **Roo Terra, Raiz (C):** a Roo afunda e viaja por baixo da terra (invisível, invulnerável, passa sob paredes, caixotes e inimigos) e nasce na casa livre mais distante de uma linha de 4 casas, rachando a terra nas casas vizinhas. **Roo Ar mais útil:** leveza (20% mais rápida), Sopro que também desliza as poções e atordoa os inimigos, **Salto de vento (C)**; saiu a regra de não pegar baús. Segunda habilidade em `FormDef.ability2` / `RooForm.useAbility2`, tecla C, botão de toque HABILIDADE 2 (aparece só quando a forma tem), ajuda, Manuscrito e sons (`root`).
 - **Inimigos novos:** revisão da proposta em `docs/19-criaturas.md` (seção 6), com os furos do elenco e a ordem sugerida. Nenhum foi construído ainda.
 
+## Rodada de 2026-11-15, parte 3
+
+- **O Observatório** (`stages/chapters/observatorio.ts`): 4 fases (o pátio, o salão dos relógios, a galeria das cartas, a cúpula), sem chefe, entre a Biblioteca e o Retorno (fases 13 a 16; o Retorno vai a 17 a 20). Tema `observatory` (pedra azul-noite), mapa com papel estrelado e cúpula, passagens 13 a 16 em `story.ts`, páginas no Manuscrito. `STAGE_SCHEMA` 5 renumera o save. `upcoming.ts` ficou vazio.
+- **Quatro inimigos novos, com sprite** (`textures/enemiesNew.ts`): lanterna viva (fogo, patrulha), relógio de cobre (terra, patrulha com pausa de 2 s a cada 8 passos), toupeira de sal (terra; afunda e brota perto da Roo avisando com um monte) e coruja do scriptorium (ar; marca a casa da Roo e mergulha). Regras puras em `enemyRules.ts`, comportamento em `EnemySystem.ts`, perfis em `profiles.ts`. Lanterna e coruja também na Biblioteca.
+- **Defesa (V) em todas as formas** (`forms/defense.ts`): corta o dano pela metade por 3 s. Fogo: Escudo de brasas; Água: Bolha protetora (iridescente); Terra: Círculo de sal (muro nas 4 casas, empurra 2 casas o que estava ao redor); Ar: Redemoinho (afasta os vizinhos). Botão de toque DEFESA, ajuda e HUD.
+- **Raiz com destino à escolha:** C abre uma mira (setas movem o cursor dentro de 4 passos, C confirma, X ou V cancelam).
+- **Contraste no jardim:** os textos flutuantes (+1 FRASCO, dano, DEFENDIDO) ganharam contorno escuro.
+- **Verificado:** `npm run check` (389 testes e build) e, num navegador de teste, comportamentos dos 4 inimigos, defesa das 4 formas, empurrão do círculo, mira da Raiz, textos do jardim e o mapa do Observatório.
+

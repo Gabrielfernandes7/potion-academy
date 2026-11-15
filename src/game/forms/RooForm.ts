@@ -12,6 +12,7 @@ export class RooForm {
   private cooldown = 0;
   private abilityCd = 0;
   private ability2Cd = 0;
+  private defenseCd = 0;
 
   /** A forma ativa (ou null). */
   get id(): FormId | null { return this.kind; }
@@ -22,6 +23,7 @@ export class RooForm {
   get cooldownMs(): number { return this.cooldown; }
   get abilityCooldownMs(): number { return this.abilityCd; }
   get ability2CooldownMs(): number { return this.ability2Cd; }
+  get defenseReady(): boolean { return this.active && this.defenseCd <= 0; }
   get ready(): boolean { return !this.active && this.cooldown <= 0; }
   get abilityReady(): boolean { return this.active && this.abilityCd <= 0; }
   /** A segunda habilidade (tecla C) existe nesta forma e está pronta? */
@@ -36,6 +38,7 @@ export class RooForm {
     this.remaining = FORM_MS;
     this.abilityCd = 0;
     this.ability2Cd = 0;
+    this.defenseCd = 0;
     return true;
   }
 
@@ -46,6 +49,15 @@ export class RooForm {
     this.abilityCd = d.ability.cooldownMs;
     this.spend(d.ability.costMs);
     return true;
+  }
+
+  /** Defesa (V): gasta tempo da forma e começa a espera. Devolve a defesa, ou null se não der. */
+  useDefense(): FormDef['defense'] | null {
+    const d = this.def?.defense;
+    if (!d || !this.defenseReady) return null;
+    this.defenseCd = d.cooldownMs;
+    this.spend(d.costMs);
+    return d;
   }
 
   /** Segunda habilidade (C): como a primeira, com espera própria. Devolve false se a forma não tem. */
@@ -67,6 +79,7 @@ export class RooForm {
   tick(deltaMs: number): void {
     this.abilityCd = Math.max(0, this.abilityCd - deltaMs);
     this.ability2Cd = Math.max(0, this.ability2Cd - deltaMs);
+    this.defenseCd = Math.max(0, this.defenseCd - deltaMs);
     if (this.remaining > 0) this.spend(deltaMs);
     else if (this.cooldown > 0) this.cooldown = Math.max(0, this.cooldown - deltaMs);
   }
@@ -80,6 +93,8 @@ export interface FormView {
   cooldownRatio: number; // quanto falta para poder transformar de novo (1 a 0)
   abilityReady: boolean;
   ability2Ready: boolean; // a habilidade da tecla C (Raiz, Salto de vento)
+  defenseReady: boolean; // a defesa (tecla V) está pronta
+  guarding: boolean; // a defesa está de pé agora
   element: ElementId | null; // o elemento da forma agora (só essa poção funciona)
 }
 
@@ -93,6 +108,8 @@ export function formView(f: RooForm): FormView {
     cooldownRatio: f.cooldownMs / FORM_COOLDOWN_MS,
     abilityReady: f.abilityReady,
     ability2Ready: f.ability2Ready,
+    defenseReady: f.defenseReady,
+    guarding: false, // a RooFormSystem preenche (a defesa é estado de jogo, não da máquina de tempo)
     element: f.formElement,
   };
 }

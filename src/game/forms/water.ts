@@ -7,6 +7,7 @@
 //   de uma bolha: é a habilidade mais dela.
 import { PROFILES } from '../entities/profiles';
 import type { DamageProfile } from '../entities/damage';
+import { DEFENSE_WATER } from './defense';
 import type { FormDef, FormStage } from './types';
 
 const FULL: DamageProfile = { element: 'water', maxHp: PROFILES.roo.maxHp, weak: ['fire'], resist: [], immune: ['water'] };
@@ -18,6 +19,7 @@ export const WATER_FORM: FormDef = {
   element: 'water',
   profile: (stage: FormStage): DamageProfile => (stage >= 3 ? FULL : stage >= 1 ? COOLING : PROFILES.roo),
   boost: 0.5,
+  defense: DEFENSE_WATER,
   ability: { id: 'bubble', nome: 'Bolha de sabão', short: 'BOLHA', costMs: 2000, cooldownMs: 3500, range: 4 },
 };
 

@@ -317,3 +317,12 @@ Novas decisões entram no fim.
 - **Motivo:** testar equilíbrio sem depender de uma pessoa jogando: dois chefes lutam entre si e o resultado diz quem é mais forte contra quem.
 - **Decisão:** na Arena, dois chefes diferentes se enfrentam por 100 s, sem a Roo (ela só assiste). Perde quem cair primeiro; se ninguém cair, perde quem tiver menos vida (em pontos); vida igual é empate (`game/duel.ts`). Cada ataque de um chefe mira o outro e fere com a tabela de dano de quem o recebe. O duelo não conta para a jornada nem para o Manuscrito.
 - **Resultado de referência** (simulação de 100 s de jogo, cada lado em cada canto): Belladona e Leão Verde vencem quase todos; Mandrágora vence a Quimera; a Quimera perde de todos. Nenhum duelo foi ao tempo: todos terminaram em nocaute (18 a 90 s).
+
+## O Observatório entra na campanha
+- **Decisão:** quatro fases (o pátio, o salão dos relógios, a galeria das cartas e a cúpula), entre a Biblioteca e o Retorno (fases 13 a 16; o Retorno passa a 17 a 20). Sem chefe: o desfecho é a cúpula, onde a Roo lê o céu. Tema próprio (`observatory`, pedra azul-noite) e mapa de papel estrelado com astrolábios. **Save:** `STAGE_SCHEMA` 5 renumera o progresso antigo (o Retorno sobe 4).
+- **Inimigos:** lanterna viva, relógio de cobre, toupeira de sal e coruja (ver `docs/19-criaturas.md`); a lanterna e a coruja também aparecem na Biblioteca.
+- **Em aberto:** o Observatório não tem chefe. Um chefe novo pede sprite, controlador, falas, perfil e página no Manuscrito.
+
+## Defesa em todas as formas, Raiz com destino à escolha
+- **Decisão:** toda forma ganhou uma defesa (tecla V) que corta o dano pela metade por 3 s: Escudo de brasas, Bolha protetora, Círculo de sal (que empurra o que estiver ao redor) e Redemoinho. A Raiz da Terra deixa a jogadora escolher onde brotar, com uma mira.
+- **Avisos legíveis:** os textos flutuantes ganharam contorno escuro, porque o verde do jardim apagava o `+1` e o dano.

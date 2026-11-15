@@ -7,6 +7,7 @@ import { drawBlocks } from './blocks';
 import { drawPotions } from './potions';
 import { drawRooTextures } from './roo';
 import { drawEntities } from './entities';
+import { drawNewEnemies } from './enemiesNew';
 import { drawHudIcons } from './hud';
 import { drawMenuTextures } from './menu';
 import { BOSS_DEFS, BOSS_IDS } from '../game/entities/bosses/defs';
@@ -31,6 +32,7 @@ export function generateTextures(scene: Phaser.Scene): void {
   for (let fi = 0; fi < 4; fi++) for (const dir of ['down', 'up', 'side']) outlineTexture(scene, `roo_${dir}_${fi}`);
   addRooBubble(scene);
   drawEntities(make);
+  drawNewEnemies(make);
   drawHudIcons(g);
   drawMenuTextures(g);
   for (const id of BOSS_IDS) BOSS_DEFS[id].sprite.draw(g, CONFIG.tile); // os chefes vêm do registro
