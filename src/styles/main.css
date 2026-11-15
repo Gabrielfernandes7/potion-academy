@@ -1014,3 +1014,11 @@ kbd {
   }
 }
 
+
+/* Símbolos alquímicos em SVG (public/svg/): traço escuro, invertido para o fundo escuro da legenda */
+.legend .glyph {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  filter: invert(1) brightness(1.1);
+}
