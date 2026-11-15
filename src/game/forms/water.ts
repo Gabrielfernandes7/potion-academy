@@ -55,6 +55,8 @@ export function puddleTiles(
   return out;
 }
 
+const NONE: Array<{ x: number; y: number; left: number }> = []; // lista vazia compartilhada
+
 /** As poças no chão: casas com validade. Puro: quem chama dá o relógio. */
 export class PuddleField {
   private tiles = new Map<string, number>();
@@ -67,12 +69,17 @@ export class PuddleField {
     for (const t of tiles) this.tiles.set(this.key(t.x, t.y), now + ms);
   }
 
+  get size(): number {
+    return this.tiles.size;
+  }
+
   has(x: number, y: number, now: number): boolean {
     const until = this.tiles.get(this.key(x, y));
     return until !== undefined && until > now;
   }
 
   active(now: number): Array<{ x: number; y: number; left: number }> {
+    if (this.tiles.size === 0) return NONE;
     const out: Array<{ x: number; y: number; left: number }> = [];
     for (const [k, until] of this.tiles) {
       if (until <= now) { this.tiles.delete(k); continue; }

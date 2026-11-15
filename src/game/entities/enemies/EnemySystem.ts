@@ -15,6 +15,7 @@ import { hitFx } from '../hitEffects';
 import type { MainScene } from '../../../scenes/MainScene';
 import { ENEMY_TYPES, EnemyKind } from './defs';
 import { PROFILES } from '../profiles';
+import { fxPool } from '../../fx/particlePool';
 import { EMBER_TICK_MS, PUDDLE_SLOW, emberDamage } from '../../forms';
 
 // Movimento de cada inimigo: pulo vertical e horizontal do passo, e o balanço parado (altura e velocidade).
@@ -53,6 +54,7 @@ const KILL_TEXT: Partial<Record<EnemyKind, Partial<Record<ElementId, string>>>> 
 export class EnemySystem {
   enemies: Enemy[] = [];
   private lashGfx!: Phaser.GameObjects.Graphics; // avisos dos chicotes das flores do mal
+  private lashDirty = false; // o gráfico dos avisos recebeu desenho neste quadro (ver lg)
   private tickMs = 0; // relógio dos quadros de vida (balanço da chama, piscada da coruja...)
 
   constructor(private readonly scene: MainScene) {}
@@ -60,6 +62,12 @@ export class EnemySystem {
   // Camada dos avisos de chicote (criada pela cena em create(), na mesma ordem de antes).
   createLashGfx(): void {
     this.lashGfx = this.scene.add.graphics().setDepth(4);
+  }
+
+  // O gráfico dos avisos, marcando que tem desenho (para limpar só quando precisar).
+  private lg(): Phaser.GameObjects.Graphics {
+    this.lashDirty = true;
+    return this.lashGfx;
   }
 
   clearLash(): void {
@@ -336,8 +344,8 @@ export class EnemySystem {
     if (enemy.sprite.texture.key !== key) enemy.sprite.setTexture(key);
     if (enemy.kind === 'lantern' && enemy.sprite.visible) {
       const k = 0.5 + 0.5 * Math.sin((this.tickMs + enemy.phase) / 170);
-      this.lashGfx.fillStyle(0xffa94d, 0.07 + 0.05 * k).fillCircle(enemy.sprite.x, enemy.sprite.y, 30);
-      this.lashGfx.fillStyle(0xffd27a, 0.10 + 0.06 * k).fillCircle(enemy.sprite.x, enemy.sprite.y, 19);
+      this.lg().fillStyle(0xffa94d, 0.07 + 0.05 * k).fillCircle(enemy.sprite.x, enemy.sprite.y, 30);
+      this.lg().fillStyle(0xffd27a, 0.10 + 0.06 * k).fillCircle(enemy.sprite.x, enemy.sprite.y, 19);
     }
   }
 
@@ -374,15 +382,15 @@ export class EnemySystem {
       if (t) {
         // o monte de terra no lugar onde ela vai brotar (xadrez de pixels que treme)
         const wob = Math.floor(enemy.actMs / 90) % 2;
-        this.lashGfx.fillStyle(0x5d4228, 0.9).fillRect(t.x * T + 9, t.y * T + 20 + wob, 22, 11);
-        this.lashGfx.fillStyle(0x8d6e43, 0.95).fillRect(t.x * T + 13, t.y * T + 16 + wob, 14, 8);
-        this.lashGfx.lineStyle(2, 0xf0e6c8, 0.9).strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6);
+        this.lg().fillStyle(0x5d4228, 0.9).fillRect(t.x * T + 9, t.y * T + 20 + wob, 22, 11);
+        this.lg().fillStyle(0x8d6e43, 0.95).fillRect(t.x * T + 13, t.y * T + 16 + wob, 14, 8);
+        this.lg().lineStyle(2, 0xf0e6c8, 0.9).strokeRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6);
         // o rastro: um monte que anda por baixo da terra, da casa onde afundou até o lugar onde vai brotar
         const p = 1 - Math.max(0, enemy.actMs) / MOLE_BURROW_MS;
         const ox = enemy.gridX * T + T / 2, oy = enemy.gridY * T + T / 2;
         const mx = ox + (t.x * T + T / 2 - ox) * p, my = oy + (t.y * T + T / 2 - oy) * p;
-        this.lashGfx.fillStyle(0x5d4228, 0.85).fillRect(Math.round(mx) - 7, Math.round(my) + 2, 14, 6);
-        this.lashGfx.fillStyle(0x8d6e43, 0.9).fillRect(Math.round(mx) - 4, Math.round(my) - 1, 8, 4);
+        this.lg().fillStyle(0x5d4228, 0.85).fillRect(Math.round(mx) - 7, Math.round(my) + 2, 14, 6);
+        this.lg().fillStyle(0x8d6e43, 0.9).fillRect(Math.round(mx) - 4, Math.round(my) - 1, 8, 4);
       }
       if (enemy.actMs <= 0 && t) {
         enemy.gridX = t.x;
@@ -434,10 +442,10 @@ export class EnemySystem {
     const t = enemy.target;
     if (!t) { enemy.state = 'walk'; return; }
     const k = Math.max(0, enemy.actMs / OWL_AIM_MS); // 1 -> 0
-    this.lashGfx.lineStyle(2, 0xeef4f8, 0.95).strokeCircle(t.x * T + T / 2, t.y * T + T / 2, 8 + 12 * k);
-    this.lashGfx.fillStyle(0xc9d6df, 0.18 + 0.25 * (1 - k)).fillRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6);
+    this.lg().lineStyle(2, 0xeef4f8, 0.95).strokeCircle(t.x * T + T / 2, t.y * T + T / 2, 8 + 12 * k);
+    this.lg().fillStyle(0xc9d6df, 0.18 + 0.25 * (1 - k)).fillRect(t.x * T + 3, t.y * T + 3, T - 6, T - 6);
     // a sombra da coruja cresce no chão: ela vem de cima
-    this.lashGfx.fillStyle(0x000000, 0.2 + 0.25 * (1 - k)).fillEllipse(t.x * T + T / 2, t.y * T + T / 2 + 8, 8 + 24 * (1 - k), 4 + 10 * (1 - k));
+    this.lg().fillStyle(0x000000, 0.2 + 0.25 * (1 - k)).fillEllipse(t.x * T + T / 2, t.y * T + T / 2 + 8, 8 + 24 * (1 - k), 4 + 10 * (1 - k));
     if (enemy.actMs > 0) return;
     const me = s.playerTile();
     this.thornFx(t.x * T + T / 2, t.y * T + T / 2);
@@ -490,10 +498,10 @@ export class EnemySystem {
       // aviso: casas se enchem de um rosa pulsante
       const pulse = 0.25 + 0.2 * Math.sin(enemy.lashMs / 55);
       for (const c of around) {
-        this.lashGfx.fillStyle(0xd81b60, pulse);
-        this.lashGfx.fillRect(c.x * T + 2, c.y * T + 2, T - 4, T - 4);
-        this.lashGfx.lineStyle(2, 0xff80ab, 0.9);
-        this.lashGfx.strokeRect(c.x * T + 2, c.y * T + 2, T - 4, T - 4);
+        this.lg().fillStyle(0xd81b60, pulse);
+        this.lg().fillRect(c.x * T + 2, c.y * T + 2, T - 4, T - 4);
+        this.lg().lineStyle(2, 0xff80ab, 0.9);
+        this.lg().strokeRect(c.x * T + 2, c.y * T + 2, T - 4, T - 4);
       }
       return;
     }
@@ -509,22 +517,19 @@ export class EnemySystem {
 
   // Espinhos e folhas que saltam quando a flor chicoteia.
   thornFx(px: number, py: number): void {
-    const emitter = this.scene.add.particles(px, py, 'menu_spark', {
+    fxPool(this.scene).burst('thorn', 'menu_spark', {
       speed: { min: 40, max: 110 },
       angle: { min: 0, max: 360 },
       lifespan: { min: 300, max: 520 },
       scale: { start: 1.8, end: 0 },
       alpha: { start: 1, end: 0 },
       tint: [0x66bb6a, 0x2e7d32, 0xad1457],
-      emitting: false,
-    }).setDepth(10);
-    emitter.explode(6);
-    this.scene.time.delayedCall(700, () => emitter.destroy());
+    }, px, py, 6, 10);
   }
 
   update(delta: number): void {
     const s = this.scene;
-    this.lashGfx.clear();
+    if (this.lashDirty) { this.lashGfx.clear(); this.lashDirty = false; } // só limpa se o quadro anterior desenhou algo
     this.tickMs += delta;
     for (const enemy of [...this.enemies]) {
       if (!enemy.alive) continue;

@@ -41,7 +41,7 @@
         <button class="big-btn alt" id="menu-arena" type="button">ARENA</button>
         <button class="big-btn alt" id="menu-manuscript" type="button">MANUSCRITO</button>
         <button class="big-btn alt" id="menu-music" type="button">SALA DE MÚSICA</button>
-        <a class="big-btn alt" id="menu-versions" href="/history.html#log">LOG DA HISTÓRIA</a>
+        <a class="big-btn alt" id="menu-book" href="/livro.html">O LIVRO</a>
         <p class="menu-hint">Pressione <kbd>Enter</kbd> para jogar</p>
       </div>
     </div>
@@ -126,12 +126,27 @@
   <div class="panel letter paper">
     <img id="letter-portrait" class="portrait" alt="Frei Anselmo" width="160" height="200" hidden>
     <h2 id="letter-title">A CARTA</h2>
-    <p class="letter-text">Roo, filho do Caldeirão: preciso que busques o que eu não posso mais buscar. Há três anos o vale colhe pouco, e o pão custa mais do que o povo tem. As escrituras que guardamos foram <b>levadas</b> por Belladona, discípula do teu mestre. Não foi por maldade: ela acredita que, lidas como receita, podem virar pão para todos. Não te peço que creias no que eu creio. Peço que as <b>tragas de volta</b> e que, ao encontrá-las, não as trates como pedra.</p>
+    <p class="letter-text">Roo, filho do Caldeirão: há três invernos o teu mestre partiu sem dizer para onde, e desde então comes da sopa do mosteiro como qualquer um do vale, na mesma fila, onde as viúvas e os órfãos passam primeiro, porque assim aprendemos com Jesus. Belladona, discípula dele, tomou o teu laboratório e as escrituras que guardamos. Não foi por maldade: ela acredita que, lidas como receita, podem virar pão para todos, e o pão custa hoje mais do que o povo tem. Eu sei de uma noite que tu não conheces, a tua, e só a conto a quem vier ouvi-la aqui. Não te peço que creias no que eu creio. Peço que as <b>tragas de volta</b> e que, ao encontrá-las, não as trates como pedra.</p>
     <p class="letter-sign">— frei Anselmo, Mosteiro de São Tomás</p>
     <p class="letter-note">Dentro do envelope, um frasco vazio, lacrado.</p>
     <div class="btn-row">
       <button class="big-btn" id="letter-btn" type="button">COMEÇAR</button>
     </div>
+  </div>
+</div>
+
+<!-- Entrada da fase: a gravura animada do lugar, o nome e a frase da história -->
+<div id="intro-overlay" class="overlay overlay--intro" role="dialog" aria-labelledby="intro-name">
+  <div class="panel intro paper">
+    <canvas id="intro-canvas" width="200" height="150" role="img" aria-label="Gravura animada do lugar"></canvas>
+    <p class="intro-head" id="intro-head"></p>
+    <h2 id="intro-name"></h2>
+    <p class="letter-text" id="intro-story"></p>
+    <p class="intro-tip" id="intro-tip" hidden></p>
+    <div class="btn-row">
+      <button class="big-btn" id="intro-btn" type="button">COMEÇAR</button>
+    </div>
+    <p class="hint">ou aperte <kbd>Enter</kbd></p>
   </div>
 </div>
 

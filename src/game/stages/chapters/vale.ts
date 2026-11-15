@@ -11,7 +11,7 @@ export const VALE: ChapterSpec = {
   stages: [
     {
       kind: 'lab', name: 'O CHAMADO', place: 'Laboratório do Caldeirão',
-      story: 'O laboratório do mestre agora é de Belladona, e as gemas que fixam as transformações estão trancadas nos caixotes. Foi aqui que o mestre me ensinou a medir o fogo. Lá fora, o vale passa fome.',
+      story: 'O laboratório do mestre agora é de Belladona, e as gemas que fixam as transformações estão trancadas nos caixotes. Foi aqui que o mestre me ensinou a medir o fogo, antes de partir sem dizer para onde. Lá fora, o vale passa fome, e eu como da mesma sopa que todos. Frei Anselmo sabe quem eu sou: só me conta se eu for ouvir.',
       chest: CHEST_COMMON, time: 100000, blockChance: 0.7, door: true, theme: 'stone', block: 'wood', track: 'alambique',
       // a salamandra do Caldeirão é amiga: aquece a Roo uma vez, se ela chegar perto
       enemies: [{ kind: 'frog', start: 2, max: 5, every: 8 }, { kind: 'salamander', start: 1, max: 1 }],
@@ -25,7 +25,7 @@ export const VALE: ChapterSpec = {
     },
     {
       kind: 'crypt', name: 'A NÉVOA', place: 'Charneca do Vale',
-      story: 'Uma névoa baixa cobre a charneca, onde o trigo apodreceu em pé. Nas casas da beira, a febre deixou famílias acamadas. Só se vê o que está por perto.',
+      story: 'Uma névoa baixa cobre a charneca, onde o trigo apodreceu em pé. Nas casas da beira, a febre deixou famílias acamadas e viúvas e órfãos sem ninguém. Só se vê o que está por perto.',
       chest: CHEST_RICH, tip: 'Na névoa só se vê o que está perto. Os fantasmas chegam sem aviso: ande devagar.',
       time: 110000, blockChance: 0.55, door: true, theme: 'stone', block: 'moss', track: 'ecos', fog: { radius: 3 },
       enemies: [{ kind: 'ghost', start: 2, max: 3, every: 9 }, { kind: 'frog', start: 1, max: 1, every: 12 }, { kind: 'slime', start: 1, max: 2, every: 14 }],

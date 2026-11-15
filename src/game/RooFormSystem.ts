@@ -10,6 +10,7 @@ import { FORM_LESSONS, formLearned, lessonReached, lessonsAtStart, lessonsForHit
 import { knowsForm, learnForm } from '../storage';
 import { ENEMY_TYPES } from './entities/enemies/defs';
 import type { Enemy, Bomb } from './types';
+import { fxPool } from './fx/particlePool';
 import {
   AIR_SIGHT_RADIUS, BUBBLE_STEP_MS, EmberField, PuddleField, novaTiles, puddleTiles, SaltWallField, LEAP_MS, ROOT_MS, airSeesThroughFog, airWalkFactor, earthWalkFactor, gustPush, gustStunMs, gustTarget,
   gustTiles, leapTarget, rootBurstTiles, rootTarget, iridescent, FORMS, formForElement, FormId, FormView, RooForm, boostedDamage, bubbleAt, bubblePath, fireLight, flameTiles,
@@ -47,6 +48,8 @@ export class RooFormSystem {
   private guard: { def: FormDefense; ms: number; walls: Array<{ x: number; y: number }>; healMs: number } | null = null;
   // Mira da Raiz: o cursor, enquanto a jogadora escolhe onde brotar
   private aim: { x: number; y: number } | null = null;
+  // gráficos que já estão limpos: não são limpos de novo a cada quadro quando não há o que desenhar
+  private readonly drawn = new Set<Phaser.GameObjects.Graphics>();
   private burrowMs = 0; // tempo que falta debaixo da terra (Roo Terra, Raiz)
   private lessonHits = new Map<LessonForm, number>(); // golpes da poção de cada lição, nesta partida
   private bubbles: Bubble[] = [];
@@ -104,6 +107,18 @@ export class RooFormSystem {
     setAbility2Label(def.ability2?.short ?? null);
     setDefenseLabel(def.defense.short);
     s.updateHud();
+  }
+
+  // Prepara um gráfico para o quadro: se há o que desenhar, limpa e devolve true; se não há, limpa só uma vez (a que
+  // apaga o desenho do quadro anterior) e devolve false. Limpar e redesenhar tudo a cada quadro pesa no celular.
+  private beginDraw(g: Phaser.GameObjects.Graphics, active: boolean): boolean {
+    if (!active) {
+      if (this.drawn.delete(g)) g.clear();
+      return false;
+    }
+    g.clear();
+    this.drawn.add(g);
+    return true;
   }
 
   /** O peso e a leveza: quanto o passo da Roo demora (a Terra anda 20% mais devagar, o Ar 20% mais rápido). */
@@ -509,12 +524,10 @@ export class RooFormSystem {
   // Um sopro de poeira ou vento na cor dada.
   private puff(x: number, y: number, color: number): void {
     const s = this.scene;
-    const e = s.add.particles(x, y, 'menu_puff', {
+    fxPool(s).burst(`puff:${color}`, 'menu_puff', {
       speed: { min: 15, max: 50 }, lifespan: { min: 300, max: 600 },
-      scale: { start: 0.35, end: 0.9 }, alpha: { start: 0.6, end: 0 }, tint: [color], emitting: false,
-    }).setDepth(12);
-    e.explode(8);
-    s.time.delayedCall(700, () => e.destroy());
+      scale: { start: 0.35, end: 0.9 }, alpha: { start: 0.6, end: 0 }, tint: [color],
+    }, x, y, 8, 12);
   }
 
   // O muro só nasce em casa livre: chão vazio, sem poção, sem a porta, sem inimigo, sem chefe e sem a Roo.
@@ -665,9 +678,8 @@ export class RooFormSystem {
   // A defesa de pé: conta o tempo, desenha o efeito da forma em volta da Roo e cai ao acabar (ou se a forma acabar).
   private updateGuard(delta: number): void {
     const g = this.guardGfx;
-    g.clear();
     const guard = this.guard;
-    if (!guard) return;
+    if (!this.beginDraw(g, !!guard) || !guard) return;
     guard.ms -= delta;
     if (guard.ms <= 0 || !this.form.active) {
       this.endGuard();
@@ -717,9 +729,8 @@ export class RooFormSystem {
   // A mira da Raiz: as casas onde a Roo pode brotar em verde-claro, o cursor com borda forte.
   private drawAim(): void {
     const g = this.aimGfx;
-    g.clear();
     const a = this.aim;
-    if (!a) return;
+    if (!this.beginDraw(g, !!a) || !a) return;
     const s = this.scene;
     const range = this.form.def?.ability2?.range ?? 4;
     const from = { x: s.player.gridX, y: s.player.gridY };
@@ -811,7 +822,8 @@ export class RooFormSystem {
 
   private drawBubbles(): void {
     const g = this.bubbleGfx;
-    g.clear();
+    const enemies = this.scene.enemySystem.enemies;
+    if (!this.beginDraw(g, this.bubbles.length > 0 || enemies.some(e => e.alive && e.trapMs > 0))) return;
     for (const b of this.bubbles) {
       const p = this.bubblePos(b);
       this.drawBubble(g, p.x, p.y + Math.sin(this.clockMs / 140) * 1.5, 11);
@@ -829,7 +841,7 @@ export class RooFormSystem {
   // O muro: blocos de sal em pixels, com a borda escura; piscam quando estão para cair.
   private drawWalls(): void {
     const g = this.wallGfx;
-    g.clear();
+    if (!this.beginDraw(g, this.walls.size > 0)) return;
     for (const w of this.walls.active(this.clockMs)) {
       if (w.left < 700 && Math.floor(this.clockMs / 90) % 2 === 0) continue;
       const x = w.x * T;
@@ -862,8 +874,8 @@ export class RooFormSystem {
 
   // O sopro: três fios claros que correm pela linha, em pixels, e somem.
   private drawGusts(delta: number): void {
-    const g = this.gustGfx;
-    g.clear();
+    const g = this.gustGfx; // também leva o monte de terra da Raiz (updateBurrow desenha depois, sem limpar)
+    if (!this.beginDraw(g, this.gusts.length > 0 || this.burrowMs > 0)) return;
     for (const w of [...this.gusts]) {
       w.t += delta;
       if (w.t >= GUST_FX_MS) { this.gusts = this.gusts.filter(x => x !== w); continue; }
@@ -886,8 +898,8 @@ export class RooFormSystem {
 
   // Brasas em xadrez de pixels que alternam entre quadros (sem degradê); piscam quando estão acabando.
   private drawEmbers(): void {
-    const g = this.emberGfx;
-    g.clear();
+    const g = this.emberGfx; // também leva as poças (drawPuddles desenha depois, sem limpar)
+    if (!this.beginDraw(g, this.embers.size > 0 || this.puddles.size > 0)) return;
     const phase = Math.floor(this.clockMs / 180);
     for (const e of this.embers.active(this.clockMs)) {
       if (e.left < 600 && Math.floor(this.clockMs / 100) % 2 === 0) continue;

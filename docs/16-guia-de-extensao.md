@@ -48,6 +48,12 @@ Não é preciso mexer em: `MainScene`, `textures/index.ts`, `arena.ts`, `sprites
 ### Uma fase ou um capítulo novo
 Uma entrada em `stages` do capítulo (ou `chapters/<nome>.ts` + uma linha em `CHAPTER_LIST`, tirando o capítulo de `UPCOMING_CHAPTERS`). Inserir fases no meio **muda a numeração**: aumente `STAGE_SCHEMA` e acrescente o passo em `stages/migration.ts`. Texto: o `story` da fase e, se couber, uma passagem em `PASSAGE_CARDS`.
 
+### Uma abertura nova do Livro de Roo
+Veja `docs/22-livro.md`: um objeto em `LIVRO` (`game/livro.ts`), uma cena em `CENAS` (`pages/livroScenes.ts`) e o teste de contagem em `tests/livro.test.ts`. A glosa é uma nota do copista, **sem citar versículo**.
+
+### Uma gravura de fase nova
+O cartão de entrada de cada fase usa uma gravura do livro. Em `game/stageArt.ts`, uma linha em `PLACAS_DAS_FASES` (placa e variante); se a cena for nova, a função em `pages/placas.ts` (`PLACAS`; os sprites do jogo que ela usar entram em `SPRITES_DAS_PLACAS`) e o teste de `tests/stageArt.test.ts`.
+
 ### Um bloco novo
 Um estilo em `blockStyles.ts` (`BlockStyle`, `BLOCK_TEXTURE`, `BLOCK_NAME`) e o desenho em `textures/blocks.ts`. **Nada em forma de cruz** (veja "Respeito à fé").
 

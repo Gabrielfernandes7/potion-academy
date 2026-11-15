@@ -8,6 +8,7 @@ import Phaser from 'phaser';
 import { BLOCK, BOMB_ORDER, BombId, CANVAS, CONFIG, ElementId, EMPTY, WALL } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
 import { ARENA_STAGE, arenaStageDef, duelStageDef } from '../game/arena';
+import { ObjectPool } from '../game/fx/objectPool';
 import { duelOutcome, validDuel } from '../game/duel';
 import { canUseBomb, isBlockedBomb, setArenaLoadout } from '../game/loadout';
 import { rooOriginY } from '../textures/rooGeometry';
@@ -757,19 +758,20 @@ export class MainScene extends Phaser.Scene {
   }
 
   // Aviso que sobe e some. Fica parado (hold) antes de subir para dar tempo de ler.
+  // Os textos são reaproveitados (ver fx/objectPool.ts): criar um texto cria uma textura de canvas, e os avisos são
+  // dezenas por minuto.
+  private readonly textPool = new ObjectPool(() => this.add.text(0, 0, '', { fontFamily: 'monospace' }).setOrigin(0.5).setDepth(20));
+
   floatingText(gx: number, gy: number, text: string, color: string, size = 12, hold = 650): void {
-    const t = this.add.text(
-      gx * CONFIG.tile + CONFIG.tile / 2,
-      gy * CONFIG.tile + CONFIG.tile / 2,
-      text,
-      // contorno escuro: o aviso lê sobre qualquer chão (o verde do jardim apagava o +1 e o -2)
-      { fontFamily: 'monospace', fontSize: `${size}px`, color, fontStyle: 'bold', stroke: '#14100c', strokeThickness: Math.max(3, Math.round(size / 4)) },
-    ).setOrigin(0.5).setDepth(20);
+    const t = this.textPool.acquire();
+    // contorno escuro: o aviso lê sobre qualquer chão (o verde do jardim apagava o +1 e o -2)
+    t.setStyle({ fontFamily: 'monospace', fontSize: `${size}px`, color, fontStyle: 'bold', stroke: '#14100c', strokeThickness: Math.max(3, Math.round(size / 4)) });
+    t.setText(text).setPosition(gx * CONFIG.tile + CONFIG.tile / 2, gy * CONFIG.tile + CONFIG.tile / 2).setAlpha(1);
     // sobe e some só depois da permanência
     this.tweens.add({
       targets: t, y: t.y - 24, alpha: 0,
       duration: 450, delay: hold, ease: 'Quad.easeIn',
-      onComplete: () => t.destroy(),
+      onComplete: () => this.textPool.release(t),
     });
   }
 

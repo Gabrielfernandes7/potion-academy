@@ -58,6 +58,29 @@ Monge, confessor do mestre. Sabe que a caridade do mosteiro não resolve tudo e 
 ### Roo
 Nasceu no Caldeirão, de uma bolha. Os alquimistas do vale o chamam de "filho do Caldeirão". Ele acha que a história da bolha é uma fábula de ninar. Não é.
 
+## Por que a Roo parte (o motivo)
+
+A Roo não é um soldado que busca algo "porque sim". Parte por **três razões pessoais**, todas ditas na carta e no cartão do primeiro nível:
+1. **Come da mesma sopa.** O mestre partiu há três invernos sem dizer para onde, e a Roo faz a mesma fila do mosteiro que o vale inteiro. A fome é dela também.
+2. **O lar foi tomado.** Belladona ocupou o laboratório do mestre (o Caldeirão, a casa da Roo) e levou as escrituras.
+3. **Uma noite que ela não conhece.** Anselmo sabe como a Roo nasceu e só conta a quem vier ouvi-lo no mosteiro. A Roo vai atrás de quem é.
+
+O arco: ela parte para **saber o que é** (acha que pode ser só um resultado, uma "prova" do mestre) e volta sabendo **o que fazer com o que recebeu** (é uma dádiva, e dádiva se reparte).
+
+## O desfecho (o que acontece depois)
+
+Cada fio que a história abre ganha uma resposta no fim, mesmo quando a resposta é "ainda não". Está no jogo (`ENDING_CARDS`, `CAULDRON_LINES`) e no livro animado (abertura "A primavera").
+
+| Fio | Resposta no fim |
+|---|---|
+| **A fome** | Sem milagre: nenhuma poção a vence. Os celeiros do vale se abrem um a um, o primeiro o do senhor que ouviu o frei; a semente seca é repartida; na colheita seguinte "o pão não sobrou: deu para todos". |
+| **A peste (a febre)** | Recua das casas da beira da charneca. Nem todos são salvos; os que se foram são lembrados pelo nome. |
+| **Belladona** | Perdeu a luta, mas o trauma ganha caminho: na derrota diz "agora não sei o que faço"; no portão do mosteiro diz "eu sei destilar a febre" e fica para trabalhar na enfermaria (Anselmo não a absolve: "não é o meu ofício"). Escreve o nome da mãe no primeiro frasco que destila. Ainda conta os mortos; agora conta também os alimentados. |
+| **As escrituras** | Não voltam ao cofre: copiadas em três mosteiros e lidas em voz alta nas aldeias. Anselmo parte o pão à porta. |
+| **O mestre** | Sem notícia. A última página dele, achada no Observatório, responde à pergunta da Roo: "não foi prova: foi dádiva". A Roo deixa uma vela na janela do Caldeirão. |
+| **O que a Roo aprendeu** | Dito por ela no portão: "não nasci para provar nada; escolho, todos os dias, ficar ao lado de quem tem fome". |
+| **O Caldeirão** | Que nunca fez pão, ferve sopa pela primeira vez, mexido por muitas mãos (a de Belladona, a dos monges, a das famílias). |
+
 ## Origem da Roo: a bolha
 
 Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Materia com o sabão de lixívia que o laboratório usa para purificar os vidros e soprou por um tubo de vidro. Subiu uma bolha iridescente, que refletiu o laboratório, o caldeirão e o rosto dele, e não estourou. Pousou na bolsa de uma capa pendurada num gancho e estourou sem ruído. Na bolsa respirava uma criatura pequena, de orelhas grandes: a Roo. Ninguém soube explicar por que um cachorro. O mestre escreveu *"a matéria responde ao que não sabemos pedir"* e riscou.
@@ -80,9 +103,9 @@ As escrituras aparecem como objeto e como tema. Nenhum dos três ecos é ensinad
 
 | Texto | Como aparece | O que mostra |
 |---|---|---|
-| **A multiplicação dos pães** (João 6) | Belladona o lê como técnica reproduzível; Anselmo lê como compaixão, partilha e Pão da Vida | O erro dela não é querer alimentar os famintos, é querer ser dona do poder que alimenta |
-| **O Bom Samaritano** (Lucas 10,25–37) | Anselmo ao fim: "fica ao lado dessa pessoa" | Saber muito não basta; cuidar de quem está ferido, sim |
-| **O rico e Lázaro** (Lucas 16,19–31) | Celeiros trancados; Lázaro à porta, o portão do jardim | A fome não é só falta de comida, é também como se reparte |
+| **A multiplicação dos pães** | Belladona o lê como técnica reproduzível; Anselmo lê como compaixão, partilha e Pão da Vida | O erro dela não é querer alimentar os famintos, é querer ser dona do poder que alimenta |
+| **O Bom Samaritano** | Anselmo ao fim: "fica ao lado dessa pessoa" | Saber muito não basta; cuidar de quem está ferido, sim |
+| **O rico e Lázaro** | Celeiros trancados; Lázaro à porta, o portão do jardim | A fome não é só falta de comida, é também como se reparte |
 
 ## A Grande Obra: os quatro atos
 

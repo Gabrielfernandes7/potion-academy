@@ -31,6 +31,7 @@
       <li><a href="#log">Log da história</a></li>
     </ol>
     <label><input type="checkbox" id="notes-toggle" checked> Mostrar notas para o jogo</label>
+    <a class="back" href="/livro.html">Ver como livro animado</a>
     <a class="back" href="/">Voltar ao jogo</a>
   </nav>
 
@@ -138,7 +139,7 @@
 
       <div class="note">
         <strong>Para o jogo</strong>
-        <p>Nada disto aparece com capítulo e versículo. Os ecos vivem em objetos e falas: celeiros trancados nas notícias, o portão, o "fica ao lado". O livro mostra os versículos só para o roteiro não perder a fonte.</p>
+        <p>Nada disto aparece com capítulo e versículo. Os ecos vivem em objetos e falas: celeiros trancados nas notícias, o portão, o "fica ao lado". O livro também não os cita: as notas do copista dizem a ideia, sem referência.</p>
       </div>
     </article>
 
@@ -160,7 +161,8 @@
     <article class="chapter" id="ato1" data-stage="nigredo">
       <div class="kicker">Ato I · Nigredo, o escurecer</div>
       <h2>O Chamado</h2>
-      <p>Numa noite, Roo recebe uma carta de frei Anselmo. Não é um pedido comum: as escrituras do mosteiro foram <em>levadas</em>, e ele teme o que será feito delas. Junto vem um frasco vazio, lacrado. Nenhuma explicação.</p>
+      <p>Numa noite, Roo recebe uma carta de frei Anselmo. Há três invernos o mestre partiu sem dizer para onde, e desde então Roo come da sopa do mosteiro, na mesma fila que o vale inteiro. Belladona tomou o laboratório, que era a casa dele, e levou as escrituras. Anselmo pede que as traga de volta e promete, só a quem vier ouvi-lo, contar uma noite que Roo não conhece: a dele. Junto vem um frasco vazio, lacrado.</p>
+      <p>Roo não parte por dever, nem porque sim. Parte porque a fome é dele também, porque a casa foi tomada e porque quer saber quem é.</p>
       <p>Roo parte do Caldeirão para o antigo laboratório do mestre, hoje de Belladona. As salas estão trancadas por gemas, e os sapos magos guardam os cantos. Pelo caminho, Roo encontra notícias do vale: colheitas perdidas, aldeias vazias. A missão parecia ser recuperar uns papéis. Começa a parecer outra coisa.</p>
       <p>Na saída, uma página rasgada, na letra do mestre: <em>"a terra é de quem a cultiva"</em>, riscado, escrito de novo. Roo nunca o viu hesitar diante de uma fórmula.</p>
       <div class="note">
@@ -231,6 +233,11 @@
       <p>Conta o que fez e o que deixou de fazer: era confessor do mestre, viu que ele se perdia atrás da pedra filosofal e não o deteve. Conta o que o mestre lhe disse na noite da bolha, e o que ele respondeu, e como o mestre chorou, e como ele não insistiu. Não pede perdão. Pede que Roo não repita: <em>"Quando alguém procurar sem saber o que procura, fica ao lado dessa pessoa."</em></p>
       <p>As escrituras, o que restou delas, não voltam ao cofre. Anselmo vai mandar copiá-las muitas vezes e levá-las às aldeias. Tesouro escondido não serve a ninguém; serve o pão partido.</p>
       <p>E devolve o frasco vazio.</p>
+      <p>Atrás das famílias, de capa verde e sem chapéu, espera Belladona, com um frasco vazio na mão. Veio ouvir, não pedir perdão. Procurou a fórmula do pão enquanto a mãe ardia de febre e entendeu tarde: não era a fórmula que faltava, era alguém sentado ao lado. Anselmo não a absolve, que não é o ofício dele. Diz que há um alambique que ninguém sabe acender. <em>"Eu sei destilar a febre."</em> <em>"Então fica."</em></p>
+      <p>E a Roo diz o que aprendeu: <em>não nasci para provar nada; escolho, todos os dias, ficar ao lado de quem tem fome.</em></p>
+      <h3>Na primavera seguinte</h3>
+      <p>A fome não acabou num dia, e nenhuma poção a venceu. Mas os celeiros do vale se abriram um a um, o primeiro o do senhor que ouviu o frei, e a semente seca foi repartida. Na colheita seguinte, o pão não sobrou: deu para todos. A febre recuou das casas da beira da charneca. Nem todos foram salvos; os que se foram foram lembrados pelo nome, e Belladona escreveu o da mãe no primeiro frasco que destilou.</p>
+      <p>Do mestre não houve notícia. Roo deixa uma vela na janela do Caldeirão, todas as noites. Se ele voltar, encontrará a página que deixou sob o astrolábio: <em>não foi prova, foi dádiva</em>. E o Caldeirão, que nunca tinha feito pão, ferveu sopa pela primeira vez, mexido por muitas mãos.</p>
       <div class="note">
         <strong>Para o jogo</strong>
         <p><span class="status status--ok">aplicado</span> O portão, o cartão da culpa (a noite da bolha, "ele chorou, não acreditou, e eu não insisti") antes de "Não te peço perdão", e a cena final.</p>
@@ -286,6 +293,20 @@
       <div class="kicker">Apêndice</div>
       <h2>Log da história</h2>
       <p>Cada mudança de fato no roteiro entra aqui como um commit, com o que era antes e o que passou a ser. Os nomes de personagens e os fatos que o jogo mostra são o que importa; ajustes de texto sem mudança de fato não entram. Para o código exato, use <code>git log -p</code> nos arquivos <code>history.html</code>, <code>docs/12-historia.md</code> e <code>src/game/story.ts</code>.</p>
+
+      <h3>working tree · 2026-11-15 · o desfecho e o motivo da Roo</h3>
+      <p class="versao-nota">Alterações não commitadas (<code>git status</code>): ainda sem commit.</p>
+      <ul>
+        <li><b>O motivo:</b> a Roo parte porque come da mesma sopa, porque o lar foi tomado e porque Anselmo sabe quem ela é (antes, partia porque a carta pedia).</li>
+        <li><b>O desfecho:</b> Belladona volta ao portão e fica na enfermaria; a fome e a febre ganham resposta (sem milagre); a última página do mestre responde à pergunta; a Roo diz o que aprendeu. Antes, nada disso era dito: a carta pedia, a Roo ia, Belladona perdia e a história acabava.</li>
+      </ul>
+
+      <h3>working tree · 2026-11-15 · o Livro de Roo animado</h3>
+      <p class="versao-nota">Alterações não commitadas (<code>git status</code>): ainda sem commit.</p>
+      <ul>
+        <li><b>O Livro de Roo</b> (<code>livro.html</code>, botão O LIVRO do menu): a história em 12 aberturas, como um manuscrito de alquimia à luz de vela, com gravuras animadas, glosas bíblicas do copista e música opcional.</li>
+        <li><b>O pão como eixo:</b> a multiplicação dos pães lida de duas maneiras, como fórmula (Belladona) e como gesto (Anselmo). A tentação das pedras ecoa a filosofia dela. Nenhum fato do roteiro mudou: só a forma de contar.</li>
+      </ul>
 
       <h3>working tree · 2026-11-15 · o Observatório, o Ouroboros e as páginas do mestre</h3>
       <p class="versao-nota">Alterações não commitadas (<code>git status</code>): ainda sem commit.</p>

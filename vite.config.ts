@@ -38,6 +38,7 @@ export default defineConfig({
         sprites: 'sprites.html',
         history: 'history.html',
         manuscrito: 'manuscrito.html',
+        livro: 'livro.html',
         notFound: '404.html',
         serverError: '500.html',
       },

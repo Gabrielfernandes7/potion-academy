@@ -34,6 +34,8 @@ export function bootGame(): void {
     powerPreference: 'high-performance',
     pixelArt: true,
     antialias: false,
+    // Sem `fps.limit`: medido, um limite de 60 numa tela de 60 Hz deixa o Phaser com 42 atualizações por segundo (ele
+    // descarta quadros por ruído de tempo). Em telas de 120 Hz o jogo roda a 120; o trabalho por quadro é que foi reduzido.
     parent: 'game',
     audio: { noAudio: true }, // o áudio é todo do AudioEngine (WebAudio próprio)
     // o canvas se ajusta ao contêiner #game (CSS), em qualquer tela

@@ -110,6 +110,8 @@ export function saltWallTiles(
   return out;
 }
 
+const NONE: Array<{ x: number; y: number; left: number }> = []; // lista vazia compartilhada
+
 /** Os muros de sal no chão: casas com validade. Puro: quem chama dá o relógio. */
 export class SaltWallField {
   private tiles = new Map<string, number>();
@@ -128,6 +130,10 @@ export class SaltWallField {
     for (const t of tiles) this.tiles.delete(this.key(t.x, t.y));
   }
 
+  get size(): number {
+    return this.tiles.size;
+  }
+
   has(x: number, y: number, now: number): boolean {
     const until = this.tiles.get(this.key(x, y));
     return until !== undefined && until > now;
@@ -135,6 +141,7 @@ export class SaltWallField {
 
   /** Remove os vencidos e lista os de pé. */
   active(now: number): Array<{ x: number; y: number; left: number }> {
+    if (this.tiles.size === 0) return NONE;
     const out: Array<{ x: number; y: number; left: number }> = [];
     for (const [k, until] of this.tiles) {
       if (until <= now) { this.tiles.delete(k); continue; }

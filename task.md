@@ -3,7 +3,18 @@
 Este arquivo é a memória do projeto entre sessões: **só o que está em aberto**. Leia antes de começar e atualize ao terminar cada tarefa.
 O que já foi feito (e o histórico por rodada) está em `solved.md`. Para o "como funciona", veja `CLAUDE.md` (técnico) e `docs/` (jogo).
 
-Última atualização: 2026-11-15. As rodadas desta data estão commitadas até `f806677`; o que veio depois (UI, Ouroboros, mais inimigos, segunda habilidade do fogo e da água, Muro que barra explosões, Roo de orelhas caídas) está **sem commit** (`git status`).
+Última atualização: 2026-11-15. A rodada de hoje (desempenho, UI de tabuleta e pergaminho, Ouroboros, 8 inimigos novos, segunda habilidade das formas, o Livro de Roo animado, o desfecho da história, a mensagem sem versículos, as gravuras antes de cada fase e o novo Mestre) foi **commitada junto** no fim da sessão (`git log -1`).
+
+## O que foi feito nesta sessão (resumo; o detalhe está em `solved.md`, partes 5 a 9)
+
+- **Desempenho:** pools de partículas e objetos, gráficos só redesenhados quando há o que mostrar, névoa e HUD sem trabalho repetido (`docs/21-desempenho.md`). `fps.limit` foi tentado e revertido.
+- **UI:** tabuleta de madeira, latão, pergaminho e vela; Ouroboros (chefe do Observatório) e 8 inimigos novos; segunda habilidade em todas as formas; muro que barra explosões.
+- **O Livro de Roo** (`/livro.html`, botão O LIVRO): 13 aberturas animadas em pixel art como um manuscrito de alquimia (a Roo bebê na bolha iridescente, o laboratório de velas, o pão partido, Belladona...).
+- **O desfecho:** a Roo ganhou um motivo para partir; Belladona tem trauma, arco e destino; a fome e a peste são resolvidas sem milagre; o mestre deixa a última página; a Roo diz o que aprendeu. 17 cartões no fim.
+- **A mensagem sem versículos:** o verdadeiro evangelho é dedicar a vida a Jesus e servir os mais pobres, as viúvas e os órfãos (como Belladona). Espalhada em pouco, em cada parte: carta, glosas do livro, história das 20 fases, passagens e fim. Os versículos saíram do livro, dos docs e dos testes; `tests/desfecho.test.ts` e `tests/livro.test.ts` conferem.
+- **Gravuras antes de cada fase:** o cartão de entrada de fase mostra a gravura animada do livro (20 fases, 16 gravuras com variantes; poço, torre, biblioteca e observatório são novas). `game/stageArt.ts`, `pages/placas.ts`, `ui/stageIntro.ts`. Conferi as 20 no navegador de teste (desktop e 390 px) e o botão COMEÇAR.
+- **O Mestre** (`textures/mestre.ts`) redesenhado: chapéu de ponta dobrada com lua, capuz com dois pontos de luz, livro no cinto, runas na barra rasgada, cajado com cristal que pulsa e lanterna na corrente. Mesmas chaves (`mestre_sombra_0/1`).
+- **Docs:** `docs/ides.md` podado (só o que falta), `docs/22-livro.md` reescrito, CLAUDE.md, `docs/16` e `docs/README.md` atualizados.
 
 ## Aguardando você: jogar, ouvir e olhar
 
@@ -12,6 +23,8 @@ Eu verifico por script (regra pura, testes, simulações e o jogo rodando num na
 - **Equilíbrio das formas:** 20% de peso (Terra) e de leveza (Ar), muro de 4 s que agora barra explosões, Raiz de 4 casas, Salto de 3, Sopro de 2, Onda de brasas (2 casas), Poça (3x3, 4 s), defesa (corta 50%, 3 s, espera 6 s), lição de 3 golpes. Bônus de 50% das formas, espera de 25 s, custo das habilidades. A Bolha protetora cura 1 de vida a cada 0,5 s (entendi "a cada segundo 0,5" assim; se era a cada 1 s, mude `BUBBLE_HEAL_EVERY_MS`).
 - **Chefes:** o Ouroboros (32 de vida, ciclo de 9 s, anéis, mordida e o Ciclo) nunca foi jogado; a Quimera (28 de vida, Onda de ar na fúria), a Mandrágora (14 de vida na campanha, água cura 1), o Leão Verde e a Belladona.
 - **As fases novas:** o Observatório (4 fases, tema azul-noite), a Névoa com gosma, a Torre com sentinela, o Retorno com ratinho, o Caldeirão com salamandra: tempos, quantidades e se os avisos (monte da toupeira, círculo da coruja, rastro da gosma) dão tempo de reagir. O texto das passagens (13 a 15) e a despedida do Ouroboros.
+- **As gravuras de entrada de fase** (as 20) e o **novo Mestre**: só vi no navegador de teste (computador e celular emulado de 390 px, onde o cartão cabe sem rolar). Falta ver num celular de verdade, conferir se o laço de 30 quadros pesa em aparelho fraco e se a lanterna e o cristal do Mestre leem bem a 40 px dentro do jogo (laboratório e bolha do livro, página do Manuscrito).
+- **A mensagem em cada parte** (Jesus, pobres, viúvas, órfãos): leia a carta, a história das 20 fases e as passagens 11, 14 e 17. A régua era "pouco, em cada parte, sem aula": diga onde ficou pesado ou ausente.
 - **Os 8 inimigos novos:** se leem bem em 40 px (conferi o catálogo, `docs/img/sprites/enemies.png`), sons de tique (relógio) e de pio (coruja).
 - **UI nova** (tabuleta de madeira, latão, pergaminho e vela): conferi menu, carta, ajuda, Arena, fim de jogo e celular em pé, mas **só no navegador de teste**. Falta ver em celular de verdade, em telas deitadas e com o sistema em modo claro.
 - **Roo de orelhas caídas:** agora lê como cachorro; vale ver andando, nas quatro formas e no jardim.
@@ -25,16 +38,26 @@ Eu verifico por script (regra pura, testes, simulações e o jogo rodando num na
 
 ## Decisões que só você pode tomar
 
+- **Qual ideia de `docs/ides.md` trabalhar a seguir** (plano e ordem sugerida no fim do arquivo): reações no chão (lama, vapor, cristais), grimório de reações no Manuscrito e a Prima Materia entregue a Anselmo.
+- **Acessibilidade no celular** (ver a resposta da sessão de 2026-11-15; resumo em `docs/21-desempenho.md` não cobre isso): HUD no canvas fica com letra de 6 a 7 px num celular em pé e os seletores de frasco têm 21x13 px de toque; não há manifesto de app (instalável, tela cheia).
+
 - **Licença do projeto** (o README segue sem): é uma escolha jurídica, não minha.
 - **Endereço final do site** (`og:image` e `og:url` absolutos): depende de onde será hospedado. A 404 e a 500 estão explicadas para Nginx, Apache e hospedeiros estáticos em `docs/20-publicar.md`.
 - **Versão 2 (adiado de propósito):** o Boticário (quem é, se é jogável) e o Ato II ampliado (puzzle de recomposição das páginas), e os companheiros que dependem deles (D3, P5, P6).
 
 ## Roteiro (`docs/12-historia.md`)
 
+- **O desfecho novo** (`docs/12-historia.md`, "Por que a Roo parte" e "O desfecho"): leia os 17 cartões do fim, a carta nova e o texto da abertura "A primavera". Em especial: Belladona ficar na enfermaria (ela é perdoada o bastante?), a fome resolvida com os celeiros abertos (honesto demais, ou de menos?), e a Roo falar a lição em voz alta (ela é calada o jogo todo).
+- **O Livro de Roo animado** (`/livro.html`, `docs/22-livro.md`): revise o texto das 13 aberturas, as glosas do copista (sem versículo) e a frase de Belladona ("de um sopro e de sabão nasce pão"). Só vi no navegador de teste; falta ver num celular de verdade e ouvir a música de cada abertura.
 - Você revisa os furos de roteiro e o texto dos interlúdios novos no livro (Biblioteca e Observatório). A Roo é masculina na prosa; os cartões ficam por ora, e no futuro um vídeo da história no lugar.
 - Os nomes das etapas da Obra (Nigredo, Albedo...) como subtítulo dos atos: hoje só como cor e tom.
 
 ## Fila técnica (o que sobrou e eu posso fazer)
+
+- **Acessibilidade no celular** (decisão sua, ver acima): subir o texto da HUD para o mínimo legível (hoje 6 a 7 px), aumentar o toque dos seletores de frasco (21x13 px; o ideal é 44 px), manifesto de app (instalável, tela cheia, ícone), vibração curta ao acertar ou levar dano e `touch-action` conferido em todas as telas.
+- **Gravuras de fase:** poderia haver uma gravura própria por capítulo para a abertura da Arena (hoje usa a do duelo) e os chefes terem uma moldura diferente.
+- **Ideias de `docs/ides.md`** (em ordem): reações no chão, grimório de reações, Prima Materia entregue a Anselmo.
+- **Teste automático do cartão de entrada no navegador** (hoje só os puros e o fake de contexto; o `npm run smoke` não abre o cartão).
 
 - HUD no canvas fica serrilhada em telas muito grandes (decisão visual do estilo pixel art; mudar só se você quiser texto nítido).
 - A Torre ainda tem pouco além de fantasmas e sentinelas; mais variedade só com a sua opinião depois de jogar.

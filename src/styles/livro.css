@@ -1,0 +1,304 @@
+/*
+   O Livro de Roo (livro.html): um códice de alquimia aberto sobre uma mesa de madeira, à luz de vela. Duas folhas de
+   pergaminho: a gravura animada (pixel art, ampliada sem suavização) à esquerda e o texto com letra capitular, glosa do
+   copista e escrita não decifrada à direita. Em tela estreita vira uma coluna só: gravura em cima, texto embaixo.
+*/
+:root {
+  --desk-0: #100a06;
+  --desk-1: #1d130b;
+  --desk-2: #2c1d10;
+  --leather: #4a2f1a;
+  --leather-dark: #2e1c0f;
+  --brass: #b58a2f;
+  --paper: #f1e5c2;
+  --paper-2: #e6d4a6;
+  --paper-3: #f7efd8;
+  --ink: #3a2814;
+  --ink-soft: #6b5232;
+  --ink-faint: #8a7350;
+  --seal: #8f2d1f;
+  --gold: #9a6416;
+  --gold-bright: #f0c674;
+  --candle: #ffcf6b;
+  --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+  --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+
+body.mesa {
+  min-height: 100dvh;
+  color: var(--ink);
+  font-family: var(--font-body);
+  /* a mesa: madeira escura com veios, e a luz das velas por cima */
+  background:
+    repeating-linear-gradient(92deg, rgba(255, 210, 150, 0.025) 0 2px, transparent 2px 13px),
+    radial-gradient(ellipse 80% 55% at 50% 0%, rgba(255, 175, 80, 0.2), transparent 70%),
+    linear-gradient(180deg, var(--desk-2), var(--desk-1) 40%, var(--desk-0));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: max(10px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* as duas velas nas pontas da mesa: manchas de luz que tremem devagar */
+.vela-luz {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 6% 22%, rgba(255, 190, 90, 0.2), transparent 26%),
+    radial-gradient(circle at 94% 26%, rgba(255, 190, 90, 0.17), transparent 24%);
+  animation: tremer 3.4s ease-in-out infinite alternate;
+}
+@keyframes tremer { from { opacity: 0.72; } 45% { opacity: 1; } to { opacity: 0.84; } }
+@media (pointer: coarse) { .vela-luz { animation: none; opacity: 0.9; } }
+
+.topo, .livro, .controle, .dica { position: relative; z-index: 1; }
+
+.topo {
+  width: min(100%, 1100px);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.voltar {
+  color: #e8d5a8;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border: 1px solid var(--brass);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #3a2a1c, #271a12);
+  box-shadow: inset 0 1px 0 rgba(255, 230, 170, 0.12);
+}
+.topo-links { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.voltar:hover { border-color: var(--gold-bright); color: #fff; }
+
+.carregando { margin: 20vh 0 0; color: #e8d5a8; font-family: var(--font-display); letter-spacing: 0.14em; animation: tremer 1.6s ease-in-out infinite alternate; }
+
+/* ---------------------------------------------------------------- o livro */
+.livro { width: min(100%, 1100px); }
+
+.encadernacao {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
+  perspective: 1800px;
+  padding: 14px;
+  border-radius: 14px;
+  /* a capa de couro em volta das folhas */
+  background:
+    repeating-linear-gradient(8deg, rgba(0, 0, 0, 0.06) 0 2px, transparent 2px 6px),
+    linear-gradient(180deg, var(--leather), var(--leather-dark));
+  box-shadow: 0 0 0 2px #1a0f08, 0 0 0 4px var(--brass), 0 24px 50px rgba(0, 0, 0, 0.65), 0 0 90px rgba(255, 170, 70, 0.1);
+}
+
+.pg {
+  position: relative;
+  min-height: min(76vh, 640px);
+  padding: 26px 30px 34px;
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse at 20% 8%, rgba(255, 248, 224, 0.7), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(150, 105, 50, 0.28), transparent 55%),
+    repeating-linear-gradient(7deg, rgba(110, 80, 40, 0.04) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, var(--paper-3), var(--paper), var(--paper-2));
+  box-shadow: inset 0 0 44px rgba(120, 80, 30, 0.38); /* as bordas queimadas do pergaminho */
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+.pg.esq { border-radius: 8px 0 0 8px; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 40px; }
+.pg.dir { border-radius: 0 8px 8px 0; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; scrollbar-width: thin; }
+
+/* a lombada: a dobra do livro, com o fio da costura */
+.lombada {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 22px, rgba(255, 220, 150, 0.35) 22px 24px, transparent 24px 46px),
+    linear-gradient(90deg, #5a3a1c, #2a180c 50%, #5a3a1c);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+/* furinhos de pauta nas margens, como num códice real */
+.pg::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: 12px;
+  width: 4px;
+  background: radial-gradient(circle, rgba(90, 60, 30, 0.5) 0 1px, transparent 1.5px) 0 0 / 4px 26px repeat-y;
+  pointer-events: none;
+}
+.pg.dir::before { left: auto; right: 12px; }
+
+/* ---------------------------------------------------------------- a gravura */
+.gravura { margin: 0; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+#cena {
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 5px solid var(--ink);
+  border-radius: 3px;
+  background: #0b1218;
+  box-shadow: 0 0 0 2px var(--gold), 0 0 0 4px var(--ink), 0 8px 18px rgba(60, 40, 15, 0.45), inset 0 0 14px rgba(0, 0, 0, 0.5);
+}
+.gravura figcaption { max-width: 540px; text-align: center; font-style: italic; font-size: 14px; line-height: 1.5; color: var(--ink-soft); }
+
+.folio { margin: 0; font-family: var(--font-display); font-size: 12px; letter-spacing: 0.18em; color: var(--ink-faint); }
+.pg.esq .folio { position: absolute; left: 30px; bottom: 12px; }
+.pg.dir .folio { position: absolute; right: 30px; bottom: 12px; }
+
+/* ---------------------------------------------------------------- o texto */
+.cabeca { text-align: center; }
+.rubrica {
+  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--seal); /* a rubrica, em vermelho, como nos manuscritos */
+}
+.cabeca h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.6vw, 36px);
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  color: var(--ink);
+  text-shadow: 0 1px 0 rgba(255, 248, 224, 0.7);
+}
+.cabeca h1::after {
+  content: '';
+  display: block;
+  width: 150px;
+  height: 10px;
+  margin: 10px auto 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='10' viewBox='0 0 150 10'%3E%3Cpath d='M2 5h58M90 5h58' stroke='%239a6416' stroke-width='1.2'/%3E%3Cpath d='M75 0l5 5-5 5-5-5z' fill='%23b58a2f' stroke='%236f5420' stroke-width='.8'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.texto { font-size: clamp(15px, 1.55vw, 18px); line-height: 1.72; }
+.texto p { margin: 0 0 0.85em; text-align: justify; hyphens: auto; animation: surgir 0.9s ease-out both; animation-delay: calc(var(--i, 0) * 0.32s + 0.15s); }
+@keyframes surgir { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* a letra capitular: grande, em vermelho, com um fio de ouro, como a primeira letra de um capítulo iluminado */
+.texto p:first-child::first-letter {
+  float: left;
+  margin: 0.04em 0.1em 0 0;
+  padding: 0.04em 0.12em 0.02em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 3.5em;
+  line-height: 0.82;
+  color: var(--seal);
+  background: linear-gradient(180deg, rgba(240, 198, 116, 0.35), rgba(240, 198, 116, 0.08));
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  text-shadow: 1px 1px 0 rgba(240, 198, 116, 0.7);
+}
+
+/* a glosa do copista, à margem */
+.glosa {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+  padding: 10px 12px;
+  border-left: 3px solid var(--seal);
+  background: rgba(143, 45, 31, 0.07);
+  border-radius: 0 6px 6px 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  font-style: italic;
+  color: var(--ink-soft);
+  animation: surgir 0.9s ease-out 1.4s both;
+}
+.glosa-sinal { color: var(--seal); font-family: var(--font-display); font-style: normal; font-weight: 700; }
+.glosa b { color: var(--seal); font-style: normal; font-family: var(--font-display); letter-spacing: 0.06em; font-size: 12.5px; }
+
+.marginalia { margin: 0 0 18px; text-align: center; font-style: italic; font-size: 11.5px; letter-spacing: 0.08em; color: var(--ink-faint); opacity: 0.8; }
+
+/* ---------------------------------------------------------------- os controles */
+.controle {
+  width: min(100%, 1100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.seta, .musica {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 16px;
+  border: 2px solid var(--brass);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #4a3520, #301f13);
+  color: var(--gold-bright);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 230, 170, 0.15), 0 3px 8px rgba(0, 0, 0, 0.45);
+}
+.musica { font-family: var(--font-body); font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+.musica[aria-pressed='true'] { background: linear-gradient(180deg, #6a4a20, #4a3010); box-shadow: 0 0 14px rgba(255, 207, 107, 0.35), inset 0 1px 0 rgba(255, 230, 170, 0.2); }
+.seta:hover:not(:disabled), .musica:hover { border-color: var(--gold-bright); color: #fff; }
+.seta:disabled { opacity: 0.35; cursor: default; }
+:focus-visible { outline: 3px solid var(--gold-bright); outline-offset: 2px; }
+
+.pontos { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.pontos button {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+}
+/* cada ponto é uma chama de vela: apagada, ou acesa na abertura em que estamos */
+.pontos button::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: #5b4a35;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.pontos button[aria-current='true']::before { background: var(--candle); box-shadow: 0 0 9px 3px rgba(255, 207, 107, 0.65); transform: scale(1.25); }
+.pontos button:hover::before { background: #b89a60; }
+
+.dica { margin: 0; font-size: 12.5px; color: #bfa77a; text-align: center; }
+.dica kbd { padding: 1px 6px; border: 1px solid var(--brass); border-radius: 4px; background: rgba(0, 0, 0, 0.3); font-family: var(--font-body); }
+
+/* ---------------------------------------------------------------- celular e telas estreitas */
+@media (max-width: 820px) {
+  .encadernacao { grid-template-columns: minmax(0, 1fr); padding: 10px; }
+  .lombada, .pg::before { display: none; }
+  .pg { min-height: 0; padding: 18px 16px 34px; }
+  .pg.esq { border-radius: 8px 8px 0 0; }
+  .pg.dir { border-radius: 0 0 8px 8px; overflow: visible; }
+  .pg.esq .folio, .pg.dir .folio { position: static; text-align: right; margin-top: 4px; }
+  .texto { font-size: 16.5px; }
+  .texto p { text-align: left; }
+  /* uma linha só, presa embaixo: anterior, música e próxima (o "n / 12" já diz onde se está) */
+  .controle { position: sticky; bottom: 0; display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; gap: 10px; padding: 10px 0 max(8px, env(safe-area-inset-bottom)); background: linear-gradient(180deg, transparent, rgba(16, 10, 6, 0.94) 35%); }
+  .pontos { display: none; }
+  .seta, .musica { width: 100%; padding: 8px 6px; }
+  #ant { grid-column: 1; grid-row: 1; }
+  #musica { grid-column: 2; grid-row: 1; }
+  #prox { grid-column: 3; grid-row: 1; }
+  .dica { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}

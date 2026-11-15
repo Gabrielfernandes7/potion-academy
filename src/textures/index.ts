@@ -35,6 +35,8 @@ export function generateTextures(scene: Phaser.Scene): void {
   drawEntities(make);
   drawNewEnemies(make);
   drawMestre(make);
+  // o anel que se abre em cada casa de uma explosão (uma imagem, no lugar de um círculo vetorial por casa)
+  make('fx_ring', (g, T) => { g.lineStyle(2, 0xffffff, 0.95); g.strokeCircle(T / 2, T / 2, 10.5); g.fillStyle(0xffffff, 0.18); g.fillCircle(T / 2, T / 2, 10.5); });
   drawHudIcons(g);
   drawMenuTextures(g);
   for (const id of BOSS_IDS) BOSS_DEFS[id].sprite.draw(g, CONFIG.tile); // os chefes vêm do registro

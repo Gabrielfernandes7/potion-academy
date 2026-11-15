@@ -197,3 +197,37 @@ Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
 - **Descartadas por falta de descrição ou por ficarem sem sentido:** as "teclas U e I" (pendência antiga sem texto), o "gasto que se repete" (era da loja, que saiu), a "estimativa de economia de 80 POÇÃO" (já tinha saído de `docs/10-equilibrio.md`), "capítulos selados" (não há mais nenhum) e "o chefe do Observatório" (é o Ouroboros).
 - **Verificado:** `npm run check` (416 testes e build) e, num navegador de teste, as telas da UI, o Ouroboros, os quatro comportamentos novos (cura da salamandra, divisão da gosma, roubo do ratinho e marcha da sentinela), a Roo de orelhas caídas e o catálogo.
 
+## Rodada de 2026-11-15, parte 6: lag (investigação e correção)
+
+Investigação medida (perfil de CPU, vazamento em tempo real, custo de uma explosão); relato completo em `docs/21-desempenho.md`.
+- **Sem vazamento:** objetos, tweens e memória estáveis em 60 s de jogo. O lag era de picos.
+- **A explosão criava 62 objetos de uma vez** (um emissor, um temporizador, duas imagens e dois tweens por casa). Agora: partículas compartilhadas (`game/fx/particlePool.ts`), imagens reaproveitadas (`objectPool.ts`) e animação no `update`, **0 objetos criados por explosão** e `detonate` de 0,65 para 0,26 ms. Mesmo tratamento para golpes, poeira, espinhos e vapor.
+- **Textos flutuantes reaproveitados** (criar um texto cria uma textura de canvas).
+- **Gráficos redesenhados só quando há o que mostrar** (formas, avisos dos inimigos), **névoa** só quando a posição ou o raio mudou, **HUD** ignora estado idêntico.
+- **Tentado e revertido:** `fps.limit: 60` derruba telas de 60 Hz para 42 atualizações por segundo.
+- **CSS:** o fundo deixou de ser `fixed` e a poeira fica parada em telas de toque (o custo era imperceptível no teste, mas é risco no celular).
+- Testes: `tests/fx.test.ts` (419 no total).
+
+## Rodada de 2026-11-15, parte 7: O Livro de Roo animado
+
+- **`livro.html`** (botão **O LIVRO** do menu, no lugar do link do log, que continua em `history.html#log` e no topo do livro): a história em **12 aberturas** como um manuscrito de alquimia copiado à luz de vela. Gravura animada em pixel art à esquerda (a Roo bebê dentro da bolha iridescente no laboratório de velas, a fome no vale, o pão partido, o duelo, o ciclo do Ouroboros, o frasco vazio e a bolha que sobe), texto com letra capitular, rubrica em latim, **glosa bíblica do copista** e escrita não decifrada à direita; virada de página em 3D, deslizar, teclado, música opcional (a faixa de cada abertura), versão de uma coluna para celular, movimento reduzido.
+- **O pão partido como eixo:** a multiplicação dos pães lida como fórmula por Belladona e como gesto por Anselmo; a tentação das pedras ecoa a filosofia dela; também o samaritano, o rico e Lázaro, os celeiros cheios, o tempo de cada coisa e "de graça recebestes".
+- **Respeito à fé:** nenhuma figura tem cruz (a única está na torre do sino do mosteiro); `disco()` desenha discos de 1 e 2 px como quadrados, porque a conta de um disco minúsculo é um "+". O teste confere.
+- Arquivos: `src/game/livro.ts` (texto, puro), `src/pages/livroScenes.ts` e `livroDraw.ts` (cenas), `livro.ts`, `src/styles/livro.css`; `docs/22-livro.md`. Testes: `tests/livro.test.ts` roda cada cena com um contexto de mentira em cinco instantes e confere texto, glosas, músicas e a regra da cruz (429 no total).
+
+## Rodada de 2026-11-15, parte 8: o motivo da Roo e o desfecho da história
+
+Crítica recebida: no fim ninguém dizia como os problemas se resolviam (a fome, a peste, o que houve com Belladona, o que a Roo aprendeu) e a Roo parecia só um soldado que busca algo "porque sim".
+- **O motivo:** a carta e o cartão do primeiro nível agora dão três razões pessoais: a Roo come da mesma sopa que o vale, o lar (o Caldeirão) foi tomado e Anselmo sabe quem ela é, mas só conta a quem for ouvir. Arco: parte para saber o que é, volta sabendo o que fazer com o que recebeu (ver `docs/12-historia.md`).
+- **Belladona:** na derrota o trauma aparece ("minha mãe ardeu três noites e eu contei cada uma... agora não sei o que faço"); no portão do mosteiro ela vem, diz "eu sei destilar a febre" e fica (Anselmo: "não te absolvo: não é o meu ofício").
+- **A fome e a peste:** respostas honestas, sem milagre: celeiros abertos um a um, semente repartida, "o pão não sobrou: deu para todos"; a febre recua, nem todos se salvam e os que se foram são lembrados pelo nome.
+- **O mestre:** a última página dele, achada no Observatório (cartões do Ouroboros), responde à pergunta ("não foi prova, foi dádiva"); a Roo deixa uma vela na janela.
+- **O que a Roo aprendeu**, dito por ela ("não nasci para provar nada; escolho, todos os dias, ficar ao lado de quem tem fome"), e a cena final mostra o Caldeirão fervendo sopa, mexido por muitas mãos.
+- **No jogo:** `ENDING_CARDS` passou de 6 para 17 cartões (montados de `CONFISSAO`, `BELLADONA_NO_PORTAO`, `FRASCO` e `EPILOGO`), `CAULDRON_LINES` ganhou 2 linhas, `BELLADONA_CARDS` e `OUROBOROS_CARDS` ganharam um cartão cada. **No livro animado:** nova abertura "A primavera" (13 no total) e as aberturas da jornada, do duelo, do ciclo e do retorno reescritas. Testes em `tests/desfecho.test.ts` (437 no total).
+
+## Rodada de 2026-11-15, parte 9: a mensagem, as gravuras de fase e o novo Mestre
+
+- **A mensagem sem versículos:** o livro, os docs, o histórico e os testes deixaram de citar capítulo e versículo (`Glosa` perdeu o campo `ref`; as glosas são notas do copista). O que o jogo quer dizer entra em pouco e em cada parte: **o verdadeiro evangelho é dedicar a vida a Jesus e servir os mais pobres, as viúvas e os órfãos, como Belladona passa a fazer.** Carta de Anselmo, parágrafos do livro (a fome, a jornada, o retorno, a primavera, o frasco), a história das 20 fases, as passagens 11, 14 e 17, a confissão, Belladona no portão e o epílogo. Testes: `tests/livro.test.ts` (sem versículo, mensagem presente, sem cruz) e `tests/desfecho.test.ts`.
+- **Gravuras antes de cada fase:** o cartão de entrada de fase (`#intro-overlay`, `ui/stageIntro.ts`) mostra a gravura animada do livro. `game/stageArt.ts` liga as 20 fases a 16 gravuras (com variantes); `pages/placas.ts` tem as 4 novas (o poço da Quimera, a torre com escada e portas seladas, a biblioteca em 4 variantes com o Leão Verde dormindo, o observatório em 3 com lanterna, relógio e coruja). Movimento reduzido: quadro parado. Conferido no navegador de teste: as 20 gravuras, o botão COMEÇAR e Enter; `tests/stageArt.test.ts` roda cada uma com contexto de mentira.
+- **O novo Mestre** (`textures/mestre.ts`): pixel art em retângulos de 1 px, 2 quadros (o segundo pisca um olho, o cristal e a chama pulsam, a barra da capa balança). Aparece no livro (laboratório e bolha) e na página do Manuscrito.
+- **Docs:** `docs/22-livro.md` reescrito (13 aberturas, sem referências, gravuras de fase); `docs/ides.md` podado (saiu o que já está no jogo); CLAUDE.md, `docs/16` e `docs/README.md`.

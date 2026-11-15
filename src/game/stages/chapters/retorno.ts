@@ -10,7 +10,7 @@ export const RETORNO: ChapterSpec = {
   stages: [
     {
       kind: 'crypt', name: 'A ESTRADA', place: 'Estrada do Vale',
-      story: 'A estrada desce do vale, cheia de gente a caminho da sopa do mosteiro. Roo leva o frasco vazio e pensa em Anselmo.',
+      story: 'A estrada desce do vale, cheia de gente a caminho da sopa do mosteiro, as viúvas à frente, com os órfãos pela mão. Roo leva o frasco vazio e pensa em Anselmo.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'garden', block: 'hay', track: 'jardim',
       enemies: [{ kind: 'frog', start: 2, max: 3, every: 10 }],
     },
@@ -22,7 +22,7 @@ export const RETORNO: ChapterSpec = {
     },
     {
       kind: 'crypt', name: 'OS MUROS', place: 'Muralha do Mosteiro',
-      story: 'Os muros do mosteiro se aproximam. O portão está à vista, e há famílias à porta, esperando a sopa.',
+      story: 'Os muros do mosteiro se aproximam. O portão está à vista, e há famílias à porta, esperando a sopa. As viúvas e os órfãos entram primeiro: é a regra do frei, e ele diz que é de Jesus.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'garden', block: 'brick', track: 'jardim',
       enemies: [{ kind: 'frog', start: 1, max: 2, every: 10 }, { kind: 'flower', start: 4, max: 5 }, { kind: 'rat', start: 1, max: 2 }],
     },

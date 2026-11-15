@@ -23,7 +23,7 @@ export const BIBLIOTECA: ChapterSpec = {
     },
     {
       kind: 'crypt', name: 'O COFRE', place: 'Cofre das Escrituras',
-      story: 'Aqui estão as escrituras que Belladona levou, presas a correntes com o selo do mestre. Cada caixote quebrado solta um elo.',
+      story: 'Aqui estão as escrituras que Belladona levou, presas a correntes com o selo do mestre. Frei Anselmo quer vê-las nas mãos dos pobres, e não nos cofres. Cada caixote quebrado solta um elo.',
       chest: CHEST_RICH, time: 110000, blockChance: 0.5, door: true, theme: 'crypt', block: 'books', track: 'ecos',
       enemies: [{ kind: 'ghost', start: 2, max: 3, every: 9 }, { kind: 'flower', start: 3, max: 3 }],
     },

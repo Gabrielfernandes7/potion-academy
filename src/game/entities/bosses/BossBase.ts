@@ -11,6 +11,7 @@ import { rooOriginY } from '../../../textures/rooGeometry';
 import { readTheme } from '../../../ui/theme';
 import type { MainScene } from '../../../scenes/MainScene';
 import { BossPhase, Tile, phaseFor } from './common';
+import { fxPool } from '../../fx/particlePool';
 
 export type { BossPhase, Tile };
 export type BossPose = 'idle' | 'cast' | 'hurt' | 'talk' | 'defeat';
@@ -198,17 +199,14 @@ export abstract class BossBase {
   }
 
   protected burst(x: number, y: number, texture: string, tint: number[], count: number, speed = 90): void {
-    const e = this.scene.add.particles(x, y, texture, {
+    fxPool(this.scene).burst(`boss:${texture}:${tint.join('-')}:${speed}`, texture, {
       speed: { min: 20, max: speed },
       lifespan: { min: 350, max: 800 },
       scale: { start: 1.5, end: 0 },
       alpha: { start: 1, end: 0 },
       blendMode: 'ADD',
       tint,
-      emitting: false,
-    }).setDepth(14);
-    e.explode(count);
-    this.scene.time.delayedCall(1000, () => e.destroy());
+    }, x, y, count, 14);
   }
 
   // casa aberta para um golpe: chão vazio e sem o muro de sal da Roo Terra (que barra os golpes, como uma parede)

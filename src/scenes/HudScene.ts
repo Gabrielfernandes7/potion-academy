@@ -310,7 +310,12 @@ export class HudScene extends Phaser.Scene {
     if (duel) this.bossName2.setText(bosses[1].name).setY(ROW_B - 9);
   }
 
+  private lastKey = ''; // o último estado desenhado: um estado idêntico não precisa redesenhar a faixa inteira
+
   private apply(s: HudState): void {
+    const key = JSON.stringify(s);
+    if (key === this.lastKey) return;
+    this.lastKey = key;
     const t = this.theme;
 
     this.emptyFlask.setVisible(s.stage === LAST_STAGE);

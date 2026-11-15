@@ -32,6 +32,7 @@ Game state is persisted in `localStorage` under `bombroo_bank` (coins) and `bomb
 ```
 index.html                 # markup: topbar, canvas + menu, controles de toque, overlays (pausa, game over)
 manuscrito.html              # manuscrito do alquimista (botão MANUSCRITO do menu); script em src/pages/manuscrito.ts
+livro.html                # O Livro de Roo: a história como manuscrito animado (botão O LIVRO do menu); texto em src/game/livro.ts, cenas em src/pages/livroScenes.ts, docs/22-livro.md; a mensagem do jogo (Jesus, pobres, viúvas, órfãos) vai sem citar versículo
 history.html              # livro da história em prosa (/history.html); script em src/pages/history.ts, cena do nascimento da Roo em src/pages/birthScene.ts, roteiro em docs/12-historia.md
 src/
   main.ts                  # layout (vars CSS do canvas, modo toque), botões do DOM, nome da faixa
@@ -55,6 +56,8 @@ src/
   game/rewards.ts          # tabela de drop (rollReward), texturas e brilho dos itens
   game/hudState.ts         # contrato de eventos MainScene <-> HudScene, timerView
   game/story.ts            # textos da história (cartões, passagens)
+  game/stageArt.ts         # qual gravura do Livro de Roo abre cada fase (puro, testado); pages/placas.ts desenha as 16 gravuras (as 12 cenas do livro + poço, torre, biblioteca, observatório)
+  ui/stageIntro.ts         # o cartão de entrada de fase em DOM (#intro-overlay): gravura animada + lugar, nome, história e dica; ligado em StoryDirector.showBanner()
   game/manuscrito.ts          # páginas do Manuscrito do Alquimista (textos; números vêm de profiles.ts), puro e testado
   game/voynich.ts          # decoração à moda do Voynich (puro): seções, fólios, palavras em escrita não decifrada (EVA)
   game/arena.ts + loadout.ts # Arena de treino (chefes, fase montada na hora) e quais poções valem (todas na Arena)
@@ -72,6 +75,7 @@ src/
   game/upgrades.ts         # power-ups por poção: alcance e frascos valem só para a poção escolhida (puro)
   game/blast.ts            # alcance de uma explosão, como gerador (puro, testável)
   game/BombSystem.ts + PickupSystem.ts + SleepSystem.ts  # sistemas tirados da MainScene (regras puras em *Rules.ts)
+  game/fx/                 # partículas e objetos reaproveitados (particlePool.ts, objectPool.ts): o que evita o lag das explosões
   game/events.ts + launcher.ts  # eventos globais; cria o Phaser.Game e navega menu/partida
   game/entities/           # personagens que sofrem dano: inimigos e chefes (ver docs/14-estrutura-do-codigo.md)
   game/entities/damage.ts  # regra pura de dano por elemento (multiplicadores, damageTo, hitsToKill)
@@ -160,6 +164,10 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 
 Antes de acrescentar um chefe, uma forma da Roo, uma fase ou uma página, leia `docs/16-guia-de-extensao.md`: cada tipo de coisa tem uma **lista única** (registro) e uma receita curta. Depois de qualquer mudança rode `npm run check` (tipos, testes e build); `PW=... npm run smoke` abre o jogo num navegador e confere os caminhos principais. Regra de jogo vive em arquivo puro com teste; o arquivo do Phaser só desenha e liga.
 
+## Desempenho (regra de código)
+
+Veja `docs/21-desempenho.md`. Em resumo: **não crie um emissor de partículas, uma imagem ou um texto por efeito** (use `game/fx/particlePool.ts` e `objectPool.ts`); um `Graphics` só é limpo e redesenhado quando há o que mostrar; não use `fps.limit` (piora telas de 60 Hz). O jogo roda na taxa da tela, então o trabalho por quadro é o que importa.
+
 ## Respeito à fé (regra de conteúdo)
 
-O jogo trata temas cristãos com reverência. **Nenhuma cruz em objeto destrutível, inimigo, bloco ou ficha**; a cruz só no hábito de frei Anselmo e no mosteiro. Nada que ridicularize a fé. Veja `docs/16-guia-de-extensao.md`.
+O jogo trata temas cristãos com reverência. **Não se citam versículos nem capítulos** (nem no jogo, nem no livro, nem nos docs): a fé aparece em gestos e em falas curtas. A mensagem é dita pouco e em cada parte: o verdadeiro evangelho é dedicar a vida a Jesus e servir os mais pobres, as viúvas e os órfãos, como Belladona passa a fazer (`docs/12-historia.md`, testado em `tests/desfecho.test.ts`). **Nenhuma cruz em objeto destrutível, inimigo, bloco ou ficha**; a cruz só no hábito de frei Anselmo e no mosteiro. Nada que ridicularize a fé. Veja `docs/16-guia-de-extensao.md`.

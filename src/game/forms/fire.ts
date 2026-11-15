@@ -74,6 +74,8 @@ export function flameTiles(
 
 interface Ember { until: number }
 
+const NONE: Array<{ x: number; y: number; left: number }> = []; // lista vazia compartilhada: sem alocar a cada quadro
+
 /** Brasas no chão: casas com validade. Puro: quem chama dá o relógio. */
 export class EmberField {
   private tiles = new Map<string, Ember>();
@@ -99,6 +101,11 @@ export class EmberField {
     return n;
   }
 
+  /** Quantas casas guardadas (inclui as vencidas que ainda não foram varridas por `active`). */
+  get size(): number {
+    return this.tiles.size;
+  }
+
   lit(x: number, y: number, now: number): boolean {
     const e = this.tiles.get(this.key(x, y));
     return !!e && e.until > now;
@@ -106,6 +113,7 @@ export class EmberField {
 
   /** Remove as vencidas e lista as acesas. */
   active(now: number): Array<{ x: number; y: number; left: number }> {
+    if (this.tiles.size === 0) return NONE;
     const out: Array<{ x: number; y: number; left: number }> = [];
     for (const [k, e] of this.tiles) {
       if (e.until <= now) { this.tiles.delete(k); continue; }

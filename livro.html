@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#140d07">
+<title>Potion Academy: o livro de Roo</title>
+<meta name="description" content="O Livro de Roo: a história do jogo contada como um manuscrito de alquimia, à luz de vela, com doze gravuras animadas: a bolha iridescente, a fome no vale, o pão partido e o frasco vazio.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body class="mesa">
+<div class="vela-luz" aria-hidden="true"></div>
+
+<header class="topo">
+  <a class="voltar" href="/">Voltar ao jogo</a>
+  <span class="topo-links"><a class="voltar" href="/history.html">Ler em prosa</a> <a class="voltar" href="/history.html#log">Log da história</a></span>
+</header>
+
+<main class="livro" id="livro">
+  <p class="carregando" id="carregando" role="status">Acendendo as velas...</p>
+  <div class="encadernacao" id="encadernacao" hidden>
+    <article class="pg esq" id="pg-esq" aria-label="Gravura">
+      <figure class="gravura">
+        <canvas id="cena" width="200" height="150" role="img" aria-label="Gravura animada da abertura"></canvas>
+        <figcaption id="legenda"></figcaption>
+      </figure>
+      <p class="folio" id="folio-esq"></p>
+    </article>
+    <div class="lombada" aria-hidden="true"></div>
+    <article class="pg dir" id="pg-dir" aria-live="polite">
+      <header class="cabeca">
+        <p class="rubrica" id="rubrica"></p>
+        <h1 id="titulo"></h1>
+      </header>
+      <div class="texto" id="texto"></div>
+      <aside class="glosa" id="glosa">
+        <span class="glosa-sinal" aria-hidden="true">§</span>
+        <span class="glosa-corpo"><span id="glosa-txt"></span></span>
+      </aside>
+      <p class="marginalia" id="marginalia" aria-hidden="true"></p>
+      <p class="folio" id="folio-dir"></p>
+    </article>
+  </div>
+</main>
+
+<nav class="controle" id="controle" aria-label="Virar as páginas" hidden>
+  <button type="button" class="seta" id="ant" aria-label="Página anterior">&larr;</button>
+  <ol class="pontos" id="pontos"></ol>
+  <button type="button" class="seta" id="prox" aria-label="Próxima página">&rarr;</button>
+  <button type="button" class="musica" id="musica" aria-pressed="false">Música: desligada</button>
+</nav>
+
+<p class="dica">Use as setas <kbd>&larr;</kbd> <kbd>&rarr;</kbd>, deslize a página ou toque nos pontos para virar. A cena de cada página se move.</p>
+
+<div id="stage" hidden></div>
+<script type="module" src="/src/pages/livro.ts"></script>
+</body>
+</html>

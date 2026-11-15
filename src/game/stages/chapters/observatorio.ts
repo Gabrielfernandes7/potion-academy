@@ -19,7 +19,7 @@ export const OBSERVATORIO: ChapterSpec = {
     },
     {
       kind: 'crypt', name: 'O SALÃO DOS RELÓGIOS', place: 'Salão dos Relógios',
-      story: 'Relógios de cobre contam horas diferentes na mesma parede. Os autômatos de ronda param por um instante a cada volta, como quem confere o tempo.',
+      story: 'Relógios de cobre contam horas diferentes na mesma parede. Os autômatos de ronda param por um instante a cada volta, como quem confere o tempo. O tempo de uma viúva com fome, porém, não espera a roda.',
       chest: CHEST_RICH, tip: 'O relógio de cobre trava por 2 s a cada volta. A água o enferruja; a terra não o toca.',
       time: 100000, blockChance: 0.5, door: true, theme: 'observatory', block: 'flasks', track: 'alambique',
       enemies: [{ kind: 'clock', start: 2, max: 3, every: 10 }, { kind: 'lantern', start: 1, max: 2, every: 12 }],

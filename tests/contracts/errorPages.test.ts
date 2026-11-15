@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import notFound from '../../404.html?raw';
 import serverError from '../../500.html?raw';
+import livroHtml from '../../livro.html?raw';
 import indexHtml from '../../index.html?raw';
 import historyHtml from '../../history.html?raw';
 import viteConfig from '../../vite.config.ts?raw';
@@ -24,9 +25,11 @@ describe('páginas de erro', () => {
   });
 });
 
-describe('log da história', () => {
-  it('o menu leva à seção de log do livro', () => {
-    expect(indexHtml).toContain('href="/history.html#log"');
+describe('o livro e o log da história', () => {
+  it('o menu leva ao Livro de Roo, e o livro em prosa guarda o log (que o livro animado também aponta)', () => {
+    expect(indexHtml).toContain('href="/livro.html"');
     expect(historyHtml).toContain('id="log"');
+    expect(historyHtml).toContain('href="/livro.html"'); // a prosa aponta para o livro animado
+    expect(livroHtml).toContain('href="/history.html#log"');
   });
 });

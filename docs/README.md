@@ -19,6 +19,8 @@ Cada arquivo responde uma pergunta e cabe em uma tela.
 | [12-historia.md](12-historia.md) | Qual é a história, e quem são os personagens? |
 | [16-guia-de-extensao.md](16-guia-de-extensao.md) | Onde mexer para acrescentar um chefe, uma forma, uma fase ou uma página? Como testar? Regras de respeito à fé |
 | [20-publicar.md](20-publicar.md) | Como servir o `dist/`, a 404 e a 500 em Nginx, Apache e hospedeiros estáticos? E o endereço final das prévias? |
+| [21-desempenho.md](21-desempenho.md) | O jogo engasga? O que foi medido, o que mudou, quais regras evitam o lag e como medir de novo |
+| [22-livro.md](22-livro.md) | O Livro de Roo: a história como manuscrito animado à luz de vela. Onde está, as 13 aberturas, as gravuras que abrem cada fase, como acrescentar uma |
 
 Regra geral: se uma informação muda, mude no arquivo certo, e não copie em outros lugares.
 
