@@ -26,7 +26,7 @@ Mapa do código. Para cada tarefa, o arquivo para começar.
 | os números de equilíbrio | `src/config.ts` (veja `10-equilibrio.md`) |
 | ver todos os sprites | abra `/sprites.html` (veja `09-sprites.md`) |
 | a música e os sons | `src/audio/AudioEngine.ts` e `src/audio/tracks.ts` |
-| o que se guarda entre partidas (moedas, poções) | `src/storage.ts` |
+| o que se guarda entre partidas (poções aprendidas, fases) | `src/storage.ts` |
 | os controles do celular | `src/input/touch.ts` |
 
 ## Peças que se conversam

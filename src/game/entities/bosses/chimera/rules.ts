@@ -8,7 +8,7 @@ import type { BossPhase, Tile } from '../common';
 export const CHIMERA_NAME = 'QUIMERA';
 export const CHIMERA_HP = PROFILES.chimera.maxHp;
 
-// Mercúrio: a água escorre (imune); a terra a prende (fraqueza); fogo e éter machucam normal.
+// Mercúrio: a água escorre (imune); a terra a prende (fraqueza); fogo e ar machucam normal.
 // A tabela está em game/entities/damage.ts, a partir do perfil em profiles.ts.
 export const CHIMERA_DAMAGE: Record<ElementId, number> = {
   fire: damageTo(PROFILES.chimera, 'fire'),

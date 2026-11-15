@@ -25,10 +25,18 @@ export const BELLADONA_CARDS: StoryCard[] = [
 
 // Derrota da Quimera: a prata do mestre se despede antes de a Roo seguir para a Torre.
 export const CHIMERA = 'Quimera';
+export const LION = 'Leão Verde';
+
+export const LION_CARDS: StoryCard[] = [
+  { speaker: LION, text: "Não sou guarda de ouro. Guardo o que o ouro não compra: livros que alguém ainda quer ler." },
+  { speaker: LION, text: "Pode levar as escrituras. Leve também o que elas pedem: que ninguém passe fome por causa delas." },
+];
+
 export const CHIMERA_CARDS: StoryCard[] = [
   { speaker: CHIMERA, text: 'Eu era o que o mestre derramou quando não soube mais o que guardar: prata sem forma, sem dono.' },
   { speaker: CHIMERA, text: 'Você me prendeu com terra, não com ódio. Poucos sabem a diferença.' },
   { speaker: CHIMERA, text: 'Siga. A torre fica depois da charneca. Lá, quem lê demais espera por você.' },
+  { speaker: CHIMERA, text: "Leve o sopro que eu guardava. O ar não se prende, e por isso sempre volta." },
 ];
 
 // Derrota da Mandrágora: a guardiã do portão do jardim se despede antes de o portão abrir.
@@ -56,6 +64,7 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
   1: [
     { speaker: ROO, text: 'Ao sair do laboratório, encontro no chão uma página rasgada. A letra é do mestre, a mesma das minhas lições.' },
     { speaker: ROO, text: 'Ele escreveu "a terra é de quem a cultiva", riscou e escreveu de novo. Nunca o vi hesitar diante de uma fórmula.' },
+    { speaker: ROO, text: "No caixote do laboratório há um frasco de água do mestre. Aprendo a usá-lo: a água apaga o fogo, e o fogo não apaga a água." },
   ],
   2: [
     { speaker: ROO, text: 'Os fantasmas deste salão não têm alma. São ecos: o que foi estudado sem cuidado, repetindo-se nas paredes.' },
@@ -66,6 +75,7 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
   3: [
     { speaker: ROO, text: 'A névoa se abre devagar. Atrás de mim, a charneca desaparece como se nunca tivesse existido.' },
     { speaker: ROO, text: 'No chão, uma poça de prata respira. Ao redor, a pedra tem a letra do mestre gravada. Chego mais perto.' },
+    { speaker: ROO, text: "Um frasco de terra, pesado como sal. Quando cai, a terra prende o que tenta escapar." },
   ],
   5: [
     { speaker: ROO, text: 'A torre se ergue sobre o vale. Os degraus são frios, e os fantasmas daqui não têm cheiro, só silêncio.' },
@@ -78,16 +88,29 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
   7: [
     { speaker: ROO, text: 'Na antecâmara, os frascos brilham com um pó que cheira a farinha. Belladona tentou fazer pão com a Obra.' },
     { speaker: BELLADONA, text: 'Entre, cachorro. Quantas pessoas morreram de fome enquanto o mestre hesitava? Eu contei. Você sabe quantas? Anselmo guarda palavras em cofres enquanto o pão acaba.' },
+    { speaker: BELLADONA, text: 'Minha mãe ardeu de febre três noites, à espera de um remédio que nenhum caldeirão deu. Foi aí que decidi não esperar mais.' },
   ],
   9: [
+    { speaker: ROO, text: "Os livros estão presos por correntes finas, cada uma com o selo do mestre. Uma página escapa de uma delas e cai aos meus pés." },
+    { speaker: ROO, text: "Não sei quem as prendeu, mas alguém cuidou delas: nenhuma está rasgada." },
+  ],
+  10: [
+    { speaker: ROO, text: "Um copista deixou uma frase pela metade: \"a semente guardada no celeiro seco não apodrece\". Ninguém a riscou." },
+    { speaker: ROO, text: "A lâmpada ainda está acesa. Sigo com cuidado, longe dos papéis." },
+  ],
+  11: [
+    { speaker: ROO, text: "Entre as escrituras, uma página com a letra do mestre: \"quem reparte o pão não precisa de ouro\"." },
+    { speaker: ROO, text: "Solto o último elo. Do salão do leão vem um ronco baixo, e a porta range." },
+  ],
+  13: [
     { speaker: ROO, text: 'Desço o vale com o frasco vazio. A estrada é a mesma da ida, mas agora sei o que o mestre temia.' },
     { speaker: ROO, text: 'Não sei se volto para o Caldeirão ou se fico por aqui. Sigo, por enquanto.' },
   ],
-  10: [
+  14: [
     { speaker: ROO, text: 'As flores de Belladona crescem até na beira do riacho. Não as toco.' },
     { speaker: ROO, text: 'Do outro lado da ponte, os muros do mosteiro já aparecem.' },
   ],
-  11: [
+  15: [
     { speaker: ROO, text: 'O portão do mosteiro está à vista. À porta, famílias esperam a sopa. Anselmo deve estar do outro lado.' },
     { speaker: ROO, text: 'Ensaio o que vou dizer e percebo que não tenho nada a provar. Só levo o frasco.' },
   ],

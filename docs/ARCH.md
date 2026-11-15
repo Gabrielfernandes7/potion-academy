@@ -48,7 +48,6 @@ Navegação em `game/launcher.ts`: `startGame()` (sempre com `{ stage: 1 }` expl
 
 | Chave | Conteúdo |
 |---|---|
-| `bombroo_bank` | OURO (moedas) |
 | `bombroo_owned` | tipos de bomba comprados |
 | `bombroo_audio` | preferência de música e efeitos |
 | `bombroo_track` | (antigo) faixa escolhida na sala de música; não é mais lida |

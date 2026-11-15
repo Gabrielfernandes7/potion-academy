@@ -3,11 +3,6 @@ import { BOMB_ORDER, BOMB_TYPES, CONFIG } from '../src/config';
 import { crossTiles, dominates } from '../src/game/balance';
 
 describe('equilíbrio das poções', () => {
-  it('o custo cresce na ordem da loja', () => {
-    const costs = BOMB_ORDER.map(id => BOMB_TYPES[id].cost);
-    for (let i = 1; i < costs.length; i++) expect(costs[i]).toBeGreaterThan(costs[i - 1]);
-  });
-
   it('nenhuma poção é melhor que outra em tudo (todas têm um motivo para existir)', () => {
     for (const a of BOMB_ORDER) {
       for (const b of BOMB_ORDER) {
@@ -21,9 +16,8 @@ describe('equilíbrio das poções', () => {
     for (const id of BOMB_ORDER) expect(BOMB_TYPES[id].radius).toBeLessThanOrEqual(3);
   });
 
-  it('a poção inicial é gratuita e as outras são pagas', () => {
-    expect(BOMB_TYPES.normal.cost).toBe(0);
-    for (const id of BOMB_ORDER.slice(1)) expect(BOMB_TYPES[id].cost).toBeGreaterThan(0);
+  it('a poção inicial é a de fogo; as outras são aprendidas na jornada (learning.ts)', () => {
+    expect(BOMB_ORDER[0]).toBe('normal');
   });
 
   it('crossTiles conta as casas de uma cruz', () => {

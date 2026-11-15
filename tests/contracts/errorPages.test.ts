@@ -24,9 +24,9 @@ describe('páginas de erro', () => {
   });
 });
 
-describe('versões da história', () => {
-  it('o menu leva à seção de versões do livro', () => {
-    expect(indexHtml).toContain('href="/history.html#versoes"');
-    expect(historyHtml).toContain('id="versoes"');
+describe('log da história', () => {
+  it('o menu leva à seção de log do livro', () => {
+    expect(indexHtml).toContain('href="/history.html#log"');
+    expect(historyHtml).toContain('id="log"');
   });
 });

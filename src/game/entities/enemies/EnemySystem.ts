@@ -91,7 +91,6 @@ export class EnemySystem {
     enemy.bar.destroy();
     this.enemies = this.enemies.filter(e => e !== enemy);
     hitFx(this.scene, px, py, element);
-    this.scene.pickupSystem.spawnPickupSprite(enemy.gridX, enemy.gridY, 'coin');
     this.scene.cameras.main.shake(60, 0.003);
   }
 

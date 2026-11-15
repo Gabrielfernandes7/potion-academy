@@ -38,8 +38,8 @@ describe('Arena de treino', () => {
     expect(LAST_STAGE).toBe(STAGES.length);
     expect(() => arenaStageDef('nada' as BossId)).toThrow();
   });
-  it('o Leão Verde só existe na Arena por enquanto (a Biblioteca está selada)', () => {
-    expect(STAGES.some(s => s.boss === 'lion')).toBe(false);
+  it('o Leão Verde é o chefe da Biblioteca na campanha e também está na Arena', () => {
+    expect(STAGES.some(s => s.boss === 'lion')).toBe(true);
     expect(arenaStageDef('lion').block).toBe('books');
   });
 });

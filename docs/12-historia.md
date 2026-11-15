@@ -19,7 +19,7 @@
 4. **O mestre amava a Roo.** A busca dele nasce do medo de perdê-la, não de ganância.
 5. **A Roo é um presente, não um produto.** Ninguém nunca soube explicar a origem dele; o jogo não explica.
 6. **A pergunta final é do jogador:** "o que você vai fazer com o que encontrou?"
-7. **Toda mudança de fato entra em `history.html`, na seção "Versões da história"**, com o que era antes e o que passou a ser. Ajuste de texto sem mudança de fato não entra.
+7. **Toda mudança de fato entra em `history.html`, na seção "Log da história", como um commit** (o que era antes e o que passou a ser). Enquanto não houver commit, a entrada fica como "working tree". Ajuste de texto sem mudança de fato não entra.
 
 ## O mundo: Vale das Fórmulas e os anos magros
 

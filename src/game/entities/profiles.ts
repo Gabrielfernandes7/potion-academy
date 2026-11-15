@@ -16,8 +16,8 @@ export const PROFILES: Record<EntityId, DamageProfile> = {
   // Roo: o fogo é o que mais a machuca (inclusive as poções dela); a água, o que menos. 24 pontos = 6 golpes neutros.
   roo:        { element: 'water', maxHp: 24, weak: ['fire'],         resist: ['water'],        immune: [] },
   // Leão Verde: o solvente universal, que devora o sol (o ouro). A terra (sal, o que ele já dissolveu) não o toca;
-  // o éter, a quintessência que ele não consegue dissolver, o fere muito; a água o dilui.
+  // o ar, a quintessência que ele não consegue dissolver, o fere muito; a água o dilui.
   lion:       { element: 'earth', maxHp: 28, weak: ['air'],          resist: ['water'],        immune: ['earth'] },
-  // Quimera de Mercúrio: líquida, a água escorre por ela; a terra a prende. Fogo e éter machucam normal.
+  // Quimera de Mercúrio: líquida, a água escorre por ela; a terra a prende. Fogo e ar machucam normal.
   chimera:    { element: 'water', maxHp: 24, weak: ['earth'],        resist: [],                immune: ['water'] },
 };

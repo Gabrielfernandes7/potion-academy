@@ -4,9 +4,8 @@ Use sempre estes nomes, em qualquer tela, texto ou conversa.
 
 | Nome na tela | Significa | Não use |
 |---|---|---|
-| OURO | a moeda do jogo (antes POÇÃO) | moedas, POÇÃO (não usar: é a poção) |
 | FRASCO | um slot de bomba ativa; "+1 FRASCO" aumenta o limite | bomba (na tela) |
-| Poção de Fogo / Aqua / Telúrica / Etérea | os 4 tipos de bomba | bomba normal, mega |
+| Poção de Fogo / Água / Terra / Ar | os 4 tipos de bomba | bomba normal, mega |
 | GEMAS | as 3 gemas para abrir a porta | pedras |
 | BLOCOS | caixotes destruídos (contador) | caixas |
 | TEMPO | o tempo que sobra na fase | timer |

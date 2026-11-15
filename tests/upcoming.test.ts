@@ -3,9 +3,9 @@ import { CHAPTERS, CHAPTER_LIST, LAST_STAGE, STAGES } from '../src/game/stages/i
 import { SEALED_MESSAGE, UPCOMING_CHAPTERS, isUpcoming } from '../src/game/stages/upcoming';
 
 describe('capítulos selados no mapa', () => {
-  it('são dois: a biblioteca proibida e o observatório', () => {
-    expect(UPCOMING_CHAPTERS.map(c => c.id)).toEqual(['biblioteca', 'observatorio']);
-    expect(UPCOMING_CHAPTERS.map(c => c.icon)).toEqual(['library', 'observatory']);
+  it("é um só: o observatório (a Biblioteca já entrou na campanha)", () => {
+    expect(UPCOMING_CHAPTERS.map(c => c.id)).toEqual(["observatorio"]);
+    expect(UPCOMING_CHAPTERS.map(c => c.icon)).toEqual(["observatory"]);
   });
   it('não dão acesso a nada: sem fases, fora de CHAPTER_LIST e de CHAPTERS, e não mudam o fim do jogo', () => {
     const real = new Set(CHAPTER_LIST.map(c => c.id));
@@ -14,7 +14,7 @@ describe('capítulos selados no mapa', () => {
       expect(CHAPTERS.some(x => x.id === c.id)).toBe(false);
       expect(isUpcoming(c.id)).toBe(true);
     }
-    expect(STAGES.map(s => s.chapter ?? '').join('|')).not.toMatch(/BIBLIOTECA|OBSERVAT/);
+    expect(STAGES.map(s => s.chapter ?? '').join('|')).not.toMatch(/OBSERVAT/);
     expect(LAST_STAGE).toBe(STAGES.length);
     expect(isUpcoming('vale')).toBe(false);
   });

@@ -6,7 +6,6 @@ import type { ChestOdd } from './stages/types';
 // Probabilidades acumuladas: roll < limite => tipo.
 
 export type PickupType =
-  | 'coin'
   | 'gem'
   | 'chest'
   | 'heart'
@@ -15,8 +14,9 @@ export type PickupType =
   | 'speed_up'
   | 'time_up';
 
-const REWARD_TABLE: ReadonlyArray<readonly [number, PickupType]> = [
-  [0.45, 'coin'],
+// Sem moedas: a fatia de 45% é um bloco vazio (null).
+const REWARD_TABLE: ReadonlyArray<readonly [number, PickupType | null]> = [
+  [0.45, null],
   [0.60, 'gem'],
   [0.70, 'chest'],
   [0.75, 'heart'],
@@ -34,7 +34,6 @@ export const PICKUP_HALO: Partial<Record<PickupType, number>> = {
 };
 
 export const PICKUP_TEXTURE: Record<PickupType, string> = {
-  coin: 'pickup_coin',
   gem: 'pickup_gem',
   chest: 'pickup_chest',
   heart: 'pickup_heart',
@@ -61,19 +60,19 @@ export function pickupHalo(type: PickupType, potion?: BombId): number | undefine
   return PICKUP_HALO[type];
 }
 
-export function rollReward(roll: number = Math.random()): PickupType {
+export function rollReward(roll: number = Math.random()): PickupType | null {
   for (const [limit, type] of REWARD_TABLE) {
     if (roll < limit) return type;
   }
   return 'time_up';
 }
 
-// Quantas moedas o baú traz, sorteado pela tabela da fase (roll em [0, 1)).
-export function rollChestCoins(table: ReadonlyArray<ChestOdd>, roll: number = Math.random()): number {
+// Que item o baú guarda, sorteado pela tabela da fase (roll em [0, 1)).
+export function rollChestPrize(table: ReadonlyArray<ChestOdd>, roll: number = Math.random()): PickupType {
   let acc = 0;
   for (const odd of table) {
     acc += odd.chance;
-    if (roll < acc) return odd.coins;
+    if (roll < acc) return odd.prize;
   }
-  return table[table.length - 1].coins;
+  return table[table.length - 1].prize;
 }

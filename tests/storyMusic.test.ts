@@ -5,7 +5,7 @@ import { STAGES, LAST_STAGE } from '../src/game/stages/index';
 
 describe('trilha por fase', () => {
   it('Chamado, Caminho, Duelo e Estrada têm faixas próprias; a Névoa e as três da Torre dividem a do salão; o Poço usa a do duelo', () => {
-    const tracks = [0, 1, 7, 8].map(i => STAGES[i].track);
+    const tracks = [0, 1, 7, 12].map(i => STAGES[i].track);
     for (const i of [2, 4, 5, 6]) expect(STAGES[i].track).toBe(STAGES[1].track);
     expect(STAGES[3].track).toBe(STAGES[7].track);
     expect(new Set(tracks).size).toBe(tracks.length);
@@ -24,7 +24,7 @@ describe('trilha por fase', () => {
 describe('passagens entre fases', () => {
   it('há passagem depois de cada fase que tem porta, exceto a última', () => {
     for (let s = 1; s < LAST_STAGE; s++) {
-      if (s === 4 || s === 8) continue; // os chefes têm a própria despedida (CHIMERA_CARDS, BELLADONA_CARDS)
+      if (s === 4 || s === 8 || s === 12) continue; // os chefes têm a própria despedida (CHIMERA_CARDS, BELLADONA_CARDS)
       expect(PASSAGE_CARDS[s], `fase ${s}`).toBeDefined();
     }
   });

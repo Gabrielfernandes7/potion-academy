@@ -1,11 +1,10 @@
-// Itens no chão: moedas, gemas, baús, corações e power-ups. Nascem quando um caixote quebra ou
-// um inimigo morre, e são coletados quando a Roo pisa na casa (coordenadas de grade).
+// Itens no chão: gemas, baús, corações e power-ups. Nascem quando um caixote quebra ou um inimigo
+// morre, e são coletados quando a Roo pisa na casa (coordenadas de grade).
 // As regras puras estão em game/pickupRules.ts e game/rewards.ts.
 import Phaser from 'phaser';
 import { BOMB_ORDER, BOMB_TYPES, BombId, CONFIG } from '../config';
-import { Bank } from '../storage';
 import { canUseBomb } from './loadout';
-import { PickupType, isPotionPowerup, pickupHalo, pickupTexture, rollChestCoins, rollReward } from './rewards';
+import { PickupType, isPotionPowerup, pickupHalo, pickupTexture, rollChestPrize, rollReward } from './rewards';
 import { pickPowerupPotion, pickupAt, resolveRewardType, timeAfterBonus } from './pickupRules';
 import { addBombSlot, addFireLevel } from './upgrades';
 import type { Pickup } from './types';
@@ -17,22 +16,26 @@ export class PickupSystem {
 
   constructor(private readonly scene: MainScene) {}
 
+  // Sorteio de um bloco destruído. Pode não sair nada (bloco vazio).
   spawnReward(x: number, y: number): void {
     if (this.scene.gemBlocks.has(`${x},${y}`)) {
       this.spawnPickupSprite(x, y, 'gem');
       return;
     }
-    const type = rollReward();
-    // na fase do chefe não há porta: gema vira moeda
-    const final = resolveRewardType(type, !!this.scene.def.door && !this.scene.isBossStage);
-    // o baú já nasce com o valor sorteado pela tabela desta fase
-    const value = final === 'chest' ? rollChestCoins(this.scene.def.chest) : undefined;
+    const rolled = rollReward();
+    if (rolled === null) return;
+    // na fase do chefe não há porta: a gema não nasce
+    const final = resolveRewardType(rolled, !!this.scene.def.door && !this.scene.isBossStage);
+    if (final === null) return;
+    // o baú já nasce com o item sorteado pela tabela desta fase
+    const prize = final === 'chest' ? rollChestPrize(this.scene.def.chest) : undefined;
     // +frasco e +raio nascem já com a poção que fortalecem (uma das que a Roo tem)
-    const potion = isPotionPowerup(final) ? pickPowerupPotion(BOMB_ORDER.filter(canUseBomb)) : undefined;
-    this.spawnPickupSprite(x, y, final, value, potion);
+    const shown = prize ?? final;
+    const potion = isPotionPowerup(shown) ? pickPowerupPotion(BOMB_ORDER.filter(canUseBomb)) : undefined;
+    this.spawnPickupSprite(x, y, final, prize, potion);
   }
 
-  spawnPickupSprite(x: number, y: number, type: PickupType, value?: number, potion?: BombId): void {
+  spawnPickupSprite(x: number, y: number, type: PickupType, prize?: PickupType, potion?: BombId): void {
     const sprite = this.scene.add.image(
       x * CONFIG.tile + CONFIG.tile / 2,
       y * CONFIG.tile + CONFIG.tile / 2,
@@ -52,34 +55,39 @@ export class PickupSystem {
         duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
       });
     }
-    this.pickups.push({ gridX: x, gridY: y, type, value, potion, sprite, halo });
+    this.pickups.push({ gridX: x, gridY: y, type, prize, potion, sprite, halo });
   }
 
-  // "Fogo", "Aqua"...: a poção que recebeu o power-up
+  // "Fogo", "Água"...: a poção que recebeu o power-up
   private potionShortName(potion: BombId): string {
     return BOMB_TYPES[potion].label.replace('Poção ', '').replace('de ', '').toUpperCase();
   }
 
   collectPickup(pickup: Pickup): void {
     const s = this.scene;
-    switch (pickup.type) {
-      case 'coin':
-        s.coins += CONFIG.coinPickupValue;
-        Bank.add(CONFIG.coinPickupValue);
-        s.play('pickup');
-        break;
+    // o baú abre na hora e dá o item sorteado para ele
+    this.applyItem(pickup.type === 'chest' ? (pickup.prize ?? 'heart') : pickup.type, pickup);
+    s.tweens.killTweensOf(pickup.sprite);
+    pickup.sprite.destroy();
+    if (pickup.halo) {
+      s.tweens.killTweensOf(pickup.halo);
+      pickup.halo.destroy();
+    }
+    this.pickups = this.pickups.filter(p => p !== pickup);
+    s.updateHud();
+  }
+
+  private applyItem(type: PickupType, pickup: Pickup): void {
+    const s = this.scene;
+    switch (type) {
       case 'gem':
         s.gems += 1;
         s.play('pickup');
         if (s.gems >= CONFIG.gemsForDoor && !s.doorOpen) s.openDoor();
         break;
-      case 'chest': {
-        const coins = pickup.value ?? 5;
-        s.coins += coins;
-        Bank.add(coins);
-        s.play('powerup'); // o baú só dá OURO: a cura vem dos corações (ver docs/06-decisoes.md)
+      case 'chest':
+        // nunca chega aqui: o baú é aberto em collectPickup
         break;
-      }
       case 'heart':
         s.player.hp = healRoo(s.player.hp);
         s.floatingText(pickup.gridX, pickup.gridY, `+${HEART_HEAL}`, '#9be564');
@@ -110,14 +118,6 @@ export class PickupSystem {
         s.play('powerup');
         break;
     }
-    s.tweens.killTweensOf(pickup.sprite);
-    pickup.sprite.destroy();
-    if (pickup.halo) {
-      s.tweens.killTweensOf(pickup.halo);
-      pickup.halo.destroy();
-    }
-    this.pickups = this.pickups.filter(p => p !== pickup);
-    s.updateHud();
   }
 
   checkPickups(): void {

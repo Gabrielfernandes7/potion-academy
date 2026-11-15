@@ -49,7 +49,7 @@ describe('manuscrito do alquimista', () => {
     expect(statsOf(entryById('anselmo')!)).toBeNull();
   });
   it('o atributo mostra o símbolo e o nome alquímico', () => {
-    expect(cardStats(PROFILES.chimera).atributo).toMatchObject({ simbolo: '▽', alquimia: 'Mercúrio' });
+    expect(cardStats(PROFILES.chimera).atributo).toMatchObject({ simbolo: '/svg/alchemy-water.svg', alquimia: 'Mercúrio' });
     expect(elementLabel('fire')).toBe('FOGO (Enxofre)');
   });
 });
@@ -67,12 +67,11 @@ describe('manuscrito: Roo Fire e Leão Verde', () => {
     expect(e.habilidades.map(h => h.nome).join(' ')).toMatch(/Labareda.*|Brasas/);
     expect(e.sprite.frames).toHaveLength(8);
   });
-  it('a página do Leão Verde é selada: só abre ao vencê-lo na Arena', () => {
+  it('a página do Leão Verde abre quando a Biblioteca é alcançada (fase 12)', () => {
     const e = entryById('leao')!;
-    expect(e.selado).toBe(true);
-    expect(isEntryOpen(e, () => true)).toBe(false); // nem o progresso da campanha abre
-    expect(isEntryOpen(e, () => true, ['chimera'])).toBe(false); // outro chefe não abre esta página
-    expect(isEntryOpen(e, () => false, ['lion'])).toBe(true);
+    expect(e.selado).toBeFalsy();
+    expect(isEntryOpen(e, (f) => f >= 12)).toBe(true);
+    expect(isEntryOpen(e, (f) => f < 12)).toBe(false);
     const s = statsOf(e)!;
     expect(s.fraqueza).toEqual(['air']);
     expect(s.forca.imune).toEqual(['earth']);

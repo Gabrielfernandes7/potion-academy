@@ -1,7 +1,7 @@
 // Caldeirão de Magia: loja de frascos (overlay DOM #shop-overlay).
 // Markup do cenário em index.html; visual em styles/main.css (seção "Caldeirão").
 import { BOMB_ORDER, BOMB_TYPES, ELEMENTS, BombId, ElementId } from '../config';
-import { Bank, buyBombType, hasBombType } from '../storage';
+import { hasBombType } from '../storage';
 import { buttonLabel, cardView } from '../game/shopRules';
 import { byId, setShown } from './dom';
 
@@ -35,7 +35,7 @@ const FLASK_SVG: Record<ElementId, string> = {
     <path class="shine" d="M16.500 40v22"/>
     <rect class="cork" x="17" y="14" width="30" height="11" rx="2"/>
     <circle class="bubble" cx="20" cy="56" r="1.600"/>`,
-  // éter: losango com névoa
+  // ar: losango com névoa
   air: `
     <path class="liquid" d="M32 32L45 50 32 68 19 50Z"/>
     <path style="fill:#fff;fill-opacity:.7" d="M32 40L39 50 32 60 25 50Z"/>
@@ -49,13 +49,13 @@ function potionSvg(element: ElementId): string {
   return `<svg viewBox="0 0 64 80" aria-hidden="true" focusable="false">${FLASK_SVG[element]}</svg>`;
 }
 
-function buildCard(type: BombId, index: number, justBought: boolean): HTMLElement {
+function buildCard(type: BombId, index: number): HTMLElement {
   const cfg = BOMB_TYPES[type];
   const el = ELEMENTS[cfg.element];
-  const view = cardView(type, hasBombType(type), Bank.get());
+  const view = cardView(type, hasBombType(type));
 
   const card = document.createElement('article');
-  card.className = `shop-item ${view.state}${justBought ? ' just-bought' : ''}`;
+  card.className = `shop-item ${view.state}`;
   card.style.setProperty('--el', hex(el.color));
   card.style.setProperty('--el-glow', hex(el.glow));
   card.title = cfg.desc; // detalhes ficam na dica, sem poluir o cartão
@@ -63,43 +63,15 @@ function buildCard(type: BombId, index: number, justBought: boolean): HTMLElemen
     <span class="key-badge" title="Tecla de atalho">${index + 1}</span>
     <div class="potion-art">${potionSvg(cfg.element)}</div>
     <h3>${cfg.label}</h3>
-    <button type="button" class="buy-btn"${view.state === 'affordable' ? '' : ' disabled'}>${buttonLabel(type, view)}</button>
+    <button type="button" class="buy-btn" disabled>${buttonLabel(type, view)}</button>
   `;
-  if (view.state === 'affordable') {
-    const button = card.querySelector('button');
-    if (button) button.onclick = () => purchase(type);
-  }
   return card;
 }
 
-let toastTimer: ReturnType<typeof setTimeout> | null = null;
-
-function showToast(message: string): void {
-  const toast = byId('shop-toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
-}
-
-function purchase(type: BombId): void {
-  if (!buyBombType(type)) {
-    showToast('OURO insuficiente.');
-    return;
-  }
-  renderShop(type);
-  showToast(`${BOMB_TYPES[type].label} adquirida! Use a tecla ${BOMB_ORDER.indexOf(type) + 1} no jogo.`);
-  const balance = byId('shop-balance');
-  balance.classList.remove('pulse');
-  void balance.offsetWidth; // reinicia a animação
-  balance.classList.add('pulse');
-}
-
-export function renderShop(justBought?: BombId): void {
-  byId('shop-coins').textContent = String(Bank.get());
+export function renderShop(): void {
   const container = byId('shop-items');
   container.innerHTML = '';
-  BOMB_ORDER.forEach((type, i) => container.appendChild(buildCard(type, i, type === justBought)));
+  BOMB_ORDER.forEach((type, i) => container.appendChild(buildCard(type, i)));
 }
 
 export function openShop(): void {

@@ -1,7 +1,7 @@
 // Leão Verde, guardião da Biblioteca Proibida: habilidades e falas. O resto (vida, fases, tempos, avisos,
 // dano e derrota) vem de BossBase. As regras puras estão em rules.ts e são testadas.
 //
-// É o solvente universal: dissolve tudo, até as poções da Roo. A terra é imune; o éter o fere muito.
+// É o solvente universal: dissolve tudo, até as poções da Roo. A terra é imune; o ar o fere muito.
 // Habilidades (cada uma mostra um aviso no chão antes de acontecer; ver docs/03-mundo.md):
 //   pounce  : some e salta sobre a casa em que você está, com um abalo em cruz. Depois fica EXPOSTO.
 //   dissolve: um ácido verde corre pela linha da sua casa (furioso, também pela coluna) e dissolve

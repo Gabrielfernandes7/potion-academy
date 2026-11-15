@@ -2,9 +2,9 @@
 import type { BombId } from '../config';
 import type { PickupType } from './rewards';
 
-// Item que de fato nasce de um sorteio: na fase do chefe não há porta, então a gema vira moeda.
-export function resolveRewardType(rolled: PickupType, hasDoor: boolean): PickupType {
-  return !hasDoor && rolled === 'gem' ? 'coin' : rolled;
+// Item que de fato nasce de um sorteio: na fase do chefe não há porta, então a gema não nasce (null).
+export function resolveRewardType(rolled: PickupType, hasDoor: boolean): PickupType | null {
+  return !hasDoor && rolled === "gem" ? null : rolled;
 }
 
 // Item parado na casa (x, y), se houver (o primeiro da lista).

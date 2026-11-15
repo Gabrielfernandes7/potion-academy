@@ -9,7 +9,7 @@ O jogo tem **quatro fases**:
 3. **Duelo:** derrotar a bruxa **Belladona** (10 de vida; fogo e éter tiram 2, água e terra tiram 1) em 120 segundos.
 4. **Jardim:** fora do castelo. Pegar 3 gemas e chegar ao **portão** em 100 segundos, entre sapos magos e **flores do mal**. Cruzar o portão encerra o jogo.
 
-Ao passar de uma fase para a seguinte, a Roo leva a vida (sem bônus), os power-ups e as moedas.
+Ao passar de uma fase para a seguinte, a Roo leva a vida (sem bônus) e os power-ups.
 
 ## Controles
 
@@ -69,17 +69,17 @@ O botão **?** fica no topo, ao lado do botão de som. A ajuda **pausa o jogo** 
 
 ## Como se ganha
 
-- Derrotar a Belladona dá **+80 OURO** e abre o caminho para o jardim.
-- Cruzar o portão do jardim vence o jogo e dá **+60 OURO**.
+- Derrotar a Belladona abre o caminho para o jardim.
+- Cruzar o portão do jardim vence o jogo.
 
 ## Loja
 
-No **Caldeirão de Magia** você gasta OURO para liberar poções (veja a tabela em `03-mundo.md`).
-O OURO vem das moedas, dos baús e da vitória sobre a Belladona.
+No **Caldeirão de Magia** você vê as poções que a Roo já aprendeu. Os elementos não se compram: a água vem na fase 1, a terra na fase 3 e o ar na fase 4 (ver `game/learning.ts`).
+O OURO foi tirado do jogo: não há moedas, nem loja que venda nada.
 
 ## Arena de treino
 
-O botão **ARENA** do menu abre uma lista de chefes (Quimera, Belladona, Mandrágora e o Leão Verde) para treinar quando quiser. Cada cartão mostra o desenho, a vida, a fraqueza e a imunidade. Na Arena **todas as poções estão liberadas**, o tempo é de sobra (10 min) e nada conta para a jornada: não há ouro, nem fase vencida. Vencer guarda o chefe como vencido e abre a página dele no Manuscrito. "Tentar novamente" (ou R) recomeça a mesma luta.
+O botão **ARENA** do menu abre uma lista de chefes (Quimera, Belladona, Mandrágora e o Leão Verde) para treinar quando quiser. Cada cartão mostra o desenho, a vida, a fraqueza e a imunidade. Na Arena **todas as poções estão liberadas**, o tempo é de sobra (10 min) e nada conta para a jornada: não há fase vencida. Vencer guarda o chefe como vencido e abre a página dele no Manuscrito. "Tentar novamente" (ou R) recomeça a mesma luta.
 
 ## As transformações
 

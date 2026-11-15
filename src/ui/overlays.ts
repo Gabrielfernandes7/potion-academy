@@ -3,7 +3,6 @@ import { byId, setShown } from './dom';
 
 export interface GameOverData {
   won: boolean;
-  coins: number;
   gems: number;
   hp: number;
   maxHp: number;
@@ -36,7 +35,6 @@ export function showGameOver(d: GameOverData): void {
       tile('TEMPO', `${Math.ceil(d.timeLeft / 1000)} s`),
     ]
     : [
-      tile('OURO', String(d.coins)),
       tile('GEMAS', String(d.gems)),
       tile('VIDA', `${d.hp}/${d.maxHp}`),
       tile('BLOCOS', String(d.blocksDestroyed)),

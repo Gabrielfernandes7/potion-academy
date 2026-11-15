@@ -280,3 +280,23 @@ Novas decisões entram no fim.
 - **Motivo:** o jogo muda muito nos personagens, nas formas, nas fases e nos textos, e pouco na estrutura. Um chefe novo tocava cerca de 12 arquivos (perfil, id, regras, falas, controlador, textura, grupo do catálogo, quatro `if` na cena, lista da Arena, página do Manuscrito, fase, testes).
 - **Consequência:** uma **lista única por tipo de coisa** (`docs/16-guia-de-extensao.md`): `bosses/defs.ts` + `registry.ts` (chefes), `forms/registry.ts` (transformações), `enemies/defs.ts`, `profiles.ts`, `stages/chapters`. A Arena, as texturas dos chefes, o catálogo de sprites, o nascimento e a despedida deles agora **derivam** do registro; o `Record<Id, Definição>` faz o TypeScript exigir a entrada. A `MainScene` perdeu 225 linhas: `RooFormSystem` (formas) e `StoryDirector` (cartão de fase, passagens, final, despedida) saíram dela. As páginas de apoio foram para `src/pages/` com um boot compartilhado (`pages/shared.ts`). Os **testes de contrato** (`tests/contracts/`: chefes, formas, fases, HTML e sprites) dizem o que falta quando algo novo é ligado pela metade. Novos comandos: `npm run check` e `npm run smoke` (navegador, com Playwright fora do projeto).
 - **Ficou de fora:** pôr os textos de cada chefe (Manuscrito) dentro da pasta dele (hoje os textos ficam em `manuscrito.ts` e `story.ts`, para quem escreve ter um lugar só, e o contrato cuida da ligação); o mesmo registro para os inimigos comuns no Manuscrito.
+
+## Elementos: FOGO, ÁGUA, TERRA e AR (símbolos da tabela de alquimia)
+- **Motivo:** o elemento de ar chamava-se ÉTER e a terra usava um losango; a tabela de símbolos da alquimia (triângulos com e sem barra) é a referência que o projeto adota.
+- **Decisão:** △ fogo, ▽ água, 🜃 terra (▽ com barra), 🜁 ar (△ com barra). Nomes: FOGO, ÁGUA, TERRA, AR. Poções: Poção de Fogo, de Água, de Terra e de Ar (antes Aqua, Telúrica e Etérea). O ícone SVG (`ui/elementIcons.ts`) segue a mesma forma.
+- **Consequência:** o nome latino do ar passa a ser "aer". A forma de água segue chamada Roo Aqua (nome da transformação, a revisar).
+- **Em aberto:** renomear também a forma "Roo Aqua" para "Roo Água"; conferir os símbolos 🜁 e 🜃 na fonte do navegador de cada sistema.
+- **Símbolos em arquivo:** os quatro símbolos estão em `public/svg/alchemy-fire.svg`, `alchemy-water.svg`, `alchemy-earth.svg` e `alchemy-air.svg` (use `<img src="/svg/alchemy-air.svg">`). Não dependem da fonte do sistema.
+
+## Poções são aprendidas na jornada; Biblioteca Proibida na campanha; velocidade gradual
+- **Motivo:** a loja vendia água, terra e ar, e a Roo começava com a poção de fogo comprada. O elemento é uma descoberta da história, não uma compra.
+- **Decisão:** o fogo é o primeiro elemento. A água é aprendida ao concluir a fase 1 (O Chamado), a terra na fase 3 (A Névoa) e o ar na fase 4 (O Poço, Quimera). Ver `game/learning.ts`. A loja só mostra o que já é da Roo; não vende mais nada. O ouro continua sendo coletado, mas hoje não compra nada (a decidir).
+- **Biblioteca Proibida:** capítulo de quatro fases (estantes, scriptorium, cofre, Leão Verde) entre a Torre e o Retorno. As fases do Retorno sobem quatro números (da 9 para a 13), e a migração do progresso é a versão 4 (`game/stages/migration.ts`). A página do Leão Verde no Manuscrito abre na fase 12.
+- **Velocidade gradual:** a casa leva 260 ms (antes 300), e cada ponto de velocidade encurta 12% (antes 55%). Com um power-up a casa leva ~232 ms; com dois, ~210 ms. Ver `game/movement.ts`.
+- **Tom:** o jogo é aconchegante. A Biblioteca tem lâmpadas acesas, copistas e sala de leitura, e o Leão guarda o que o ouro não compra.
+- **Em aberto:** o uso do OURO; a forma "Roo Aqua" (nome da transformação); e as quatro transformações da Roo, que só serão discutidas quando forem adicionadas.
+
+## OURO sai do jogo
+- **Motivo:** o OURO acumulava sem ter o que comprar desde que a loja deixou de vender poções (as poções agora são aprendidas na jornada).
+- **Decisão:** não há mais moedas soltas: a fatia de 45% que caía como moeda vira bloco vazio. Os baús guardam um item (coração ou power-up, conforme a fase), dado ao ser pisado. Os inimigos não deixam mais nada, e os bônus de vitória (Belladona, portão) saíram. A HUD e a tela de fim não mostram mais OURO.
+- **Save:** a chave `bombroo_bank` não é mais lida nem gravada. Saves antigos só deixam essa chave sem uso; nenhuma outra chave mudou.

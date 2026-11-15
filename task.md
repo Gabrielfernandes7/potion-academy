@@ -14,8 +14,8 @@ Para o "como funciona" completo, veja `CLAUDE.md` (técnico) e `docs/` (jogo). O
 - Decisões suas: gênero da Roo (carta diz "filho"), nomes das etapas da Obra como subtítulo, bolha no último quadro.
 
 ## Feito em 2026-11-14
-- **Páginas de erro e versões no menu:** `404.html` e `500.html` (estáticas, publicadas pelo Vite); em desenvolvimento, um middleware em `vite.config.ts` responde 404 de verdade para endereços sem extensão. Botão VERSÕES DA HISTÓRIA no menu (leva a `history.html#versoes`). Testes em `tests/contracts/errorPages.test.ts`. `vite.config.ts` saiu do typecheck (`tsconfig`). **Falta**: o hospedeiro precisa mandar 404 para `404.html` e erros 5xx para `500.html`; o 500 de verdade só existe se o servidor falhar.
-- **Versões da história:** seção "Versões da história" em `history.html` (antes e depois de cada fato, v2 e v1, e o que vem antes). Regra 7 em `docs/12-historia.md`: toda mudança de fato entra lá. Versões futuras começam pelo commit.
+- **Páginas de erro e versões no menu:** `404.html` e `500.html` (estáticas, publicadas pelo Vite); em desenvolvimento, um middleware em `vite.config.ts` responde 404 de verdade para endereços sem extensão. Botão LOG DA HISTÓRIA no menu (leva a `history.html#log`). Testes em `tests/contracts/errorPages.test.ts`. `vite.config.ts` saiu do typecheck (`tsconfig`). **Falta**: o hospedeiro precisa mandar 404 para `404.html` e erros 5xx para `500.html`; o 500 de verdade só existe se o servidor falhar.
+- **Log da história:** seção "Log da história" em `history.html` (antes e depois de cada fato, por commit: working tree e 42af0e3, e o que vem antes). Regra 7 em `docs/12-historia.md`: toda mudança de fato entra lá como commit.
 - **history.html** atualizado ao jogo: status (aplicado, em aberto), apêndice reescrito, Diário trocado por Manuscrito. Doenças e capítulos selados marcados como em aberto.
 - **Derrota recomeça na fase perdida:** `retryData` (`src/game/retry.ts`, usado por `MainScene.restartData`); a campanha volta à fase em que a Roo perdeu, a Arena recomeça a luta. Teste em `tests/retry.test.ts`. Antes, a campanha sempre voltava à fase 1.
 - **Manuscrito lento no celular:** o ruído do papel era um filtro SVG (feTurbulence) refeito a cada repintura, e o body tinha `background-attachment: fixed`. Agora o grão é gerado uma vez em canvas (`setPaperGrain` em `src/pages/manuscrito.ts`). Medido com CPU 6x no Chromium headless: a troca de página já era ~30 ms, então o ganho real só se confirma num aparelho: **falta testar num celular de verdade**. Suspeito restante: os 12 ícones com `feDisplacementMap` (filtro #rough) por página.
@@ -164,3 +164,9 @@ Não entregue código Phaser nem imagem gerada por IA.
 | música e sons | `src/audio/AudioEngine.ts`, `src/audio/tracks.ts` |
 | textos de ajuda | `index.html` (`#help-overlay`) |
 | cores e layout | `src/styles/main.css` |
+
+## Biblioteca, aprendizado de poções e velocidade (2026-11-15)
+- **Biblioteca Proibida** é capítulo da campanha: `game/stages/chapters/biblioteca.ts` (4 fases, Leão Verde no fim), entre a Torre e o Retorno. Migração de progresso `STAGE_SCHEMA` 4. Testes: `tests/stages/*`, `tests/storyMusic.test.ts`, `tests/tracks.test.ts`.
+- **Poções aprendidas, não compradas:** `game/learning.ts` (água na fase 1, terra na 3, ar na 4). `storage.markStageCompleted` concede a poção. A loja não vende mais nada (`game/shopRules.ts`). O OURO segue sem uso: decidir.
+- **Velocidade gradual:** `SPEED_STEP` = 0,12 por ponto; casa base 260 ms. Ver `docs/10-equilibrio.md`.
+- **Pendências:** o que fazer com o OURO; a forma "Roo Aqua"; as quatro transformações (a discutir); conferir o Leão no jogo (a fase do Leão usa a arena já existente).

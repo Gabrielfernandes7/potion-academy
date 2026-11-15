@@ -37,7 +37,9 @@ src/
   main.ts                  # layout (vars CSS do canvas, modo toque), botões do DOM, nome da faixa
   config.ts                # CONFIG, CANVAS, ELEMENTS, BOMB_TYPES, BOMB_ORDER (balanceamento)
   storage.ts               # Storage, Bank, owned bombs (localStorage)
-  audio/AudioEngine.ts     # WebAudio: cadeia suave + reverb, efeitos calmos, música por faixas (playTrack)
+  audio/AudioEngine.ts     # motor: contexto, flags, agendador da música (playTrack), API `audio` (fachada)
+  audio/synth.ts           # primitivas WebAudio: cadeia + reverb, voz, grão de ruído, sopro (sem regra de jogo)
+  audio/sounds.ts          # qual som toca para cada efeito (playSfx), por elemento, e as fanfarras
   audio/tracks.ts          # 6 faixas procedurais (uma por parte do jogo, SCENE_TRACKS) e gerador de compassos (puro)
   input/touch.ts           # entrada por toque (d-pad e botões em DOM -> jogo)
   textures/                # texturas procedurais (terrain, potions, roo, entities, hud, menu)
@@ -79,7 +81,7 @@ src/
   game/stages/upcoming.ts  # capítulos selados que já aparecem no mapa (Biblioteca Proibida, Observatório): sem fases e sem acesso
   game/stages/             # fases e capítulos: index.ts (STAGES, CHAPTERS), types.ts, chests.ts, mapRules.ts, chapters/<capítulo>.ts
   ui/arena.ts              # janela da Arena de treino (um cartão por chefe)
-  ui/elementIcons.ts       # ícones SVG dos atributos (Enxofre, Mercúrio, Sal, Éter) e o filtro de tinta #rough
+  ui/elementIcons.ts       # ícones SVG dos atributos (Enxofre, Mercúrio, Sal, Ar) e o filtro de tinta #rough
   ui/ornaments.ts          # ornamentos SVG das seções do manuscrito e a estrela de parágrafo
   ui/dom.ts                # helpers de DOM (byId, setShown)
   ui/theme.ts              # lê cores/fontes das variáveis CSS para o canvas
@@ -105,8 +107,8 @@ tests/                     # testes unitários (lógica pura, storage, toque, fa
 - **Escala responsiva**: `Phaser.Scale.FIT` dentro de `#game`, cujo tamanho é definido por CSS (`--canvas-w/--canvas-h` vêm de `CANVAS`, em `main.ts`).
 - **Telas de menu** (menu, loja, pausa, game over) são DOM. Cores e fontes vivem em variáveis CSS (`:root`); o canvas as lê via `ui/theme.ts`, então mude as cores só no CSS.
 - **Toque**: `data-touch="up|down|left|right|bomb|push|detonate|pause"` nos botões; `input/touch.ts` guarda o estado e `MainScene.handleInput()` o consome junto com o teclado.
-- **Glossário** (use estes nomes em toda a UI): **POÇÃO** = moeda; **FRASCOS** = bombas ativas/limite (ex.: "+1 FRASCO"); **GEMAS**; **BLOCOS**; **TEMPO**; **VIDA** (barra contínua). Os 4 tipos continuam "Poção de Fogo/Aqua/Telúrica/Etérea".
-- Sem emojis na UI. Os símbolos alquímicos (△ ▽ ◇ ☿) são glifos do tema e ficam.
+- **Glossário** (use estes nomes em toda a UI): **FRASCOS** = bombas ativas/limite (ex.: "+1 FRASCO"); **GEMAS**; **BLOCOS**; **TEMPO**; **VIDA** (barra contínua). Os 4 tipos são "Poção de Fogo/Água/Terra/Ar". O OURO foi tirado do jogo.
+- Sem emojis na UI. Os símbolos alquímicos (△ ▽ 🜁 🜃, da tabela de símbolos da alquimia) são glifos do tema e ficam.
 
 ## Estado do trabalho
 
@@ -138,7 +140,7 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 - *Roo* (`textures/roo.ts`): poses `awake` (walk, 4 frames x 3 directions), `sleep` and `stir` (menu). The texture is `ROO_HEAD_ROOM` px taller than the tile so ears and hat are not clipped; the player sprite therefore uses `setOrigin(0.5, rooOriginY(tile))`. The cape is drawn *after* the body so it covers it (front: two flaps with the pouch showing; back: full cloak; side: hangs from the shoulders). The wand is held at the side, never over the face.
 - *Power-ups* (`textures/entities.ts`): round tokens with a colored rim (`POWERUP_COLORS`) and a symbol. Power-ups and gems get a soft pulsing halo (`PICKUP_HALO`, created in `spawnPickupSprite`, destroyed in `collectPickup`).
 
-**Audio Engine**: `AudioEngine` synthesizes everything with WebAudio, aiming for calm: only sine/triangle voices with slow attacks, a low-pass filter, a generated-impulse reverb and a gentle compressor. Music (`enabled`/`playing`) and sound effects (`sfx`) are independent flags. The player's choice is kept in `audio/prefs.ts` (`bombroo_audio`, default both on) and applied by `main.ts` (`applyMusicPref`/`applySfxPref`); the top bar has MÚSICA and EFEITOS buttons. `audio.unlock()` runs on any pointer or key press. Effects: `play('bomb'|'explosion'|'pickup'|'powerup'|'hurt'|'door', element?)`. The explosion sound depends on the element (`elementSound()`): fire = flame hiss and crackles (sulfur), water = heavy drops (mercury), earth = crystal crackle (salt), air = soft hum of a glowing gas (ether). Win/game-over jingles: `playWinMusic()` / `playGameOverMusic()`.
+**Audio Engine**: `AudioEngine` synthesizes everything with WebAudio, aiming for calm: only sine/triangle voices with slow attacks, a low-pass filter, a generated-impulse reverb and a gentle compressor. Music (`enabled`/`playing`) and sound effects (`sfx`) are independent flags. The player's choice is kept in `audio/prefs.ts` (`bombroo_audio`, default both on) and applied by `main.ts` (`applyMusicPref`/`applySfxPref`); the top bar has MÚSICA and EFEITOS buttons. `audio.unlock()` runs on any pointer or key press. Effects: `play('bomb'|'explosion'|'pickup'|'powerup'|'hurt'|'door', element?)`. Sound design lives in `audio/sounds.ts` (primitives in `audio/synth.ts`). The explosion sound depends on the element (`elementSound()`): fire = flame hiss and crackles (sulfur), water = heavy drops (mercury), earth = crystal crackle (salt), air = soft hum of a glowing gas (ether). Win/game-over jingles: `playWinMusic()` / `playGameOverMusic()`.
 - *Music*: `audio/tracks.ts` holds six tracks, one per part of the game (`SCENE_TRACKS`: menu/letter, stages 1-4, ending). `audio.playTrack(id)` switches with a fade (no-op if already playing it). Menu starts on the first gesture; `MainScene.init` plays `def.track`; the ending plays `vesperas`. Each play uses a new random seed, so a track never sounds the same twice. The topbar shows the current track name (`audio.onTrackChange`). No random track picking and no player-chosen track: the Music Room only previews.
 
 **Game Constants**: Tuning lives in `src/config.ts`: `CONFIG`, `ELEMENTS`, `BOMB_TYPES`, `BOMB_ORDER`. Modify these when balancing.
@@ -147,7 +149,7 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 
 - Elements react only through bomb chains (`game/chain.ts`): fire ignites, water neutralizes fire, earth is immune. Fire explosions leave no lasting flames yet. Bombs are limited to 2 at a time (up to 5 with power-ups), and the remote bomb counts toward that limit until detonated.
 - Four stages with a story ending (Anselmo's confession at the garden gate, `game/story.ts`); stage progress is saved (`bombroo_stages_completed`) and gates the map. No high score; shop has only 3 one-time items.
-- Enemies don't chase (frog, ghost, flower). There is no per-stage unlock of potions: the Aqua potion must be bought in the shop to use the new water mechanic.
+- Enemies don't chase (frog, ghost, flower). Potions are learned in the journey (game/learning.ts): water after stage 1, earth after stage 3, air after stage 4. The shop shows them and sells nothing. There is no gold (OURO) in the game anymore.
 - HUD text is drawn in the canvas, so it is pixel-scaled on very large screens.
 - The Phaser bundle is ~1.2 MB (full build); could be trimmed by importing only the used modules.
 - Audio levels were verified with an analyser, not by ear: tune `master`/`MUSIC_LEVEL` in `AudioEngine.ts` if it feels too quiet or loud.

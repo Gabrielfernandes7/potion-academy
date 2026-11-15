@@ -11,10 +11,6 @@ export interface UpcomingChapter {
 
 export const UPCOMING_CHAPTERS: readonly UpcomingChapter[] = [
   {
-    id: 'biblioteca', name: 'A BIBLIOTECA PROIBIDA', place: 'Scriptorium acorrentado', icon: 'library',
-    hint: 'Livros acorrentados e manuscritos que ninguém deveria ler.',
-  },
-  {
     id: 'observatorio', name: 'O OBSERVATÓRIO', place: 'Torre dos Astrolábios', icon: 'observatory',
     hint: 'Astrolábios, mapas celestes e cartas de estrelas, desenhados como manuscritos antigos.',
   },

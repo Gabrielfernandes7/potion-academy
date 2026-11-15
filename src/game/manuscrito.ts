@@ -44,7 +44,7 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
     visto: 'Laboratório do Caldeirão', fase: 1,
     habilidades: [
       { nome: 'Colocar poção', texto: 'Põe um frasco no chão. Cada poção tem o seu elemento, alcance e tempo.' },
-      { nome: 'Explodir poções etéreas', texto: 'Com a tecla D, detona de longe os frascos de éter, no instante em que escolher.' },
+      { nome: 'Explodir poções de ar', texto: 'Com a tecla D, detona de longe os frascos de ar, no instante em que escolher.' },
       { nome: 'Trocar de frasco', texto: 'Alterna entre as poções que já comprou no Caldeirão de Magia (teclas 1 a 4).' },
     ],
     nota: 'Aprendi cedo que as minhas próprias poções também queimam. O fogo me fere mais que qualquer outra coisa; a água, quase nada. Sigo cada passo com cuidado.',
@@ -57,7 +57,7 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
     visto: 'Em qualquer fase, com a tecla T', fase: 1,
     habilidades: [
       { nome: 'Transformação (T)', texto: 'Dura 20 s e esfria em 4 degraus, e a capa, o chapéu e as orelhas voltam ao normal aos poucos. Depois, 25 s de espera.' },
-      { nome: 'A chama recusa a água', texto: 'Enquanto a forma durar, a Roo não pode usar a Poção Aqua: a chama a rejeita.' },
+      { nome: 'A chama recusa a água', texto: 'Enquanto a forma durar, a Roo não pode usar a Poção de Água: a chama a rejeita.' },
       { nome: 'Poções de fogo +50%', texto: 'No auge, a Poção de Fogo de 4 tira 6. O bônus cai a cada degrau e só vale para as poções dela.' },
       { nome: 'Brasas', texto: 'A explosão de fogo deixa brasas no chão. Queimam inimigos comuns; chefes são imunes. Uma explosão de água as apaga.' },
       { nome: 'Labareda (X)', texto: 'Um jato de fogo de 3 casas à frente. Custa 2 s da transformação e tem 3,5 s de espera.' },
@@ -73,8 +73,8 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
     visto: 'Em qualquer fase, com a tecla Y', fase: 1,
     habilidades: [
       { nome: 'Transformação (Y)', texto: 'Dura 20 s e esfria em 4 degraus: as bolhas vão se desfazendo e a capa volta ao normal. Depois, 25 s de espera.' },
-      { nome: 'Imune à água', texto: 'No auge, a água não a machuca: nem a Poção Aqua, nem a maré, nem os sapos de água (o contato continua doendo). O fogo segue sendo a fraqueza.' },
-      { nome: 'Poções de água +50%', texto: 'No auge, a Poção Aqua ganha metade a mais de dano. O bônus cai a cada degrau.' },
+      { nome: 'Imune à água', texto: 'No auge, a água não a machuca: nem a Poção de Água, nem a maré, nem os sapos de água (o contato continua doendo). O fogo segue sendo a fraqueza.' },
+      { nome: 'Poções de água +50%', texto: 'No auge, a Poção de Água ganha metade a mais de dano. O bônus cai a cada degrau.' },
       { nome: 'Bolha de sabão (X)', texto: 'Sopra uma bolha que flutua até 4 casas. Se alcança um inimigo comum, o prende dentro dela até estourar. Chefes são imunes. Custa 2 s da forma.' },
     ],
     nota: 'A água me reconhece e não me machuca. Gosto de soprar bolhas: elas prendem o que não precisa ser ferido. O fogo, esse, continua sendo o meu ponto fraco.',
@@ -97,7 +97,7 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
     visto: 'Laboratório e jardim', fase: 1,
     habilidades: [
       { nome: 'Pulinhos', texto: 'Anda sem rumo, de casa em casa. Não persegue ninguém.' },
-      { nome: 'Contato', texto: 'Encostar nele machuca. Morre com poucas explosões e deixa uma moeda.' },
+      { nome: 'Contato', texto: 'Encostar nele machuca. Morre com poucas explosões.' },
     ],
     nota: 'Vive do calor do caldeirão. O chapéu com estrela é só pose: não conjura nada. A terra o derruba de um golpe.',
   },
@@ -110,7 +110,7 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
       { nome: 'Atravessar', texto: 'Passa por muralhas, caixotes e poções. Dentro da pedra, a explosão não o alcança.' },
       { nome: 'Flutuar', texto: 'Um passo lento a cada 1,5 s. Não sai da sala e não persegue.' },
     ],
-    nota: 'A Poção Telúrica passa por ele como por névoa. A água, porém, o desfaz: lembra as bênçãos que Anselmo fazia.',
+    nota: 'A Poção de Terra passa por ele como por névoa. A água, porém, o desfaz: lembra as bênçãos que Anselmo fazia.',
   },
   {
     id: 'quimera', nome: 'Quimera de Mercúrio', titulo: 'Prata viva derramada no poço', grupo: 'chefe', perfil: 'chimera',
@@ -129,15 +129,15 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
   {
     id: 'leao', nome: 'Leão Verde', titulo: 'Solvente universal, guardião da Biblioteca Proibida', grupo: 'chefe', perfil: 'lion',
     arenaId: 'lion',
-    secao: 'astronomica', selado: true,
+    secao: 'astronomica',
     sprite: { frames: ['lion_idle_0', 'lion_idle_1'], zoom: 5 },
-    visto: 'Biblioteca Proibida (capítulo selado); por ora, só na Arena', fase: 1,
+    visto: 'A Biblioteca Proibida, no Salão dos Acorrentados', fase: 12,
     habilidades: [
       { nome: 'Bote', texto: 'Some e salta sobre a sua casa, com um abalo em cruz. Depois fica exposto e leva dano extra.' },
       { nome: 'Dissolver', texto: 'Um ácido verde corre pela linha da sua casa e dissolve as suas poções no caminho. Furioso, também pela coluna.' },
       { nome: 'Rugido (fúria)', texto: 'Atinge quase o campo todo. As casas verdes são seguras.' },
     ],
-    nota: 'Os manuscritos o mostram devorando o sol: o verde dissolve até o ouro. A terra, que é sal, ele já dissolveu. O éter, que nada dissolve, o queima.',
+    nota: 'Os manuscritos o mostram devorando o sol: o verde dissolve até o ouro. A terra, que é sal, ele já dissolveu. O ar, que nada dissolve, o queima.',
   },
   {
     id: 'belladona', nome: 'Belladona', titulo: 'Alquimista rival, dona da Torre', grupo: 'chefe', perfil: 'belladonna',
@@ -156,7 +156,7 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
     id: 'flor', nome: 'Flor do mal', titulo: 'Sentinela das margens', grupo: 'inimigo', perfil: 'flower',
     secao: 'herbaria',
     sprite: { frames: ['enemy_flower'], zoom: 6 },
-    visto: 'Ponte e jardim', fase: 10,
+    visto: 'Ponte e jardim', fase: 14,
     habilidades: [
       { nome: 'Raiz', texto: 'Fica fixa e bloqueia a casa. Não se mexe nem se multiplica.' },
       { nome: 'Chicote', texto: 'A cada 3,2 s avisa em rosa as quatro casas ao redor e, 0,8 s depois, chicoteia.' },
@@ -168,7 +168,7 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
     arenaId: 'mandrake',
     secao: 'herbaria',
     sprite: { frames: ['mandrake_idle_0', 'mandrake_idle_1'], zoom: 5 },
-    visto: 'Jardim do Mosteiro', fase: 12,
+    visto: 'Jardim do Mosteiro', fase: 16,
     habilidades: [
       { nome: 'Raízes', texto: 'Raízes sobem na linha e na coluna onde você está. Furiosa, em cruz.' },
       { nome: 'Maré', texto: 'Anéis de água se expandem um depois do outro. Uma faixa fica seca: o caminho seguro.' },

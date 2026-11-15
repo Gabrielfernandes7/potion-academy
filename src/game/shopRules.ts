@@ -1,27 +1,24 @@
-// Regras de exibição da loja (puras, sem DOM, testáveis).
-import { BOMB_TYPES, BombId } from '../config';
+// Regras de exibição da loja (puras, sem DOM, testáveis). O Caldeirão não vende poções: a Roo
+// aprende cada uma no decorrer da jornada (game/learning.ts). A loja só mostra o que já é dela.
+import type { BombId } from '../config';
 
-type CardState = 'initial' | 'owned' | 'affordable' | 'locked';
+export type CardState = 'initial' | 'owned' | 'journey';
 
 export interface CardView {
   state: CardState;
-  missing: number; // quanto falta de OURO para comprar (só em 'locked')
 }
 
-export function cardView(type: BombId, owned: boolean, bank: number): CardView {
-  if (type === 'normal') return { state: 'initial', missing: 0 };
-  if (owned) return { state: 'owned', missing: 0 };
-  const cost = BOMB_TYPES[type].cost;
-  if (bank >= cost) return { state: 'affordable', missing: 0 };
-  return { state: 'locked', missing: cost - bank };
+export function cardView(type: BombId, owned: boolean): CardView {
+  if (type === 'normal') return { state: 'initial' };
+  if (owned) return { state: 'owned' };
+  return { state: 'journey' };
 }
 
-export function buttonLabel(type: BombId, view: CardView): string {
+export function buttonLabel(_type: BombId, view: CardView): string {
   switch (view.state) {
     case 'initial': return 'Inicial';
-    case 'owned': return 'Adquirida';
-    case 'affordable': return `Comprar · ${BOMB_TYPES[type].cost} OURO`;
-    case 'locked': return `Faltam ${view.missing} OURO`;
+    case 'owned': return 'Aprendida';
+    case 'journey': return 'Na jornada';
   }
 }
 

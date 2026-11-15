@@ -1,16 +1,15 @@
 // Persistência em localStorage.
-// ATENÇÃO: as chaves 'bombroo_bank' e 'bombroo_owned' não podem ser renomeadas
-// sem uma migração, senão os jogadores perdem o progresso.
+// ATENÇÃO: as chaves 'bombroo_owned' e as de fases não podem ser renomeadas sem uma migração, senão os jogadores perdem o progresso.
+// 'bombroo_bank' (o OURO, que foi tirado do jogo) não é mais lida nem gravada: saves antigos só a deixam sem uso.
 
-import { BOMB_TYPES, BombId } from './config';
+import { BombId } from './config';
 import { STAGE_SCHEMA, migrateCompleted } from './game/stages/migration';
+import { learnedAfter } from './game/learning';
 
-const BANK_KEY = 'bombroo_bank';
 const OWNED_KEY = 'bombroo_owned';
 const STAGES_KEY = 'bombroo_stages_completed';
 const STAGES_SCHEMA_KEY = 'bombroo_stages_schema'; // versão da numeração das fases (game/stages/migration.ts)
 const ARENA_KEY = 'bombroo_arena_wins'; // chefes já vencidos na Arena (chave nova; não mexe no progresso antigo)
-const START_BANK = 100;
 
 export const Storage = {
   get<T>(k: string, def: T): T {
@@ -30,27 +29,6 @@ export const Storage = {
   },
 };
 
-export const Bank = {
-  get(): number {
-    return Storage.get<number>(BANK_KEY, 0);
-  },
-  add(n: number): number {
-    const v = this.get() + n;
-    Storage.set(BANK_KEY, v);
-    return v;
-  },
-  spend(n: number): boolean {
-    const v = this.get();
-    if (v < n) return false;
-    Storage.set(BANK_KEY, v - n);
-    return true;
-  },
-};
-
-if (Storage.get<number | null>(BANK_KEY, null) === null) {
-  Storage.set(BANK_KEY, START_BANK);
-}
-
 let owned: BombId[] = Storage.get<BombId[]>(OWNED_KEY, ['normal']);
 if (!owned.includes('normal')) owned.push('normal');
 
@@ -58,12 +36,11 @@ export function hasBombType(t: BombId): boolean {
   return owned.includes(t);
 }
 
-export function buyBombType(t: BombId): boolean {
-  if (hasBombType(t)) return false;
-  if (!Bank.spend(BOMB_TYPES[t].cost)) return false;
+// A poção passa a ser da Roo (aprendida na jornada, sem custo).
+export function grantBombType(t: BombId): void {
+  if (hasBombType(t)) return;
   owned.push(t);
   Storage.set(OWNED_KEY, owned);
-  return true;
 }
 
 // Rastreamento de fases concluídas. A numeração das fases tem versão: se o jogo inseriu fases desde
@@ -87,6 +64,8 @@ export function markStageCompleted(stage: number): void {
     completed.push(stage);
     Storage.set(STAGES_KEY, completed);
   }
+  const learned = learnedAfter(stage);
+  if (learned) grantBombType(learned);
 }
 
 // Vitórias na Arena de treino: guardam só o id de cada chefe vencido (abre a página dele no Manuscrito).

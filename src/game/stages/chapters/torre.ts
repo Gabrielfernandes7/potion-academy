@@ -11,7 +11,7 @@ export const TORRE: ChapterSpec = {
     {
       kind: 'crypt', name: 'A ESCADARIA', place: 'Escadaria da Torre',
       story: 'Degraus de pedra subindo na escuridão. Os fantasmas daqui não têm cheiro, só frio.',
-      chest: CHEST_RICH, tip: 'O fantasma só resiste à Poção Telúrica.',
+      chest: CHEST_RICH, tip: 'O fantasma só resiste à Poção de Terra.',
       time: 100000, blockChance: 0.6, door: true, theme: 'crypt', block: 'slab', track: 'ecos',
       enemies: [{ kind: 'ghost', start: 2, max: 3, every: 8 }],
     },

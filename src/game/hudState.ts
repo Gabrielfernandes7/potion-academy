@@ -8,7 +8,6 @@ export const HUD_SELECT_BOMB = 'hud:select-bomb';
 export interface HudState {
   hp: number;
   maxHp: number;
-  coins: number;
   gems: number;
   gemsForDoor: number;
   blocks: number;

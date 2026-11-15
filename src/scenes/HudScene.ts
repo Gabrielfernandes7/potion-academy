@@ -1,5 +1,5 @@
 // HUD dentro do canvas: faixa no topo, acima da grade. Enxuta e em ícones, no clima do jogo:
-//   Linha de cima: a vida (barra com faixa clara do dano), a ampulheta com o tempo, o OURO e as GEMAS (losangos).
+//   Linha de cima: a vida (barra com faixa clara do dano), a ampulheta com o tempo e as GEMAS (losangos).
 //   Linha de baixo: o seletor de frascos (teclas 1-4 ou toque), o medidor da Roo Fire (4 degraus) e as bolinhas
 //   dos frascos já colocados, na cor do elemento escolhido.
 // Sem legendas de texto: ícone, número e cor dizem o resto. Na fase de chefe, a vida dele ocupa o lugar das gemas.
@@ -32,7 +32,6 @@ const FIRE_X = 204; // medidor da Roo Fire (linha de baixo)
 const FIRE_BAR_X = FIRE_X + 26; // dois ícones (chama e gota) antes dos degraus
 const FIRE_SEG_W = 22;
 const FIRE_SEG_GAP = 3;
-const COIN_X = 404;
 const GEM_X = 488; // gemas em losangos
 const BOSS_X = 462; // vida do chefe, no lugar das gemas
 const BOSS_W = 124;
@@ -52,12 +51,9 @@ export class HudScene extends Phaser.Scene {
   private hpView = { ratio: 1, low: false };
   private emptyFlask!: Img;
   private lastHp: number | null = null;
-  private lastCoins: number | null = null;
   private timerText!: Text;
   private overtimeTween: Phaser.Tweens.Tween | null = null;
-  private coinText!: Text;
-  private coinIcon!: Img;
-  private bossGfx!: Phaser.GameObjects.Graphics;
+    private bossGfx!: Phaser.GameObjects.Graphics;
   private bossName!: Text;
   private slotGfx!: Phaser.GameObjects.Graphics;
   private slotIcons: Img[] = [];
@@ -72,7 +68,6 @@ export class HudScene extends Phaser.Scene {
     this.slotIcons = [];
     this.slotKeys = [];
     this.lastHp = null;
-    this.lastCoins = null;
     this.overtimeTween = null;
     this.hpTween = null;
     this.hpTrail = 1;
@@ -119,7 +114,6 @@ export class HudScene extends Phaser.Scene {
 
   private createRowA(): void {
     const t = this.theme;
-    const gold = '#' + t.goldBright.toString(16).padStart(6, '0');
 
     // vida da Roo: coração e barra contínua (a faixa clara mostra o que acabou de perder)
     this.add.image(HEART_X, ROW_A, 'hud_heart').setScale(0.75).setDepth(2);
@@ -130,10 +124,6 @@ export class HudScene extends Phaser.Scene {
     this.timerText = this.text(TIMER_X + 16, ROW_A, '90', 22, t.info, true).setDepth(2);
     // frasco vazio: só aparece na última fase (lembrança do fim)
     this.emptyFlask = this.add.image(TIMER_X + 82, ROW_A, 'hud_flask_empty').setDepth(2).setVisible(false);
-
-    // OURO (só o ícone e o número)
-    this.coinIcon = this.add.image(COIN_X, ROW_A, 'pickup_coin').setScale(0.9).setDepth(2);
-    this.coinText = this.text(COIN_X + 14, ROW_A, '0', 18, gold, true).setDepth(2);
 
     // GEMAS em losangos; na fase do chefe, a vida dele ocupa o lugar
     this.gemGfx = this.add.graphics().setDepth(2);
@@ -299,10 +289,6 @@ export class HudScene extends Phaser.Scene {
     this.bossName.setText(boss.name);
   }
 
-  private pulse(target: Phaser.GameObjects.Components.Transform & Phaser.GameObjects.GameObject): void {
-    this.tweens.add({ targets: target, scale: { from: 1.45, to: 1 }, duration: 240, ease: 'Back.easeOut' });
-  }
-
   private apply(s: HudState): void {
     const t = this.theme;
 
@@ -322,11 +308,6 @@ export class HudScene extends Phaser.Scene {
       this.overtimeTween = null;
       this.timerText.setAlpha(1);
     }
-
-    // OURO
-    this.coinText.setText(String(s.coins));
-    if (this.lastCoins !== null && s.coins > this.lastCoins) this.pulse(this.coinIcon);
-    this.lastCoins = s.coins;
 
     this.applyBoss(s);
     this.drawPips(s);

@@ -4,7 +4,7 @@ import { canUseBomb, forbiddenElement, isBannedBomb, setArenaLoadout, setForbidd
 afterEach(() => { setArenaLoadout(false); setForbiddenElement(null); });
 
 describe('poções que a Roo pode usar', () => {
-  it('a forma de fogo proíbe a Poção Aqua, mesmo na Arena, e libera de novo ao acabar', () => {
+  it('a forma de fogo proíbe a Poção de Água, mesmo na Arena, e libera de novo ao acabar', () => {
     setArenaLoadout(true);
     expect(canUseBomb('mega')).toBe(true);
     setForbiddenElement('water');

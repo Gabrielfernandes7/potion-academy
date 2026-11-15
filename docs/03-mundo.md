@@ -72,8 +72,7 @@ Cada fase da campanha tem um bloco destrutível próprio (`game/stages/blockStyl
 
 | Item | Efeito | Limite |
 |---|---|---|
-| Moeda | +1 OURO | |
-| Baú | OURO sorteado (5 a 50, conforme a fase); não cura | |
+| Baú | guarda um item (coração ou power-up), conforme a fase; não cura sozinho | |
 | Coração | +4 de vida (um golpe neutro) | até 24 de vida |
 | Gema | conta para abrir a porta | 3 por fase |
 | +Frasco | +1 poção ao mesmo tempo, **só da poção do elemento do item** | até 5 por poção |
@@ -86,12 +85,12 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 ## Inimigos
 
 **Sapo mago** (laboratório e jardim)
-- *Faz:* anda sem rumo, com pulinhos, e tira 1 de vida ao encostar. Morre com uma explosão e deixa uma moeda.
+- *Faz:* anda sem rumo, com pulinhos, e tira 1 de vida ao encostar. Morre com uma explosão.
 - *Detalhe:* no laboratório aparecem mais conforme você quebra caixotes (2 no início, até 5). No jardim são 2, até 3.
 - *Limite:* não persegue.
 
 **Fantasma** (salão dos fantasmas)
-- *Faz:* flutua sem rumo (um passo a cada 1,5 s), **atravessa muralhas, caixotes e poções** e tira 1 de vida ao encostar. Deixa uma moeda.
+- *Faz:* flutua sem rumo (um passo a cada 1,5 s), **atravessa muralhas, caixotes e poções** e tira 1 de vida ao encostar. Morre sem deixar nada.
 - *Detalhe:* dentro de uma muralha fica meio transparente e a explosão não o alcança. Começam 2, até 4 (mais um a cada 10 caixotes).
 - *Limite:* não persegue nem sai da sala.
 - *Imune:* só a Telúrica (terra). Água, fogo e éter o derrotam. Também aparece na Torre da Belladona (2 no início, até 3).
@@ -121,7 +120,7 @@ As gemas são escolhidas no começo de cada fase com porta (1, 2 e 4), então a 
 - *Bote:* some e salta sobre a sua casa, com um abalo em cruz. Depois fica **exposto** por 2,2 s e leva +2 de dano.
 - *Dissolver:* um ácido verde corre pela linha da sua casa (furioso, também pela coluna) e **dissolve as suas poções** que estiverem no caminho.
 - *Rugido (fúria):* atinge quase o campo todo; as casas verdes são seguras.
-- *História:* nos manuscritos alquímicos o Leão Verde aparece devorando o sol, porque dissolve até o ouro. Guarda a Biblioteca Proibida, o capítulo ainda selado; por enquanto só se luta com ele na Arena.
+- *História:* nos manuscritos alquímicos o Leão Verde aparece devorando o sol, porque dissolve até o ouro. Guarda a Biblioteca Proibida: é o chefe da última fase do capítulo, e também está na Arena.
 
 ## Quimera de Mercúrio (chefe do Vale)
 

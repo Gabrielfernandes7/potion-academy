@@ -3,9 +3,9 @@ import { ENEMY_TYPES, isImmune } from '../../src/game/entities/enemies/defs';
 import { LAST_STAGE, STAGES, stageDef } from '../../src/game/stages/index';
 
 describe('fases', () => {
-  it('são doze: Vale (três e o poço), Torre (três e o duelo), Retorno (três e o jardim)', () => {
-    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'garden']);
-    expect(LAST_STAGE).toBe(12);
+  it('são dezesseis: Vale (três e o poço), Torre (três e o duelo), Biblioteca (três e o Leão), Retorno (três e o jardim)', () => {
+    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'garden']);
+    expect(LAST_STAGE).toBe(16);
   });
 
   it('a fase 1 não tem fantasmas nem flores do mal', () => {
@@ -17,8 +17,9 @@ describe('fases', () => {
   it('os chefes: Quimera no Vale, Belladona na Torre, Mandrágora no jardim', () => {
     expect(stageDef(4).boss).toBe('chimera');
     expect(stageDef(8).boss).toBe('belladonna');
-    expect(stageDef(12).boss).toBe('mandrake');
-    expect(STAGES.filter(s => s.boss)).toHaveLength(3);
+    expect(stageDef(12).boss).toBe('lion');
+    expect(stageDef(16).boss).toBe('mandrake');
+    expect(STAGES.filter(s => s.boss)).toHaveLength(4);
   });
 
   it('as fases de chefe sem porta (Poço e Duelo) não têm inimigos comuns', () => {
@@ -29,8 +30,8 @@ describe('fases', () => {
   });
 
   it('o jardim só tem as flores que a Mandrágora faz brotar; o salão tem fantasmas', () => {
-    expect(stageDef(12).enemies.map(e => e.kind)).toEqual(['flower']);
-    expect(stageDef(12).enemies[0].start).toBe(0);
+    expect(stageDef(16).enemies.map(e => e.kind)).toEqual(['flower']);
+    expect(stageDef(16).enemies[0].start).toBe(0);
     expect(stageDef(2).enemies.map(e => e.kind)).toContain('ghost');
   });
 
@@ -62,7 +63,7 @@ describe('inimigos', () => {
     for (const e of ['fire', 'earth', 'air'] as const) expect(isImmune('flower', e)).toBe(false);
   });
 
-  it('sapos não são imunes a nada; fantasmas só à Telúrica', () => {
+  it('sapos não são imunes a nada; fantasmas só à de Terra', () => {
     for (const e of ['fire', 'water', 'earth', 'air'] as const) {
       expect(isImmune('frog', e)).toBe(false);
       expect(isImmune('ghost', e)).toBe(e === 'earth');

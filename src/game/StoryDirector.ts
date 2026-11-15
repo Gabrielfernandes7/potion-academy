@@ -6,7 +6,7 @@ import Phaser from 'phaser';
 import { CONFIG } from '../config';
 import { audio } from '../audio/AudioEngine';
 import { SCENE_TRACKS } from '../audio/tracks';
-import { Bank, markArenaWin, markStageCompleted } from '../storage';
+import { markArenaWin, markStageCompleted } from '../storage';
 import { showDialogue } from '../ui/dialogue';
 import { readTheme } from '../ui/theme';
 import type { MainScene } from '../scenes/MainScene';
@@ -90,13 +90,11 @@ export class StoryDirector {
   gateReached(): void {
     const s = this.scene;
     s.floatingText(s.player.gridX, s.player.gridY, 'O PORTÃO SE ABRE', '#9be564');
-    s.coins += CONFIG.gardenVictoryBonus;
-    Bank.add(CONFIG.gardenVictoryBonus);
     s.time.delayedCall(900, () => { void this.ending(); });
   }
 
-  // Um chefe foi derrotado. Na Arena: só guarda a vitória e mostra o resultado (sem ouro nem despedida). Na campanha:
-  // ouro, a queda dele, a despedida em cartões e então 'next' (segue para a fase seguinte) ou 'gate' (abre o portão).
+  // Um chefe foi derrotado. Na Arena: só guarda a vitória e mostra o resultado (sem despedida). Na campanha:
+  // a queda dele, a despedida em cartões e então 'next' (segue para a fase seguinte) ou 'gate' (abre o portão).
   bossDefeated(): void {
     const s = this.scene;
     if (s.gameOver || s.transitioning) return;
@@ -109,8 +107,6 @@ export class StoryDirector {
       return;
     }
     const boss = s.def.boss ? BOSS_DEFS[s.def.boss] : null;
-    s.coins += CONFIG.bossVictoryBonus;
-    Bank.add(CONFIG.bossVictoryBonus);
     s.floatingText(gridX, gridY, `${s.boss?.name ?? 'CHEFE'} DERROTADA!`, '#9be564');
     if (boss?.after === 'gate') {
       // o último chefe: depois da despedida o portão (onde Anselmo espera) se abre

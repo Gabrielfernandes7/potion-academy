@@ -2,7 +2,7 @@
 //   bomb_normal (fogo)  : balão de fundo redondo, líquido vermelho com brasas
 //   bomb_mega   (água)  : tubo alto, líquido azul com onda e gotas
 //   bomb_pierce (terra) : pote largo com cristais verdes
-//   bomb_remote (éter)  : frasco em losango com névoa lilás e estrelas
+//   bomb_remote (ar)  : frasco em losango com névoa lilás e estrelas
 import type { DrawFn, MakeFn } from './make';
 
 type Gfx = Parameters<DrawFn>[0];
@@ -101,7 +101,7 @@ function air(g: Gfx): void {
   g.fillStyle(0xb0bec5); g.fillCircle(20, 6, 3.2);
   g.fillStyle(0xeceff1); g.fillCircle(19, 5, 1.2);
   g.lineStyle(1.6, 0xffffff, 0.7); g.lineBetween(13.2, 23.5, 17.4, 18.5);
-  g.lineStyle(1, 0x7e57c2); g.strokeCircle(20, 25, 3.6); // runa do éter
+  g.lineStyle(1, 0x7e57c2); g.strokeCircle(20, 25, 3.6); // runa do ar
 }
 
 export function drawPotions(make: MakeFn): void {
