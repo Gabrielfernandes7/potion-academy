@@ -29,12 +29,14 @@ import { PickupSystem } from '../game/PickupSystem';
 import { EnemySystem } from '../game/entities/enemies/EnemySystem';
 import { SleepSystem } from '../game/SleepSystem';
 import { markStageCompleted } from '../storage';
-import { cloneUpgrades, createUpgrades } from '../game/upgrades';
 import { HIT_TINT, hitFx } from '../game/entities/hitEffects';
 import { ENEMY_TYPES, EnemyKind } from '../game/entities/enemies/defs';
 import { LAST_STAGE, stageDef } from '../game/stages/index';
 import { blockTextureOf } from '../game/stages/blockStyles';
 import { BossId, StageDef, StageTheme } from '../game/stages/types';
+import { buildTiles, cellKey, doorCell, isPassable, isSpawnSafe, tileAt } from '../game/grid';
+import { advanceStep, beginStep, facingFor, lerp, moveDurationMs, tileCenter, walkTimeScale, type StepState } from '../game/movement';
+import { carryForward, doorOutcome, startingState } from '../game/stageFlow';
 
 type MainKeys = Record<'space' | 'x' | 't' | 'y' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
 
@@ -60,7 +62,6 @@ export class MainScene extends Phaser.Scene {
   pickupSystem!: PickupSystem;
   enemySystem!: EnemySystem;
   sleepSystem!: SleepSystem;
-  coins = 0;
   gems = 0;
   bombType: BombId = 'normal';
   gameOver = false;
@@ -126,32 +127,25 @@ export class MainScene extends Phaser.Scene {
     this.helpPaused = false;
     this.grid = [];
     this.blockSprites = new Map();
-    this.coins = 0;
+    // o que ela conquistou na fase anterior continua aqui (game/stageFlow.ts)
+    const start = startingState(data?.carry, CONFIG.maxHp);
     this.gems = 0;
-    this.bombType = 'normal';
+    this.bombType = start.bombType;
     this.gameOver = false;
     this.won = false;
-    this.moveCarry = 0;
+    this.step = beginStep(0, 220);
     this.player = {
       gridX: 1, gridY: 1,
       dir: { x: 0, y: 1 }, facing: 'down', moving: false,
-      hp: CONFIG.maxHp, invulnerable: 0,
-      upgrades: createUpgrades(),
-      speedUp: 0,
+      hp: start.hp, invulnerable: 0,
+      upgrades: start.upgrades,
+      speedUp: start.speedUp,
     };
-    if (data?.carry) {
-      // o que ela conquistou na fase 1 continua na fase 2
-      const c = data.carry;
-      this.player.hp = c.hp;
-      this.player.upgrades = cloneUpgrades(c.upgrades);
-      this.player.speedUp = c.speedUp;
-      this.coins = c.coins;
-      this.bombType = c.bombType;
-    }
     this.lastDir = { x: 0, y: 0 };
     // sem porta na fase do chefe (-1 nunca coincide com uma casa)
-    this.doorX = this.def.door ? CONFIG.cols - 2 : -1;
-    this.doorY = this.def.door ? CONFIG.rows - 2 : -1;
+    const door = doorCell(CONFIG.cols, CONFIG.rows, this.def.door);
+    this.doorX = door.x;
+    this.doorY = door.y;
     this.doorOpen = false;
     // o chão e a muralha vêm do tema; o bloco é o da fase (cada fase tem o seu: game/stages/blockStyles.ts)
     this.look = { ...LOOKS[this.def.theme], block: blockTextureOf(this.def), blockTint: undefined };
@@ -290,28 +284,27 @@ export class MainScene extends Phaser.Scene {
   // A água apagou uma poção de fogo: ela se desfaz em vapor, sem explodir.
   // ---------- Grade, blocos e porta ----------
 
+  // Sorteio e regras da grade em game/grid.ts; aqui só cria os sprites.
   buildGrid(): void {
-    for (let y = 0; y < CONFIG.rows; y++) {
-      this.grid[y] = [];
-      for (let x = 0; x < CONFIG.cols; x++) this.grid[y][x] = EMPTY;
-    }
+    const bossSpawn = this.def.boss ? BOSS_DEFS[this.def.boss].spawn : undefined;
+    const { tiles } = buildTiles(
+      CONFIG.cols, CONFIG.rows, this.def.blockChance,
+      (x, y) => isSpawnSafe(x, y, CONFIG.cols, CONFIG.rows, bossSpawn),
+    );
+    this.grid = tiles;
     for (let y = 0; y < CONFIG.rows; y++) {
       for (let x = 0; x < CONFIG.cols; x++) {
         const px = x * CONFIG.tile;
         const py = y * CONFIG.tile;
         const floor = this.add.image(px, py, (x + y) % 2 === 0 ? this.look.floor1 : this.look.floor2).setOrigin(0).setDepth(0);
         if (this.look.floorTint !== undefined) floor.setTint(this.look.floorTint);
-        const isWall = x === 0 || y === 0 || x === CONFIG.cols - 1 || y === CONFIG.rows - 1 ||
-                       (x % 2 === 0 && y % 2 === 0);
-        if (isWall) {
-          this.grid[y][x] = WALL;
+        if (tiles[y][x] === WALL) {
           const wall = this.add.image(px, py, this.look.wall).setOrigin(0).setDepth(1);
           if (this.look.wallTint !== undefined) wall.setTint(this.look.wallTint);
-        } else if (Math.random() < this.def.blockChance && !this.isSpawnSafe(x, y)) {
-          this.grid[y][x] = BLOCK;
+        } else if (tiles[y][x] === BLOCK) {
           const sprite = this.add.image(px, py, this.look.block).setOrigin(0).setDepth(2);
           if (this.look.blockTint !== undefined) sprite.setTint(this.look.blockTint);
-          this.blockSprites.set(`${x},${y}`, sprite);
+          this.blockSprites.set(cellKey(x, y), sprite);
         }
       }
     }
@@ -339,17 +332,6 @@ export class MainScene extends Phaser.Scene {
     this.gemBlocks = new Set(keys.slice(0, CONFIG.gemsForDoor));
   }
 
-  isSpawnSafe(x: number, y: number): boolean {
-    // área livre em L ao redor do spawn, para sempre haver rota de fuga
-    if (this.isBossStage) {
-      // o chefe nasce num canto (Belladona embaixo, Mandrágora em cima): deixa as casas ao redor livres
-      const r = this.def.boss && BOSS_DEFS[this.def.boss].spawn === 'top' ? 1 : CONFIG.rows - 2;
-      const c = CONFIG.cols - 2;
-      if ((y === r && x >= c - 2) || (x === c && Math.abs(y - r) <= 2)) return true;
-    }
-    return (y === 1 && x <= 3) || (x === 1 && y <= 3);
-  }
-
   removeBlock(x: number, y: number): void {
     const key = `${x},${y}`;
     const sprite = this.blockSprites.get(key);
@@ -372,8 +354,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   getTile(x: number, y: number): number | null {
-    if (x < 0 || x >= CONFIG.cols || y < 0 || y >= CONFIG.rows) return null;
-    return this.grid[y][x];
+    return tileAt(this.grid, CONFIG.cols, CONFIG.rows, x, y);
   }
 
   hasBomb(x: number, y: number): boolean {
@@ -381,11 +362,12 @@ export class MainScene extends Phaser.Scene {
   }
 
   isFree(x: number, y: number): boolean {
-    if (this.getTile(x, y) !== EMPTY) return false;
-    if (this.hasBomb(x, y)) return false;
-    if (!this.doorOpen && x === this.doorX && y === this.doorY) return false;
-    if (this.enemySystem.enemies.some(e => e.alive && ENEMY_TYPES[e.kind].rooted && e.gridX === x && e.gridY === y)) return false;
-    return true;
+    return isPassable({
+      tile: this.getTile(x, y),
+      bomb: this.hasBomb(x, y),
+      doorClosed: !this.doorOpen && x === this.doorX && y === this.doorY,
+      rootedEnemy: this.enemySystem.enemies.some(e => e.alive && ENEMY_TYPES[e.kind].rooted && e.gridX === x && e.gridY === y),
+    });
   }
 
   openDoor(): void {
@@ -431,7 +413,7 @@ export class MainScene extends Phaser.Scene {
     if (this.transitioning || !this.def.door) return;
     this.transitioning = true;
     this.play('door');
-    if (this.stage >= LAST_STAGE) {
+    if (doorOutcome(this.stage, LAST_STAGE) === 'finish') {
       this.story.gateReached(); // portão do jardim: frei Anselmo espera e a confissão fecha a história
       return;
     }
@@ -440,20 +422,18 @@ export class MainScene extends Phaser.Scene {
     this.story.passage();
   }
 
-  // Fade e recomeço da cena na fase seguinte, levando vida, power-ups, moedas e o frasco escolhido.
+  // Fade e recomeço da cena na fase seguinte, levando vida, power-ups e o frasco escolhido.
   advanceStage(): void {
     this.enemySystem.clearLash();
     this.cameras.main.fadeOut(900, 8, 14, 12);
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.restart({
         stage: this.stage + 1,
-        carry: {
-          hp: Math.min(CONFIG.maxHp, this.player.hp + CONFIG.stageClearHeal),
-          upgrades: this.player.upgrades,
-          speedUp: this.player.speedUp,
-          coins: this.coins,
-          bombType: this.bombType,
-        },
+        carry: carryForward(
+          { hp: this.player.hp, upgrades: this.player.upgrades, speedUp: this.player.speedUp, bombType: this.bombType },
+          CONFIG.stageClearHeal,
+          CONFIG.maxHp,
+        ),
       } satisfies StageData);
     });
   }
@@ -511,7 +491,7 @@ export class MainScene extends Phaser.Scene {
   // ---------- Movimento e entrada ----------
 
   moveDuration(): number {
-    return CONFIG.baseMoveDuration / (1 + this.player.speedUp * 0.55);
+    return moveDurationMs(CONFIG.baseMoveDuration, this.player.speedUp);
   }
 
   tweenSpriteTo(
@@ -535,36 +515,31 @@ export class MainScene extends Phaser.Scene {
   // Movimento da Roo feito à mão (não por tween): o tempo que sobra ao chegar numa casa
   // (`moveCarry`) vai para o passo seguinte, então andar em linha reta tem velocidade constante,
   // sem a pausa de ~1 quadro entre casas que fazia parecer pulo de bloco em bloco.
+  // A matemática do passo (tempo, excedente, direção) está em game/movement.ts.
   private moveFrom = { x: 0, y: 0 };
   private moveTo = { x: 0, y: 0 };
-  private moveElapsed = 0;
-  private moveLength = 220;
-  private moveCarry = 0;
+  private step: StepState = beginStep(0, 220);
 
   movePlayerTo(nx: number, ny: number, duration: number): void {
     this.player.gridX = nx;
     this.player.gridY = ny;
     this.player.moving = true;
     this.moveFrom = { x: this.playerSprite.x, y: this.playerSprite.y };
-    this.moveTo = { x: nx * CONFIG.tile + CONFIG.tile / 2, y: ny * CONFIG.tile + CONFIG.tile / 2 };
-    this.moveLength = duration;
-    this.moveElapsed = this.moveCarry;
-    this.moveCarry = 0;
+    this.moveTo = { x: tileCenter(nx, CONFIG.tile), y: tileCenter(ny, CONFIG.tile) };
+    this.step = beginStep(this.step.carry, duration);
     this.playWalk();
-    // um ciclo de 4 quadros a cada 2 casas (passo esquerdo + direito), sincronizado com o passo
-    this.playerSprite.anims.timeScale = 4 / (2 * (duration / 1000)) / 12;
+    this.playerSprite.anims.timeScale = walkTimeScale(duration);
   }
 
   // Avança o passo atual; ao chegar, guarda o excedente de tempo e libera o próximo passo.
   private stepPlayerMove(delta: number): void {
     if (!this.player.moving) return;
-    this.moveElapsed += delta;
-    const t = Math.min(1, this.moveElapsed / this.moveLength);
-    this.playerSprite.x = this.moveFrom.x + (this.moveTo.x - this.moveFrom.x) * t;
-    this.playerSprite.y = this.moveFrom.y + (this.moveTo.y - this.moveFrom.y) * t;
-    if (t < 1) return;
+    const tick = advanceStep(this.step, delta);
+    this.step = tick.state;
+    this.playerSprite.x = lerp(this.moveFrom.x, this.moveTo.x, tick.t);
+    this.playerSprite.y = lerp(this.moveFrom.y, this.moveTo.y, tick.t);
+    if (!tick.finished) return;
     // sem playIdle aqui: se a tecla segue pressionada, o próximo passo continua o mesmo ciclo
-    this.moveCarry = Math.min(this.moveElapsed - this.moveLength, 34);
     this.player.moving = false;
     this.pickupSystem.checkPickups();
     this.checkWin();
@@ -573,10 +548,7 @@ export class MainScene extends Phaser.Scene {
   tryMove(dx: number, dy: number): void {
     if (this.player.moving) return;
     this.player.dir = { x: dx, y: dy };
-    if (dx < 0) this.player.facing = 'left';
-    else if (dx > 0) this.player.facing = 'right';
-    else if (dy < 0) this.player.facing = 'up';
-    else if (dy > 0) this.player.facing = 'down';
+    this.player.facing = facingFor(dx, dy, this.player.facing);
     const nx = this.player.gridX + dx;
     const ny = this.player.gridY + dy;
     if (!this.isFree(nx, ny)) {
@@ -672,7 +644,6 @@ export class MainScene extends Phaser.Scene {
     return {
       hp: this.player.hp,
       maxHp: CONFIG.maxHp,
-      coins: this.coins,
       gems: this.gems,
       gemsForDoor: CONFIG.gemsForDoor,
       blocks: this.blockSprites.size,
@@ -729,7 +700,6 @@ export class MainScene extends Phaser.Scene {
     }
     showGameOver({
       won: this.won,
-      coins: this.coins,
       gems: this.gems,
       hp: this.player.hp,
       maxHp: CONFIG.maxHp,
@@ -814,7 +784,7 @@ export class MainScene extends Phaser.Scene {
     if (this.gameOver || this.won || this.transitioning) return;
     this.handleInput();
     // se não começou outro passo neste quadro, o tempo sobrando não vale
-    if (!this.player.moving) this.moveCarry = 0;
+    if (!this.player.moving) this.step = beginStep(0, this.step.length);
     if (!this.player.moving && this.playerSprite.anims.currentAnim?.key.startsWith('roo_walk_')) {
       this.playerSprite.anims.timeScale = 1;
       this.playIdle();

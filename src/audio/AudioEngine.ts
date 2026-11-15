@@ -1,34 +1,16 @@
-// Áudio sintetizado com WebAudio (sem arquivos externos), pensado para ser calmo.
-//
-// Cadeia: vozes -> barramento (sfx/música) -> filtro passa-baixa -> compressor suave -> saída,
-// com um reverb (resposta ao impulso gerada em código) para dar espaço e maciez.
-// Efeitos: senoides/triângulos com ataque lento, mais grãos de ruído filtrados (chiado, crepitar, gotas).
-// Cada elemento tem um som próprio (ver elementSound).
-// Música: faixas procedurais (ver tracks.ts); cada jogo sorteia faixa e semente novas.
-//
+// Motor de áudio: contexto do navegador, flags de música e efeitos, e o agendador das faixas.
+// Os blocos de som ficam em synth.ts (primitivas) e sounds.ts (quais sons tocam e como soam).
 // Música (enabled/playing) e efeitos (sfx) são flags independentes.
 // O sfx é ligado pelo primeiro clique em JOGAR/COMEÇAR.
 import type { ElementId } from '../config';
-import {
-  MelodyState, NoteEvent, STEPS_PER_BAR, Track, generateBar, midiToHz, mulberry32, trackById,
-} from './tracks';
+import { MelodyState, NoteEvent, STEPS_PER_BAR, Track, generateBar, midiToHz, mulberry32, trackById } from './tracks';
+import { createGraph, voice, type Graph } from './synth';
+import { gameOverJingle, playSfx, winJingle, type SfxName } from './sounds';
 
-export type SfxName =
-  | 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door' | 'fizzle'
-  | 'transform' | 'formEnd' | 'flame' | 'bubble' | 'pop'; // transformações da Roo (variante = o elemento da forma)
+export type { SfxName } from './sounds';
+export { release } from './synth';
 
 type WebkitWindow = { webkitAudioContext?: typeof AudioContext };
-type BusName = 'sfx' | 'music';
-
-interface VoiceOptions {
-  gain: number;
-  type?: OscillatorType;
-  attack?: number;
-  bus?: BusName;
-  send?: number; // quanto vai para o reverb (0 a 1)
-  glideTo?: number; // frequência final de um glissando
-  glideTime?: number;
-}
 
 const MUSIC_LEVEL = 0.55;
 // Agenda notas com 1 s de antecedência: navegadores aceleram os timers de abas em segundo plano
@@ -36,18 +18,9 @@ const MUSIC_LEVEL = 0.55;
 const LOOKAHEAD_S = 1.0;
 const SCHEDULER_MS = 100;
 
-// Solta nós de áudio que já terminaram: desconecta de tudo (o navegador os libera depois).
-export function release(...nodes: Array<AudioNode | undefined>): void {
-  for (const n of nodes) n?.disconnect();
-}
-
 class AudioEngine {
   private ctx: AudioContext | null = null;
-  private master: GainNode | null = null;
-  private sfxBus: GainNode | null = null;
-  private musicBus: GainNode | null = null;
-  private reverbIn: GainNode | null = null;
-  private noiseBuffer: AudioBuffer | null = null;
+  private graph: Graph | null = null;
 
   playing = false;
   enabled = false;
@@ -72,7 +45,7 @@ class AudioEngine {
 
   constructor(private readonly makeContext?: () => AudioContext) {}
 
-  // ------------------------------------------------------------------ infraestrutura
+  // ------------------------------------------------------------------ contexto
 
   private ensureContext(): boolean {
     if (!this.ctx) {
@@ -80,7 +53,7 @@ class AudioEngine {
         const Ctor = window.AudioContext ?? (window as unknown as WebkitWindow).webkitAudioContext;
         if (!this.makeContext && !Ctor) return false;
         this.ctx = this.makeContext ? this.makeContext() : new (Ctor as typeof AudioContext)();
-        this.buildGraph(this.ctx);
+        this.graph = createGraph(this.ctx);
         // o navegador pode suspender o áudio sozinho (troca de aba, economia de energia, ligação)
         this.ctx.onstatechange = () => this.resumeIfNeeded();
       } catch {
@@ -92,227 +65,11 @@ class AudioEngine {
     return true;
   }
 
-  // Usa um contexto já criado (testes e benchmarks): monta o grafo de áudio nele.
+  // Usa um contexto já criado (testes e benchmarks): monta a cadeia de áudio nele.
   attachContext(ctx: AudioContext): void {
     this.ctx = ctx;
-    this.buildGraph(ctx);
+    this.graph = createGraph(ctx);
   }
-
-  private buildGraph(ctx: AudioContext): void {
-    const compressor = ctx.createDynamicsCompressor();
-    compressor.threshold.value = -20;
-    compressor.knee.value = 24;
-    compressor.ratio.value = 3;
-    compressor.attack.value = 0.01;
-    compressor.release.value = 0.3;
-    compressor.connect(ctx.destination);
-
-    this.master = ctx.createGain();
-    this.master.gain.value = 1.7; // o compressor logo depois segura os picos
-    this.master.connect(compressor);
-
-    // tira os agudos ásperos de tudo
-    const soften = ctx.createBiquadFilter();
-    soften.type = 'lowpass';
-    soften.frequency.value = 5200;
-    soften.Q.value = 0.4;
-    soften.connect(this.master);
-
-    this.sfxBus = ctx.createGain();
-    this.sfxBus.gain.value = 0.9;
-    this.sfxBus.connect(soften);
-
-    this.musicBus = ctx.createGain();
-    this.musicBus.gain.value = 0.0001;
-    this.musicBus.connect(soften);
-
-    // reverb
-    const convolver = ctx.createConvolver();
-    convolver.buffer = this.makeImpulse(ctx, 2.4, 2.6);
-    const reverbOut = ctx.createGain();
-    reverbOut.gain.value = 0.55;
-    this.reverbIn = ctx.createGain();
-    this.reverbIn.connect(convolver);
-    convolver.connect(reverbOut);
-    reverbOut.connect(soften);
-
-    // ruído branco reaproveitado nos sopros
-    const len = ctx.sampleRate * 2;
-    this.noiseBuffer = ctx.createBuffer(1, len, ctx.sampleRate);
-    const data = this.noiseBuffer.getChannelData(0);
-    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
-  }
-
-  // resposta ao impulso: ruído estéreo que decai exponencialmente
-  private makeImpulse(ctx: AudioContext, seconds: number, decay: number): AudioBuffer {
-    const len = Math.floor(ctx.sampleRate * seconds);
-    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
-    for (let ch = 0; ch < 2; ch++) {
-      const d = buf.getChannelData(ch);
-      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
-    }
-    return buf;
-  }
-
-  // Uma nota: ataque suave, queda exponencial, com envio opcional ao reverb.
-  private voice(freq: number, time: number, dur: number, o: VoiceOptions): void {
-    const ctx = this.ctx;
-    if (!ctx) return;
-    const bus = (o.bus ?? 'sfx') === 'music' ? this.musicBus : this.sfxBus;
-    if (!bus) return;
-    const attack = Math.min(o.attack ?? 0.012, dur * 0.5);
-
-    const osc = ctx.createOscillator();
-    osc.type = o.type ?? 'sine';
-    osc.frequency.setValueAtTime(freq, time);
-    if (o.glideTo) osc.frequency.exponentialRampToValueAtTime(o.glideTo, time + Math.min(dur, o.glideTime ?? 0.15));
-
-    const env = ctx.createGain();
-    env.gain.setValueAtTime(0.0001, time);
-    env.gain.linearRampToValueAtTime(o.gain, time + attack);
-    env.gain.exponentialRampToValueAtTime(0.0001, time + dur);
-
-    osc.connect(env);
-    env.connect(bus);
-    let send: GainNode | undefined;
-    if (o.send && this.reverbIn) {
-      send = ctx.createGain();
-      send.gain.value = o.send;
-      env.connect(send);
-      send.connect(this.reverbIn);
-    }
-    // quando a nota acaba, solta os nós (sem isso o grafo cresce para sempre)
-    osc.onended = () => release(osc, env, send);
-    osc.start(time);
-    osc.stop(time + dur + 0.05);
-  }
-
-  // Grão de ruído filtrado: a base de chiados, crepitares e sopros.
-  private grain(time: number, dur: number, gain: number, type: BiquadFilterType, freq: number, q = 1, send = 0.3): void {
-    const ctx = this.ctx;
-    if (!ctx || !this.noiseBuffer || !this.sfxBus) return;
-    const src = ctx.createBufferSource();
-    src.buffer = this.noiseBuffer;
-    const filter = ctx.createBiquadFilter();
-    filter.type = type;
-    filter.frequency.value = freq;
-    filter.Q.value = q;
-    const env = ctx.createGain();
-    env.gain.setValueAtTime(0.0001, time);
-    env.gain.linearRampToValueAtTime(gain, time + Math.min(0.004, dur * 0.3));
-    env.gain.exponentialRampToValueAtTime(0.0001, time + dur);
-    src.connect(filter);
-    filter.connect(env);
-    env.connect(this.sfxBus);
-    let s: GainNode | undefined;
-    if (send > 0 && this.reverbIn) {
-      s = ctx.createGain();
-      s.gain.value = send;
-      env.connect(s);
-      s.connect(this.reverbIn);
-    }
-    src.onended = () => release(src, filter, env, s);
-    src.start(time, Math.random() * 1.5);
-    src.stop(time + dur + 0.02);
-  }
-
-  // Crepitar: muitos estalos curtinhos espalhados por um intervalo (cristais, brasas).
-  private crackle(time: number, count: number, span: number, freq: number, gain: number): void {
-    for (let i = 0; i < count; i++) {
-      const t = time + Math.random() * span;
-      const f = freq * (0.8 + Math.random() * 0.4);
-      this.grain(t, 0.012 + Math.random() * 0.02, gain * (0.5 + Math.random() * 0.8), 'bandpass', f, 3, 0.25);
-    }
-  }
-
-  // Gota pesada: um tom curto que cai de altura (metal líquido caindo).
-  // Sons de cada elemento (inspirados em fenômenos reais, não em "sons oficiais" dos elementos):
-  //   fogo  (enxofre queimando): chiado de chama e estalos
-  //   água  (mercúrio líquido):   gotas pesadas caindo em sequência
-  //   terra (sal):                cristais crepitando
-  //   éter  (gás luminoso):       zumbido suave com brilho no ar
-  // Cada elemento tem uma "assinatura" sonora que lembra o que ele é:
-  // - fogo: um rugido que cai (ar aquecido) + um baque grave + estalos de brasa;
-  // - água: um chiado que sobe (respingo) + bolhas que estouram subindo de tom;
-  // - terra: um baque seco + pedra se soltando (ruído agudo curto) + um ronco baixo;
-  // - ar/éter: um vento que cresce devagar + um brilho suave no fim.
-  private elementSound(element: ElementId, t: number): void {
-    switch (element) {
-      case 'fire':
-        this.breath(t, 0.9, 0.08, 1600, 260, 0.3);
-        this.voice(72, t, 0.6, { gain: 0.09, type: 'sine', attack: 0.004, glideTo: 36, glideTime: 0.5, send: 0.2 });
-        this.crackle(t + 0.05, 16, 0.6, 3000, 0.05);
-        break;
-      case 'water':
-        this.breath(t, 0.6, 0.05, 420, 2400, 0.3);
-        [0.08, 0.17, 0.27, 0.38, 0.5, 0.6].forEach((d, i) => {
-          const f = 300 + i * 70 + Math.random() * 40;
-          this.voice(f, t + d, 0.12, { gain: 0.05 * (1 - i * 0.08), type: 'sine', attack: 0.002, glideTo: f * 2.2, glideTime: 0.08, send: 0.3 });
-        });
-        break;
-      case 'earth':
-        this.voice(58, t, 0.5, { gain: 0.12, type: 'sine', attack: 0.003, glideTo: 34, glideTime: 0.3 });
-        this.crackle(t + 0.02, 10, 0.25, 1800, 0.05);
-        this.grain(t, 0.35, 0.05, 'highpass', 3000, 0.7, 0.1);
-        this.breath(t, 0.5, 0.04, 500, 180, 0.1);
-        break;
-      case 'air':
-        this.breath(t, 1.5, 0.05, 300, 2800, 0.8);
-        this.voice(880, t + 0.5, 0.8, { gain: 0.012, type: 'sine', attack: 0.3, send: 0.8 });
-        this.voice(1320, t + 0.6, 0.8, { gain: 0.008, type: 'sine', attack: 0.3, send: 0.8 });
-        break;
-    }
-  }
-
-  // Transformação da Roo: cada forma tem o seu som, subindo (a energia se junta) e abrindo num acorde.
-  //   fogo : rugido que cresce, estalos de brasa e um acorde quente (sol, si, ré)
-  //   água : borbulhar que sobe, gotas em escala e um acorde claro (mi, lá, si)
-  private transformSound(element: ElementId, t: number): void {
-    if (element === 'water') {
-      this.breath(t, 0.9, 0.06, 300, 3000, 0.5);
-      [0, 0.1, 0.2, 0.32, 0.45, 0.6].forEach((d, i) => {
-        const f = 330 * Math.pow(1.19, i);
-        this.voice(f, t + d, 0.2, { gain: 0.04, type: 'sine', attack: 0.003, glideTo: f * 1.9, glideTime: 0.09, send: 0.5 });
-      });
-      [330, 440, 494].forEach((f, i) => this.voice(f, t + 0.55 + i * 0.05, 1.1, { gain: 0.03, type: 'triangle', attack: 0.08, send: 0.7 }));
-      return;
-    }
-    this.breath(t, 0.9, 0.08, 250, 2800, 0.3);
-    this.voice(98, t, 0.9, { gain: 0.08, type: 'triangle', attack: 0.05, glideTo: 392, glideTime: 0.8, send: 0.3 });
-    this.crackle(t + 0.15, 22, 0.8, 3200, 0.05);
-    [392, 494, 587].forEach((f, i) => this.voice(f, t + 0.6 + i * 0.05, 1.1, { gain: 0.032, type: 'triangle', attack: 0.06, send: 0.6 }));
-  }
-
-  // Sopro de ruído filtrado: sobe e desce suave (como vento ou borbulhar).
-  private breath(time: number, dur: number, gain: number, fromHz: number, toHz: number, send = 0.3): void {
-    const ctx = this.ctx;
-    if (!ctx || !this.noiseBuffer || !this.sfxBus) return;
-    const src = ctx.createBufferSource();
-    src.buffer = this.noiseBuffer;
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(fromHz, time);
-    filter.frequency.exponentialRampToValueAtTime(toHz, time + dur);
-    const env = ctx.createGain();
-    env.gain.setValueAtTime(0.0001, time);
-    env.gain.linearRampToValueAtTime(gain, time + dur * 0.25);
-    env.gain.exponentialRampToValueAtTime(0.0001, time + dur);
-    src.connect(filter);
-    filter.connect(env);
-    env.connect(this.sfxBus);
-    let s: GainNode | undefined;
-    if (send > 0 && this.reverbIn) {
-      s = ctx.createGain();
-      s.gain.value = send;
-      env.connect(s);
-      s.connect(this.reverbIn);
-    }
-    src.onended = () => release(src, filter, env, s);
-    src.start(time, Math.random() * 1.5);
-    src.stop(time + dur + 0.05);
-  }
-
-  // ------------------------------------------------------------------ música
 
   // Cria/retoma o AudioContext. Deve ser chamado dentro de um clique (exigência dos navegadores).
   unlock(): void {
@@ -324,6 +81,8 @@ class AudioEngine {
   resumeIfNeeded(): void {
     if (this.ctx && this.playing && this.ctx.state !== 'running') void this.ctx.resume();
   }
+
+  // ------------------------------------------------------------------ música
 
   toggleMusic(): boolean {
     if (this.playing) {
@@ -394,8 +153,8 @@ class AudioEngine {
   }
 
   private fadeMusic(target: number, timeConstant: number): void {
-    if (!this.ctx || !this.musicBus) return;
-    const g = this.musicBus.gain;
+    if (!this.ctx || !this.graph) return;
+    const g = this.graph.musicBus.gain;
     g.cancelScheduledValues(this.ctx.currentTime);
     g.setTargetAtTime(Math.max(0.0001, target), this.ctx.currentTime, timeConstant);
   }
@@ -439,137 +198,53 @@ class AudioEngine {
 
   // Toca uma nota no tempo dado (chamado pelo agendador; público para testes de carga e benchmarks).
   playNote(ev: NoteEvent, time: number, stepDur: number): void {
+    const g = this.graph;
+    if (!g) return;
     const freq = midiToHz(ev.midi);
     const dur = ev.steps * stepDur;
     switch (ev.voice) {
       case 'pad':
-        this.voice(freq, time, dur * 1.05, { gain: 0.011, type: 'triangle', attack: 0.9, bus: 'music', send: 0.5 });
+        voice(g, freq, time, dur * 1.05, { gain: 0.011, type: 'triangle', attack: 0.9, bus: 'music', send: 0.5 });
         break;
       case 'bass':
-        this.voice(freq, time, dur * 1.1, { gain: 0.03, type: 'sine', attack: 0.06, bus: 'music', send: 0.1 });
+        voice(g, freq, time, dur * 1.1, { gain: 0.03, type: 'sine', attack: 0.06, bus: 'music', send: 0.1 });
         break;
       case 'melody':
-        this.voice(freq, time, dur * 1.8, { gain: 0.026, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
-        this.voice(freq * 2, time, dur * 0.9, { gain: 0.005, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
+        voice(g, freq, time, dur * 1.8, { gain: 0.026, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
+        voice(g, freq * 2, time, dur * 0.9, { gain: 0.005, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
         break;
       case 'flute':
         // flauta: tom puro, ataque lento para o sopro entrar, um toque de harmônico e a nota se sustenta
-        this.voice(freq, time, dur * 1.6, { gain: 0.03, type: 'sine', attack: 0.09, bus: 'music', send: 0.35 });
-        this.voice(freq * 2, time, dur * 0.8, { gain: 0.004, type: 'sine', attack: 0.12, bus: 'music', send: 0.3 });
+        voice(g, freq, time, dur * 1.6, { gain: 0.03, type: 'sine', attack: 0.09, bus: 'music', send: 0.35 });
+        voice(g, freq * 2, time, dur * 0.8, { gain: 0.004, type: 'sine', attack: 0.12, bus: 'music', send: 0.3 });
         break;
       case 'bell':
-        this.voice(freq, time, 1.9, { gain: 0.02, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
-        this.voice(freq * 2.01, time, 1.0, { gain: 0.006, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
+        voice(g, freq, time, 1.9, { gain: 0.02, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
+        voice(g, freq * 2.01, time, 1.0, { gain: 0.006, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
         break;
     }
   }
 
   // ------------------------------------------------------------------ efeitos
 
-  // variant: elemento da poção (muda o timbre do estouro).
+  // variant: elemento da poção ou da forma (muda o timbre).
   play(name: SfxName, variant?: ElementId): void {
-    if (!this.sfx || !this.ctx) return;
-    const t = this.ctx.currentTime;
-    switch (name) {
-      case 'bomb': {
-        // poção pousando: uma gota/bolha suave
-        this.voice(420, t, 0.3, { gain: 0.04, glideTo: 640, glideTime: 0.12, send: 0.4 });
-        this.voice(560, t + 0.08, 0.26, { gain: 0.022, glideTo: 780, glideTime: 0.1, send: 0.4 });
-        break;
-      }
-      case 'explosion':
-        this.elementSound(variant ?? 'fire', t);
-        break;
-      case 'fizzle': {
-        // poção de fogo apagada pela água: chiado de vapor que some + uma gota
-        this.breath(t, 0.7, 0.06, 3200, 500, 0.4);
-        this.voice(420, t + 0.05, 0.18, { gain: 0.04, type: 'sine', attack: 0.003, glideTo: 180, glideTime: 0.15, send: 0.4 });
-        break;
-      }
-      case 'pickup': {
-        // sininho
-        this.voice(784, t, 0.55, { gain: 0.034, attack: 0.008, send: 0.5 });
-        this.voice(1175, t + 0.06, 0.65, { gain: 0.02, attack: 0.008, send: 0.5 });
-        break;
-      }
-      case 'powerup': {
-        // arpejo ascendente, delicado
-        [523, 659, 784, 1047].forEach((f, i) => {
-          this.voice(f, t + i * 0.085, 0.7, { gain: 0.032, type: i % 2 ? 'triangle' : 'sine', attack: 0.012, send: 0.55 });
-        });
-        break;
-      }
-      case 'hurt': {
-        // batida grave e abafada (sem aspereza)
-        this.voice(150, t, 0.34, { gain: 0.06, glideTo: 92, glideTime: 0.3, send: 0.15 });
-        this.breath(t, 0.2, 0.012, 500, 200, 0.1);
-        break;
-      }
-      case 'transform':
-        this.transformSound(variant ?? 'fire', t);
-        break;
-      case 'formEnd': {
-        // a forma se desfaz: o mesmo timbre, descendo e se apagando
-        if (variant === 'water') {
-          this.breath(t, 0.8, 0.04, 2200, 300, 0.5);
-          [0, 0.12, 0.26, 0.42].forEach((d, i) => this.voice(700 - i * 110, t + d, 0.22, { gain: 0.03, type: 'sine', attack: 0.004, glideTo: 380 - i * 40, glideTime: 0.14, send: 0.5 }));
-        } else {
-          this.breath(t, 0.9, 0.05, 1800, 240, 0.4);
-          this.voice(220, t, 0.8, { gain: 0.05, type: 'triangle', attack: 0.01, glideTo: 70, glideTime: 0.7, send: 0.3 });
-        }
-        break;
-      }
-      case 'flame': {
-        // Labareda: um sopro de fogo curto e quente, com estalos
-        this.breath(t, 0.5, 0.09, 2800, 500, 0.3);
-        this.voice(190, t, 0.4, { gain: 0.07, type: 'triangle', attack: 0.004, glideTo: 70, glideTime: 0.35, send: 0.25 });
-        this.crackle(t + 0.03, 10, 0.4, 3400, 0.045);
-        break;
-      }
-      case 'bubble': {
-        // bolha de sabão soprada: um sopro suave e um "plim" que sobe
-        this.breath(t, 0.35, 0.03, 700, 2600, 0.5);
-        this.voice(520, t + 0.05, 0.3, { gain: 0.035, type: 'sine', attack: 0.01, glideTo: 940, glideTime: 0.22, send: 0.6 });
-        this.voice(1040, t + 0.14, 0.4, { gain: 0.016, type: 'sine', attack: 0.01, send: 0.7 });
-        break;
-      }
-      case 'pop': {
-        // a bolha estoura: um estalo seco e uma gotinha
-        this.grain(t, 0.05, 0.07, 'bandpass', 2600, 2, 0.4);
-        this.voice(1500, t, 0.1, { gain: 0.04, type: 'sine', attack: 0.001, glideTo: 520, glideTime: 0.07, send: 0.5 });
-        break;
-      }
-      case 'door': {
-        // acorde que "abre" como uma respiração
-        [392, 523, 659].forEach((f, i) => {
-          this.voice(f, t + i * 0.05, 1.3, { gain: 0.028, attack: 0.16, send: 0.6 });
-        });
-        break;
-      }
-    }
+    if (!this.sfx || !this.ctx || !this.graph) return;
+    playSfx(this.graph, name, this.ctx.currentTime, variant);
   }
 
   playWinMusic(): void {
     if (!this.sfx) return;
     this.stop();
-    if (!this.ensureContext() || !this.ctx) return;
-    const t = this.ctx.currentTime + 0.05;
-    [523, 659, 784, 1047, 784, 1047].forEach((f, i) => {
-      this.voice(f, t + i * 0.27, 1.4, { gain: 0.042, attack: 0.012, send: 0.6 });
-      this.voice(f * 1.5, t + i * 0.27, 1.0, { gain: 0.012, type: 'triangle', attack: 0.012, send: 0.6 });
-    });
+    if (!this.ensureContext() || !this.ctx || !this.graph) return;
+    winJingle(this.graph, this.ctx.currentTime + 0.05);
   }
 
   playGameOverMusic(): void {
     if (!this.sfx) return;
     this.stop();
-    if (!this.ensureContext() || !this.ctx) return;
-    const t = this.ctx.currentTime + 0.05;
-    // frase descendente, melancólica mas macia
-    [392, 349, 330, 262].forEach((f, i) => {
-      this.voice(f, t + i * 0.5, 1.6, { gain: 0.04, attack: 0.05, send: 0.6 });
-      this.voice(f / 2, t + i * 0.5, 1.6, { gain: 0.02, type: 'triangle', attack: 0.08, send: 0.4 });
-    });
+    if (!this.ensureContext() || !this.ctx || !this.graph) return;
+    gameOverJingle(this.graph, this.ctx.currentTime + 0.05);
   }
 }
 

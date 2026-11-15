@@ -21,3 +21,18 @@ Regra de ouro: **lógica pura num arquivo, Phaser em outro.** O que é puro (sor
 
 ## Testes
 Espelham as pastas: `tests/entities/`, `tests/entities/bosses/`, `tests/stages/`. Os demais ficam em `tests/`.
+
+## Regras de partida (`src/game/`, puras)
+- `grid.ts`: muralha, área de nascimento (com canto do chefe), sorteio da grade (`buildTiles`, com `roll` injetável), porta e `isPassable` (o que bloqueia uma casa).
+- `movement.ts`: velocidade, passo casa a casa com tempo que sobra (`beginStep`/`advanceStep`), direção (`facingFor`) e animação de caminhada.
+- `stageFlow.ts`: o que a Roo leva para a fase seguinte (`startingState`, `carryForward`) e o que a porta decide (`doorOutcome`).
+
+A `MainScene` só liga esses módulos ao Phaser (sprites, tweens, input). Os testes estão em `tests/grid.test.ts`, `tests/movement.test.ts` e `tests/stageFlow.test.ts`.
+
+## Áudio (`src/audio/`)
+- `AudioEngine.ts`: a API `audio` usada pelo jogo (flags, música, `play`). Não contém síntese.
+- `synth.ts`: primitivas do WebAudio (cadeia com reverb, `voice`, `grain`, `crackle`, `breath`). Sem regra de jogo.
+- `sounds.ts`: quais sons tocam para cada evento (`playSfx`), o som de cada elemento e as fanfarras de vitória e derrota.
+- `tracks.ts`: as seis faixas e o gerador de compassos (puro).
+
+**Efeito novo:** acrescente o nome em `SfxName` e um `case` em `playSfx` (sounds.ts). **Elemento novo:** um `case` em `elementSound` e outro em `transformSound`, se a forma tiver som próprio.

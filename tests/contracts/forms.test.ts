@@ -1,7 +1,7 @@
 // Contrato das transformações: cada forma do registro (game/forms) precisa de página, tecla, botão de toque e ajuda.
 import { describe, expect, it } from 'vitest';
 import html from '../../index.html?raw';
-import audioSrc from '../../src/audio/AudioEngine.ts?raw';
+import audioSrc from '../../src/audio/sounds.ts?raw';
 import { FORMS, FORM_IDS } from '../../src/game/forms';
 import { MANUSCRITO } from '../../src/game/manuscrito';
 import { TOUCH_NAMES } from '../../src/input/touch';

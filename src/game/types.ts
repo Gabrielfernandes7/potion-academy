@@ -37,7 +37,7 @@ export interface Pickup {
   gridX: number;
   gridY: number;
   type: PickupType;
-  value?: number; // moedas do baú (sorteadas ao nascer)
+  prize?: PickupType; // item que o baú guarda (sorteado ao nascer)
   potion?: BombId; // power-up de alcance/frasco: a poção que ele fortalece (sorteada ao nascer)
   sprite: Phaser.GameObjects.Image;
   halo?: Phaser.GameObjects.Image;
@@ -82,11 +82,10 @@ export interface PowerupCounts {
 }
 
 // O que a jogadora leva da fase 1 para a fase 2.
-interface Carry {
+export interface Carry {
   hp: number;
   upgrades: Upgrades;
   speedUp: number;
-  coins: number;
   bombType: import('../config').BombId;
 }
 
