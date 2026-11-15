@@ -63,6 +63,20 @@ export class PickupSystem {
     return BOMB_TYPES[potion].label.replace('Poção ', '').replace('de ', '').toUpperCase();
   }
 
+  /** Tira um item do chão sem dar o efeito dele (o ratinho o leva). Devolve o que era, para quem precisar devolver. */
+  removePickup(pickup: Pickup): { type: PickupType; prize?: PickupType; potion?: BombId } {
+    const s = this.scene;
+    s.tweens.killTweensOf(pickup.sprite);
+    pickup.sprite.destroy();
+    if (pickup.halo) {
+      s.tweens.killTweensOf(pickup.halo);
+      pickup.halo.destroy();
+    }
+    this.pickups = this.pickups.filter(p => p !== pickup);
+    s.updateHud();
+    return { type: pickup.type, prize: pickup.prize, potion: pickup.potion };
+  }
+
   collectPickup(pickup: Pickup): void {
     const s = this.scene;
     // o baú abre na hora e dá o item sorteado para ele

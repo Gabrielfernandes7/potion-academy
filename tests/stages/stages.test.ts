@@ -3,8 +3,8 @@ import { ENEMY_TYPES, isImmune } from '../../src/game/entities/enemies/defs';
 import { LAST_STAGE, STAGES, stageDef } from '../../src/game/stages/index';
 
 describe('fases', () => {
-  it('são vinte: Vale (três e o poço), Torre (três e o duelo), Biblioteca (três e o Leão), Observatório (quatro, sem chefe), Retorno (três e o jardim)', () => {
-    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'crypt', 'crypt', 'crypt', 'crypt', 'garden']);
+  it('são vinte: Vale (três e o poço), Torre (três e o duelo), Biblioteca (três e o Leão), Observatório (três e a cúpula), Retorno (três e o jardim)', () => {
+    expect(STAGES.map(s => s.kind)).toEqual(['lab', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'boss', 'crypt', 'crypt', 'crypt', 'garden']);
     expect(LAST_STAGE).toBe(20);
   });
 
@@ -14,12 +14,13 @@ describe('fases', () => {
     expect(kinds).not.toContain('flower');
   });
 
-  it('os chefes: Quimera no Vale, Belladona na Torre, Mandrágora no jardim', () => {
+  it('os chefes: Quimera no Vale, Belladona na Torre, Leão na Biblioteca, Ouroboros no Observatório, Mandrágora no jardim', () => {
     expect(stageDef(4).boss).toBe('chimera');
     expect(stageDef(8).boss).toBe('belladonna');
     expect(stageDef(12).boss).toBe('lion');
+    expect(stageDef(16).boss).toBe('ouroboros');
     expect(stageDef(20).boss).toBe('mandrake');
-    expect(STAGES.filter(s => s.boss)).toHaveLength(4);
+    expect(STAGES.filter(s => s.boss)).toHaveLength(5);
   });
 
   it('as fases de chefe sem porta (Poço e Duelo) não têm inimigos comuns', () => {

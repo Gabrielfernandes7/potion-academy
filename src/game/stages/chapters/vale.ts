@@ -13,7 +13,8 @@ export const VALE: ChapterSpec = {
       kind: 'lab', name: 'O CHAMADO', place: 'Laboratório do Caldeirão',
       story: 'O laboratório do mestre agora é de Belladona, e as gemas que fixam as transformações estão trancadas nos caixotes. Foi aqui que o mestre me ensinou a medir o fogo. Lá fora, o vale passa fome.',
       chest: CHEST_COMMON, time: 100000, blockChance: 0.7, door: true, theme: 'stone', block: 'wood', track: 'alambique',
-      enemies: [{ kind: 'frog', start: 2, max: 5, every: 8 }],
+      // a salamandra do Caldeirão é amiga: aquece a Roo uma vez, se ela chegar perto
+      enemies: [{ kind: 'frog', start: 2, max: 5, every: 8 }, { kind: 'salamander', start: 1, max: 1 }],
     },
     {
       kind: 'crypt', name: 'O CAMINHO', place: 'Salão dos Ecos',
@@ -27,7 +28,7 @@ export const VALE: ChapterSpec = {
       story: 'Uma névoa baixa cobre a charneca, onde o trigo apodreceu em pé. Nas casas da beira, a febre deixou famílias acamadas. Só se vê o que está por perto.',
       chest: CHEST_RICH, tip: 'Na névoa só se vê o que está perto. Os fantasmas chegam sem aviso: ande devagar.',
       time: 110000, blockChance: 0.55, door: true, theme: 'stone', block: 'moss', track: 'ecos', fog: { radius: 3 },
-      enemies: [{ kind: 'ghost', start: 2, max: 3, every: 9 }, { kind: 'frog', start: 1, max: 2, every: 12 }],
+      enemies: [{ kind: 'ghost', start: 2, max: 3, every: 9 }, { kind: 'frog', start: 1, max: 1, every: 12 }, { kind: 'slime', start: 1, max: 2, every: 14 }],
     },
     {
       kind: 'boss', boss: 'chimera', name: 'O POÇO', place: 'Poço de Prata',

@@ -12,6 +12,7 @@ import { duelOutcome, validDuel } from '../game/duel';
 import { canUseBomb, isBlockedBomb, setArenaLoadout } from '../game/loadout';
 import { rooOriginY } from '../textures/rooGeometry';
 import type { Facing, Player, PowerupCounts, StageData } from '../game/types';
+import type { FormId } from '../game/forms';
 import { retryData } from '../game/retry';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
 import { touch } from '../input/touch';
@@ -109,6 +110,7 @@ export class MainScene extends Phaser.Scene {
   // Duelo de chefes na Arena (game/duel.ts): o segundo chefe (o primeiro é `arena`). A Roo só assiste.
   duel: BossId | null = null;
   boss2: BossBase | null = null;
+  arenaForm: FormId | null = null; // Arena: a transformação fixa em que a Roo luta (sem fim)
   private duelDone = false;
   private arenaDef: StageDef | null = null;
 
@@ -119,7 +121,7 @@ export class MainScene extends Phaser.Scene {
 
   // Dados explícitos para recomeçar (o Phaser reaproveita os do último reinício): a Arena recomeça a luta; a campanha, na fase em que a Roo perdeu.
   restartData(): StageData {
-    return retryData(this.stage, this.arena, ARENA_STAGE, this.duel);
+    return retryData(this.stage, this.arena, ARENA_STAGE, this.duel, this.arenaForm);
   }
 
   get isBossStage(): boolean {
@@ -130,6 +132,7 @@ export class MainScene extends Phaser.Scene {
     this.arena = data?.arena ?? null;
     this.duel = this.arena && validDuel(this.arena, data?.duel) ? data?.duel ?? null : null;
     this.boss2 = null;
+    this.arenaForm = this.arena && !this.duel ? data?.form ?? null : null;
     this.duelDone = false;
     this.arenaDef = null;
     setArenaLoadout(!!this.arena); // na Arena, todas as poções estão liberadas
@@ -201,6 +204,7 @@ export class MainScene extends Phaser.Scene {
     this.enemySystem.createLashGfx();
     this.forms = new RooFormSystem(this);
     this.story = new StoryDirector(this);
+    if (this.arenaForm) this.forms.pinForm(this.arenaForm); // Arena: transformada desde o começo
     if (this.def.fog) this.fog = new Fog(this, CONFIG.cols * CONFIG.tile, CONFIG.rows * CONFIG.tile, this.def.fog.radius, CONFIG.tile);
     if (this.def.boss) this.boss = createBoss(this.def.boss, this);
     if (this.duel && this.boss) this.setupDuel(this.boss, createBoss(this.duel, this));

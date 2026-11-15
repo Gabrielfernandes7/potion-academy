@@ -9,7 +9,7 @@ export type FormStage = 0 | 1 | 2 | 3 | 4;
 
 /** A habilidade da forma (tecla X): gasta um pedaço da própria transformação e tem espera. */
 export interface FormAbility {
-  id: 'flame' | 'bubble' | 'salt' | 'gust' | 'root' | 'leap';
+  id: 'flame' | 'bubble' | 'salt' | 'gust' | 'root' | 'leap' | 'nova' | 'puddle';
   nome: string;
   short: string; // rótulo curto do botão de toque
   costMs: number;
@@ -37,7 +37,7 @@ export interface FormDef {
   /** Bônus de dano das poções do próprio elemento no auge (0,5 = +50%); cai a cada degrau. */
   boost: number;
   ability: FormAbility;
-  /** A segunda habilidade (tecla C), se a forma tiver: Raiz (terra) e Salto de vento (ar). */
+  /** A segunda habilidade (tecla C), se a forma tiver: Onda de brasas (fogo), Poça (água), Raiz (terra) e Salto de vento (ar). */
   ability2?: FormAbility;
   /** A defesa (tecla V): toda forma tem uma. */
   defense: FormDefense;

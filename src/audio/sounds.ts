@@ -11,7 +11,7 @@ import { breath, crackle, grain, voice, type Graph } from './synth';
 
 export type SfxName =
   | 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door' | 'fizzle'
-  | 'transform' | 'formEnd' | 'flame' | 'bubble' | 'pop' | 'wall' | 'gust' | 'root'; // transformações da Roo (variante = o elemento da forma)
+  | 'transform' | 'formEnd' | 'flame' | 'bubble' | 'pop' | 'wall' | 'gust' | 'root' | 'tick' | 'hoot'; // transformações da Roo (variante = o elemento da forma)
 
 // Som da explosão de uma poção, conforme o elemento.
 function elementSound(g: Graph, element: ElementId, t: number): void {
@@ -143,6 +143,16 @@ export function playSfx(g: Graph, name: SfxName, t: number, variant?: ElementId)
       // o muro de sal sobe: um tranco grave e cristais estalando
       voice(g, 70, t, 0.35, { gain: 0.09, type: 'sine', attack: 0.004, glideTo: 48, glideTime: 0.25, send: 0.2 });
       crackle(g, t + 0.02, 12, 0.4, 3000, 0.05);
+      break;
+    case 'tick':
+      // o relógio de cobre dá um passo: um clique seco de engrenagem
+      grain(g, t, 0.025, 0.05, 'bandpass', 2400, 3, 0.2);
+      voice(g, 640, t, 0.06, { gain: 0.012, type: 'triangle', attack: 0.001, glideTo: 420, glideTime: 0.04, send: 0.1 });
+      break;
+    case 'hoot':
+      // a coruja marca a casa: dois "hu" graves, o segundo mais baixo
+      voice(g, 330, t, 0.3, { gain: 0.03, type: 'sine', attack: 0.03, glideTo: 290, glideTime: 0.25, send: 0.6 });
+      voice(g, 262, t + 0.32, 0.4, { gain: 0.034, type: 'sine', attack: 0.03, glideTo: 220, glideTime: 0.35, send: 0.6 });
       break;
     case 'root':
       // a Roo afunda na terra: um ronco grave que desliza e cascalho

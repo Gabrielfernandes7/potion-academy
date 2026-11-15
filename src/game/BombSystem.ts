@@ -2,7 +2,7 @@
 // A cena (MainScene) guarda o estado da partida e chama este sistema; as regras de reação
 // entre poções ficam em game/chain.ts. Ver docs/ARCH.md.
 import Phaser from 'phaser';
-import { BLOCK, BOMB_TYPES, CONFIG, ELEMENTS, ElementId } from '../config';
+import { BLOCK, BOMB_TYPES, CONFIG, ELEMENTS, ElementId, WALL } from '../config';
 import { chainOutcome } from './chain';
 import { walkBlast } from './blast';
 import { blastRadius, canPlace } from './upgrades';
@@ -73,7 +73,9 @@ export class BombSystem {
     const type = BOMB_TYPES[bomb.type];
     const radius = blastRadius(this.scene.player.upgrades, bomb.type, type.radius);
     const tiles: Array<{ x: number; y: number }> = [];
-    for (const t of walkBlast(bomb.gridX, bomb.gridY, radius, !!type.pierce, (x, y) => this.scene.getTile(x, y))) {
+    // o muro de sal da Roo Terra barra a explosão como uma parede (até a Poção de Terra, que atravessa caixotes, para nele)
+    const tileAt = (x: number, y: number): number | null => (this.scene.forms?.isSaltWall(x, y) ? WALL : this.scene.getTile(x, y));
+    for (const t of walkBlast(bomb.gridX, bomb.gridY, radius, !!type.pierce, tileAt)) {
       if (!t.origin) {
         // reação entre poções: fogo acende, água apaga o fogo, terra é imune (ver game/chain.ts)
         const chainBomb = this.bombs.find(b => b !== bomb && b.gridX === t.x && b.gridY === t.y && !b.detonated);

@@ -44,4 +44,9 @@ describe('duelo de chefes', () => {
     expect(retryData(0, 'lion', 0, 'chimera')).toEqual({ stage: 0, arena: 'lion', duel: 'chimera' });
     expect(retryData(0, 'lion', 0)).toEqual({ stage: 0, arena: 'lion' });
   });
+  it('treinar com uma transformação fixa recomeça com a mesma; o duelo não leva transformação', () => {
+    expect(retryData(0, 'lion', 0, null, 'earth')).toEqual({ stage: 0, arena: 'lion', form: 'earth' });
+    expect(retryData(0, 'lion', 0, 'chimera', 'earth')).toEqual({ stage: 0, arena: 'lion', duel: 'chimera' });
+    expect(retryData(3, null, 0, null, 'air')).toEqual({ stage: 3 });
+  });
 });

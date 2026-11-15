@@ -82,7 +82,7 @@ O botão **ARENA** do menu abre uma lista de chefes (Quimera, Belladona, Mandrá
 
 ## As transformações
 
-A tecla **T** transforma a Roo na forma da poção que você segura: com a Poção de Fogo, vira **Roo Fire**; com a Poção de Água, vira **Roo Aqua**. Uma forma de cada vez. Enquanto ela dura, só a poção desse elemento funciona. Cada forma dura **20 segundos** e vai esfriando em 4 degraus (as cores e os efeitos voltam ao normal aos poucos). Quando acaba, há 25 s de espera, comum às duas. O medidor fica na HUD, ao lado dos frascos: a chama ou a gota acesa, conforme a poção na mão, quando está pronto; os 4 degraus mostram o tempo que resta; o X aparece quando a habilidade está pronta.
+A tecla **T** transforma a Roo na forma da poção que você segura: com a Poção de Fogo, vira **Roo Fire**; com a Poção de Água, vira **Roo Água**. Uma forma de cada vez. Enquanto ela dura, só a poção desse elemento funciona. Cada forma dura **20 segundos** e vai esfriando em 4 degraus (as cores e os efeitos voltam ao normal aos poucos). Quando acaba, há 25 s de espera, comum às duas. O medidor fica na HUD, ao lado dos frascos: a chama ou a gota acesa, conforme a poção na mão, quando está pronto; os 4 degraus mostram o tempo que resta; o X aparece quando a habilidade está pronta.
 
 ### Roo Fire (poção de fogo + T)
 - **Poções de fogo mais fortes:** +50% de dano no auge (a Poção de Fogo de 4 tira 6), e o bônus cai a cada degrau.
@@ -92,7 +92,7 @@ A tecla **T** transforma a Roo na forma da poção que você segura: com a Poç�
 - **Labareda (X):** um jato de fogo de 3 casas à frente, com o dano de uma poção de fogo. Custa 2 s da forma e tem espera de 3,5 s.
 - **Luz de chama:** na névoa, a Roo enxerga até 2 casas a mais.
 
-### Roo Aqua (poção de água + T)
+### Roo Água (poção de água + T)
 - **Imune à água** no auge: a Poção Aqua, a maré e a chuva não a machucam (o contato com inimigos de água continua doendo). Esfriando, vira resistência. O fogo segue sendo a fraqueza.
 - **Poções de água +50%** no auge. **Só a Poção de Água** funciona enquanto durar.
 - **Bolha de sabão (X):** a Roo sopra uma bolha que flutua até 4 casas. Se alcança um inimigo comum, **o prende dentro dela** (ele não anda, não machuca e não chicoteia) por até 4 s, mais nos degraus altos; depois estoura. Chefes são imunes (a bolha só estoura). Custa 2 s da forma e tem espera de 3,5 s.

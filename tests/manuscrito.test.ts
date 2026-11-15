@@ -31,7 +31,7 @@ describe('manuscrito do alquimista', () => {
   });
   it('as páginas abrem pelo progresso; as da fase 1 já estão abertas', () => {
     const nada = (): boolean => false;
-    expect(MANUSCRITO.filter(e => isEntryOpen(e, nada)).map(e => e.id)).toEqual(['roo', 'roo-fire', 'anselmo', 'sapo']);
+    expect(MANUSCRITO.filter(e => isEntryOpen(e, nada)).map(e => e.id)).toEqual(['roo', 'roo-fire', 'anselmo', 'sapo', 'salamandra']);
     expect(isEntryOpen(entryById('roo-aqua')!, s => s <= 1)).toBe(false); // a água é aprendida na fase 2
     expect(isEntryOpen(entryById('roo-aqua')!, s => s <= 2)).toBe(true);
     expect(isEntryOpen(entryById('roo-terra')!, s => s <= 3)).toBe(false);
@@ -122,7 +122,7 @@ describe('manuscrito: Roo Terra e Roo Ar', () => {
   });
 });
 
-describe('manuscrito: Roo Aqua', () => {
+describe('manuscrito: Roo Água', () => {
   it('mostra o perfil da forma de água: imune à água, fraca ao fogo, com a Bolha de sabão', () => {
     const e = entryById('roo-aqua')!;
     const s = statsOf(e)!;

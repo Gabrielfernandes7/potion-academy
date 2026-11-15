@@ -64,7 +64,8 @@ src/
   game/learning.ts         # o que a Roo aprende na jornada: poções (fim de fase) e lições das formas (FORM_LESSONS), puro
   game/RooFormSystem.ts    # as formas na partida (Phaser): habilidade, brasas, bolhas, sprite, luz; a MainScene só delega
   game/StoryDirector.ts    # a direção da história na partida: cartão de fase, passagens, final, despedida dos chefes
-  textures/enemiesNew.ts   # sprites da lanterna viva, do relógio de cobre, da toupeira de sal e da coruja
+  textures/enemiesNew.ts   # sprites dos 8 inimigos novos (lanterna, relógio, toupeira, coruja, gosma, sentinela, ratinho, salamandra)
+  textures/ouroboros.ts + mestre.ts # o Ouroboros (chefe do Observatório) e o mestre em sombra (página do Manuscrito)
   textures/rooFire.ts + rooWater.ts + rooEarth.ts + rooAir.ts + rooRecolor.ts + rooFormTextures.ts # sprites de cada forma por estágio (1536 texturas geradas no boot, só no jogo)
   game/entities/roo.ts     # vida da Roo: barra contínua, dano por elemento, cura (puro)
   game/balance.ts          # regra de equilíbrio das poções (testável)
@@ -77,7 +78,7 @@ src/
   game/entities/profiles.ts # tabela de personagens: vida, atributo, fraqueza, resistência, imunidade
   game/entities/hitEffects.ts # efeito visual de acerto por elemento
   game/entities/enemies/   # defs.ts (dados), enemyRules.ts (puro), EnemySystem.ts (Phaser)
-  game/entities/bosses/    # defs.ts (LISTA ÚNICA de chefes, pura), registry.ts (fábrica), BossBase.ts, common.ts e uma pasta por chefe (Controller, rules, lines)
+  game/entities/bosses/    # (cinco chefes: Belladona, Mandrágora, Quimera, Leão Verde e Ouroboros) defs.ts (LISTA ÚNICA de chefes, pura), registry.ts (fábrica), BossBase.ts, common.ts e uma pasta por chefe (Controller, rules, lines)
   game/effects/            # efeitos de tela com regra pura própria: Fog.ts (névoa) e fogRules.ts
   lab/                     # só dev: experimentos de ideias (/lab.html); ver docs/15-lab.md
   game/stages/upcoming.ts  # capítulos selados que já aparecem no mapa (hoje nenhum: o Observatório entrou na campanha)
@@ -149,8 +150,8 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 ## Known Gaps / Ideas (not implemented)
 
 - Elements react only through bomb chains (`game/chain.ts`): fire ignites, water neutralizes fire, earth is immune. Fire explosions leave no lasting flames yet. Bombs are limited to 2 at a time (up to 5 with power-ups), and the remote bomb counts toward that limit until detonated.
-- The campaign has 16 stages in 4 chapters and a story ending (Anselmo's confession at the garden gate, `game/story.ts`); stage progress is saved (`bombroo_stages_completed`) and gates the map. No high score.
-- Enemies don't chase (frog, ghost, flower). Potions are learned in the journey (game/learning.ts): water after stage 1, earth after stage 3, air after stage 4. There is no shop and no gold (OURO).
+- The campaign has 20 stages in 5 chapters (Vale, Torre, Biblioteca, Observatório, Retorno; five bosses) and a story ending (Anselmo's confession at the garden gate, `game/story.ts`); stage progress is saved (`bombroo_stages_completed`) and gates the map. No high score.
+- Enemies don't chase (frog, ghost, flower, lantern, clock...); the rat only runs to pickups and away from Roo. Potions are learned in the journey (game/learning.ts): water after stage 1, earth after stage 3, air after stage 4. There is no shop and no gold (OURO).
 - HUD text is drawn in the canvas, so it is pixel-scaled on very large screens.
 - The Phaser bundle is ~1.2 MB (full build); could be trimmed by importing only the used modules.
 - Audio levels were verified with an analyser, not by ear: tune `master`/`MUSIC_LEVEL` in `AudioEngine.ts` if it feels too quiet or loud.

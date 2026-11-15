@@ -318,4 +318,4 @@ Isso pode se tornar a identidade central do jogo: não vencer pela força das ex
 
 **Outras formas de obter a transformação:**
 - Item da loja (compra única, como a Poção Aqua), recompensa de chefe, ou uma carga que enche com os caixotes quebrados.
-- Uma **segunda forma** para cada elemento (Roo Aqua, Roo Telúrica, Roo Etérea), cada uma com o próprio perfil (fraqueza, resistência) e uma habilidade.
+- Uma **segunda forma** para cada elemento (Roo Água, Roo Telúrica, Roo Etérea), cada uma com o próprio perfil (fraqueza, resistência) e uma habilidade.

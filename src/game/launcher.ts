@@ -18,6 +18,8 @@ import { audio } from '../audio/AudioEngine';
 import { SCENE_TRACKS } from '../audio/tracks';
 import { ARENA_STAGE } from './arena';
 import type { BossId } from './stages/types';
+import type { FormId } from './forms/types';
+import type { StageData } from './types';
 
 let phaserGame: Phaser.Game | null = null;
 let texturesReady: Promise<void> = Promise.resolve();
@@ -83,14 +85,15 @@ export function retryGame(): void {
 
 // Começa uma luta de treino na Arena, a partir do menu. Não toca na carta nem no progresso da campanha.
 // Com `duel`, é um duelo entre dois chefes (a Roo só assiste; game/duel.ts).
-export async function startArena(boss: BossId, duel?: BossId): Promise<void> {
+export async function startArena(boss: BossId, duel?: BossId, form?: FormId): Promise<void> {
   if (!phaserGame) bootGame();
   await texturesReady;
   await ensureFonts();
   const game = phaserGame as Phaser.Game;
   hideGameOver();
   setMenuVisible(false);
-  const data = duel ? { stage: ARENA_STAGE, arena: boss, duel } : { stage: ARENA_STAGE, arena: boss };
+  // `form`: a Roo luta transformada e fixa nessa forma (só para treinar)
+  const data: StageData = duel ? { stage: ARENA_STAGE, arena: boss, duel } : { stage: ARENA_STAGE, arena: boss, ...(form ? { form } : {}) };
   if (game.scene.isActive('Main')) {
     game.scene.getScene('Main').scene.restart(data);
   } else {

@@ -4,7 +4,7 @@ import type { BlockStyle } from './blockStyles';
 
 export type StageKind = 'lab' | 'crypt' | 'boss' | 'garden';
 export type StageTheme = 'stone' | 'crypt' | 'garden' | 'observatory';
-export type BossId = 'belladonna' | 'mandrake' | 'chimera' | 'lion';
+export type BossId = 'belladonna' | 'mandrake' | 'chimera' | 'lion' | 'ouroboros';
 
 // Quantos inimigos de um tipo: `start` no início; se houver `every`, mais um a cada N caixotes quebrados, até `max`.
 export interface EnemyRule {

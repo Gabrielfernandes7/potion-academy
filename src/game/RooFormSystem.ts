@@ -2,7 +2,7 @@
 // e a luz. As regras puras estão em game/forms/ (testadas); aqui só há desenho, som e ligação com a cena.
 // A MainScene cria um destes em create() e só delega: transform(), useAbility(), update(), boost(), onBlast().
 import Phaser from 'phaser';
-import { BOMB_TYPES, CONFIG, EMPTY, ElementId } from '../config';
+import { BOMB_ORDER, BOMB_TYPES, CONFIG, EMPTY, ElementId } from '../config';
 import type { MainScene } from '../scenes/MainScene';
 import { hitFx } from './entities/hitEffects';
 import { inArenaLoadout, setFormElement } from './loadout';
@@ -11,14 +11,15 @@ import { knowsForm, learnForm } from '../storage';
 import { ENEMY_TYPES } from './entities/enemies/defs';
 import type { Enemy, Bomb } from './types';
 import {
-  AIR_SIGHT_RADIUS, BUBBLE_STEP_MS, EmberField, SaltWallField, LEAP_MS, ROOT_MS, airSeesThroughFog, airWalkFactor, earthWalkFactor, gustPush, gustStunMs, gustTarget,
+  AIR_SIGHT_RADIUS, BUBBLE_STEP_MS, EmberField, PuddleField, novaTiles, puddleTiles, SaltWallField, LEAP_MS, ROOT_MS, airSeesThroughFog, airWalkFactor, earthWalkFactor, gustPush, gustStunMs, gustTarget,
   gustTiles, leapTarget, rootBurstTiles, rootTarget, iridescent, FORMS, formForElement, FormId, FormView, RooForm, boostedDamage, bubbleAt, bubblePath, fireLight, flameTiles,
-  formView, guardedDamage, profileOf, saltWallTiles, trapMs, aimMove, rootCandidates, ringNeighbors, RING_PUSH_STEPS, WHIRL_PUSH_STEPS,
+  formView, guardedDamage, profileOf, saltWallTiles, trapMs, aimMove, rootCandidates, ringNeighbors, RING_PUSH_STEPS, WHIRL_PUSH_STEPS, BUBBLE_HEAL, bubbleHealTick,
   type FormDefense,
 } from './forms';
 import { NO_FORM_LABEL, setAbility2Label, setAbilityLabel, setDefenseLabel } from '../ui/abilityButton';
 import { FORM_TREMOR_MS, FORM_TREMOR_STEPS, formTextureKey } from '../textures/rooFormTextures';
 import type { DamageProfile } from './entities/damage';
+import { addRooFormTextures } from '../textures/rooFormTextures';
 
 const T = CONFIG.tile;
 const center = (n: number): number => n * T + T / 2;
@@ -40,9 +41,10 @@ export class RooFormSystem {
   readonly form = new RooForm();
   readonly embers = new EmberField();
   readonly walls = new SaltWallField();
+  readonly puddles = new PuddleField();
   private gusts: Gust[] = [];
   // Defesa (V): a que está de pé, quanto falta e as casas de sal do círculo (para desfazer junto)
-  private guard: { def: FormDefense; ms: number; walls: Array<{ x: number; y: number }> } | null = null;
+  private guard: { def: FormDefense; ms: number; walls: Array<{ x: number; y: number }>; healMs: number } | null = null;
   // Mira da Raiz: o cursor, enquanto a jogadora escolhe onde brotar
   private aim: { x: number; y: number } | null = null;
   private burrowMs = 0; // tempo que falta debaixo da terra (Roo Terra, Raiz)
@@ -87,6 +89,21 @@ export class RooFormSystem {
   /** Bônus das poções do elemento da forma para as explosões da Roo (poção e Labareda). */
   boost(base: number, element: ElementId): number {
     return boostedDamage(this.form.id, base, element, this.form.stage);
+  }
+
+  /** Arena: a Roo luta transformada, no auge, sem tempo para acabar (a poção da forma já vem na mão). */
+  pinForm(id: FormId): void {
+    const s = this.scene;
+    const def = FORMS[id];
+    this.form.pin(id);
+    addRooFormTextures(s, { forms: [id] }); // a Arena começa transformada: os quadros precisam existir já
+    const potion = BOMB_ORDER.find(p => BOMB_TYPES[p].element === def.element);
+    if (potion) s.bombType = potion;
+    this.syncFormElement();
+    setAbilityLabel(def.ability.short);
+    setAbility2Label(def.ability2?.short ?? null);
+    setDefenseLabel(def.defense.short);
+    s.updateHud();
   }
 
   /** O peso e a leveza: quanto o passo da Roo demora (a Terra anda 20% mais devagar, o Ar 20% mais rápido). */
@@ -153,6 +170,7 @@ export class RooFormSystem {
       return;
     }
     const def = FORMS[id];
+    addRooFormTextures(s, { forms: [id] }); // garante os quadros da forma (se o boot ainda não os gerou, gera agora)
     if (!formLearned(id, knowsForm, inArenaLoadout())) {
       s.floatingText(gridX, gridY - 1, 'AINDA NÃO APRENDIDA', '#bfae8a', 12, 1200);
       return;
@@ -236,6 +254,10 @@ export class RooFormSystem {
       this.startAim();
       return;
     }
+    if (def.id === 'nova' || def.id === 'puddle') {
+      this.areaAbility(def.id, from, dir, def.range);
+      return;
+    }
     const to = leapTarget(from, dir, def.range, (x, y) => s.getTile(x, y) === EMPTY, land);
     if (!to) {
       s.floatingText(gridX, gridY - 1, 'SEM ONDE POUSAR', '#bfae8a', 11, 900);
@@ -247,6 +269,40 @@ export class RooFormSystem {
     }
     this.leap(to);
     s.updateHud();
+  }
+
+  // Onda de brasas (fogo) e Poça (água): habilidades de área; só gastam se houver casas onde agir.
+  private areaAbility(id: 'nova' | 'puddle', from: { x: number; y: number }, dir: { x: number; y: number }, range: number): void {
+    const s = this.scene;
+    const open = (x: number, y: number): boolean => s.getTile(x, y) === EMPTY && !(x === s.doorX && y === s.doorY && !s.doorOpen);
+    const tiles = id === 'nova' ? novaTiles(from, range, open) : puddleTiles(from, dir, range, open);
+    if (tiles.length === 0) {
+      s.floatingText(from.x, from.y - 1, 'SEM ESPAÇO', '#bfae8a', 11, 900);
+      return;
+    }
+    if (!this.form.useAbility2()) {
+      s.floatingText(from.x, from.y - 1, 'ESPERA...', '#bfae8a', 12, 700);
+      return;
+    }
+    if (id === 'nova') {
+      s.bombSystem.flameBlast(tiles); // fere o que estiver nas casas...
+      this.embers.ignite(tiles, this.clockMs, this.form.stage); // ...e deixa brasas
+      this.puff(s.playerSprite.x, s.playerSprite.y, 0xffa94d);
+    } else {
+      this.puddles.spread(tiles, this.clockMs, this.form.stage);
+      this.embers.douse(tiles);
+      for (const bomb of [...s.bombSystem.bombs]) {
+        if (bomb.element === 'fire' && tiles.some(t => t.x === bomb.gridX && t.y === bomb.gridY)) s.bombSystem.neutralizeBomb(bomb);
+      }
+      s.play('bubble');
+      this.puff(s.playerSprite.x, s.playerSprite.y, 0x7fd6ff);
+    }
+    s.updateHud();
+  }
+
+  /** Há poça de água nesta casa? (os inimigos dentro dela andam bem mais devagar) */
+  inPuddle(x: number, y: number): boolean {
+    return this.puddles.has(x, y, this.clockMs);
   }
 
   // ---------- Raiz: a jogadora escolhe onde brotar ----------
@@ -325,7 +381,7 @@ export class RooFormSystem {
       s.floatingText(gridX, gridY - 1, 'ESPERA...', '#bfae8a', 12, 700);
       return;
     }
-    this.guard = { def, ms: def.guardMs, walls: [] };
+    this.guard = { def, ms: def.guardMs, walls: [], healMs: 0 };
     const me = { x: gridX, y: gridY };
     const ring = ringNeighbors(me);
     s.floatingText(gridX, gridY - 1, def.nome.toUpperCase(), FORM_LOOK[this.form.id ?? 'fire'].text, 12, 1000);
@@ -566,6 +622,7 @@ export class RooFormSystem {
     this.drawEmbers();
     this.drawBubbles();
     this.drawWalls();
+    this.drawPuddles();
     this.drawGusts(delta);
     this.updateGuard(delta);
     this.drawAim();
@@ -617,6 +674,16 @@ export class RooFormSystem {
       return;
     }
     const s = this.scene;
+    // a bolha cura: 1 de vida a cada 0,5 s
+    if (guard.def.id === 'bubble') {
+      const tick = bubbleHealTick(guard.healMs, delta);
+      guard.healMs = tick.accMs;
+      for (let i = 0; i < tick.heals && s.player.hp < CONFIG.maxHp; i++) {
+        s.player.hp = Math.min(CONFIG.maxHp, s.player.hp + BUBBLE_HEAL);
+        s.floatingText(s.player.gridX, s.player.gridY - 1, `+${BUBBLE_HEAL}`, '#9be564', 12, 350);
+        s.updateHud();
+      }
+    }
     const x = s.playerSprite.x;
     const y = s.playerSprite.y - 2;
     if (guard.ms < 600 && Math.floor(this.clockMs / 90) % 2 === 0) return; // pisca quando está acabando
@@ -775,6 +842,21 @@ export class RooFormSystem {
       }
       g.fillStyle(0x8a7f60, 1).fillRect(x + 2, y + T - 4, T - 4, 2);
       g.lineStyle(2, 0x3a3224, 1).strokeRect(x + 2, y + 6, T - 4, T - 8);
+    }
+  }
+
+  // A poça: água em pixels, com anéis que se abrem e somem; pisca perto do fim. Fica no gráfico das brasas (por baixo).
+  private drawPuddles(): void {
+    const g = this.emberGfx;
+    const phase = Math.floor(this.clockMs / 260);
+    for (const p of this.puddles.active(this.clockMs)) {
+      if (p.left < 700 && Math.floor(this.clockMs / 100) % 2 === 0) continue;
+      const x = p.x * T;
+      const y = p.y * T;
+      g.fillStyle(0x3d8fd0, 0.32).fillRect(x + 2, y + 2, T - 4, T - 4);
+      g.fillStyle(0x8fd6ff, 0.28).fillRect(x + 6, y + 6, T - 12, T - 12);
+      const r = 4 + ((phase + p.x + p.y) % 3) * 3;
+      g.lineStyle(1, 0xd8f3ff, 0.8).strokeCircle(x + T / 2, y + T / 2, r);
     }
   }
 

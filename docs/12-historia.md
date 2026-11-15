@@ -120,7 +120,7 @@ A cena final fica como está: o frasco sobre a mesa, o Caldeirão morno, silênc
 | Manuscrito do Alquimista | `game/manuscrito.ts` | Substituiu o Diário da Roo: uma página por personagem, não por fase |
 | Tela final | "Jornada cumprida" | Mantida |
 
-> **Para a revisão de roteiro (a fazer):** a campanha tem 12 fases em 3 capítulos (O Vale, A Torre / Duelo, O Retorno) e 3 chefes, mais a Quimera, que é a prata do mestre. O roteiro foi escrito para 4 atos; aqui o Ato I (Nigredo) cobre O Vale inteiro, o Ato II (Albedo) a Torre até a Antecâmara, o Ato III (Citrinitas) o Duelo e o Ato IV (Rubedo) O Retorno. O Leão Verde e os capítulos selados (Biblioteca Proibida, Observatório) ainda não têm lugar na história. Furos resolvidos em 2026-11-15 (cartões do jogo e capítulo VI do livro): por que Belladona guarda um laboratório com fantasmas e uma Quimera (o que o mestre não soube descartar); como a Quimera se liga à busca do mestre (a prata que ele tentou virar pão); o que a Mandrágora faz no mosteiro (guarda plantada por Belladona); por que o frasco vazio está no mosteiro (era do mestre, deixado com Anselmo).
+> **Para a revisão de roteiro (a fazer):** a campanha tem 20 fases em 5 capítulos (O Vale, A Torre / Duelo, A Biblioteca Proibida, O Observatório, O Retorno) e 5 chefes (Quimera, Belladona, Leão Verde, Ouroboros e Mandrágora). A Quimera é a prata do mestre. O roteiro foi escrito para 4 atos; aqui o Ato I (Nigredo) cobre O Vale inteiro, o Ato II (Albedo) a Torre até a Antecâmara, o Ato III (Citrinitas) o Duelo e o Ato IV (Rubedo) O Retorno. A Biblioteca e o Observatório entram como interlúdios entre o Ato III e o Ato IV (ver o livro). Furos resolvidos em 2026-11-15 (cartões do jogo e capítulo VI do livro): por que Belladona guarda um laboratório com fantasmas e uma Quimera (o que o mestre não soube descartar); como a Quimera se liga à busca do mestre (a prata que ele tentou virar pão); o que a Mandrágora faz no mosteiro (guarda plantada por Belladona); por que o frasco vazio está no mosteiro (era do mestre, deixado com Anselmo).
 
 ### Falas propostas (rascunho para aplicar depois)
 
@@ -133,8 +133,10 @@ Anselmo, na confissão (cartão novo): *"Ele me contou o que fez naquela noite. 
 ## Decisões em aberto
 
 - **Os nomes das etapas da Obra** (Nigredo, Albedo, Citrinitas, Rubedo) como subtítulo dos atos: usar ou deixar só como cor e tom?
-- **A bolha no último quadro:** sim ou não?
-- **Companheiros** (boticário cético, criatura transformada por Belladona): adiados (dependem do Ato II ampliado; ver `task.md`).
+- **A bolha no último quadro:** **sim** (aplicado em `EndScene`, 2026-11-15): uma bolha iridescente sobe do caldeirão, sem explicação.
+- **Companheiros** (boticário cético, criatura transformada por Belladona) e o Ato II ampliado: **adiados para a versão 2** (decisão de 2026-11-15; ver `task.md`).
+- **Biblioteca e Observatório:** já têm lugar na história (interlúdios no livro; `chapters/biblioteca.ts` e `chapters/observatorio.ts`). O Observatório termina no Ouroboros, a serpente do ciclo.
+- **As lições pela alquimia:** seguem as **operações** (calcinação, solução, coagulação, sublimação), não as etapas da Obra.
 
 ## Inspiração: *Jornada ao Oeste*
 

@@ -7,10 +7,11 @@ import type Phaser from 'phaser';
 import { drawChimeraTextures } from '../../../textures/chimera';
 import { drawLionTextures } from '../../../textures/greenLion';
 import { drawMandrakeTextures } from '../../../textures/mandrake';
+import { drawOuroborosTextures } from '../../../textures/ouroboros';
 import { drawWitchTextures } from '../../../textures/witch';
 import type { BlockStyle } from '../../stages/blockStyles';
 import type { BossId, StageTheme } from '../../stages/types';
-import { BELLADONA_CARDS, CHIMERA_CARDS, LION_CARDS, MANDRAKE_CARDS, type StoryCard } from '../../story';
+import { BELLADONA_CARDS, CHIMERA_CARDS, LION_CARDS, MANDRAKE_CARDS, OUROBOROS_CARDS, type StoryCard } from '../../story';
 import type { EntityId } from '../profiles';
 
 export interface BossDef {
@@ -52,6 +53,15 @@ export const BOSS_DEFS: Record<BossId, BossDef> = {
     arena: {
       nome: 'Mandrágora', lugar: 'Jardim do Mosteiro',
       dica: 'O fogo a fere muito; terra e água quase nada.', theme: 'garden', block: 'garden',
+    },
+  },
+  ouroboros: {
+    id: 'ouroboros', profile: 'ouroboros',
+    sprite: { prefix: 'ouro', draw: drawOuroborosTextures },
+    spawn: 'bottom', after: 'next', farewell: OUROBOROS_CARDS,
+    arena: {
+      nome: 'Ouroboros', lugar: 'Cúpula do Observatório',
+      dica: 'A fraqueza gira a cada ciclo: o brilho em volta dele mostra o elemento que o fere agora. O oposto ele devora.', theme: 'observatory', block: 'brick',
     },
   },
   lion: {

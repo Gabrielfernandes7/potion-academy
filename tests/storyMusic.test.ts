@@ -24,7 +24,7 @@ describe('trilha por fase', () => {
 describe('passagens entre fases', () => {
   it('há passagem depois de cada fase que tem porta, exceto a última', () => {
     for (let s = 1; s < LAST_STAGE; s++) {
-      if (s === 4 || s === 8 || s === 12) continue; // os chefes têm a própria despedida (CHIMERA_CARDS, BELLADONA_CARDS)
+      if (s === 4 || s === 8 || s === 12 || s === 16) continue; // os chefes têm a própria despedida (CHIMERA_CARDS, BELLADONA_CARDS)
       expect(PASSAGE_CARDS[s], `fase ${s}`).toBeDefined();
     }
   });

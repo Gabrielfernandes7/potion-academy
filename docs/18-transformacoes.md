@@ -56,6 +56,15 @@ Cada forma segue o molde de `game/forms/types.ts`: três degraus de perfil, um b
 - **Habilidade X, "Sopro":** uma linha de vento de 4 casas empurra 2 casas (1 nos degraus baixos) os inimigos comuns, que ficam atordoados, **e as poções do chão, que deslizam** (dá para pôr uma poção contra um alvo). Flores e chefes não saem do lugar. Apaga as brasas. Custa 2 s da forma, espera 3,5 s.
 - **Habilidade C, "Salto de vento":** um pulo de até 3 casas por cima de inimigos, poções e muros de sal, invulnerável por 0,25 s. Não atravessa parede nem caixote. Custa 1,5 s da forma, espera 2,5 s. É a esquiva.
 
+### A segunda habilidade (tecla C) de todas as formas
+
+| Forma | Habilidade | O que faz |
+|---|---|---|
+| Fogo | **Onda de brasas** | uma explosão de fogo num losango de 2 casas em volta da Roo (sem a casa dela): fere o que estiver nele e deixa brasas. Custa 2 s, espera 5 s |
+| Água | **Poça** | uma área de 3x3, duas casas à frente, por até 4 s: quem pisa anda a 40% da velocidade, as brasas se apagam e as poções de fogo caídas nela viram vapor. Custa 2 s, espera 5 s |
+| Terra | **Raiz** | afunda e nasce onde a jogadora escolher (ver acima) |
+| Ar | **Salto de vento** | pulo de 3 casas, invulnerável |
+
 ### Defesa (tecla V), em todas as formas (`game/forms/defense.ts`)
 
 Toda forma tem uma defesa que dura 3 s, **corta o dano pela metade**, custa 2 s da forma e espera 6 s. V de novo desfaz antes da hora.
@@ -63,7 +72,7 @@ Toda forma tem uma defesa que dura 3 s, **corta o dano pela metade**, custa 2 s 
 | Forma | Defesa | Efeito além de cortar o dano |
 |---|---|---|
 | Fogo | Escudo de brasas | um anel de brasas nas 4 casas ao redor, que queima quem pisa |
-| Água | Bolha protetora | a bolha iridescente da Roo Água em volta dela |
+| Água | Bolha protetora | a bolha iridescente da Roo Água em volta dela, que **cura 1 de vida a cada 0,5 s** (até 6 em 3 s) |
 | Terra | Círculo de sal | muro nas 4 casas ao redor e, ao levantar, **empurra 2 casas** o que estava nelas (inimigos comuns e poções) |
 | Ar | Redemoinho | afasta 1 casa os inimigos vizinhos |
 
@@ -79,12 +88,12 @@ A escolha de fogo e ar foi minha (a bolha e o muro foram pedidos): o fogo fica c
 
 ### Nome
 
-O código e o Manuscrito ainda chamam a forma de água de "Roo Aqua"; a proposta é "Roo Água", com o mesmo padrão de "Roo Terra" e "Roo Ar". Renomear é trocar o texto (`FORMS.water.nome`, a página `roo-aqua`), sem mexer nas chaves das texturas.
+O código e o Manuscrito chamam a forma de água de "Roo Água"; a proposta é "Roo Água", com o mesmo padrão de "Roo Terra" e "Roo Ar". Renomear é trocar o texto (`FORMS.water.nome`, a página `roo-aqua`), sem mexer nas chaves das texturas.
 
 ## 3. Pontos em aberto
 
-1. Mapeamento pela Obra: operações (recomendado) ou etapas? A ordem das lições do jogo segue as poções, não a Obra.
+1. **Decidido:** as lições seguem as **operações** da alquimia (calcinação, solução, coagulação, sublimação), não as etapas da Obra (que ficam só como cor e tom). A ordem em que se aprende segue as poções.
 2. O Ar ficou com leveza e visão de cima, sem punição. A fraqueza à terra basta como preço? Falta jogar.
-3. O muro barra só quem anda. Deve barrar também a onda das explosões?
+3. **Decidido:** o Muro de sal **barra as explosões** como uma parede (as da Roo e as dos chefes; até a Poção de Terra, que atravessa caixotes, para nele). Fica mais forte como defesa e mais arriscado para quem o levanta no lugar errado.
 4. Equilíbrio: 20% de peso e de leveza, 4 s de muro, 4 casas de Raiz, 3 casas de Salto, 2 casas de Sopro, 3 golpes de lição. Tudo por jogar.
 5. Fogo e Água só têm uma habilidade. Ideias para a segunda (C): Fogo, uma onda de brasas em volta; Água, uma poça que escorrega e leva inimigos.

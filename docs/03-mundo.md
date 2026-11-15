@@ -6,7 +6,7 @@ Cada personagem e item tem uma ficha curta: o que é, o que faz e um detalhe que
 
 **Roo, o bruxo-cachorro** (jogador)
 - *Quer:* sair do laboratório com as gemas e vencer a rival.
-- *Sabe fazer:* colocar poções e explodir as etéreas de longe. Com a tecla T vira **Roo Fire** (poções de fogo mais fortes, brasas, Labareda, luz na névoa; resiste ao fogo, fraca à água e sem a Poção Aqua) e com a tecla Y vira **Roo Aqua** (imune à água, poções de água mais fortes e a Bolha de sabão que prende inimigos). Cada forma dura 20 s (ver `02-como-se-joga.md`).
+- *Sabe fazer:* colocar poções e explodir as etéreas de longe. Com a tecla T vira **Roo Fire** (poções de fogo mais fortes, brasas, Labareda, luz na névoa; resiste ao fogo, fraca à água e sem a Poção Aqua) e com a tecla Y vira **Roo Água** (imune à água, poções de água mais fortes e a Bolha de sabão que prende inimigos). Cada forma dura 20 s (ver `02-como-se-joga.md`).
 - *Detalhe:* manto roxo com barra dourada, chapéu e varinha. Parada, ele cochila.
 - *Vida e dano:* barra de 24 pontos. **Fraca ao fogo** (as próprias poções machucam mais: 6), **resiste à água** (2); terra e éter, 4.
 - *Frase:* "Mais uma poção e a porta é minha."

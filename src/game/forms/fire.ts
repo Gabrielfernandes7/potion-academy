@@ -4,6 +4,8 @@
 // Brasas: a explosão de fogo deixa brasas; queimam inimigos comuns (chefes são imunes), nunca machucam a Roo,
 //   duram menos a cada degrau, e a água as apaga.
 // Labareda (X): jato de fogo de 3 casas à frente; custa 2 s da forma, espera 3,5 s.
+// Onda de brasas (C): uma explosão de fogo num losango de 2 casas em volta da Roo (a casa dela não entra): fere o que
+//   estiver nele e deixa brasas no chão. É a saída de quem foi cercado. Custa 2 s da forma, espera 5 s.
 // Luz de chama: mais visão na névoa (+0,5 casa por degrau).
 import { PROFILES } from '../entities/profiles';
 import { DamageProfile, damageTo } from '../entities/damage';
@@ -21,7 +23,20 @@ export const FIRE_FORM: FormDef = {
   boost: 0.5,
   defense: DEFENSE_FIRE,
   ability: { id: 'flame', nome: 'Labareda', short: 'LABAREDA', costMs: 2000, cooldownMs: 3500, range: 3 },
+  ability2: { id: 'nova', nome: 'Onda de brasas', short: 'ONDA', costMs: 2000, cooldownMs: 5000, range: 2 },
 };
+
+/** As casas da Onda de brasas: as livres a até `radius` passos (Manhattan) de `at`, sem a casa dele. */
+export function novaTiles(at: { x: number; y: number }, radius: number, isOpen: (x: number, y: number) => boolean): Array<{ x: number; y: number }> {
+  const out: Array<{ x: number; y: number }> = [];
+  for (let dy = -radius; dy <= radius; dy++) {
+    for (let dx = -radius; dx <= radius; dx++) {
+      const d = Math.abs(dx) + Math.abs(dy);
+      if (d >= 1 && d <= radius && isOpen(at.x + dx, at.y + dy)) out.push({ x: at.x + dx, y: at.y + dy });
+    }
+  }
+  return out;
+}
 
 /** Luz de chama: casas a mais de visão na névoa, 0,5 por degrau (2 no auge). */
 export function fireLight(stage: FormStage): number {

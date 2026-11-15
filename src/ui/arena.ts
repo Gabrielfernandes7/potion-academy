@@ -4,6 +4,7 @@ import { ELEMENTS, ElementId } from '../config';
 import { ARENA_BOSSES } from '../game/arena';
 import { validDuel } from '../game/duel';
 import type { BossId } from '../game/stages/types';
+import type { FormId } from '../game/forms/types';
 import { PROFILES } from '../game/entities/profiles';
 import { startArena, textureDataUrl } from '../game/launcher';
 import { arenaWins } from '../storage';
@@ -76,7 +77,11 @@ function renderCards(): void {
     go.type = 'button';
     go.className = 'big-btn';
     go.textContent = 'TREINAR';
-    go.onclick = () => { closeArena(); void startArena(b.id); };
+    go.onclick = () => {
+      const form = (byId('arena-form-select') as HTMLSelectElement).value as FormId | '';
+      closeArena();
+      void startArena(b.id, undefined, form || undefined);
+    };
 
     card.append(head, life, chips('Fraqueza', p.weak), chips('Imune', p.immune), tip, go);
     grid.append(card);

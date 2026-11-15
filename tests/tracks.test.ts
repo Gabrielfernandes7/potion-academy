@@ -22,7 +22,7 @@ describe('faixas', () => {
 
   it('cada fase tem a faixa da cena correspondente', () => {
     // Névoa e Torre (índices 2, 4 a 6) usam a faixa do salão (stage2); os dois chefes sem porta (Poço e Duelo), a do duelo
-    const map: Record<number, keyof typeof SCENE_TRACKS> = { 0: 'stage1', 1: 'stage2', 2: 'stage2', 3: 'stage3', 4: 'stage2', 5: 'stage2', 6: 'stage2', 7: 'stage3', 8: 'stage1', 9: 'stage2', 10: 'stage2', 11: 'stage3', 12: 'stage2', 13: 'stage1', 14: 'stage2', 15: 'stage1', 16: 'stage4', 17: 'stage4', 18: 'stage4', 19: 'stage4' };
+    const map: Record<number, keyof typeof SCENE_TRACKS> = { 0: 'stage1', 1: 'stage2', 2: 'stage2', 3: 'stage3', 4: 'stage2', 5: 'stage2', 6: 'stage2', 7: 'stage3', 8: 'stage1', 9: 'stage2', 10: 'stage2', 11: 'stage3', 12: 'stage2', 13: 'stage1', 14: 'stage2', 15: 'stage3', 16: 'stage4', 17: 'stage4', 18: 'stage4', 19: 'stage4' };
     STAGES.forEach((s, i) => {
       expect(s.track).toBe(SCENE_TRACKS[map[i]]);
     });

@@ -3,55 +3,47 @@
 Este arquivo é a memória do projeto entre sessões: **só o que está em aberto**. Leia antes de começar e atualize ao terminar cada tarefa.
 O que já foi feito (e o histórico por rodada) está em `solved.md`. Para o "como funciona", veja `CLAUDE.md` (técnico) e `docs/` (jogo).
 
-Última atualização: 2026-11-15. Tudo das últimas rodadas está **sem commit** (ver `git status`).
+Última atualização: 2026-11-15. As rodadas desta data estão commitadas até `f806677`; o que veio depois (UI, Ouroboros, mais inimigos, segunda habilidade do fogo e da água, Muro que barra explosões, Roo de orelhas caídas) está **sem commit** (`git status`).
 
-## Aguardando você: jogar e dizer
+## Aguardando você: jogar, ouvir e olhar
 
-Eu só verifico por script (regra pura, testes, e o jogo rodando num navegador de teste). Sensação de jogo, som e olho são seus.
+Eu verifico por script (regra pura, testes, simulações e o jogo rodando num navegador de teste). Sensação de jogo, som e olho são seus. **Dica:** na Arena dá para treinar com cada transformação contra cada chefe, e o duelo de chefes mostra quem está fora da curva (`docs/10-equilibrio.md`).
 
-- **Roo Terra e Roo Ar (novas, 2026-11-15):** equilíbrio (20% de peso e de leveza, muro de 4 s, Raiz de 4 casas, Salto de 3, Sopro de 2, lição de 3 golpes); se os sprites leem bem em 40 px; sons (transformação, muro, sopro, raiz). Rodei no navegador: troca de textura, muro, Sopro empurrando inimigo e poção, Raiz por baixo de uma parede, Salto por cima de um sapo, lições da Terra (fase 4) e da água (3 golpes). Não joguei uma partida inteira.
-- **Duelo de chefes (Arena):** a simulação (12 combinações, 100 s de jogo) mostra a **Quimera perdendo de todos** e Belladona e Leão Verde dominando; nenhum duelo foi ao tempo. É um sinal para você decidir se rebalanceia os chefes (vida, tempos, dano) antes de ajustar a Roo.
-- **Observatório e inimigos novos (2026-11-15):** equilíbrio das 4 fases (tempos, quantidades), se lanterna, relógio, toupeira e coruja leem bem e avisam a tempo; se o tema azul-noite agrada; texto das passagens 13 a 16. Rodei 30 s simulados na cúpula (toupeira afundou, coruja marcou, relógio travou, todos andaram) e conferi os sprites e o mapa.
-- **Defesa (V) em todas as formas e Raiz com mira:** a escolha do Escudo de brasas (fogo) e do Redemoinho (ar) foi minha; equilíbrio (corta 50%, 3 s, espera 6 s). Se o círculo de sal prende demais a Roo (3 s).
-- **Mapas:** conferi no navegador as 5 telas (vale e os 4 capítulos). Os nomes das fases ficam sobre uma placa de papel e não esmaecem; falta só você olhar no celular.
-- **Roo Fire e Roo Aqua:** bônus de 50%, espera de 25 s, custo da Labareda, a Bolha de sabão.
-- **Vida da Roo** (24 pontos, fraca ao fogo) e o ritmo das fases agora que sapo e fantasma levam 1 a 3 golpes (`docs/10-equilibrio.md`). Fase 1 com 100 s.
-- **Chefes:** Quimera (24 de vida, tempos, faixa própria, sprite), Mandrágora (14 de vida, água cura 1, fogo 3), Leão Verde (a fase da Biblioteca usa a arena já existente), Belladona na Torre.
-- **Power-ups por poção** (`+1 RAIO`, `+1 FRASCO` só para a poção escolhida): fica fácil demais? Alternativa: limitar o total de frascos. Velocidade gradual (`SPEED_STEP` 0,12).
+- **Equilíbrio das formas:** 20% de peso (Terra) e de leveza (Ar), muro de 4 s que agora barra explosões, Raiz de 4 casas, Salto de 3, Sopro de 2, Onda de brasas (2 casas), Poça (3x3, 4 s), defesa (corta 50%, 3 s, espera 6 s), lição de 3 golpes. Bônus de 50% das formas, espera de 25 s, custo das habilidades. A Bolha protetora cura 1 de vida a cada 0,5 s (entendi "a cada segundo 0,5" assim; se era a cada 1 s, mude `BUBBLE_HEAL_EVERY_MS`).
+- **Chefes:** o Ouroboros (32 de vida, ciclo de 9 s, anéis, mordida e o Ciclo) nunca foi jogado; a Quimera (28 de vida, Onda de ar na fúria), a Mandrágora (14 de vida na campanha, água cura 1), o Leão Verde e a Belladona.
+- **As fases novas:** o Observatório (4 fases, tema azul-noite), a Névoa com gosma, a Torre com sentinela, o Retorno com ratinho, o Caldeirão com salamandra: tempos, quantidades e se os avisos (monte da toupeira, círculo da coruja, rastro da gosma) dão tempo de reagir. O texto das passagens (13 a 15) e a despedida do Ouroboros.
+- **Os 8 inimigos novos:** se leem bem em 40 px (conferi o catálogo, `docs/img/sprites/enemies.png`), sons de tique (relógio) e de pio (coruja).
+- **UI nova** (tabuleta de madeira, latão, pergaminho e vela): conferi menu, carta, ajuda, Arena, fim de jogo e celular em pé, mas **só no navegador de teste**. Falta ver em celular de verdade, em telas deitadas e com o sistema em modo claro.
+- **Roo de orelhas caídas:** agora lê como cachorro; vale ver andando, nas quatro formas e no jardim.
+- **Vida da Roo** (24, fraca ao fogo), o ritmo das fases agora que sapo e fantasma levam 1 a 3 golpes (`docs/10-equilibrio.md`), fase 1 com 100 s, power-ups por poção (fica fácil demais? alternativa: limitar o total de frascos) e a velocidade gradual (`SPEED_STEP` 0,12).
 - **Caminhada da Roo:** o passo à mão (`stepPlayerMove`). Se ainda parecer pulo, diga a tela e se é 60 ou 120 Hz; o próximo passo seria um ciclo de 6 a 8 quadros (arte nova).
-- **Músicas** (6 faixas, nenhuma ouvida) e sons dos elementos: clima, andamento, volume (`docs/13-musica.md`). **Passagens** entre fases (`PASSAGE_CARDS`): ritmo e português.
-- **Equilíbrio com pessoas:** 5 a 10 partidas, anotar e ajustar (roteiro em `docs/10-equilibrio.md`). A estimativa de economia de lá (80 POÇÃO por partida) é do tempo do OURO: reescrever.
+- **Músicas** (6 faixas, nenhuma ouvida) e sons dos elementos e das formas: clima, andamento, volume (`docs/13-musica.md`). A pergunta R6 (reverberação mais curta ou orçamento medido) só se responde ouvindo.
 - **"Som não toca" (relato antigo):** causa no seu computador não confirmada. Preciso de navegador, sistema e de quando o som para.
-- **Manuscrito lento no celular:** o ruído do papel já é um canvas gerado uma vez; falta testar num celular de verdade. Suspeito restante: os 12 ícones com `feDisplacementMap` (filtro `#rough`) por página.
-- **Vistos no celular, sem correção:** a legenda "Visto em" fica sob o sprite no medalhão; o sprite ainda lê como coelho.
-- **Contorno escuro da Roo no jardim**, dano `-2` na Belladona, menu em pixel art, `EndScene`, cartões de despedida: nunca vistos por uma pessoa.
+- **Manuscrito lento no celular:** o ruído do papel já é um canvas gerado uma vez; falta testar num aparelho. Suspeito restante: os 12 ícones com `feDisplacementMap` (filtro `#rough`) por página. A legenda "Visto em" já não fica sob o sprite.
+- **Nunca vistos por uma pessoa:** contorno escuro da Roo no jardim, dano `-2` na Belladona, o menu em pixel art, a `EndScene` (agora com a bolha que sobe), os cartões de despedida.
+- **Equilíbrio com pessoas:** 5 a 10 partidas, anotar e ajustar (roteiro em `docs/10-equilibrio.md`).
 
-## Decisões suas
+## Decisões que só você pode tomar
 
-- **Mapeamento das lições pela Obra:** operações (recomendado) ou etapas (`docs/18-transformacoes.md`, "Pontos em aberto").
-- **Nome "Roo Aqua"** (código, Manuscrito) → "Roo Água"? Só trocar o texto; as chaves das texturas ficam.
-- **Muro de sal:** deve barrar também a onda das explosões? Hoje barra só quem anda.
-- **Fogo e Água com uma segunda habilidade (C)?** Ideias em `docs/18-transformacoes.md` (onda de brasas; poça que escorrega).
-- **Mais inimigos:** faltam gosma de mercúrio, sentinela de cera, ratinho do celeiro e salamandra amiga (`docs/19-criaturas.md`, seções 6 e 7). A Torre ainda só tem fantasmas.
-- **Chefe do Observatório:** o capítulo entrou sem chefe (a cúpula é o desfecho). Quer um chefe? Pede sprite, controlador, falas, perfil e página no Manuscrito.
-- **Boticário** (quem é, se é jogável; sugestão: não jogável na primeira versão) e **Ato II** (puzzle de recomposição das páginas, fase nova entre 2 e 3; sugestão: adiar para a versão 2). D3, P5 e P6 (companheiros, criatura transformada, mestre em sombra) dependem disso.
-- **Licença** do projeto (o README segue sem) e **endereço final** do site (`og:image` absoluto).
-- **Hospedagem:** o servidor precisa mandar 404 para `404.html` e erros 5xx para `500.html`.
-- **Música (R6):** orçamento medido ou reverberação mais curta.
-- **Gasto que se repete** (depois de conversar) e capítulo narrado da Biblioteca no livro (`history.html`): sem decisão.
+- **Licença do projeto** (o README segue sem): é uma escolha jurídica, não minha.
+- **Endereço final do site** (`og:image` e `og:url` absolutos): depende de onde será hospedado. A 404 e a 500 estão explicadas para Nginx, Apache e hospedeiros estáticos em `docs/20-publicar.md`.
+- **Versão 2 (adiado de propósito):** o Boticário (quem é, se é jogável) e o Ato II ampliado (puzzle de recomposição das páginas), e os companheiros que dependem deles (D3, P5, P6).
 
 ## Roteiro (`docs/12-historia.md`)
 
-- Falta: página do mestre no Manuscrito; a bolha no último quadro; os capítulos selados; o fantasma-eco já está na passagem 2.
-- Você revisa os furos de roteiro (a Roo é masculina na prosa; os cartões ficam por ora, e no futuro um vídeo da história no lugar).
-- Teclas **U e I** (pendência antiga, sem descrição; confirmar se ainda vale).
+- Você revisa os furos de roteiro e o texto dos interlúdios novos no livro (Biblioteca e Observatório). A Roo é masculina na prosa; os cartões ficam por ora, e no futuro um vídeo da história no lugar.
+- Os nomes das etapas da Obra (Nigredo, Albedo...) como subtítulo dos atos: hoje só como cor e tom.
 
 ## Fila técnica (o que sobrou e eu posso fazer)
 
-- Fotos do catálogo: `docs/img/sprites.png` e `sprites/bosses.png` estão atualizadas; as outras sete de `docs/img/sprites/` não mudaram de conteúdo, mas o script de recorte não achou os seletores (`sprites.html` não tem `id` por categoria). Também faltam as fotos de Roo Terra e Roo Ar no catálogo.
-- 1536 texturas de forma são geradas no boot (eram 768). Se o menu demorar a abrir em aparelho fraco, gerar cada forma só na primeira transformação (`addRooFormTextures(scene, { forms: [id] })` já aceita isso).
-- A habilidade de empurrar da Roo foi removida; o Sopro do ar faz um papel parecido (só em inimigos comuns). Ideias guardadas em `docs/ides.md`.
 - HUD no canvas fica serrilhada em telas muito grandes (decisão visual do estilo pixel art; mudar só se você quiser texto nítido).
+- A Torre ainda tem pouco além de fantasmas e sentinelas; mais variedade só com a sua opinião depois de jogar.
+
+## Como testar por script (para a próxima sessão)
+
+- O Chromium já está em `~/Library/Caches/ms-playwright/` e o módulo `playwright-core` no cache do `npx`; os scripts de teste ficam no scratchpad da sessão, não no projeto. Depois de `scene.start('Main', ...)`, chame `endIntro()` (com o cartão de entrada aberto a `update` não roda).
+- **Duelo de chefes sem esperar:** `scene.start('Main', { stage: 0, arena: A, duel: B })`, `endIntro()` e um laço `while (!m.gameOver && t < 130000) { m.update(t, 50); t += 50; }`; o texto do resultado está em `#go-title` e `#go-stats`.
+- **Inimigos e formas:** `m.enemySystem.createEnemy(kind, x, y)`, `m.forms.useDefense()`, `m.forms.useAbility2()`; zere a grade com `m.grid[y][x] = 0` para um corredor livre.
 
 ## Descartado (com motivo)
 

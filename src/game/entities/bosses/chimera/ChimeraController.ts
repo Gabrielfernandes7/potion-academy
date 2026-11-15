@@ -6,7 +6,7 @@
 //   spit  : cospe um jato de prata em linha reta, passando pela casa em que você está.
 //   drops : gotas de prata caem, uma depois da outra; a primeira, na sua casa.
 //   slide : vira poça (protegida), escorre e ressurge perto de você, com um respingo.
-//   wave  : (só furiosa) uma onda varre o campo em faixas; a linha verde fica seca.
+//   wave  : (só furiosa) uma onda de vapor de mercúrio (ar) varre o campo em faixas; a linha verde fica seca.
 import { CONFIG, ElementId } from '../../../../config';
 import type { MainScene } from '../../../../scenes/MainScene';
 import { BossBase, center } from '../BossBase';
@@ -147,8 +147,9 @@ export class ChimeraController extends BossBase {
     this.markTiles(safe, 0x9be564, first + (bands.length - 1) * WAVE_STEP_MS);
     bands.forEach((band, i) => {
       const ms = first + i * WAVE_STEP_MS;
-      this.telegraph(band, 'water', undefined, ms);
-      this.after(ms, () => { if (this.state !== 'defeated') this.explode(band, 'water'); });
+      // a onda é o vapor do mercúrio: ar, não água (a água escorria inútil contra quem a resiste e curava a Mandrágora)
+      this.telegraph(band, 'air', undefined, ms);
+      this.after(ms, () => { if (this.state !== 'defeated') this.explode(band, 'air'); });
     });
     this.after(first + (bands.length - 1) * WAVE_STEP_MS + 200, () => this.endCast());
   }

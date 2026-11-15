@@ -4,6 +4,7 @@ import type { PickupType } from './rewards';
 import type { Upgrades } from './upgrades';
 import type { EnemyKind } from './entities/enemies/defs';
 import type { BossId } from './stages/types';
+import type { FormId } from './forms/types';
 
 export type Facing = 'up' | 'down' | 'left' | 'right';
 
@@ -62,7 +63,9 @@ export interface Enemy {
   actMs: number; // toupeira/coruja: tempo até a próxima ação (afundar, mergulhar)
   state: 'walk' | 'burrowed' | 'aim'; // toupeira: debaixo da terra; coruja: marcando a casa
   target: { x: number; y: number } | null; // casa onde brota ou onde mergulha
-  trapMs: number; // preso numa bolha de sabão da Roo Aqua: não anda, não machuca e não chicoteia até estourar
+  loot: { type: PickupType; prize?: PickupType; potion?: BombId } | null; // ratinho: o item que roubou
+  used: boolean; // salamandra: já aqueceu a Roo nesta fase
+  trapMs: number; // preso numa bolha de sabão da Roo Água: não anda, não machuca e não chicoteia até estourar
   fxCooldown: number; // evita repetir o aviso "IMUNE" e o dano a cada quadro enquanto a explosão dura
   hp: number;
   maxHp: number;
@@ -99,5 +102,6 @@ export interface StageData {
   stage?: number;
   carry?: Carry;
   arena?: BossId; // treino na Arena contra este chefe (stage = ARENA_STAGE; nada vale para a campanha)
+  form?: FormId; // na Arena: a transformação fixa em que a Roo luta (sem fim; só para treinar)
   duel?: BossId; // com `arena`: duelo de chefes (arena contra duel, sem a Roo; game/duel.ts)
 }

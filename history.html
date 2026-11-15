@@ -23,6 +23,8 @@
       <li><a href="#ato1">Ato I: O Chamado</a></li>
       <li><a href="#ato2">Ato II: O Caminho</a></li>
       <li><a href="#ato3">Ato III: O Duelo</a></li>
+      <li><a href="#biblioteca">Interlúdio: A Biblioteca</a></li>
+      <li><a href="#observatorio">Interlúdio: O Observatório</a></li>
       <li><a href="#ato4">Ato IV: O Retorno</a></li>
       <li><a href="#frasco">O frasco vazio</a></li>
       <li><a href="#jogo">Onde entra no jogo</a></li>
@@ -198,6 +200,30 @@
       </div>
     </article>
 
+    <article class="chapter" id="biblioteca">
+      <div class="kicker">Interlúdio · entre a Torre e o Retorno</div>
+      <h2>A Biblioteca Proibida</h2>
+      <p>Depois do duelo, Roo desce ao scriptorium do mosteiro, onde Belladona acorrentou as escrituras que levou. Estantes de carvalho sobem até o teto; os livros estão presos por correntes finas, cada uma com o selo do mestre, mas alguém deixou as lâmpadas acesas. Aqui ainda se lê.</p>
+      <p>Nenhuma corrente está rasgada: quem as prendeu cuidou delas. Num canto, um copista deixou uma frase pela metade, <em>"a semente guardada no celeiro seco não apodrece"</em>, e ninguém a riscou. No cofre, uma página com a letra do mestre: <em>"quem reparte o pão não precisa de ouro"</em>.</p>
+      <p>No fim está o Leão Verde, o solvente universal, que dorme sobre as correntes. Não guarda ouro: guarda o que o ouro não compra, livros que alguém ainda quer ler. Quando cai, deixa as escrituras irem: <em>"Leve também o que elas pedem: que ninguém passe fome por causa delas."</em></p>
+      <div class="note">
+        <strong>Para o jogo</strong>
+        <p><span class="status status--ok">aplicado</span> Quatro fases (<code>chapters/biblioteca.ts</code>), passagens 9, 10 e 11 e a despedida do Leão (<code>LION_CARDS</code>). Aparecem a lanterna viva (as lâmpadas que ficaram acesas) e a coruja do scriptorium, que só ataca quem fica parado no círculo.</p>
+      </div>
+    </article>
+
+    <article class="chapter" id="observatorio">
+      <div class="kicker">Interlúdio · entre a Biblioteca e o Retorno</div>
+      <h2>O Observatório</h2>
+      <p>No alto do vale, a Torre dos Astrolábios guarda o que o mestre fazia à noite: olhar o céu para saber quando semear. Astrolábios de bronze repousam entre as lajes, apontando para estrelas que já mudaram de lugar. Lanternas acesas andam de um lado a outro, e relógios de cobre contam horas diferentes na mesma parede. O mestre dizia que o tempo da colheita não espera ninguém, e que por isso ninguém devia ter pressa.</p>
+      <p>Na galeria, as estrelas estão desenhadas como manuscritos: cada constelação tem uma legenda numa letra que Roo não decifra. Uma coruja o observa do alto e não ataca quem apenas olha; só avisa, num círculo, quem fica parado. No chão, a terra se mexe em montes pequenos.</p>
+      <p>Na cúpula, sob a fenda aberta para o céu inteiro, uma serpente de escamas verdes morde a própria cauda e gira devagar, como o céu em volta dela. É o Ouroboros. Não guarda nada: gira. A fraqueza dele muda a cada volta, e o que ele ensina é esperar: <em>"Você aprendeu a ler o aviso e a sair do círculo. É o mais difícil: saber quando esperar a roda passar."</em> Roo procura no céu a estrela do caderno do mestre e não a encontra: ela se mudou, como tudo o que ele estudou. Fecha o caderno e desce, em direção ao mosteiro.</p>
+      <div class="note">
+        <strong>Para o jogo</strong>
+        <p><span class="status status--ok">aplicado</span> Quatro fases (<code>chapters/observatorio.ts</code>) e o chefe Ouroboros (<code>bosses/ouroboros/</code>), passagens 13 a 15 e a despedida <code>OUROBOROS_CARDS</code>. Inimigos: lanterna viva, relógio de cobre, toupeira de sal e coruja.</p>
+      </div>
+    </article>
+
     <article class="chapter" id="ato4" data-stage="rubedo">
       <div class="kicker">Ato IV · Rubedo, o consumar</div>
       <h2>O Retorno</h2>
@@ -220,7 +246,7 @@
       <p>Roo continua alquimista. Mas agora sabe que conhecimento não é só o que se consegue produzir: importa também o que se faz com o que se sabe. A pergunta com que a carta começou volta, sem resposta, ao jogador: o que você vai fazer com o que encontrou?</p>
       <div class="note">
         <strong>Para o jogo</strong>
-        <p>A cena final continua como está (<code>CAULDRON_LINES</code>). Nenhuma fala explica o frasco: a imagem e o silêncio trabalham. <b>Opção em aberto:</b> uma bolha iridescente que sobe do caldeirão no último quadro, sem explicação.</p>
+        <p>A cena final continua como está (<code>CAULDRON_LINES</code>). Nenhuma fala explica o frasco: a imagem e o silêncio trabalham. <span class="status status--ok">aplicado</span> No último quadro, uma bolha iridescente sobe do caldeirão, sem explicação: a mesma de onde a Roo nasceu.</p>
       </div>
     </article>
 
@@ -237,22 +263,22 @@
             <tr><td>Passagens</td><td><code>PASSAGE_CARDS</code> em <code>game/story.ts</code></td><td><span class="status status--ok">aplicado</span></td><td>Bolha na passagem 2, fantasmas como ecos, voz de Belladona na 7.</td></tr>
             <tr><td>Despedida de Belladona</td><td><code>BELLADONA_CARDS</code></td><td><span class="status status--ok">aplicado</span></td><td>Fala da fome, não só de palavras.</td></tr>
             <tr><td>Confissão</td><td><code>ENDING_CARDS</code></td><td><span class="status status--ok">aplicado</span></td><td>O cartão da culpa e da noite da bolha.</td></tr>
-            <tr><td>Manuscrito do Alquimista</td><td><code>game/manuscrito.ts</code></td><td><span class="status status--ok">aplicado</span></td><td>Substituiu o Diário. Falta uma página do mestre com "hoje a bolha não estourou".</td></tr>
-            <tr><td>Cena final</td><td><code>CAULDRON_LINES</code></td><td><span class="status status--ok">manter</span></td><td>Decisão em aberto: a bolha no último quadro.</td></tr>
+            <tr><td>Manuscrito do Alquimista</td><td><code>game/manuscrito.ts</code></td><td><span class="status status--ok">aplicado</span></td><td>Substituiu o Diário. Tem a página do mestre (a partir do Salão dos Ecos), com a lanterna e as quatro lições.</td></tr>
+            <tr><td>Cena final</td><td><code>CAULDRON_LINES</code></td><td><span class="status status--ok">manter</span></td><td>Aplicado: uma bolha iridescente sobe do caldeirão no último quadro.</td></tr>
             <tr><td>Doenças (febre)</td><td><code>game/stages/chapters/vale.ts</code> (A Névoa) e <code>PASSAGE_CARDS</code>, passagem 7</td><td><span class="status status--ok">aplicado</span></td><td>Casas acamadas na Névoa e a mãe de Belladona, na antecâmara. Sem mecânica: só texto.</td></tr>
             <tr><td>Quimera (O Poço)</td><td><code>game/stages/chapters/vale.ts</code>, passagem 3</td><td><span class="status status--ok">aplicado</span></td><td>Chefe e poça de prata existem. Falta dizer como a Quimera se liga à busca do mestre.</td></tr>
-            <tr><td>Capítulos selados</td><td><code>game/stages/upcoming.ts</code></td><td><span class="status status--todo">em aberto</span></td><td>A Biblioteca Proibida já é um capítulo (entre a Torre e o Retorno). O Observatório ainda não tem lugar na história.</td></tr>
+            <tr><td>Capítulos selados</td><td><code>game/stages/upcoming.ts</code></td><td><span class="status status--ok">aplicado</span></td><td>Nenhum capítulo está selado: a Biblioteca Proibida e o Observatório são capítulos da campanha (ver os interlúdios).</td></tr>
             <tr><td>Furos: laboratório com fantasmas e a Quimera</td><td><code>PASSAGE_CARDS</code> (passagem 2) e <code>CHIMERA_CARDS</code></td><td><span class="status status--ok">aplicado</span></td><td>Belladona guardou o que o mestre não soube descartar; a Quimera é a prata que ele tentou virar pão e estudada por ela.</td></tr>
             <tr><td>Furo: a Mandrágora no mosteiro</td><td><code>retorno.ts</code>, O Jardim</td><td><span class="status status--ok">aplicado</span></td><td>Os monges a cultivavam para o remédio; Belladona a plantou à porta como guarda.</td></tr>
             <tr><td>Furo: o frasco vazio no mosteiro</td><td><code>ENDING_CARDS</code></td><td><span class="status status--ok">aplicado</span></td><td>O frasco era do mestre, deixado com Anselmo na última confissão.</td></tr>
-            <tr><td>As lições (formas da Roo)</td><td><code>forms/</code>, <code>learning.ts</code></td><td><span class="status status--todo">em aberto</span></td><td>Fogo e água aplicados (com o cartão do Chamado e a passagem 1). Terra e ar só como proposta: <code>docs/18-transformacoes.md</code>.</td></tr>
-            <tr><td>Menu</td><td><code>MenuScene</code></td><td><span class="status status--new">opcional</span></td><td>Uma bolha iridescente subindo do caldeirão.</td></tr>
+            <tr><td>As lições (formas da Roo)</td><td><code>forms/</code>, <code>learning.ts</code></td><td><span class="status status--ok">aplicado</span></td><td>As quatro formas existem. Água no meio do Salão dos Ecos, terra ao chegar ao Poço (antes da Quimera) e ar no meio da Escadaria: <code>docs/18-transformacoes.md</code>. A ordem segue as operações da alquimia (calcinação, solução, coagulação, sublimação).</td></tr>
+            <tr><td>Menu</td><td><code>MenuScene</code></td><td><span class="status status--new">opcional</span></td><td>Uma bolha iridescente subindo do caldeirão (já está na cena final).</td></tr>
           </tbody>
         </table>
       </div>
       <div class="note">
         <strong>Decisões em aberto</strong>
-        <p>Onde o Observatório entra na história (ainda selado no mapa; ver <code>game/stages/upcoming.ts</code>). Se os nomes das etapas da Obra (Nigredo, Albedo, Citrinitas, Rubedo) entram como subtítulo dos atos. Se a bolha aparece no último quadro. Os companheiros (boticário, criatura transformada) ficam para depois. Como a Quimera se liga à busca do mestre.</p>
+        <p>Se os nomes das etapas da Obra (Nigredo, Albedo, Citrinitas, Rubedo) entram como subtítulo dos atos (por ora, só como cor e tom). Os companheiros (boticário, criatura transformada) e o Ato II ampliado ficam para a versão 2.</p>
       </div>
     </article>
 
@@ -260,6 +286,15 @@
       <div class="kicker">Apêndice</div>
       <h2>Log da história</h2>
       <p>Cada mudança de fato no roteiro entra aqui como um commit, com o que era antes e o que passou a ser. Os nomes de personagens e os fatos que o jogo mostra são o que importa; ajustes de texto sem mudança de fato não entram. Para o código exato, use <code>git log -p</code> nos arquivos <code>history.html</code>, <code>docs/12-historia.md</code> e <code>src/game/story.ts</code>.</p>
+
+      <h3>working tree · 2026-11-15 · o Observatório, o Ouroboros e as páginas do mestre</h3>
+      <p class="versao-nota">Alterações não commitadas (<code>git status</code>): ainda sem commit.</p>
+      <ul>
+        <li><b>O Observatório:</b> capítulo novo entre a Biblioteca e o Retorno, com o Ouroboros no fim (a serpente do ciclo). Antes, selado no mapa e sem lugar na história.</li>
+        <li><b>O mestre:</b> ganha uma página no Manuscrito (a lanterna e a silhueta, nunca o rosto).</li>
+        <li><b>A bolha no último quadro:</b> uma bolha iridescente sobe do caldeirão na cena final. Antes, decisão em aberto.</li>
+        <li><b>Criaturas:</b> gosma de mercúrio, sentinela de cera, ratinho do celeiro, salamandra amiga, lanterna viva, relógio de cobre, toupeira de sal e coruja.</li>
+      </ul>
 
       <h3>working tree · 2026-11-15 · furos de roteiro e as lições do mestre</h3>
       <p class="versao-nota">Alterações não commitadas (<code>git status</code>): ainda sem commit.</p>

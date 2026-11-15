@@ -270,11 +270,11 @@ Novas decisões entram no fim.
 - **Motivo:** a laje de pedra da Escadaria tinha uma runa em forma de cruz, o selo de cera do Corredor um "+", o caixote de madeira um "+" feito de tábuas, a pilha de pergaminhos uma fita vertical que cruzava os rolos, a pilha de livros correntes em "X" e a ficha de +raio uma cruz grande. Blocos são destruídos em explosões: um símbolo sagrado não deve estar em algo que se destrói. O autor é cristão.
 - **Consequência:** caixote e musgo com tábuas horizontais e pregos; laje com um brasão de círculo e triângulo; selo de cera com anel e ponto; pergaminhos com fitas em posições diferentes; livros com uma corrente horizontal e cadeado; ficha de +raio como ondas de explosão com setas nas diagonais; o "+" verde das fichas de frasco virou seta para cima. **Regra permanente** (`CLAUDE.md` e `docs/16-guia-de-extensao.md`): nenhuma cruz em objeto destrutível, inimigo, bloco ou ficha; a cruz só no hábito de frei Anselmo e na capela do mosteiro (mapa). O formato de explosão em quatro direções é geometria de jogo, não símbolo.
 
-## Formas da Roo: 16 s, Roo Aqua, regras de poção e som
+## Formas da Roo: 16 s, Roo Água, regras de poção e som
 - **Motivo:** a transformação de fogo ficava curta; faltava a de água, com a bolha de sabão (a origem da Roo); e a forma de fogo não devia usar água.
-- **Consequência:** todas as formas duram **16 s** (33% a mais que os 12 s), em 4 degraus de 4 s, com uma espera comum de 25 s. **Roo Fire** não pode usar a Poção Aqua enquanto durar (`loadout.setForbiddenElement`; se era a escolhida, troca ao transformar; o slot apaga). **Roo Aqua** (tecla **Y**): imune à água no auge (esfriando, resistência), fraca ao fogo, poções de água +50%, pode usar todas as poções. **Bolha de sabão (X)**: bolha que flutua até 4 casas e prende o primeiro inimigo comum (`Enemy.trapMs`: parado, inofensivo, sem chicote), por 1,75 a 4 s; chefes imunes; estoura com som. Sprite da forma de água: `textures/rooWater.ts` (capa azul em degradê, gotas, bolhas que giram e ondas nos pés). **Sons** novos: `transform` (fogo ruge e estala; água borbulha subindo), `formEnd`, `flame`, `bubble`, `pop`.
+- **Consequência:** todas as formas duram **16 s** (33% a mais que os 12 s), em 4 degraus de 4 s, com uma espera comum de 25 s. **Roo Fire** não pode usar a Poção Aqua enquanto durar (`loadout.setForbiddenElement`; se era a escolhida, troca ao transformar; o slot apaga). **Roo Água** (tecla **Y**): imune à água no auge (esfriando, resistência), fraca ao fogo, poções de água +50%, pode usar todas as poções. **Bolha de sabão (X)**: bolha que flutua até 4 casas e prende o primeiro inimigo comum (`Enemy.trapMs`: parado, inofensivo, sem chicote), por 1,75 a 4 s; chefes imunes; estoura com som. Sprite da forma de água: `textures/rooWater.ts` (capa azul em degradê, gotas, bolhas que giram e ondas nos pés). **Sons** novos: `transform` (fogo ruge e estala; água borbulha subindo), `formEnd`, `flame`, `bubble`, `pop`.
 - **Escolha do jogador:** a habilidade (X) é uma só tecla; o botão de toque HABILIDADE muda de nome com a forma (LABAREDA ou BOLHA).
-- **Em aberto:** o equilíbrio jogado (a bolha prende por muito tempo?), outras formas (Telúrica, Etérea), e a Roo Aqua poder prender também a flor do mal.
+- **Em aberto:** o equilíbrio jogado (a bolha prende por muito tempo?), outras formas (Telúrica, Etérea), e a Roo Água poder prender também a flor do mal.
 
 ## Arquitetura por registros e testes de contrato
 - **Motivo:** o jogo muda muito nos personagens, nas formas, nas fases e nos textos, e pouco na estrutura. Um chefe novo tocava cerca de 12 arquivos (perfil, id, regras, falas, controlador, textura, grupo do catálogo, quatro `if` na cena, lista da Arena, página do Manuscrito, fase, testes).
@@ -284,8 +284,8 @@ Novas decisões entram no fim.
 ## Elementos: FOGO, ÁGUA, TERRA e AR (símbolos da tabela de alquimia)
 - **Motivo:** o elemento de ar chamava-se ÉTER e a terra usava um losango; a tabela de símbolos da alquimia (triângulos com e sem barra) é a referência que o projeto adota.
 - **Decisão:** △ fogo, ▽ água, 🜃 terra (▽ com barra), 🜁 ar (△ com barra). Nomes: FOGO, ÁGUA, TERRA, AR. Poções: Poção de Fogo, de Água, de Terra e de Ar (antes Aqua, Telúrica e Etérea). O ícone SVG (`ui/elementIcons.ts`) segue a mesma forma.
-- **Consequência:** o nome latino do ar passa a ser "aer". A forma de água segue chamada Roo Aqua (nome da transformação, a revisar).
-- **Em aberto:** renomear também a forma "Roo Aqua" para "Roo Água"; conferir os símbolos 🜁 e 🜃 na fonte do navegador de cada sistema.
+- **Consequência:** o nome latino do ar passa a ser "aer". A forma de água segue chamada Roo Água (nome da transformação, a revisar).
+- **Em aberto:** renomear também a forma "Roo Água" para "Roo Água"; conferir os símbolos 🜁 e 🜃 na fonte do navegador de cada sistema.
 - **Símbolos em arquivo:** os quatro símbolos estão em `public/svg/alchemy-fire.svg`, `alchemy-water.svg`, `alchemy-earth.svg` e `alchemy-air.svg` (use `<img src="/svg/alchemy-air.svg">`). Não dependem da fonte do sistema.
 
 ## Poções são aprendidas na jornada; Biblioteca Proibida na campanha; velocidade gradual
@@ -294,7 +294,7 @@ Novas decisões entram no fim.
 - **Biblioteca Proibida:** capítulo de quatro fases (estantes, scriptorium, cofre, Leão Verde) entre a Torre e o Retorno. As fases do Retorno sobem quatro números (da 9 para a 13), e a migração do progresso é a versão 4 (`game/stages/migration.ts`). A página do Leão Verde no Manuscrito abre na fase 12.
 - **Velocidade gradual:** a casa leva 260 ms (antes 300), e cada ponto de velocidade encurta 12% (antes 55%). Com um power-up a casa leva ~232 ms; com dois, ~210 ms. Ver `game/movement.ts`.
 - **Tom:** o jogo é aconchegante. A Biblioteca tem lâmpadas acesas, copistas e sala de leitura, e o Leão guarda o que o ouro não compra.
-- **Em aberto:** o uso do OURO; a forma "Roo Aqua" (nome da transformação); e as quatro transformações da Roo, que só serão discutidas quando forem adicionadas.
+- **Em aberto:** o uso do OURO; a forma "Roo Água" (nome da transformação); e as quatro transformações da Roo, que só serão discutidas quando forem adicionadas.
 
 ## OURO sai do jogo
 - **Motivo:** o OURO acumulava sem ter o que comprar desde que a loja deixou de vender poções (as poções agora são aprendidas na jornada).
@@ -306,7 +306,7 @@ Novas decisões entram no fim.
 - **Motivo:** a poção vem como prêmio, a forma como lição: o jogador usa a poção, entende, e só depois ganha a transformação. Espaça as novidades.
 - **Terra:** imune à terra no auge (as flores do mal não a ferem), 20% mais lenta, Muro de sal. **Ar:** resiste ao ar, sem névoa e sem baús, Sopro. Detalhes em `docs/18-transformacoes.md`.
 - **Save:** chave nova `bombroo_forms`; quem já concluiu a fase da lição conta como tendo aprendido. Nenhuma chave antiga mudou.
-- **Em aberto:** equilíbrio das duas formas (por jogar), o nome "Roo Aqua" e se o muro deve barrar explosões.
+- **Em aberto:** equilíbrio das duas formas (por jogar), o nome "Roo Água" e se o muro deve barrar explosões.
 
 ## Segunda habilidade (C) da Terra e do Ar; o Ar sem punição de baús
 - **Motivo:** o Ar parecia quase inutilizável (sem baús e só um empurrão). Dar mais jogo às formas é melhor do que castigá-las.
@@ -326,3 +326,20 @@ Novas decisões entram no fim.
 ## Defesa em todas as formas, Raiz com destino à escolha
 - **Decisão:** toda forma ganhou uma defesa (tecla V) que corta o dano pela metade por 3 s: Escudo de brasas, Bolha protetora, Círculo de sal (que empurra o que estiver ao redor) e Redemoinho. A Raiz da Terra deixa a jogadora escolher onde brotar, com uma mira.
 - **Avisos legíveis:** os textos flutuantes ganharam contorno escuro, porque o verde do jardim apagava o `+1` e o dano.
+
+## Arena: transformação à escolha e Bolha que cura
+- **Arena:** o treino contra um chefe aceita uma transformação fixa (`StageData.form`): a Roo já nasce transformada, no auge, sem fim (`RooForm.pin`), com a poção da forma na mão. Serve para testar o equilíbrio de cada forma contra cada chefe. O duelo de chefes não usa isso.
+- **Bolha protetora (água):** cura 1 de vida a cada 0,5 s enquanto dura (até 6 em 3 s), além de cortar o dano pela metade.
+
+## Rodada de decisões "com bom gosto" (2026-11-15)
+- **Muro de sal barra as explosões** (como uma parede) e os golpes dos chefes; antes barrava só quem anda.
+- **Fogo e Água ganham segunda habilidade (C):** Onda de brasas e Poça. Toda forma tem duas habilidades e uma defesa.
+- **As lições seguem as operações da alquimia**, não as etapas da Obra (que ficam como cor e tom).
+- **Quimera:** vida 28 (era 24) e a Onda da fúria é de ar (vapor de mercúrio), porque os ataques todos de água não feriam três dos outros chefes e curavam a Mandrágora.
+- **O Observatório termina no Ouroboros** (fraqueza que gira: fogo, terra, água, ar). Os oito inimigos propostos estão no jogo.
+- **O Boticário e o Ato II ampliado ficam para a versão 2** (decisão de adiar, não de descartar).
+- **A bolha no último quadro:** sim.
+- **A Roo é um cachorro:** as orelhas deixaram de ser altas e retas (liam como coelho) e passaram a ser caídas.
+- **UI:** tema de tabuleta de madeira, latão, pergaminho e luz de vela (ver `src/styles/main.css`); carta, diálogos e ajuda ficam em papel.
+- **Texturas das formas** (1536) são geradas em segundo plano depois do menu abrir.
+- **Licença e endereço final** continuam com o autor: dependem de escolha jurídica e de onde o jogo será hospedado.

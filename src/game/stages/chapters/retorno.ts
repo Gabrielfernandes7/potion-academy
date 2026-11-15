@@ -18,13 +18,13 @@ export const RETORNO: ChapterSpec = {
       kind: 'crypt', name: 'A PONTE', place: 'Ponte do Riacho',
       story: 'Uma ponte de pedra sobre o riacho. Os celeiros da margem estão trancados, e à porta de um deles alguém espera.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'garden', block: 'cairn', track: 'jardim',
-      enemies: [{ kind: 'frog', start: 1, max: 2, every: 10 }, { kind: 'flower', start: 3, max: 4 }],
+      enemies: [{ kind: 'frog', start: 1, max: 2, every: 10 }, { kind: 'flower', start: 3, max: 4 }, { kind: 'rat', start: 1, max: 1 }],
     },
     {
       kind: 'crypt', name: 'OS MUROS', place: 'Muralha do Mosteiro',
       story: 'Os muros do mosteiro se aproximam. O portão está à vista, e há famílias à porta, esperando a sopa.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'garden', block: 'brick', track: 'jardim',
-      enemies: [{ kind: 'frog', start: 1, max: 2, every: 10 }, { kind: 'flower', start: 4, max: 5 }],
+      enemies: [{ kind: 'frog', start: 1, max: 2, every: 10 }, { kind: 'flower', start: 4, max: 5 }, { kind: 'rat', start: 1, max: 2 }],
     },
     {
       kind: 'garden', boss: 'mandrake', name: 'O JARDIM', place: 'Jardim do Mosteiro',

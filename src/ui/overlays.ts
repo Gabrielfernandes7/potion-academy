@@ -20,6 +20,27 @@ function tile(label: string, value: string): string {
   return `<div class="result-tile"><span class="label">${label}</span><b class="value">${value}</b></div>`;
 }
 
+// Frases de ambiente sob o título do fim de jogo: um pouco de calor, de qualquer jeito (puro: o sorteio vem de fora).
+export const FLAVOR_LOSE: readonly string[] = [
+  'O fogo se apagou, mas a brasa ainda guarda calor.',
+  'Toda fórmula pede paciência. Respire e tente outra vez.',
+  'O mestre também errava as proporções.',
+  'A Roo sacode a capa e pega outro frasco.',
+];
+export const FLAVOR_WIN: readonly string[] = [
+  'O caldeirão borbulha, contente.',
+  'Uma vela acesa a mais na janela do mosteiro.',
+  'Bem feito. O pão de amanhã agradece.',
+];
+export const FLAVOR_ARENA: readonly string[] = [
+  'Treino é só treino: a lição fica.',
+  'O manuscrito ganha mais uma anotação.',
+];
+
+export function pickFlavor(list: readonly string[], roll: number = Math.random()): string {
+  return list[Math.min(list.length - 1, Math.floor(roll * list.length))];
+}
+
 export function showGameOver(d: GameOverData): void {
   const title = byId('go-title');
   const arena = d.arenaBoss !== undefined;
@@ -27,6 +48,7 @@ export function showGameOver(d: GameOverData): void {
   const story = byId('go-story');
   story.hidden = !d.won || arena;
   title.className = d.won ? 'win' : 'lose';
+  byId('go-flavor').textContent = pickFlavor(arena ? FLAVOR_ARENA : d.won ? FLAVOR_WIN : FLAVOR_LOSE);
   byId('go-stats').innerHTML = (arena
     ? [
       tile('CHEFE', d.arenaBoss as string),
@@ -68,6 +90,7 @@ export function showDuelResult(d: DuelResultData): void {
   title.textContent = d.winner ? `${d.winner.toUpperCase()} VENCEU` : 'EMPATE';
   title.className = 'win';
   byId('go-story').hidden = true;
+  byId('go-flavor').textContent = pickFlavor(FLAVOR_ARENA);
   byId('go-stats').innerHTML = [
     tile(d.a.name.toUpperCase(), `${d.a.hp}/${d.a.maxHp}`),
     tile(d.b.name.toUpperCase(), `${d.b.hp}/${d.b.maxHp}`),

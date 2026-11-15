@@ -1,6 +1,6 @@
 // Capítulo O Observatório: a torre dos astrolábios, entre a Biblioteca e o Retorno. Quatro fases (o pátio, o salão
 // dos relógios, a galeria das cartas e a cúpula). Os inimigos são os novos: lanterna viva (fogo), relógio de cobre
-// e toupeira de sal (terra) e coruja do scriptorium (ar). Sem chefe: o desfecho é a cúpula, onde a Roo lê o céu.
+// e toupeira de sal (terra) e coruja do scriptorium (ar). Na cúpula, o chefe Ouroboros, a serpente do ciclo.
 import { CHEST_RICH } from '../chests';
 import type { ChapterSpec } from '../types';
 
@@ -32,14 +32,11 @@ export const OBSERVATORIO: ChapterSpec = {
       enemies: [{ kind: 'owl', start: 2, max: 2 }, { kind: 'mole', start: 2, max: 3, every: 10 }],
     },
     {
-      kind: 'crypt', name: 'A CÚPULA', place: 'Cúpula do Observatório',
-      story: 'A fenda da cúpula se abre para o céu inteiro. Tudo o que vigiou a torre está aqui: bronze, chama, penas e terra. Ao fim, a porta dá para o caminho de volta.',
-      chest: CHEST_RICH, tip: 'Aqui há de tudo. Leia os avisos no chão e use a poção que a criatura teme.',
-      time: 120000, blockChance: 0.45, door: true, theme: 'observatory', block: 'brick', track: 'alambique',
-      enemies: [
-        { kind: 'lantern', start: 1, max: 2, every: 12 }, { kind: 'clock', start: 1, max: 2, every: 14 },
-        { kind: 'mole', start: 1, max: 2, every: 12 }, { kind: 'owl', start: 1, max: 2 },
-      ],
+      kind: 'boss', boss: 'ouroboros', name: 'A CÚPULA', place: 'Cúpula do Observatório',
+      story: 'A fenda da cúpula se abre para o céu inteiro. No centro, uma serpente de escamas verdes morde a própria cauda e gira devagar, como o céu em volta dela.',
+      chest: CHEST_RICH, tip: 'Ouroboros: a fraqueza gira a cada ciclo. O brilho em volta dele mostra o elemento que o fere agora; o oposto ele devora.',
+      time: 120000, blockChance: 0.4, door: false, theme: 'observatory', block: 'brick', track: 'duelo',
+      enemies: [],
     },
   ],
 };

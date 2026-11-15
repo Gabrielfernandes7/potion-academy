@@ -93,3 +93,21 @@ O teste `tests/damage.test.ts` garante: todo personagem tem fraqueza, nenhuma po
 
 ## Velocidade (atualizado)
 - Casa base: 260 ms (antes 300). Cada ponto de velocidade (máximo 2) encurta a casa em 12% (`SPEED_STEP` em `game/movement.ts`): 260 → ~232 → ~210 ms. Antes, 55% por ponto deixava o primeiro power-up quase 35% mais rápido.
+
+## Como equilibrar com a Arena (2026-11-15)
+
+Dois instrumentos que não dependem de jogar a campanha inteira:
+
+1. **Treino com a transformação à escolha.** Na Arena, o seletor "Transformação para treinar" põe a Roo transformada no auge, sem fim (só as esperas das habilidades). Treine cada forma contra cada chefe e anote quantos golpes e quanta vida cada defesa economiza.
+2. **Duelo de chefes** (100 s, a Roo só assiste). Serve para comparar a força dos chefes entre si e achar um que está fora da curva.
+
+**Linha de base do duelo** (simulação de 100 s de jogo, cada lado em cada canto; Quimera com 28 de vida e a Onda de vapor de ar):
+
+| Chefe | Resultado |
+|---|---|
+| Belladona, Leão Verde | vencem quase todos |
+| Mandrágora | vence a Quimera; perde para o Leão e a Belladona |
+| Quimera | a mais frágil (resiste de 45 a 76 s), o que combina com o primeiro chefe |
+| Ouroboros | entra no duelo como o resto; a fraqueza dele gira (ver `bosses/ouroboros/rules.ts`) |
+
+Nenhum duelo chegou ao tempo: todos terminaram em nocaute. Se mudar vida, tempos ou dano de um chefe, rode a simulação de novo (`scripts/` não tem o roteiro; está em `task.md`, "Como testar por script").

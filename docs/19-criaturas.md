@@ -1,6 +1,6 @@
 # Criaturas: o que há e o que propomos (proposta)
 
-Status: **quatro criaturas já estão no jogo** (lanterna viva, relógio de cobre, toupeira de sal e coruja do scriptorium, de 2026-11-15; ver a seção 7). As outras seguem em proposta. O jogo hoje tem três inimigos comuns e quatro chefes.
+Status: **as oito criaturas propostas estão no jogo** (lanterna viva, relógio de cobre, toupeira de sal, coruja do scriptorium, gosma de mercúrio, sentinela de cera, ratinho do celeiro e salamandra do caldeirão; ver as seções 7 e 8). O jogo hoje tem três inimigos comuns e quatro chefes.
 
 ## 1. O que já existe
 
@@ -116,3 +116,16 @@ Cobertura de elementos depois disso: fogo (lanterna, salamandra), água (sapo, g
 | **Coruja do scriptorium** | `enemy_owl` | voa por cima de paredes; a cada 6 s marca a casa da Roo com um círculo e mergulha 1 s depois | terra / — | Scriptorium, Galeria, Cúpula |
 
 Regras em `game/entities/enemies/enemyRules.ts` (`patrolDir`, `moleSpot`, constantes), o jogo em `EnemySystem.ts`, os sprites em `textures/enemiesNew.ts`. Ficam para depois: gosma de mercúrio, sentinela de cera, ratinho do celeiro e salamandra.
+
+**Acabamento (2026-11-15):** cada criatura tem dois quadros de vida (a chama balança, os ponteiros andam, a toupeira fareja, a coruja pisca) e sinais que contam o que vai acontecer: o relógio fecha os olhos e vira a chave de lado ao travar e os seus passos fazem tique (só de perto); a lanterna brilha no chão em volta; a toupeira deixa um monte que anda debaixo da terra até onde vai brotar; a coruja pia, arregala os olhos e faz uma sombra crescer no chão antes de mergulhar. Acertar o elemento certo mostra um aviso que ensina a regra (APAGADA, ENFERRUJOU, DESENTOCADA, DERRUBADA).
+
+## 8. As quatro últimas (2026-11-15)
+
+| Criatura | Sprite | Comportamento | Fraqueza / imune | Onde |
+|---|---|---|---|---|
+| **Gosma de mercúrio** | `enemy_slime` | escorre devagar; ao levar fogo e sobreviver, **se divide em duas** com a vida repartida (no máximo 6) | terra / água | A Névoa |
+| **Sentinela de cera** | `enemy_sentinel` | marcha em linha reta, devagar, e só vira ao bater; muita vida | fogo (derrete) / resiste à terra | Escadaria, Corredor e Antecâmara da Torre |
+| **Ratinho do celeiro** | `enemy_rat` | foge da Roo a 3 casas, vai ao item do chão mais próximo (menos gemas), leva, e some pela parede em 3,5 s; se for derrubado antes, **devolve o item**. Não machuca | fogo / — | A Ponte e Os Muros |
+| **Salamandra do caldeirão** | `enemy_salamander` | amiga: anda devagar e **devolve 4 de vida, uma vez por fase**, quando a Roo chega perto. Não machuca | água (a apaga) / fogo | O Chamado |
+
+A Torre deixou de ser só fantasmas. Regras puras em `enemyRules.ts` (`splitHp`, `stepToward`, `stepAway`, `nearestOf`, `stealable`), comportamento em `EnemySystem.ts`.

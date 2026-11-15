@@ -61,6 +61,16 @@ export const CAULDRON_LINES: string[] = [
 export const ROO = 'Roo';
 export const MESTRE = 'O mestre';
 
+export const OUROBOROS = 'O Ouroboros';
+
+export const OUROBOROS_CARDS: StoryCard[] = [
+  { speaker: OUROBOROS, text: 'Eu não guardo nada. Giro: o que acaba aqui começa de novo em outro lugar, e o que o mestre estudou também.' },
+  { speaker: OUROBOROS, text: 'Você aprendeu a ler o aviso e a sair do círculo. É o mais difícil: saber quando esperar a roda passar.' },
+  { speaker: ROO, text: 'A fenda da cúpula se abre sobre o céu inteiro. Procuro a estrela do caderno do mestre e não a encontro: ela se mudou, como tudo o que ele estudou.' },
+  { speaker: ROO, text: 'Fecho o caderno e desço, em direção ao mosteiro. O que acaba aqui começa de novo lá embaixo, na sopa e no pão.' },
+];
+
+
 export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
   1: [
     { speaker: ROO, text: 'Ao sair do laboratório, encontro no chão uma página rasgada. A letra é do mestre, a mesma das minhas lições.' },
@@ -117,10 +127,6 @@ export const PASSAGE_CARDS: Record<number, StoryCard[]> = {
   15: [
     { speaker: ROO, text: 'Na galeria, as estrelas estão desenhadas como manuscritos: cada constelação tem uma legenda numa letra que não decifro.' },
     { speaker: ROO, text: 'Uma coruja me observa do alto e não ataca quem apenas olha. Só avisa, num círculo, quem fica parado.' },
-  ],
-  16: [
-    { speaker: ROO, text: 'A fenda da cúpula se abre sobre o céu inteiro. Procuro a estrela do caderno do mestre e não a encontro: ela se mudou, como tudo o que ele estudou.' },
-    { speaker: ROO, text: 'Aprendi aqui a esperar o aviso e a sair do círculo. Fecho o caderno e desço, em direção ao mosteiro.' },
   ],
   17: [
     { speaker: ROO, text: 'Desço o vale com o frasco vazio. A estrada é a mesma da ida, mas agora sei o que o mestre temia.' },

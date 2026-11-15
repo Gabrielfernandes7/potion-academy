@@ -117,7 +117,7 @@ Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
 - **Torre da Belladona** como capítulo com só fantasmas e a Belladona de chefe; **Mandrágora** (chefe do jardim, 4/4 de O Retorno) e a classe-pai `BossBase`.
 - **Dano por elemento** (`game/entities/damage.ts`): todos os personagens têm barra de vida, fraqueza e resistência (`profiles.ts`); chefes em `game/entities/bosses/`.
 - **Reorganização:** `game/entities/` e `game/stages/` (capítulos em `chapters/`); registros (`bosses/defs.ts`, `forms/registry.ts`); `RooFormSystem` e `StoryDirector` fora da `MainScene`; páginas em `src/pages/`; testes de contrato (`tests/contracts/`); `npm run check` e `npm run smoke`. Guia em `docs/16-guia-de-extensao.md`.
-- **Roo:** habilidade de empurrar removida; **vida contínua** (24 pontos, fraca ao fogo, `game/entities/roo.ts`, barra na HUD); **Roo Fire** (T, 20 s em 4 degraus, bônus de 50% nas poções de fogo, Brasas, Labareda no X, Luz de chama na névoa); **Roo Aqua** (imune à água, Bolha de sabão que prende inimigos, sons novos); sprites por forma e estágio.
+- **Roo:** habilidade de empurrar removida; **vida contínua** (24 pontos, fraca ao fogo, `game/entities/roo.ts`, barra na HUD); **Roo Fire** (T, 20 s em 4 degraus, bônus de 50% nas poções de fogo, Brasas, Labareda no X, Luz de chama na névoa); **Roo Água** (imune à água, Bolha de sabão que prende inimigos, sons novos); sprites por forma e estágio.
 - **Manuscrito do Alquimista** no lugar do Diário (`/manuscrito.html`, estética do Voynich); Roo Fire, Leão Verde e depois as outras formas ganharam página.
 - **Leão Verde** (chefe) e **Arena de treino** (menu ARENA, todas as poções, vencer abre a página no Manuscrito).
 - **História aplicada ao jogo:** carta, fases, passagens, falas da Belladona, confissão do Anselmo; HUD refeita (ícones, sem legendas); blocos próprios por fase (12 estilos + livros); **cruzes removidas** de blocos e fichas (regra permanente em `CLAUDE.md`); verificação de celular em 360, 390, 844 deitado e tablet.
@@ -164,4 +164,36 @@ Sessão atual (2026-11-10, parte 3): **CONCLUÍDO**
 - **Raiz com destino à escolha:** C abre uma mira (setas movem o cursor dentro de 4 passos, C confirma, X ou V cancelam).
 - **Contraste no jardim:** os textos flutuantes (+1 FRASCO, dano, DEFENDIDO) ganharam contorno escuro.
 - **Verificado:** `npm run check` (389 testes e build) e, num navegador de teste, comportamentos dos 4 inimigos, defesa das 4 formas, empurrão do círculo, mira da Raiz, textos do jardim e o mapa do Observatório.
+
+
+## Rodada de 2026-11-15, parte 4
+
+- **Inimigos novos com mais capricho:** dois quadros de vida cada (a chama balança, os ponteiros andam, a toupeira fareja, a coruja pisca), quadros de estado (relógio dando corda na pausa, coruja mirando), brilho da lanterna no chão, rastro da toupeira debaixo da terra, sombra da coruja crescendo, sons `tick` e `hoot`, e avisos que ensinam a regra ao acertar o elemento certo.
+- **Arena com transformação à escolha:** seletor na janela da Arena; a Roo luta transformada no auge, sem fim (`RooForm.pin`, `StageData.form`); recomeçar mantém a forma.
+- **Bolha protetora da água cura 1 de vida a cada 0,5 s** (`bubbleHealTick`).
+
+## Rodada de 2026-11-15, parte 5: as pendências de `task.md` (movidas de lá)
+
+**UI (tabuleta, latão, pergaminho e luz de vela, aconchegante):** tokens quentes, fundo com luz de vela e poeira, moldura de madeira com fio de latão em volta do jogo, painéis em madeira escura com rebites e divisor de losango, botões de placa de latão (primário) e de madeira (secundário), chama de vela nos botões MÚSICA e EFEITOS e selo de cera no "?", carta, diálogos e ajuda em pergaminho com tinta, frases de ambiente nas telas de pausa e fim (`FLAVOR_*` em `ui/overlays.ts`), controles de toque em madeira. A **ajuda foi reescrita**: estava descrevendo 4 fases e a Belladona como fase 3; agora cobre as 20 fases, as quatro formas (X, C e V), as criaturas e as dicas. Um defeito meu no meio do caminho (um `.big-btn` pego pelo seletor errado apagou o CSS do chip e da Sala de Música) foi achado numa captura e corrigido; conferi que nenhum seletor se perdeu.
+
+**Decisões tomadas com bom gosto (registradas em `docs/06-decisoes.md`):**
+- Muro de sal **barra as explosões** (as da Roo e as dos chefes).
+- Fogo e Água ganharam a **segunda habilidade (C)**: Onda de brasas e Poça (`forms/fire.ts` e `water.ts`, testes em `tests/forms`).
+- Lições pelas **operações** da alquimia; o nome **Roo Água** substituiu "Roo Aqua" em todo o código, docs e testes.
+- **Boticário e Ato II ampliado:** adiados de propósito para a versão 2.
+- **Licença e endereço final:** seguem com o autor (escolha jurídica e de hospedagem); a 404 e a 500 ficaram documentadas em `docs/20-publicar.md`.
+
+**Jogo:**
+- **Ouroboros**, chefe do Observatório (`bosses/ouroboros/`, `textures/ouroboros.ts`): a fraqueza gira (fogo, terra, água, ar) com um brilho que mostra o elemento da vez, o oposto ele devora; anéis que se abrem, mordida em cruz e o Ciclo na fúria. A Cúpula agora é fase de chefe; despedida `OUROBOROS_CARDS`, página no Manuscrito, entrada na Arena e no duelo.
+- **Os quatro inimigos que faltavam:** gosma de mercúrio (o fogo a divide), sentinela de cera (Torre), ratinho do celeiro (rouba itens, menos gemas, e devolve se for derrubado) e salamandra amiga (cura 4 uma vez por fase). `harmless`, `createEnemy`, `removePickup`. Os oito inimigos novos ficaram com sprites em `textures/enemiesNew.ts` e páginas no Manuscrito. A Torre deixou de ser só fantasmas.
+- **Quimera rebalanceada:** 28 de vida e a Onda da fúria é de ar (os ataques todos de água não feriam três dos outros chefes e curavam a Mandrágora). Em duelo, ela resiste de 45 a 76 s (antes 18 a 47).
+- **Roteiro:** página do mestre no Manuscrito (silhueta com lanterna, `textures/mestre.ts`), a **bolha iridescente no último quadro** da `EndScene`, interlúdios da Biblioteca e do Observatório em `history.html` e em `docs/12-historia.md`, tabela "Onde entra no jogo" atualizada.
+- **Roo de cachorro:** as orelhas altas e retas liam como coelho; agora são caídas.
+
+**Técnica:**
+- **Texturas das formas em segundo plano:** o menu abre logo (cerca de 0,7 s contra 0,95 s) e as 1536 texturas são geradas em pedaços; `RooFormSystem` garante a forma na hora de transformar.
+- **Catálogo:** as oito fotos de `docs/img/sprites/` e `sprites.png` foram refeitas com os sprites novos (cada seção tem `data-group`, então o recorte é só `section[data-group="..."]`).
+- **Manuscrito no celular:** o sprite não passa mais do medalhão (a legenda "Visto em" ficava sob ele).
+- **Descartadas por falta de descrição ou por ficarem sem sentido:** as "teclas U e I" (pendência antiga sem texto), o "gasto que se repete" (era da loja, que saiu), a "estimativa de economia de 80 POÇÃO" (já tinha saído de `docs/10-equilibrio.md`), "capítulos selados" (não há mais nenhum) e "o chefe do Observatório" (é o Ouroboros).
+- **Verificado:** `npm run check` (416 testes e build) e, num navegador de teste, as telas da UI, o Ouroboros, os quatro comportamentos novos (cura da salamandra, divisão da gosma, roubo do ratinho e marcha da sentinela), a Roo de orelhas caídas e o catálogo.
 

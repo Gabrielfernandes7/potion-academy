@@ -6,7 +6,8 @@ import {
   EmberField, FORMS, FORM_COOLDOWN_MS, FORM_IDS, FORM_MS, FORM_STAGES, RooForm, boostFactor, boostedDamage,
   bubbleAt, bubblePath, emberDamage, emberMs, embersHurt, fireLight, flameTiles, formStage, formView, profileOf, trapMs,
   BUBBLE_STEP_MS, IRIDESCENT, iridescent, formForElement,
-  GUARD_COOLDOWN_MS, GUARD_MS, GUARD_REDUCE, RING_PUSH_STEPS, aimMove, guardedDamage, ringNeighbors, rootCandidates,
+  PUDDLE_SLOW, PuddleField, novaTiles, puddleMs, puddleTiles,
+  BUBBLE_HEAL, BUBBLE_HEAL_EVERY_MS, bubbleHealTick, GUARD_COOLDOWN_MS, GUARD_MS, GUARD_REDUCE, RING_PUSH_STEPS, aimMove, guardedDamage, ringNeighbors, rootCandidates,
   AIR_SIGHT_RADIUS, LEAP_MS, ROOT_MS, SaltWallField, airSeesThroughFog, airWalkFactor, gustStunMs, leapTarget, rootBurstTiles, rootTarget, earthWalkFactor, gustPush, gustTarget, gustTiles, saltWallMs, saltWallTiles,
 } from '../../src/game/forms';
 
@@ -113,7 +114,7 @@ describe('Roo Fire', () => {
   });
 });
 
-describe('Roo Aqua', () => {
+describe('Roo Água', () => {
   it('forma de água: IMUNE à água, mas segue fraca ao fogo', () => {
     expect(hit('water', 'water', 4)).toBe(0);
     expect(hit('water', 'water', 3)).toBe(0);
@@ -318,10 +319,9 @@ describe('Roo Terra: Raiz', () => {
     expect(f.abilityReady).toBe(true); // a primeira segue pronta
     f.tick(5000);
     expect(f.ability2Ready).toBe(true);
-    const fire = new RooForm();
-    fire.start('fire');
-    expect(fire.ability2Ready).toBe(false);
-    expect(fire.useAbility2()).toBe(false);
+    const none = new RooForm();
+    expect(none.ability2Ready).toBe(false); // sem forma, não há segunda habilidade
+    expect(none.useAbility2()).toBe(false);
   });
 });
 
@@ -359,11 +359,11 @@ describe('Roo Ar', () => {
     expect(leapTarget({ x: 3, y: 2 }, { x: 1, y: 0 }, 3, fly, open)).toBeNull();
     expect(LEAP_MS).toBeLessThan(500);
   });
-  it('só o Ar e a Terra têm segunda habilidade (tecla C)', () => {
+  it('toda forma tem uma segunda habilidade (tecla C)', () => {
     expect(FORMS.air.ability2?.id).toBe('leap');
     expect(FORMS.earth.ability2?.id).toBe('root');
-    expect(FORMS.fire.ability2).toBeUndefined();
-    expect(FORMS.water.ability2).toBeUndefined();
+    expect(FORMS.fire.ability2?.id).toBe('nova');
+    expect(FORMS.water.ability2?.id).toBe('puddle');
   });
   it('o sopro: linha de 4 casas parando na primeira ocupada', () => {
     expect(gustTiles({ x: 1, y: 3 }, { x: 1, y: 0 }, 4, open)).toHaveLength(4);
@@ -453,5 +453,84 @@ describe('Raiz: a jogadora escolhe onde brotar', () => {
     expect(c).toEqual({ x: 5, y: 4 });
     expect(aimMove({ x: 8, y: 4 }, { x: 1, y: 0 }, { x: 4, y: 4 }, 4, ok)).toEqual({ x: 8, y: 4 }); // além do alcance
     expect(aimMove({ x: 0, y: 4 }, { x: -1, y: 0 }, { x: 2, y: 4 }, 4, ok)).toEqual({ x: 0, y: 4 }); // fora da grade
+  });
+});
+
+
+describe('Bolha protetora: cura', () => {
+  it('cura 1 de vida a cada 0,5 s', () => {
+    expect(BUBBLE_HEAL).toBe(1);
+    expect(BUBBLE_HEAL_EVERY_MS).toBe(500);
+    expect(bubbleHealTick(0, 499)).toEqual({ accMs: 499, heals: 0 });
+    expect(bubbleHealTick(499, 1)).toEqual({ accMs: 0, heals: 1 });
+    expect(bubbleHealTick(0, 1200)).toEqual({ accMs: 200, heals: 2 });
+  });
+  it('nos 3 s da defesa são 6 curas, sem perder resto entre quadros', () => {
+    let acc = 0;
+    let total = 0;
+    for (let t = 0; t < GUARD_MS; t += 16) {
+      const r = bubbleHealTick(acc, 16);
+      acc = r.accMs;
+      total += r.heals;
+    }
+    expect(total).toBeGreaterThanOrEqual(5);
+    expect(total).toBeLessThanOrEqual(6);
+  });
+});
+
+describe('forma fixa na Arena', () => {
+  it('fixada, não esfria, não gasta tempo e as habilidades seguem com espera', () => {
+    const f = new RooForm();
+    f.pin('earth');
+    expect(f.isPinned).toBe(true);
+    expect(f.active).toBe(true);
+    expect(f.stage).toBe(4);
+    f.tick(60000);
+    expect(f.active).toBe(true);
+    expect(f.remainingMs).toBe(FORM_MS);
+    expect(f.useAbility()).toBe(true);
+    expect(f.remainingMs).toBe(FORM_MS); // não gasta
+    expect(f.abilityReady).toBe(false); // mas tem espera
+    expect(f.useDefense()?.id).toBe('salt-ring');
+    expect(f.formElement).toBe('earth');
+  });
+});
+
+
+describe('Roo Fire: Onda de brasas', () => {
+  it('atinge o losango de 2 casas em volta, sem a casa da Roo, só as livres', () => {
+    const tiles = novaTiles({ x: 4, y: 4 }, 2, open);
+    expect(tiles).toHaveLength(12);
+    expect(tiles).not.toContainEqual({ x: 4, y: 4 });
+    for (const t of tiles) expect(Math.abs(t.x - 4) + Math.abs(t.y - 4)).toBeLessThanOrEqual(2);
+    expect(novaTiles({ x: 4, y: 4 }, 2, (x, y) => open(x, y) && x !== 5)).not.toContainEqual({ x: 5, y: 4 });
+    expect(novaTiles({ x: 0, y: 0 }, 2, open)).toHaveLength(5);
+  });
+});
+
+describe('Roo Água: Poça', () => {
+  it('é uma área de 3x3 com o centro duas casas à frente', () => {
+    const tiles = puddleTiles({ x: 1, y: 4 }, { x: 1, y: 0 }, 2, open);
+    expect(tiles).toHaveLength(9);
+    expect(tiles).toContainEqual({ x: 3, y: 4 });
+    expect(tiles).toContainEqual({ x: 4, y: 5 });
+  });
+  it('se o centro está ocupado, recua uma casa; sem nenhuma, nada', () => {
+    const noTwo = (x: number, y: number): boolean => open(x, y) && x !== 3;
+    const tiles = puddleTiles({ x: 1, y: 4 }, { x: 1, y: 0 }, 2, noTwo);
+    expect(tiles).toContainEqual({ x: 2, y: 4 });
+    expect(puddleTiles({ x: 1, y: 4 }, { x: 1, y: 0 }, 2, () => false)).toEqual([]);
+    expect(puddleTiles({ x: 1, y: 4 }, { x: 0, y: 0 }, 2, open)).toEqual([]);
+  });
+  it('dura 4 s no auge e menos ao esfriar; o inimigo dentro anda a menos da metade', () => {
+    expect(puddleMs(4)).toBe(4000);
+    expect(puddleMs(1)).toBeLessThan(puddleMs(2));
+    expect(puddleMs(0)).toBe(0);
+    expect(PUDDLE_SLOW).toBeLessThan(0.5);
+    const f = new PuddleField();
+    f.spread([{ x: 2, y: 2 }], 0, 4);
+    expect(f.has(2, 2, 3999)).toBe(true);
+    expect(f.has(2, 2, 4000)).toBe(false);
+    expect(f.active(5000)).toEqual([]);
   });
 });

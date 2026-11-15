@@ -107,3 +107,72 @@ export function moleSpot(
 
 export const OWL_CYCLE_MS = 6000; // de tempos em tempos, a coruja marca a casa da Roo
 export const OWL_AIM_MS = 1000; // o círculo avisa por 1 s; quem sair da casa não é atingido
+
+// ---------- gosma de mercúrio ----------
+
+export const SLIME_MAX_TOTAL = 6; // no máximo, tantas gosmas ao mesmo tempo (senão o fogo as multiplica sem fim)
+
+/** Ao levar fogo, a gosma se divide: a vida que sobra é repartida em duas metades (a maior fica com a original). Null se não der. */
+export function splitHp(hp: number): { keep: number; spawn: number } | null {
+  if (hp < 2) return null;
+  return { keep: Math.ceil(hp / 2), spawn: Math.floor(hp / 2) };
+}
+
+// ---------- ratinho do celeiro ----------
+
+export const RAT_FLEE_DISTANCE = 3; // a Roo mais perto que isso (Manhattan) o faz fugir
+export const RAT_ESCAPE_MS = 3500; // com o item, some pela parede depois disso
+
+const manhattan = (a: { x: number; y: number }, b: { x: number; y: number }): number => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+
+/** O passo (um dos quatro sentidos) que mais aproxima `from` de `to`; null se nenhum chega mais perto. */
+export function stepToward(
+  from: { x: number; y: number }, to: { x: number; y: number }, canEnter: (x: number, y: number) => boolean,
+): Dir2 | null {
+  let best: Dir2 | null = null;
+  let bestD = manhattan(from, to);
+  for (const [dx, dy] of DIRS) {
+    const x = from.x + dx;
+    const y = from.y + dy;
+    if (!canEnter(x, y)) continue;
+    const d = manhattan({ x, y }, to);
+    if (d < bestD) { bestD = d; best = { x: dx, y: dy }; }
+  }
+  return best;
+}
+
+/** O passo que mais afasta `from` de `threat`; null se nenhum afasta (encurralado). */
+export function stepAway(
+  from: { x: number; y: number }, threat: { x: number; y: number }, canEnter: (x: number, y: number) => boolean,
+): Dir2 | null {
+  let best: Dir2 | null = null;
+  let bestD = manhattan(from, threat);
+  for (const [dx, dy] of DIRS) {
+    const x = from.x + dx;
+    const y = from.y + dy;
+    if (!canEnter(x, y)) continue;
+    const d = manhattan({ x, y }, threat);
+    if (d > bestD) { bestD = d; best = { x: dx, y: dy }; }
+  }
+  return best;
+}
+
+/** O alvo mais perto da lista (Manhattan), ou null se vazia. */
+export function nearestOf(from: { x: number; y: number }, targets: ReadonlyArray<{ x: number; y: number }>): { x: number; y: number } | null {
+  let best: { x: number; y: number } | null = null;
+  let bestD = Infinity;
+  for (const t of targets) {
+    const d = manhattan(from, t);
+    if (d < bestD) { bestD = d; best = t; }
+  }
+  return best;
+}
+
+/** O que o ratinho pode levar: tudo o que não é gema (gema some e a porta não abriria mais). */
+export function stealable(type: string): boolean {
+  return type !== 'gem';
+}
+
+// ---------- salamandra do caldeirão ----------
+
+export const SALAMANDER_HEAL = 4; // cura uma vez por fase, quando a Roo chega perto dela

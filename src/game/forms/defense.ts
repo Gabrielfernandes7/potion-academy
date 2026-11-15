@@ -33,3 +33,14 @@ export const WHIRL_PUSH_STEPS = 1;
 export function ringNeighbors(at: { x: number; y: number }): Array<{ x: number; y: number; dir: { x: number; y: number } }> {
   return [[0, -1], [0, 1], [-1, 0], [1, 0]].map(([dx, dy]) => ({ x: at.x + dx, y: at.y + dy, dir: { x: dx, y: dy } }));
 }
+
+// A Bolha protetora da água cura: 1 de vida a cada 0,5 s enquanto a bolha dura (até 6 em 3 s).
+export const BUBBLE_HEAL = 1;
+export const BUBBLE_HEAL_EVERY_MS = 500;
+
+/** Soma `deltaMs` ao relógio da cura: devolve o que sobra do relógio e quantas curas aconteceram neste intervalo. */
+export function bubbleHealTick(accMs: number, deltaMs: number): { accMs: number; heals: number } {
+  const total = accMs + deltaMs;
+  const heals = Math.floor(total / BUBBLE_HEAL_EVERY_MS);
+  return { accMs: total - heals * BUBBLE_HEAL_EVERY_MS, heals };
+}

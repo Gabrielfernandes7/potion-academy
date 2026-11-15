@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0d1714">
+<meta name="theme-color" content="#150f0b">
 <title>Potion Academy</title>
 <meta name="description" content="Potion Academy: um jogo de alquimia em navegador. Lance poções de quatro elementos, quebre caixotes e encare a Belladona.">
 <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg">
@@ -93,6 +93,17 @@
   <div class="panel arena">
     <h2 id="arena-title">ARENA DE TREINO</h2>
     <p class="letter-note">Enfrente os chefes quando quiser. Todas as poções estão liberadas, o tempo é de sobra e nada aqui conta para a jornada.</p>
+    <div class="arena-form" id="arena-form">
+      <label for="arena-form-select"><b>Transformação para treinar</b></label>
+      <select id="arena-form-select" aria-label="Transformação da Roo no treino">
+        <option value="">Nenhuma (a Roo normal; T transforma)</option>
+        <option value="fire">Roo Fire: Labareda, Escudo de brasas</option>
+        <option value="water">Roo Água: Bolha de sabão, Bolha protetora</option>
+        <option value="earth">Roo Terra: Muro de sal, Raiz, Círculo de sal</option>
+        <option value="air">Roo Ar: Sopro, Salto de vento, Redemoinho</option>
+      </select>
+      <p class="arena-tip">A Roo luta transformada no auge, sem tempo para acabar. Vale só para o treino contra um chefe, não para o duelo.</p>
+    </div>
     <div class="arena-duel" id="arena-duel">
       <h3>DUELO DE CHEFES</h3>
       <p class="arena-tip">Dois chefes lutam entre si, em 100 s, e você só assiste. Perde quem cair primeiro; se ninguém cair, perde quem tiver menos vida. Serve para testar o equilíbrio.</p>
@@ -112,7 +123,7 @@
 
 <!-- Carta de frei Anselmo (antes da primeira fase de uma partida nova) -->
 <div id="letter-overlay" class="overlay overlay--letter" role="dialog" aria-labelledby="letter-title">
-  <div class="panel letter">
+  <div class="panel letter paper">
     <img id="letter-portrait" class="portrait" alt="Frei Anselmo" width="160" height="200" hidden>
     <h2 id="letter-title">A CARTA</h2>
     <p class="letter-text">Roo, filho do Caldeirão: preciso que busques o que eu não posso mais buscar. Há três anos o vale colhe pouco, e o pão custa mais do que o povo tem. As escrituras que guardamos foram <b>levadas</b> por Belladona, discípula do teu mestre. Não foi por maldade: ela acredita que, lidas como receita, podem virar pão para todos. Não te peço que creias no que eu creio. Peço que as <b>tragas de volta</b> e que, ao encontrá-las, não as trates como pedra.</p>
@@ -126,7 +137,7 @@
 
 <!-- Diálogo (cartões de conversa, ex.: a confissão de frei Anselmo) -->
 <div id="dialogue-overlay" class="overlay overlay--letter" role="dialog" aria-labelledby="dialogue-speaker">
-  <div class="panel dialogue">
+  <div class="panel dialogue paper">
     <img id="dialogue-portrait" class="portrait" alt="" width="160" height="200" hidden>
     <h2 id="dialogue-speaker"></h2>
     <p class="letter-text" id="dialogue-text"></p>
@@ -139,14 +150,14 @@
 
 <!-- Como jogar (botão "?") -->
 <div id="help-overlay" class="overlay overlay--help" role="dialog" aria-labelledby="help-title">
-  <div class="panel help">
+  <div class="panel help paper">
     <h2 id="help-title">COMO JOGAR</h2>
 
     <section>
       <h3>Objetivo</h3>
-      <p><b>Fases 1 e 2 (laboratório e salão dos fantasmas):</b> destrua caixotes com poções, pegue as <b>3 gemas</b> e chegue à porta antes do tempo acabar.</p>
-      <p><b>Fase 3:</b> enfrente a bruxa <b>Belladona</b>. Acerte-a com explosões até a vida dela acabar.</p>
-      <p><b>Fase 4 (jardim):</b> pegue as 3 gemas e chegue ao portão. Cuidado com as <b>flores do mal</b>.</p>
+      <p><b>A jornada tem 20 fases em cinco lugares:</b> o Vale, a Torre, a Biblioteca, o Observatório e o Retorno ao mosteiro. Em cada fase comum, destrua caixotes com poções, pegue as <b>3 gemas</b> e chegue à porta antes do tempo acabar.</p>
+      <p><b>Nas fases de chefe</b> não há porta: vença o chefe. Todo golpe dele avisa no chão antes de cair; leia o aviso e saia da casa.</p>
+      <p>Se a vida acabar, a Roo recomeça a fase em que perdeu.</p>
     </section>
 
     <section>
@@ -156,10 +167,10 @@
         <tbody>
           <tr><td>Andar</td><td><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></td><td>botões de direção</td></tr>
           <tr><td>Colocar poção</td><td><kbd>Espaço</kbd></td><td>POÇÃO</td></tr>
-          <tr><td>Transformar na forma da poção que você segura (20 s): fogo vira Roo Fire, água vira Roo Água, terra vira Roo Terra e ar vira Roo Ar. Cada forma é aprendida na jornada, e só a poção dela funciona enquanto dura.</td><td><kbd>T</kbd></td><td>TRANSFORMAR</td></tr>
-          <tr><td>Habilidade da forma: Labareda, Bolha de sabão, Muro de sal ou Sopro</td><td><kbd>X</kbd></td><td>HABILIDADE</td></tr>
-          <tr><td>Defesa da forma (3 s, corta o dano pela metade): Escudo de brasas, Bolha protetora, Círculo de sal ou Redemoinho. Aperte de novo para desfazer</td><td><kbd>V</kbd></td><td>DEFESA</td></tr>
-          <tr><td>Segunda habilidade (só Roo Terra e Roo Ar): Raiz, em que a Roo afunda e nasce até 4 casas à frente, ou Salto de vento</td><td><kbd>C</kbd></td><td>HABILIDADE 2</td></tr>
+          <tr><td>Transformar na forma da poção que você segura (20 s). Só a poção da forma funciona enquanto dura</td><td><kbd>T</kbd></td><td>TRANSFORMAR</td></tr>
+          <tr><td>Habilidade da forma</td><td><kbd>X</kbd></td><td>HABILIDADE</td></tr>
+          <tr><td>Segunda habilidade da forma. Na Raiz, as setas escolhem onde brotar e <kbd>C</kbd> confirma</td><td><kbd>C</kbd></td><td>HABILIDADE 2</td></tr>
+          <tr><td>Defesa da forma (3 s, corta o dano pela metade). Aperte de novo para desfazer</td><td><kbd>V</kbd></td><td>DEFESA</td></tr>
           <tr><td>Explodir poção de ar</td><td><kbd>D</kbd></td><td>DETONAR</td></tr>
           <tr><td>Escolher frasco</td><td><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd></td><td>toque no seletor</td></tr>
           <tr><td>Pausar</td><td><kbd>Enter</kbd></td><td>PAUSA</td></tr>
@@ -172,12 +183,23 @@
     <section>
       <h3>Os 4 frascos</h3>
       <ul class="flasks">
-        <li style="--c:#ff6b6b"><b>1 · Fogo</b> rápida e confiável.</li>
-        <li style="--c:#74b9ff"><b>2 · Água</b> alcance maior, fusível mais lento.</li>
-        <li style="--c:#81c784"><b>3 · Terra</b> atravessa caixotes.</li>
-        <li style="--c:#c9d6df"><b>4 · Ar</b> só explode quando você aperta <kbd>D</kbd>.</li>
+        <li style="--c:#b5402c"><b>1 · Fogo</b> rápida e confiável.</li>
+        <li style="--c:#2f6fa8"><b>2 · Água</b> alcance maior, fusível mais lento.</li>
+        <li style="--c:#4d7a2e"><b>3 · Terra</b> atravessa caixotes.</li>
+        <li style="--c:#5d6b78"><b>4 · Ar</b> só explode quando você aperta <kbd>D</kbd>.</li>
       </ul>
-      <p class="note">Água, Terra e Ar são aprendidas no caminho, não compradas. O Caldeirão mostra o que já é da Roo.</p>
+      <p class="note">Água, Terra e Ar são aprendidas no caminho, não compradas.</p>
+    </section>
+
+    <section>
+      <h3>As quatro formas da Roo</h3>
+      <p class="note">Cada forma é uma lição do mestre, aprendida no caminho. Segure a poção do elemento e aperte <kbd>T</kbd>.</p>
+      <div class="formrow">
+        <b style="--c:#b5402c">Roo Fire</b><span><b>Labareda</b> (X), <b>Onda de brasas</b> (C), <b>Escudo de brasas</b> (V).</span>
+        <b style="--c:#2f6fa8">Roo Água</b><span><b>Bolha de sabão</b> (X) prende um inimigo, <b>Poça</b> (C) o atrasa, <b>Bolha protetora</b> (V) cura 1 de vida a cada 0,5 s.</span>
+        <b style="--c:#4d7a2e">Roo Terra</b><span><b>Muro de sal</b> (X), <b>Raiz</b> (C) afunda e nasce onde você escolher, <b>Círculo de sal</b> (V) empurra o que está em volta. Anda mais devagar.</span>
+        <b style="--c:#5d6b78">Roo Ar</b><span><b>Sopro</b> (X) empurra inimigos e poções, <b>Salto de vento</b> (C), <b>Redemoinho</b> (V). Anda mais rápido e vê através da névoa.</span>
+      </div>
     </section>
 
     <section>
@@ -190,13 +212,22 @@
     </section>
 
     <section>
+      <h3>Criaturas</h3>
+      <p class="note">Cada criatura teme um elemento. O Manuscrito do Alquimista (no menu) guarda uma página de cada uma.</p>
+      <ul>
+        <li><b>Sapo, fantasma, flor do mal:</b> o sapo cai com terra; o fantasma atravessa paredes e teme a água; a flor chicoteia em volta depois de um aviso rosa.</li>
+        <li><b>Lanterna viva e sentinela de cera:</b> andam em linha reta. A água apaga a lanterna; o fogo derrete a sentinela.</li>
+        <li><b>Relógio de cobre:</b> para por 2 s a cada volta. <b>Toupeira de sal:</b> um monte de terra avisa onde ela vai brotar. <b>Coruja:</b> um círculo avisa o mergulho.</li>
+        <li><b>Gosma de mercúrio:</b> o fogo a divide em duas; a terra a prende. <b>Ratinho:</b> rouba o que está no chão (menos gemas) e foge. <b>Salamandra:</b> é amiga e aquece a Roo.</li>
+      </ul>
+    </section>
+
+    <section>
       <h3>Dicas</h3>
       <ul>
         <li>Fique longe da cruz da explosão: a sua própria poção também machuca.</li>
         <li>Caixotes e muralhas bloqueiam a explosão. Esconda-se atrás deles.</li>
-        <li>Contra a Belladona, o <b>quadrado colorido</b> no chão mostra onde a poção vai cair. Saia de lá!</li>
-        <li><b>Fantasmas</b> atravessam paredes e caixotes, mas são lentos. Dentro de uma muralha, a explosão não os alcança.</li>
-        <li><b>Flores do mal</b> não se mexem, mas chicoteiam as casas ao redor depois de um aviso rosa. São imunes à Água.</li>
+        <li>Nos chefes, o <b>quadrado colorido</b> no chão mostra onde o golpe vai cair. Saia de lá!</li>
         <li>Parada por alguns segundos, a Roo cochila.</li>
       </ul>
     </section>
@@ -210,6 +241,7 @@
 <div id="pause-overlay" class="overlay overlay--pause" role="dialog" aria-labelledby="pause-title">
   <div class="panel">
     <h2 id="pause-title">PAUSADO</h2>
+    <p class="flavor">O caldeirão esfria devagar. A poção espera.</p>
     <p class="hint">Pressione <kbd>Enter</kbd> para retomar</p>
     <div class="btn-row">
       <button class="big-btn" id="resume-btn" type="button">RETOMAR</button>
@@ -222,6 +254,7 @@
 <div id="gameover-overlay" class="overlay" role="dialog" aria-labelledby="go-title">
   <div class="panel">
     <h2 id="go-title">GAME OVER</h2>
+    <p class="flavor" id="go-flavor"></p>
     <p class="letter-note" id="go-story" hidden>Roo voltou ao Caldeirão com o frasco vazio. O que você faria com ele?</p>
     <div class="result-grid" id="go-stats"></div>
     <p class="hint">Pressione <kbd>R</kbd> para jogar de novo</p>

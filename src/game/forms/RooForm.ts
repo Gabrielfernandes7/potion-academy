@@ -13,6 +13,7 @@ export class RooForm {
   private abilityCd = 0;
   private ability2Cd = 0;
   private defenseCd = 0;
+  private pinned = false; // a Arena pode fixar uma forma: não esfria, não gasta tempo (para testar o equilíbrio)
 
   /** A forma ativa (ou null). */
   get id(): FormId | null { return this.kind; }
@@ -41,6 +42,19 @@ export class RooForm {
     this.defenseCd = 0;
     return true;
   }
+
+  /** A Arena fixa a forma no auge, sem fim: o tempo não passa e as habilidades não o gastam. */
+  pin(id: FormId): void {
+    this.kind = id;
+    this.remaining = FORM_MS;
+    this.cooldown = 0;
+    this.abilityCd = 0;
+    this.ability2Cd = 0;
+    this.defenseCd = 0;
+    this.pinned = true;
+  }
+
+  get isPinned(): boolean { return this.pinned; }
 
   /** Habilidade da forma: só transformada e fora da espera. Gasta parte da transformação (pode encerrá-la). */
   useAbility(): boolean {
@@ -71,7 +85,7 @@ export class RooForm {
 
   /** Gasta tempo da transformação; se zerar, ela acaba e começa a espera. */
   spend(ms: number): void {
-    if (this.remaining <= 0) return;
+    if (this.remaining <= 0 || this.pinned) return;
     this.remaining = Math.max(0, this.remaining - ms);
     if (this.remaining === 0) this.cooldown = FORM_COOLDOWN_MS;
   }

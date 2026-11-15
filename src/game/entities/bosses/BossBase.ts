@@ -211,7 +211,8 @@ export abstract class BossBase {
     this.scene.time.delayedCall(1000, () => e.destroy());
   }
 
-  protected isOpen = (x: number, y: number): boolean => this.scene.getTile(x, y) === EMPTY;
+  // casa aberta para um golpe: chão vazio e sem o muro de sal da Roo Terra (que barra os golpes, como uma parede)
+  protected isOpen = (x: number, y: number): boolean => this.scene.getTile(x, y) === EMPTY && !this.scene.forms?.isSaltWall(x, y);
 
   // ---------- movimento ----------
 

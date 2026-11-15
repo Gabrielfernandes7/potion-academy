@@ -6,7 +6,7 @@ import { BLOCK_TEXTURE } from '../src/game/stages/blockStyles';
 import { LAST_STAGE, STAGES } from '../src/game/stages/index';
 import type { BossId } from '../src/game/stages/types';
 
-const ALL_BOSSES: BossId[] = ['belladonna', 'mandrake', 'chimera', 'lion'];
+const ALL_BOSSES: BossId[] = ['belladonna', 'mandrake', 'chimera', 'lion', 'ouroboros'];
 
 describe('Arena de treino', () => {
   it('tem todos os chefes do jogo, inclusive o Leão Verde, sem repetir', () => {

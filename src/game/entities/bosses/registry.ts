@@ -7,12 +7,14 @@ import { BelladonnaController } from './belladonna/BelladonnaController';
 import { ChimeraController } from './chimera/ChimeraController';
 import { LionController } from './lion/LionController';
 import { MandrakeController } from './mandrake/MandrakeController';
+import { OuroborosController } from './ouroboros/OuroborosController';
 
 const FACTORIES: Record<BossId, (scene: MainScene) => BossBase> = {
   belladonna: s => new BelladonnaController(s),
   mandrake: s => new MandrakeController(s),
   chimera: s => new ChimeraController(s),
   lion: s => new LionController(s),
+  ouroboros: s => new OuroborosController(s),
 };
 
 export function createBoss(id: BossId, scene: MainScene): BossBase {
