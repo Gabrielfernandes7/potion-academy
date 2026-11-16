@@ -9,29 +9,41 @@ type Graphics = Phaser.GameObjects.Graphics;
 const OUT = 0x1c1410; // o contorno de todos
 
 export function drawNewEnemies(make: MakeFn): void {
-  // Lanterna viva: um espírito de chama dentro de uma lamparina de latão, com olhos e uma chama no topo.
+  // Lanterna viva: uma lamparina de latão pendurada pela argola, com um espírito de chama de rosto vivo dentro do vidro.
+  // Tudo cabe nos 40 px (a chama que balança é a de dentro do vidro; no segundo quadro ela inclina e pisca).
   const lantern = (g: Graphics, T: number, v: 0 | 1 | 2 = 0): void => {
     const c = T / 2;
-    g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 4, 22, 5);
-    // argola de segurar e a chama
-    g.lineStyle(2, OUT); g.beginPath(); g.arc(c, 7, 4, Math.PI, 0, false); g.strokePath();
-    g.fillStyle(OUT); g.fillTriangle(c, 0, c - 6, 13, c + 6, 13);
-    const lean = v === 1 ? 2.5 : 0; // a chama balança para um lado e para o outro
-    g.fillStyle(0xd6452f); g.fillTriangle(c + lean, 1, c - 5, 13, c + 5, 13);
-    g.fillStyle(0xffa94d); g.fillTriangle(c + lean, 4, c - 3, 13, c + 3, 13);
-    g.fillStyle(0xfff0b0); g.fillTriangle(c + lean * 0.6, 8, c - 1.5, 13, c + 1.5, 13);
-    // topo e base de latão
-    g.fillStyle(OUT); g.fillRect(c - 12, 12, 24, 5); g.fillRect(c - 12, T - 9, 24, 6);
-    g.fillStyle(0xb58a2f); g.fillRect(c - 11, 13, 22, 3); g.fillRect(c - 11, T - 8, 22, 4);
-    // vidro com a luz
-    g.fillStyle(OUT); g.fillRect(c - 10, 16, 20, 15);
-    g.fillStyle(0xffd27a); g.fillRect(c - 9, 17, 18, 13);
-    g.fillStyle(0xfff3c4); g.fillEllipse(c, 24, 11, 10);
-    // barras do vidro
-    g.fillStyle(0xb58a2f); g.fillRect(c - 1, 17, 2, 13);
-    // olhos
-    g.fillStyle(OUT); g.fillEllipse(c - 4, 23, 3.4, v === 1 ? 2 : 4.6); g.fillEllipse(c + 4, 23, 3.4, v === 1 ? 2 : 4.6);
-    if (v !== 1) { g.fillStyle(0xffffff); g.fillCircle(c - 4.4, 21.8, 0.8); g.fillCircle(c + 3.6, 21.8, 0.8); }
+    g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 3, 24, 5);
+    // argola de segurar
+    g.lineStyle(3, OUT); g.beginPath(); g.arc(c, 7, 5, Math.PI, 0, false); g.strokePath();
+    g.lineStyle(1.4, 0xd8a93c); g.beginPath(); g.arc(c, 7, 5, Math.PI, 0, false); g.strokePath();
+    // tampa de latão (trapézio) com a chaminé
+    g.fillStyle(OUT); g.fillRoundedRect(c - 6, 6, 12, 7, 2); g.fillRoundedRect(c - 13, 11, 26, 6, 2);
+    g.fillStyle(0xb58a2f); g.fillRect(c - 5, 7, 10, 5); g.fillRect(c - 12, 12, 24, 4);
+    g.fillStyle(0xe6c15a); g.fillRect(c - 12, 12, 24, 1.4); g.fillRect(c - 4, 7, 8, 1.2);
+    g.fillStyle(0x7d5c1d); g.fillRect(c + 6, 13.4, 6, 2.6);
+    // vidro, com o brilho quente de dentro
+    g.fillStyle(OUT); g.fillRect(c - 11, 16, 22, 16);
+    g.fillStyle(0x5a3a22); g.fillRect(c - 10, 17, 20, 14);
+    g.fillStyle(0xe58a3a, 0.55); g.fillEllipse(c, 24, 20, 18);
+    // o espírito: gota de chama com ponta, miolo claro e rosto
+    const lean = v === 1 ? 2 : 0;
+    g.fillStyle(OUT); g.fillTriangle(c + lean, 11, c - 7, 26, c + 7, 26); g.fillEllipse(c, 24.5, 17, 14);
+    g.fillStyle(0xe8501f); g.fillTriangle(c + lean, 13, c - 6, 25, c + 6, 25); g.fillEllipse(c, 24.5, 15, 12);
+    g.fillStyle(0xffa94d); g.fillTriangle(c + lean, 16, c - 4.6, 25, c + 4.6, 25); g.fillEllipse(c, 25.5, 11, 8.5);
+    g.fillStyle(0xfff0b0); g.fillEllipse(c, 27, 6.4, 4.4);
+    // olhos (piscam no segundo quadro) e um sorriso torto
+    g.fillStyle(OUT);
+    if (v === 1) { g.fillRect(c - 5, 23.4, 3.4, 1.4); g.fillRect(c + 1.6, 23.4, 3.4, 1.4); }
+    else { g.fillEllipse(c - 3.4, 23.6, 2.8, 4); g.fillEllipse(c + 3.4, 23.6, 2.8, 4); g.fillStyle(0xffffff); g.fillCircle(c - 3.8, 22.6, 0.7); g.fillCircle(c + 3, 22.6, 0.7); }
+    g.fillStyle(OUT); g.fillRect(c - 2, 28, 4, 1.2);
+    // moldura do vidro (barras de latão) por cima
+    g.fillStyle(0xb58a2f); g.fillRect(c - 11, 16, 2, 16); g.fillRect(c + 9, 16, 2, 16);
+    // base de latão e pés
+    g.fillStyle(OUT); g.fillRoundedRect(c - 13, 31, 26, 6, 2); g.fillRect(c - 10, 36, 5, 3); g.fillRect(c + 5, 36, 5, 3);
+    g.fillStyle(0xb58a2f); g.fillRect(c - 12, 32, 24, 4); g.fillRect(c - 9, 36, 3, 2); g.fillRect(c + 6, 36, 3, 2);
+    g.fillStyle(0xe6c15a); g.fillRect(c - 12, 32, 24, 1.2);
+    g.fillStyle(0x7d5c1d); g.fillRect(c + 6, 34, 6, 2);
   };
 
   // Relógio de cobre: um autômato de bronze, corpo de engrenagem, mostrador no peito e pernas curtas.
@@ -167,33 +179,53 @@ export function drawNewEnemies(make: MakeFn): void {
     g.fillStyle(0xe4edf5); g.fillCircle(c - 15, T - 12, 1.8); g.fillCircle(c + 15, T - 15, 1.4);
   };
 
-  // Sentinela de cera: uma armadura de cera de vela, com elmo de pavio, viseira de olhos brilhantes e gotas derretidas.
+  // Sentinela de cera: um cavaleiro-vela. Cabeça de cera derretida com viseira de olhos âmbar e o pavio aceso no topo,
+  // corpo de vela com um cinto de latão e gotas escorrendo, um escudo-castiçal e os pés numa poça de cera.
+  // Tudo cabe nos 40 px: no segundo quadro a chama se inclina e as gotas descem.
   const sentinel = (g: Graphics, T: number, v: 0 | 1 | 2 = 0): void => {
     const c = T / 2;
-    g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 3, 26, 6);
-    // pernas e pés
-    g.fillStyle(OUT); g.fillRect(c - 9, T - 11, 7, 9); g.fillRect(c + 2, T - 11, 7, 9);
-    g.fillStyle(0xe8dcb8); g.fillRect(c - 8, T - 10, 5, 7); g.fillRect(c + 3, T - 10, 5, 7);
-    // corpo de cera, com gotas escorrendo
-    g.fillStyle(OUT); g.fillRoundedRect(c - 13, 15, 26, 20, 3);
-    g.fillStyle(0xf1e6c4); g.fillRoundedRect(c - 12, 16, 24, 18, 2);
-    g.fillStyle(0xd9c896); g.fillRect(c + 5, 17, 6, 16);
-    g.fillStyle(0xf1e6c4);
-    const drip = v === 1 ? 3 : 0; // no segundo quadro a gota desce
-    g.fillRect(c - 9, 33, 3, 4 + drip); g.fillCircle(c - 7.5, 37 + drip, 1.8);
-    g.fillRect(c + 2, 33, 3, 3);
-    // braços com escudo
-    g.fillStyle(OUT); g.fillRect(c - 17, 18, 6, 13); g.fillRect(c + 11, 18, 6, 13);
-    g.fillStyle(0xe8dcb8); g.fillRect(c - 16, 19, 4, 11); g.fillRect(c + 12, 19, 4, 11);
-    g.fillStyle(OUT); g.fillRoundedRect(c - 22, 20, 8, 11, 2);
-    g.fillStyle(0xb58a2f); g.fillRoundedRect(c - 21, 21, 6, 9, 1.5);
-    // elmo com pavio no topo
-    g.fillStyle(OUT); g.fillRoundedRect(c - 10, 5, 20, 13, 4);
-    g.fillStyle(0xf1e6c4); g.fillRoundedRect(c - 9, 6, 18, 11, 3);
-    g.fillStyle(OUT); g.fillRect(c - 7, 10, 14, 4); // viseira
-    g.fillStyle(0xffd27a); g.fillRect(c - 5.5, 11, 3, 2); g.fillRect(c + 2.5, 11, 3, 2);
-    g.fillStyle(OUT); g.fillRect(c - 1, 1, 2, 5); // pavio
-    g.fillStyle(0xffa94d); g.fillTriangle(c, v === 1 ? 0 : -1, c - 2, 3, c + 2, 3); // chamazinha do topo
+    const WAX = 0xf1e6c4, LIGHT = 0xfffbe8, SHADE = 0xd2c08c, DEEP = 0xb7a56f, BRASS = 0xb58a2f, BRASS_L = 0xe6c15a;
+    const drip = v === 1 ? 1.5 : 0;
+    // poça de cera aos pés
+    g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 2.5, 28, 5);
+    g.fillStyle(DEEP); g.fillEllipse(c, T - 4, 26, 6);
+    g.fillStyle(SHADE); g.fillEllipse(c - 1, T - 4.6, 20, 4);
+    // pés
+    g.fillStyle(OUT); g.fillRoundedRect(c - 10, 31, 8, 7, 2); g.fillRoundedRect(c + 2, 31, 8, 7, 2);
+    g.fillStyle(WAX); g.fillRoundedRect(c - 9, 32, 6, 5, 1.5); g.fillRoundedRect(c + 3, 32, 6, 5, 1.5);
+    // corpo de vela
+    g.fillStyle(OUT); g.fillRoundedRect(c - 11, 19, 22, 15, 3);
+    g.fillStyle(WAX); g.fillRoundedRect(c - 10, 20, 20, 13, 2);
+    g.fillStyle(SHADE); g.fillRect(c + 4, 21, 6, 12);
+    g.fillStyle(LIGHT); g.fillRect(c - 9, 21, 2, 10);
+    // cinto de latão
+    g.fillStyle(OUT); g.fillRect(c - 11, 27, 22, 4);
+    g.fillStyle(BRASS); g.fillRect(c - 10, 28, 20, 2); g.fillStyle(BRASS_L); g.fillRect(c - 10, 28, 20, 1); g.fillStyle(OUT); g.fillRect(c - 1.5, 27.4, 3, 3);
+    // gotas escorrendo pelo peito
+    g.fillStyle(WAX); g.fillRect(c - 6, 20, 3, 5 + drip); g.fillCircle(c - 4.5, 25 + drip, 1.8);
+    g.fillRect(c + 1, 20, 2.4, 3 + drip); g.fillCircle(c + 2.2, 23 + drip, 1.4);
+    // braço direito (livre) e braço esquerdo com o escudo-castiçal
+    g.fillStyle(OUT); g.fillRoundedRect(c + 10, 21, 6, 10, 2);
+    g.fillStyle(WAX); g.fillRoundedRect(c + 11, 22, 4, 8, 1.5); g.fillStyle(SHADE); g.fillRect(c + 13.4, 23, 1.6, 6);
+    g.fillStyle(OUT); g.fillCircle(c - 14, 27, 6);
+    g.fillStyle(BRASS); g.fillCircle(c - 14, 27, 5); g.fillStyle(BRASS_L); g.fillCircle(c - 15, 25.6, 2.4);
+    g.fillStyle(0x7d5c1d); g.fillCircle(c - 13.5, 28.4, 2.2); g.fillStyle(WAX); g.fillCircle(c - 14, 27, 1.2); // um tocoto de vela no meio
+    g.fillStyle(OUT); g.fillRect(c - 11, 24, 2, 5);
+    g.fillStyle(WAX); g.fillRect(c - 11, 25, 1, 3);
+    // cabeça: capuz de cera derretida (as bordas escorrem) com a viseira
+    g.fillStyle(OUT); g.fillRoundedRect(c - 10, 9, 20, 14, 5); g.fillRoundedRect(c - 11.5, 15, 4, 8 + drip, 2); g.fillRoundedRect(c + 7.5, 15, 4, 6 + drip, 2);
+    g.fillStyle(WAX); g.fillRoundedRect(c - 9, 10, 18, 12, 4); g.fillRoundedRect(c - 10.5, 16, 2.4, 6 + drip, 1.2); g.fillRoundedRect(c + 8.1, 16, 2.4, 4 + drip, 1.2);
+    g.fillStyle(SHADE); g.fillRect(c + 4, 12, 4, 9); g.fillStyle(LIGHT); g.fillRect(c - 7, 11, 5, 1.6);
+    g.fillStyle(OUT); g.fillRoundedRect(c - 7.5, 14, 15, 5, 1.5);
+    g.fillStyle(0xffc34d); g.fillRect(c - 6, 15, 4, 3); g.fillRect(c + 2, 15, 4, 3);
+    g.fillStyle(0xfff0b0); g.fillRect(c - 5.4, 15.4, 1.6, 1.4); g.fillRect(c + 2.6, 15.4, 1.6, 1.4);
+    // pavio e chama (a chama se inclina no segundo quadro)
+    const lean = v === 1 ? 1.6 : 0;
+    g.fillStyle(OUT); g.fillRect(c - 1, 6, 2, 5);
+    g.fillStyle(OUT); g.fillTriangle(c + lean, 0, c - 4.4, 8, c + 4.4, 8);
+    g.fillStyle(0xe8501f); g.fillTriangle(c + lean, 1.2, c - 3.4, 7.6, c + 3.4, 7.6);
+    g.fillStyle(0xffa94d); g.fillTriangle(c + lean, 3, c - 2.2, 7.6, c + 2.2, 7.6);
+    g.fillStyle(0xfff0b0); g.fillTriangle(c + lean * 0.6, 5, c - 1, 7.6, c + 1, 7.6);
   };
 
   // Ratinho do celeiro: pardo, de orelhas grandes e rosadas, cauda comprida; no segundo quadro mexe o focinho.
