@@ -19,6 +19,7 @@
     "phaser": "3.90.0"
   },
   "devDependencies": {
+    "playwright": "^1.65.1",
     "typescript": "^5.9.2",
     "vite": "^7.1.0",
     "vitest": "^3.2.0"
