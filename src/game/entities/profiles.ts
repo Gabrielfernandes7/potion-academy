@@ -36,7 +36,7 @@ export const PROFILES: Record<EntityId, DamageProfile> = {
   lion:       { element: 'earth', maxHp: 28, weak: ['air'],          resist: ['water'],        immune: ['earth'] },
   // Ouroboros: a serpente do ciclo. A fraqueza NÃO é fixa: gira pelos quatro elementos (ver bosses/ouroboros/rules.ts);
   // por isso a tabela fica sem fraqueza nem imunidade e o dano vem da regra do ciclo.
-  ouroboros:  { element: 'air',   maxHp: 32, weak: [],               resist: [],                immune: [] },
+  ouroboros:  { element: 'air',   maxHp: 40, weak: [],               resist: [],                immune: [] },
   // Quimera de Mercúrio: líquida, a água escorre por ela; a terra a prende. Fogo e ar machucam normal. Vida 28 (era 24): o duelo de chefes mostrou que era a mais frágil.
   chimera:    { element: 'water', maxHp: 28, weak: ['earth'],        resist: [],                immune: ['water'] },
 };

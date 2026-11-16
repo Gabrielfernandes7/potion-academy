@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  ELEMENT_CYCLE, OUROBOROS_HIT_NEUTRAL, OUROBOROS_HIT_WEAK, OUROBOROS_HP, cycleMs, ouroborosCooldown, ouroborosDamage, pickOuroborosSkill, ringTiles, weakAt,
+  ELEMENT_CYCLE, OUROBOROS_DEVOUR_HEAL, OUROBOROS_HIT_NEUTRAL, OUROBOROS_HIT_WEAK, OUROBOROS_HP, cycleMs, ouroborosCooldown, ouroborosDamage, pickOuroborosSkill, ringTiles, weakAt,
 } from '../../../src/game/entities/bosses/ouroboros/rules';
 import { pickOuroborosLine } from '../../../src/game/entities/bosses/ouroboros/lines';
 
@@ -30,6 +30,15 @@ describe('Ouroboros: o ciclo', () => {
     expect(ouroborosCooldown(2)).toBeLessThan(ouroborosCooldown(1));
     expect(Math.ceil(OUROBOROS_HP / OUROBOROS_HIT_WEAK)).toBeGreaterThanOrEqual(6);
     expect(Math.ceil(OUROBOROS_HP / OUROBOROS_HIT_WEAK)).toBeLessThanOrEqual(10);
+  });
+});
+
+describe('Ouroboros: mais forte (2026-11-15)', () => {
+  it('40 de vida (10 golpes certeiros), ritmo mais rápido e cura ao devorar o oposto', () => {
+    expect(OUROBOROS_HP).toBe(40);
+    expect(ouroborosCooldown(1)).toBe(3200);
+    expect(ouroborosCooldown(2)).toBe(2100);
+    expect(OUROBOROS_DEVOUR_HEAL).toBeGreaterThan(0);
   });
 });
 
