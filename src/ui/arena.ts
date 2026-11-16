@@ -112,6 +112,9 @@ export function openArena(): void {
   if (!document.getElementById('rough')) document.body.insertAdjacentHTML('afterbegin', ROUGH_FILTER); // tinta dos ícones
   renderCards();
   fillDuel();
+  // as opções (transformação e duelo) começam abertas só em tela alta; em tela baixa o cartão dos chefes tem a vez
+  const tall = window.innerHeight >= 900;
+  for (const id of ['arena-form', 'arena-duel']) (byId(id) as HTMLDetailsElement).open = tall;
   setShown('arena-overlay', true);
   (byId('arena-grid').querySelector('button') as HTMLElement | null)?.focus();
 }

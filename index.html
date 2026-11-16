@@ -93,8 +93,9 @@
   <div class="panel arena">
     <h2 id="arena-title">ARENA DE TREINO</h2>
     <p class="letter-note">Enfrente os chefes quando quiser. Todas as poções estão liberadas, o tempo é de sobra e nada aqui conta para a jornada.</p>
-    <div class="arena-form" id="arena-form">
-      <label for="arena-form-select"><b>Transformação para treinar</b></label>
+    <details class="arena-form" id="arena-form">
+      <summary><b>Transformação para treinar</b></summary>
+      <label for="arena-form-select" class="sr-only">Transformação para treinar</label>
       <select id="arena-form-select" aria-label="Transformação da Roo no treino">
         <option value="">Nenhuma (a Roo normal; T transforma)</option>
         <option value="fire">Roo Fire: Labareda, Escudo de brasas</option>
@@ -103,9 +104,9 @@
         <option value="air">Roo Ar: Sopro, Salto de vento, Redemoinho</option>
       </select>
       <p class="arena-tip">A Roo luta transformada no auge, sem tempo para acabar. Vale só para o treino contra um chefe, não para o duelo.</p>
-    </div>
-    <div class="arena-duel" id="arena-duel">
-      <h3>DUELO DE CHEFES</h3>
+    </details>
+    <details class="arena-duel" id="arena-duel">
+      <summary><h3>DUELO DE CHEFES</h3></summary>
       <p class="arena-tip">Dois chefes lutam entre si, em 100 s, e você só assiste. Perde quem cair primeiro; se ninguém cair, perde quem tiver menos vida. Serve para testar o equilíbrio.</p>
       <div class="arena-duel-row">
         <select id="duel-a" aria-label="Primeiro chefe"></select>
@@ -113,7 +114,7 @@
         <select id="duel-b" aria-label="Segundo chefe"></select>
         <button type="button" class="big-btn" id="duel-go">DUELAR</button>
       </div>
-    </div>
+    </details>
     <div class="arena-grid" id="arena-grid"></div>
     <div class="btn-row">
       <button class="big-btn alt" id="arena-close" type="button">VOLTAR</button>
@@ -270,6 +271,7 @@
   <div class="panel">
     <h2 id="go-title">GAME OVER</h2>
     <p class="flavor" id="go-flavor"></p>
+    <p class="hint" id="go-tip" hidden></p>
     <p class="letter-note" id="go-story" hidden>Roo voltou ao Caldeirão com o frasco vazio. O que você faria com ele?</p>
     <div class="result-grid" id="go-stats"></div>
     <p class="hint">Pressione <kbd>R</kbd> para jogar de novo</p>

@@ -1005,3 +1005,118 @@ kbd {
 .panel.intro .letter-text { margin: 0; font-size: 14.5px; line-height: 1.55; text-align: center; font-style: italic; }
 .intro-tip { margin: 0; font-size: 13px; color: var(--ink-soft); text-align: center; }
 @media (max-height: 640px) { .panel.intro #intro-canvas { max-width: 300px; } .panel.intro { padding: 14px 18px; gap: 8px; } }
+
+/* ======================================================================================================
+   Painéis que cabem na tela, sem rolagem (carta, entrada de fase, diálogo, fim de jogo, pausa, Arena, ajuda).
+   Dois ajustes: (1) em tela de pouca altura (celular em pé pequeno ou deitado) o espaço, a letra e o retrato
+   encolhem em proporção à altura; (2) deitado, o retrato ou a gravura vai para a esquerda e o texto para a direita.
+   O que mede é `npm run smoke` (verifica que nenhum painel passa da altura da tela nos tamanhos comuns).
+   ====================================================================================================== */
+/* altura média: celular em pé pequeno (360x640) e janelas baixas */
+@media (max-height: 900px) {
+  .overlay { padding: 8px; }
+  .panel { gap: 10px; padding: 16px 16px; }
+  .panel .letter-text, .panel.intro .letter-text { font-size: clamp(12px, 2.1vh, 15px); line-height: 1.42; }
+  .panel .letter-note, .panel .hint { font-size: 12px; }
+  .panel h2, .panel.intro h2 { font-size: clamp(18px, 3.4vh, 26px); }
+  .portrait { width: 84px; height: 84px; border-radius: 42px 42px var(--radius-m) var(--radius-m); }
+  .panel.intro #intro-canvas { max-width: min(100%, 34vh * 1.33); }
+  .big-btn { padding: 10px 22px; font-size: 14px; }
+  .result-tile .value { font-size: 18px; }
+  .panel.arena { gap: 8px; }
+  .arena-form, .arena-duel { margin-bottom: 4px; padding: 8px 10px; }
+  .arena-tip, .panel.arena > .letter-note { font-size: 0.74rem; line-height: 1.3; }
+  .arena-card { padding: 8px; gap: 5px; }
+  .arena-sprite { width: 48px; height: 60px; }
+}
+
+/* altura curta: celular deitado. Duas colunas, tudo mais compacto */
+@media (max-height: 560px) {
+  .overlay { padding: 6px; }
+  .panel { padding: 10px 14px; gap: 6px; width: min(100%, 780px); }
+  .panel.letter, .panel.dialogue, .panel.intro {
+    display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 14px; align-items: center; text-align: left;
+    max-width: 780px;
+  }
+  .panel.letter:has(> .portrait:not([hidden])), .panel.dialogue:has(> .portrait:not([hidden])) { grid-template-columns: 96px minmax(0, 1fr); }
+  .panel.letter > .portrait, .panel.dialogue > .portrait { grid-column: 1; grid-row: 1 / span 6; width: 90px; height: 90px; align-self: start; }
+  .panel.letter > :not(.portrait), .panel.dialogue > :not(.portrait) { grid-column: -2 / -1; }
+  .panel.intro { grid-template-columns: minmax(0, 40%) minmax(0, 1fr); }
+  .panel.intro > #intro-canvas { grid-column: 1; grid-row: 1 / span 6; width: 100%; max-width: none; align-self: center; }
+  .panel.intro > :not(#intro-canvas) { grid-column: 2; }
+  .panel .letter-text, .panel.intro .letter-text { font-size: clamp(10.5px, 3.05vh, 13px); line-height: 1.3; text-align: left; }
+  .panel.intro { padding: 8px 12px; }
+  .panel .intro-head { font-size: 11px; margin: 0; }
+  .panel.intro h2 { font-size: 15px; }
+  .panel.intro #intro-canvas { max-width: none; }
+  .panel h2 { font-size: 17px; margin: 0; }
+  .panel h2::after { display: none; }
+  .panel .btn-row { justify-content: flex-start; }
+  .big-btn { padding: 8px 18px; font-size: 13px; }
+  .panel .hint { display: none; } /* "ou aperte Enter": o botão já está aí */
+  .result-grid { gap: 6px; }
+  .result-tile { padding: 4px 8px; }
+  .result-tile .value { font-size: 16px; }
+  /* Arena: cartões em três colunas e sem os textos longos (o título de cada bloco basta) */
+  .panel.arena { width: min(100%, 900px); }
+  .arena-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .arena-tip, .panel.arena > .letter-note { display: none; }
+  .arena-sprite { width: 36px; height: 46px; }
+  .arena-card .arena-row { display: none; }
+  .arena-card .big-btn { padding: 6px 10px; font-size: 12px; }
+}
+
+/* abas da ajuda (src/ui/help.ts): uma seção por vez */
+.help-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; }
+.help-tabs button {
+  padding: 6px 12px; font: inherit; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-muted); background: rgba(0, 0, 0, 0.25); border: 1px solid var(--brass-dark); border-radius: 999px; cursor: pointer;
+}
+.help-tabs button[aria-selected="true"] { color: var(--gold-bright); border-color: var(--gold); background: rgba(240, 198, 116, 0.12); }
+.panel.help section[hidden] { display: none; }
+@media (min-width: 640px) {
+  .panel.help { display: flex; width: min(100%, 640px); } /* com abas, uma coluna basta */
+}
+
+/* Arena: os dois blocos de opções são recolhíveis (abertos só quando a tela é alta o bastante) */
+.arena-form > summary, .arena-duel > summary { cursor: pointer; list-style: none; }
+.arena-form > summary::-webkit-details-marker, .arena-duel > summary::-webkit-details-marker { display: none; }
+.arena-form > summary::before, .arena-duel > summary::before { content: "▸ "; color: var(--gold); }
+.arena-form[open] > summary::before, .arena-duel[open] > summary::before { content: "▾ "; }
+.arena-duel > summary h3 { display: inline; margin: 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (min-width: 900px) { .arena-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* celular em pé: os chefes da Arena em duas colunas de cartões compactos (sem as linhas de fraqueza), para caber */
+@media (max-width: 600px) {
+  .arena-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .arena-card .arena-row, .arena-card .arena-place, .arena-card .arena-life { display: none; }
+  .arena-head { flex-direction: column; text-align: center; gap: 4px; }
+  .arena-card { padding: 6px; }
+}
+@media (max-width: 600px) {
+  .arena-card .arena-tip, .panel.arena > .letter-note { display: none; }
+  .arena-sprite { width: 40px; height: 50px; }
+  .arena-card h3 { font-size: 0.8rem; }
+  .arena-card .big-btn { padding: 6px 8px; font-size: 12px; }
+  .panel.arena h2 { font-size: 20px; margin: 0; }
+}
+
+/* Arena: em tela larga ou deitada, os cinco chefes cabem numa fila só */
+@media (min-width: 1000px) { .arena-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } .panel.arena { width: min(100%, 1180px); } }
+@media (max-height: 560px) and (min-width: 600px) {
+  .arena-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .arena-head { flex-direction: column; text-align: center; gap: 2px; }
+  .arena-card .arena-place, .arena-card .arena-life { display: none; }
+  .arena-form, .arena-duel { padding: 4px 8px; margin: 0; }
+  .panel.arena h2 { font-size: 16px; margin: 0; }
+}
+@media (max-width: 600px) {
+  .arena-form, .arena-duel { padding: 5px 8px; margin: 0; }
+  .panel.arena { padding: 12px 10px; gap: 6px; }
+  .arena-sprite { width: 32px; height: 40px; }
+}
+@media (max-height: 560px) { .help-tabs button { padding: 4px 9px; font-size: 11px; } .panel.help { padding: 8px 14px; gap: 6px; } }
+@media (max-height: 700px) { .portrait { width: 64px; height: 64px; border-radius: 32px 32px var(--radius-m) var(--radius-m); } .panel { padding: 12px 14px; gap: 8px; } }
+@media (max-width: 600px) { .arena-sprite { width: 28px; height: 35px; } .arena-card { gap: 3px; padding: 5px; } .arena-card .big-btn { padding: 4px 6px; } }
+@media (max-height: 560px) and (min-width: 600px) { .arena-sprite { width: 30px; height: 38px; } .arena-card { padding: 4px; gap: 2px; } .arena-card .big-btn { padding: 4px 8px; } .panel.arena { padding: 8px 12px; gap: 5px; } }
