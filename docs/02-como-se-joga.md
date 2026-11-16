@@ -2,12 +2,17 @@
 
 ## Objetivo
 
-O jogo tem **quatro fases**:
+A campanha tem **vinte fases em cinco capítulos** (`src/game/stages/chapters/`), quatro fases cada, a quarta com um chefe:
 
-1. **Laboratório:** pegar **3 gemas** e chegar à **porta** em 100 segundos. A porta só abre com as 3 gemas. Inimigos: sapos magos.
-2. **Salão dos fantasmas:** igual ao laboratório (3 gemas e a porta), em 100 segundos, com **fantasmas** e um sapo.
-3. **Duelo:** derrotar a bruxa **Belladona** (10 de vida; fogo e éter tiram 2, água e terra tiram 1) em 120 segundos.
-4. **Jardim:** fora do castelo. Pegar 3 gemas e chegar ao **portão** em 100 segundos, entre sapos magos e **flores do mal**. Cruzar o portão encerra o jogo.
+| Capítulo | Fases | Chefe |
+|---|---|---|
+| O Vale | 1 a 4 (O Chamado, O Caminho, A Névoa, O Poço) | Quimera de Mercúrio |
+| A Torre | 5 a 8 | Belladona |
+| A Biblioteca Proibida | 9 a 12 | Leão Verde |
+| O Observatório | 13 a 16 | Ouroboros |
+| O Retorno | 17 a 20 (termina no jardim do mosteiro) | Mandrágora |
+
+Nas fases comuns: pegar **3 gemas** e chegar à **porta** antes do tempo acabar (a porta só abre com as 3 gemas). Nas fases de chefe não há gemas nem porta: vencer o chefe abre o caminho. Cruzar o portão do jardim (fase 20) encerra o jogo com a confissão de frei Anselmo. O mapa mostra as fases liberadas; o progresso é salvo.
 
 Ao passar de uma fase para a seguinte, a Roo leva a vida (sem bônus) e os power-ups.
 
@@ -18,8 +23,8 @@ Ao passar de uma fase para a seguinte, a Roo leva a vida (sem bônus) e os power
 | Andar | setas | botões de direção |
 | Colocar poção | Espaço | BOMBA |
 | Explodir poções etéreas | D | DETONAR |
-| Transformar na forma da poção na mão (20 s): fogo vira Roo Fire, água vira Roo Água | T | TRANSFORMAR |
-| Habilidade da forma (Labareda ou Bolha de sabão) | X | HABILIDADE |
+| Transformar na forma da poção na mão (20 s): fogo vira Roo Fire, água Roo Água, terra Roo Terra, ar Roo Ar | T | TRANSFORMAR |
+| Habilidade da forma (X), segunda habilidade (C) e defesa (V) | X, C, V | botões da forma |
 | Escolher o frasco | 1, 2, 3, 4 | toque no seletor |
 | Pausar | Enter | PAUSA |
 | Recomeçar | R | botão no fim do jogo |
@@ -29,8 +34,8 @@ O botão **?** fica no topo, ao lado do botão de som. A ajuda **pausa o jogo** 
 
 ## Regras
 
-- **Tempo:** 100 s no laboratório, no salão e no jardim e 120 s no duelo. O item +15 s soma tempo (até o dobro do tempo da fase).
-- **Vida:** uma barra contínua de 24 pontos, como a dos chefes. O contato com inimigo ou chefe tira 4. Uma explosão tira pelo elemento: **fogo 6** (a fraqueza, inclusive as poções dela), **água 2** (a resistência), terra e éter 4. Depois de um golpe há 1,5 s de proteção. Cada coração cura 4.
+- **Tempo:** cada fase tem o seu (`time` em cada fase; 100 s na primeira). O item +15 s soma tempo (até o dobro do tempo da fase).
+- **Vida:** uma barra contínua de 24 pontos, como a dos chefes. O contato com inimigo ou chefe tira 4. Uma explosão tira pelo elemento: **fogo 6** (a fraqueza, inclusive as poções dela), **água 2** (a resistência), terra e ar 4. Depois de um golpe há 1,5 s de proteção. Cada coração cura 4.
 - **Poções ao mesmo tempo:** começa com 2; cada +frasco soma 1, até 5.
 - **Caixotes:** ao quebrar, podem deixar um item. Caixotes e muralhas bloqueiam a explosão.
 - **Tempo esgotado:** a Roo perde 1 de vida a cada 1,2 s. Ele precisa terminar logo.
@@ -39,9 +44,9 @@ O botão **?** fica no topo, ao lado do botão de som. A ajuda **pausa o jogo** 
 ## Exemplos
 
 - A poção de fogo explode em cruz, 2 casas para cada lado (9 casas). Um caixote no caminho para o braço da cruz.
-- Se uma explosão de **fogo** alcança outra poção, ela explode junto. A **Telúrica** nunca é acesa por isso.
-- Se uma explosão de **Aqua** alcança uma poção de **fogo**, a poção se desfaz em vapor e não explode. A explosão de Aqua continua machucando.
-- Aqua, Telúrica e Etérea não acendem outras poções.
+- Se uma explosão de **fogo** alcança outra poção, ela explode junto. A **Poção de Terra** nunca é acesa por isso.
+- Se uma explosão de **Água** alcança uma poção de **fogo**, a poção se desfaz em vapor e não explode. A explosão de Água continua machucando.
+- As poções de Água, Terra e Ar não acendem outras poções.
 - A poção telúrica atravessa os caixotes e limpa uma fileira.
 - A poção etérea fica armada até você apertar D e conta no limite de poções.
 - Atrás de um caixote você fica protegida da explosão.
@@ -60,7 +65,7 @@ O botão **?** fica no topo, ao lado do botão de som. A ajuda **pausa o jogo** 
 ## O jardim
 
 - As **flores do mal** não se mexem e **bloqueiam a casa** onde estão. A cada 3,2 s, aparece um aviso rosa nas quatro casas ao redor; 0,8 s depois elas chicoteiam quem estiver ali.
-- São **imunes à Poção Aqua**: a explosão azul não as machuca. Use fogo, Telúrica ou Etérea.
+- São **imunes à Poção de Água**: a explosão azul não as machuca. Use fogo, terra ou ar.
 
 ## Como se perde
 
@@ -93,7 +98,7 @@ A tecla **T** transforma a Roo na forma da poção que você segura: com a Poç�
 - **Luz de chama:** na névoa, a Roo enxerga até 2 casas a mais.
 
 ### Roo Água (poção de água + T)
-- **Imune à água** no auge: a Poção Aqua, a maré e a chuva não a machucam (o contato com inimigos de água continua doendo). Esfriando, vira resistência. O fogo segue sendo a fraqueza.
+- **Imune à água** no auge: a Poção de Água, a maré e a chuva não a machucam (o contato com inimigos de água continua doendo). Esfriando, vira resistência. O fogo segue sendo a fraqueza.
 - **Poções de água +50%** no auge. **Só a Poção de Água** funciona enquanto durar.
 - **Bolha de sabão (X):** a Roo sopra uma bolha que flutua até 4 casas. Se alcança um inimigo comum, **o prende dentro dela** (ele não anda, não machuca e não chicoteia) por até 4 s, mais nos degraus altos; depois estoura. Chefes são imunes (a bolha só estoura). Custa 2 s da forma e tem espera de 3,5 s.
 

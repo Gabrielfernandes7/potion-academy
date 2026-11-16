@@ -7,12 +7,12 @@ tempo acabe.
 
 ## Em uma frase
 
-Destrua caixotes com poções, pegue 3 gemas e abra a porta. Passe pelo laboratório e pelo salão dos fantasmas, vença a bruxa Belladona e cruze o portão do jardim.
+Destrua caixotes com poções, pegue 3 gemas e abra a porta. Atravesse vinte fases em cinco capítulos, vença os cinco chefes e cruze o portão do mosteiro para devolver as escrituras a frei Anselmo.
 
 ## O que o torna diferente
 
-- **Calmo.** Não há inimigos que perseguem. A música muda a cada partida e os sons são suaves.
-- **Alquímico.** As bombas são poções de quatro elementos (fogo, água, terra e éter), e eles reagem entre si:
+- **Calmo.** Os inimigos não perseguem (o ratinho só corre atrás de itens). A música muda a cada partida e os sons são suaves.
+- **Alquímico.** As bombas são poções de quatro elementos (fogo, água, terra e ar), e eles reagem entre si:
   o fogo acende outras poções, a água apaga as de fogo e a terra é estável.
 - **Feito à mão, sem imagens prontas.** Todos os desenhos são gerados pelo código.
 
@@ -23,6 +23,7 @@ explorar com calma. Não exige reflexo rápido: a maior parte do desafio é plan
 
 ## Estado atual
 
-Quatro fases em sequência (laboratório, salão dos fantasmas, duelo com a Belladona e jardim), com um fim.
-Há um menu, uma Sala de Música, um Manuscrito e um Log da história, e a partida funciona no computador, no tablet e no celular (em pé ou deitado).
-A história ainda não foi escrita.
+Vinte fases em cinco capítulos: **Vale** (Quimera de Mercúrio), **Torre** (Belladona), **Biblioteca Proibida** (Leão Verde), **Observatório** (Ouroboros) e **Retorno** (Mandrágora), com um final.
+A Roo aprende as poções de água, terra e ar pelo caminho e, com elas, as transformações do mestre (Roo Fire, Água, Terra e Ar).
+Há menu, mapa, Arena de treino (chefes e duelo de chefes), Sala de Música, Manuscrito do Alquimista, o Livro de Roo e a história em prosa (`/history.html`).
+A história está escrita (`12-historia.md`) e termina na confissão de frei Anselmo; a partida funciona no computador, no tablet e no celular (em pé ou deitado).

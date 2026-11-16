@@ -68,7 +68,7 @@ Um `.html` na raiz, um `.ts` em `src/pages/` (use `bootPage` e `prepareTextures`
 | `npm run test:watch` | o mesmo, rodando a cada mudança |
 | `npm run typecheck` | os tipos |
 | `npm run check` | tipos, testes e o build de produção (rode antes de dizer que acabou) |
-| `PW=... npm run smoke` | abre o jogo num navegador (com o `npm run dev` ligado): menu, fase 1, as duas transformações, todos os chefes na Arena e as páginas de apoio |
+| `npm run smoke` | sobe o dev e abre o jogo num navegador (Playwright): menu, fase 1, formas, chefes na Arena, as 20 fases, reinícios sem vazamento, semente e páginas de apoio |
 
 Regra de ouro: **regra de jogo vive em arquivo puro** (sem Phaser, com teste em `tests/`); o arquivo do Phaser só desenha e liga. Assim o que se muda toda semana (números, habilidades, falas) se testa em milissegundos.
 

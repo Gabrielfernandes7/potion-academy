@@ -48,7 +48,7 @@ src/
   textures/witch.ts        # sprite da Belladona (chefe)
   sprites.ts + sprites.html # catálogo de todos os sprites (abra /sprites.html no dev)
   scenes/BootScene.ts      # gera texturas e abre o menu
-  scenes/MenuScene.ts      # menu: Roo mexendo uma poção no caldeirão (animado)
+  scenes/MenuScene.ts      # menu: a Roo lendo à luz de vela, estante e alambique (leve: cenário numa textura, poucos tweens)
   scenes/MainScene.ts      # gameplay (câmera deslocada abaixo da HUD)
   scenes/HudScene.ts       # HUD dentro do canvas (cena paralela, por cima)
   scenes/EndScene.ts       # cena final no Caldeirão (roda sobre a MainScene pausada)
@@ -162,7 +162,7 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 
 ## Como estender e como testar
 
-Antes de acrescentar um chefe, uma forma da Roo, uma fase ou uma página, leia `docs/16-guia-de-extensao.md`: cada tipo de coisa tem uma **lista única** (registro) e uma receita curta. Depois de qualquer mudança rode `npm run check` (tipos, testes e build); `PW=... npm run smoke` abre o jogo num navegador e confere os caminhos principais. Regra de jogo vive em arquivo puro com teste; o arquivo do Phaser só desenha e liga.
+Antes de acrescentar um chefe, uma forma da Roo, uma fase ou uma página, leia `docs/16-guia-de-extensao.md`: cada tipo de coisa tem uma **lista única** (registro) e uma receita curta. Depois de qualquer mudança rode `npm run check` (tipos, testes e build); `npm run smoke` abre o jogo num navegador (Playwright, `npx playwright install chromium` uma vez) e confere os caminhos principais. Regra de jogo vive em arquivo puro com teste; o arquivo do Phaser só desenha e liga.
 
 ## Desempenho (regra de código)
 

@@ -72,7 +72,7 @@ Aparece na carta (retrato), no portão do jardim quando ele se abre (dois quadro
 
 - `enemy`: **sapo mago**, da fase 1. Corpo verde com contorno escuro, olhos saltados, chapéu roxo com estrela e um cajado com orbe azul.
 - `enemy_ghost`: **fantasma** do salão dos fantasmas: atravessa obstáculos e anda devagar. Meio transparente (fica mais ainda dentro de uma parede), com a barra de baixo ondulada.
-- `enemy_flower`: **flor do mal** do jardim: fixa, pétalas escuras (magenta e roxo), olhos vermelhos e dentes. O sprite balança preso ao chão. É imune à Aqua.
+- `enemy_flower`: **flor do mal** do jardim: fixa, pétalas escuras (magenta e roxo), olhos vermelhos e dentes. O sprite balança preso ao chão. É imune à Poção de Água.
 - Movimento: cada passo tem um pulo (7 px na vertical, 3 px na horizontal) e, parado, um balanço de 1 px (`animateEnemy` em `MainScene.ts`).
 
 ## Efeitos de ser atingido

@@ -195,7 +195,7 @@ Novas decisões entram no fim.
 - **Consequência:** `O POÇO` é a **fase 4** (4/4 do Vale, sem porta nem gemas, `boss: 'chimera'`); as seguintes subiram um número (são 12 fases) e o progresso salvo é renumerado uma vez (`STAGE_SCHEMA` 3, passo em `stages/migration.ts`). `PASSAGE_CARDS` e `DIARY` foram renumerados; a passagem da Névoa agora leva ao poço, e a Quimera se despede (`CHIMERA_CARDS`) antes da Torre. Perfil `chimera` (24 de vida, atributo água, **fraca à terra**, **imune à água**; fogo e éter normais): terra tira 6, fogo e éter 4, água 0 ("ESCORRE"). Fogo, a poção inicial, vence em 6 golpes; a terra, em 4.
 - **Habilidades** (todas com aviso de 1,2 s no chão, como os outros chefes): *Cuspe* (jato de prata em linha reta, até diagonal, que passa pela Roo; furiosa: um segundo jato em cruz), *Gotas* (3 gotas, furiosa 5, a primeira na casa da Roo), *Escorrer* (vira poça protegida e ressurge a 2-4 casas da Roo com um respingo em cruz), *Onda* (só furiosa: faixas de 2 colunas varrem o campo; uma linha fica seca e é escolhida por alcance real, em até 4 passos, nunca a da Roo).
 - **Código:** `game/entities/bosses/chimera/` (`rules.ts` puro e testado, `lines.ts`, `ChimeraController.ts`), sprite em `textures/chimera.ts`. `BossSetup` ganhou `furiousFlash` (cor do clarão da fúria, opcional). `onBossDefeated` agora serve a Quimera e a Belladona (só a Mandrágora abre o portão e vence o jogo).
-- **Em aberto:** equilíbrio jogado (vida 24, tempos das habilidades), música própria (hoje usa "Duelo na Torre") e falas. As outras opções de chefe ficam em `ides.md`.
+- **Em aberto:** equilíbrio jogado (vida 24, tempos das habilidades), música própria (hoje usa "Duelo na Torre") e falas. As outras opções de chefe ficam em `ideas.md`.
 
 ## Vida contínua da Roo, com perfil de dano
 - **Motivo:** a Roo passa a ter barra de vida como a dos chefes e a mesma tabela de fraqueza e resistência dos outros personagens, para padronizar a estrutura (cada personagem herda o mesmo perfil).
@@ -236,7 +236,7 @@ Novas decisões entram no fim.
 
 ## Roo Fire entra no jogo: T, Brasas, Labareda e Luz de chama
 - **Motivo:** a transformação passou do lab para a partida, com habilidades novas que combinam com o fogo e não deixam o jogo fácil.
-- **Como se obtém (decidido por padrão, dá para mudar):** a Roo **já nasce com o poder**, ativado com **T** (botão ROO FIRE no toque), com 25 s de espera depois de cada uso. Alternativas guardadas em `ides.md`: item da loja, recompensa de chefe, ou carga que enche com caixotes quebrados.
+- **Como se obtém (decidido por padrão, dá para mudar):** a Roo **já nasce com o poder**, ativado com **T** (botão ROO FIRE no toque), com 25 s de espera depois de cada uso. Alternativas guardadas em `ideas.md`: item da loja, recompensa de chefe, ou carga que enche com caixotes quebrados.
 - **Consequência:** `MainScene` guarda um `FireForm` e um `EmberField` (regras em `game/rooFire.ts`). A transformação **não passa de fase** (cada fase começa normal). Os sprites trocam por estágio sem mexer na animação de andar (`textures/rooFireTextures.ts`, gerados no boot). O perfil de dano da Roo muda com o degrau (`fireProfile`): forma de fogo resiste ao fogo e é fraca à água; esfriando é neutra.
 - **Habilidades (só transformada):**
   - **Poções de fogo +50%** (cai por degrau), nos inimigos e nos chefes; só vale para explosões da Roo (`Explosion.fromRoo`), nunca para as dos chefes.
@@ -245,7 +245,7 @@ Novas decisões entram no fim.
   - **Luz de chama:** +0,5 casa de visão na névoa por degrau (`Fog.setRadius`).
 - **Por que é equilibrado:** a fraqueza à água é o preço do bônus; a Labareda gasta o próprio tempo da transformação; tudo cai por degrau; e a espera de 25 s limita o uso a 3 ou 4 vezes por fase.
 - **HUD:** medidor ao lado do elemento (pronto, tempo que resta com 4 degraus, esfriando); botões ROO FIRE e LABAREDA no toque; ajuda atualizada.
-- **Em aberto:** equilíbrio jogado (bônus de 50%, espera de 25 s), som próprio da transformação e da Labareda, e as outras habilidades de `ides.md`.
+- **Em aberto:** equilíbrio jogado (bônus de 50%, espera de 25 s), som próprio da transformação e da Labareda, e as outras habilidades de `ideas.md`.
 
 ## HUD mais limpa e no clima do jogo
 - **Motivo:** a faixa tinha texto demais (VIDA, OURO, GEMAS, FRASCOS, BLOCOS, nome do elemento, "T: ROO FIRE"). No celular, o canvas encolhe e o texto de 9 a 10 px ficava ilegível.

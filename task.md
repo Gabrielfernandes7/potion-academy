@@ -14,7 +14,34 @@ O que já foi feito (e o histórico por rodada) está em `solved.md`. Para o "co
 - **A mensagem sem versículos:** o verdadeiro evangelho é dedicar a vida a Jesus e servir os mais pobres, as viúvas e os órfãos (como Belladona). Espalhada em pouco, em cada parte: carta, glosas do livro, história das 20 fases, passagens e fim. Os versículos saíram do livro, dos docs e dos testes; `tests/desfecho.test.ts` e `tests/livro.test.ts` conferem.
 - **Gravuras antes de cada fase:** o cartão de entrada de fase mostra a gravura animada do livro (20 fases, 16 gravuras com variantes; poço, torre, biblioteca e observatório são novas). `game/stageArt.ts`, `pages/placas.ts`, `ui/stageIntro.ts`. Conferi as 20 no navegador de teste (desktop e 390 px) e o botão COMEÇAR.
 - **O Mestre** (`textures/mestre.ts`) redesenhado: chapéu de ponta dobrada com lua, capuz com dois pontos de luz, livro no cinto, runas na barra rasgada, cajado com cristal que pulsa e lanterna na corrente. Mesmas chaves (`mestre_sombra_0/1`).
-- **Docs:** `docs/ides.md` podado (só o que falta), `docs/22-livro.md` reescrito, CLAUDE.md, `docs/16` e `docs/README.md` atualizados.
+- **Docs:** `docs/ideas.md` podado (só o que falta), `docs/22-livro.md` reescrito, CLAUDE.md, `docs/16` e `docs/README.md` atualizados.
+
+## Problemas a resolver (revisão de 2026-11-15)
+
+Feito nesta rodada:
+- [x] README e docs antigos atualizados (20 fases, 5 capítulos, formas, sem loja).
+- [x] `scripts/smoke.cjs` sem `menu-shop` e com T no lugar do Y (agora roda de verdade: `npm run smoke`).
+- [x] ~~GitHub Actions~~ removido a pedido: sem CI por enquanto.
+- [x] Persistência validada (`cleanStrings`, `cleanStageList` em `storage.ts`; poções desconhecidas, tipos errados e duplicatas são descartados; testes em `tests/storage.test.ts`).
+- [x] Área de toque dos frascos na HUD: agora é a faixa inteira da HUD (antes 36x22 px de canvas). O botão TROCAR FRASCO já existia.
+- [x] Sentinela de cera e Lanterna viva redesenhadas (sem recortes nas bordas, gotas e chama dentro dos 40 px).
+- [x] `docs/ideas.md` virou `docs/ideas.md`, com as ideias novas da revisão.
+
+- [x] (improv.md §8) Tela de derrota mostra o que matou a Roo e uma dica (`game/deathTip.ts`, `go-tip` no `index.html`).
+- [x] Ouroboros mais forte (40 de vida, ataques mais rápidos, devorar cura 1).
+
+- [x] Menu: a Roo mexendo o caldeirão (lenta) virou a Roo lendo, com estante e alambique (`MenuScene.ts`; cenário numa textura, 60 fps no navegador de teste). HUD: frascos maiores, com barra na cor do elemento, cantos dourados no escolhido e tranca nos bloqueados.
+
+- [x] Responsividade: nenhum painel (carta, entrada de fase, diálogo, fim de jogo, pausa, Arena, ajuda, sala de música) precisa de rolagem em 360x640, 390x844, 667x375, 800x360 e 1024x768 (o smoke confere). Deitado, retrato/gravura à esquerda e texto à direita; a ajuda virou abas; na Arena, as opções são recolhíveis e os 5 chefes ficam em fila ou em 2 colunas compactas. Frascos de campo com contorno escuro e luz do elemento no chão.
+
+Pendente, em ordem (os itens de `improv.md` que ainda faltam: objetivos alternativos, estrelas por fase, dificuldade selecionável, hit-stop, 4 botões no toque, protótipo de vapor e lama):
+1. **Versão global do save** (um campo `bombroo_version` com migração) e testes de saves antigos; exportar/importar progresso fica para depois.
+2. **Mobile:** texto da HUD com 6 a 7 px num celular em pé; ajuste de escala; cor não pode ser o único indicador do elemento; testar em celular real; PWA.
+3. **Refatoração** (só com o jogo aberto num navegador para conferir; hoje não tive um): extrair `PlayerController` da `MainScene` (913 linhas), depois a preparação das fases (`StageRuntime`), separar os efeitos visuais das regras em `RooFormSystem` (917) e modularizar o `EnemySystem` (579) só se precisar. Sem ECS.
+4. ~~Semente por partida~~ feita: `game/rng.ts`, `?seed=123` na URL (o console do dev mostra a semente), `tests/rng.test.ts` e contrato em `tests/contracts/rng.test.ts`. Falta: mostrar a semente na tela de pausa e o desafio diário.
+5. **Docs:** ADRs em `docs/adr/`; ampliar os testes de contrato (links entre docs, ids de chefes e inimigos, controles de cada forma, referências a mecânicas removidas, números de vida e dano).
+6. **Licença** (código e assets separados): decisão sua.
+7. **Visual dos inimigos:** discutir o padrão visual do jogo (próxima conversa) e então alinhar os 11 inimigos novos e os 3 clássicos.
 
 ## Aguardando você: jogar, ouvir e olhar
 
@@ -38,7 +65,7 @@ Eu verifico por script (regra pura, testes, simulações e o jogo rodando num na
 
 ## Decisões que só você pode tomar
 
-- **Qual ideia de `docs/ides.md` trabalhar a seguir** (plano e ordem sugerida no fim do arquivo): reações no chão (lama, vapor, cristais), grimório de reações no Manuscrito e a Prima Materia entregue a Anselmo.
+- **Qual ideia de `docs/ideas.md` trabalhar a seguir** (plano e ordem sugerida no fim do arquivo): reações no chão (lama, vapor, cristais), grimório de reações no Manuscrito e a Prima Materia entregue a Anselmo.
 - **Acessibilidade no celular** (ver a resposta da sessão de 2026-11-15; resumo em `docs/21-desempenho.md` não cobre isso): HUD no canvas fica com letra de 6 a 7 px num celular em pé e os seletores de frasco têm 21x13 px de toque; não há manifesto de app (instalável, tela cheia).
 
 - **Licença do projeto** (o README segue sem): é uma escolha jurídica, não minha.
@@ -54,9 +81,11 @@ Eu verifico por script (regra pura, testes, simulações e o jogo rodando num na
 
 ## Fila técnica (o que sobrou e eu posso fazer)
 
+- **Feito (2026-11-15, revisão externa):** README e docs 01, 02, 03, 04, 05, 10 e 14 atualizados para as 20 fases, 5 capítulos, 4 formas e sem loja; `scripts/smoke.cjs` sem `menu-shop` e com T (poção na mão) no lugar do Y. **Falta rodar o smoke** num navegador (`PW=... npm run smoke` com o dev ligado): só conferi a sintaxe.
+
 - **Acessibilidade no celular** (decisão sua, ver acima): subir o texto da HUD para o mínimo legível (hoje 6 a 7 px), aumentar o toque dos seletores de frasco (21x13 px; o ideal é 44 px), manifesto de app (instalável, tela cheia, ícone), vibração curta ao acertar ou levar dano e `touch-action` conferido em todas as telas.
 - **Gravuras de fase:** poderia haver uma gravura própria por capítulo para a abertura da Arena (hoje usa a do duelo) e os chefes terem uma moldura diferente.
-- **Ideias de `docs/ides.md`** (em ordem): reações no chão, grimório de reações, Prima Materia entregue a Anselmo.
+- **Ideias de `docs/ideas.md`** (em ordem): reações no chão, grimório de reações, Prima Materia entregue a Anselmo.
 - **Teste automático do cartão de entrada no navegador** (hoje só os puros e o fake de contexto; o `npm run smoke` não abre o cartão).
 
 - HUD no canvas fica serrilhada em telas muito grandes (decisão visual do estilo pixel art; mudar só se você quiser texto nítido).
@@ -125,7 +154,7 @@ Não entregue código Phaser nem imagem gerada por IA.
 - `npm run dev` abre em `http://localhost:5173`. O jogo fica em `window.__game` (só em dev).
 - `/sprites.html`: catálogo com todos os sprites ampliados.
 - Testes automáticos: `tests/` (Vitest, 348 testes). Lógica pura: regras, formas, lições, faixas de música, chefes, equilíbrio, geometria da Roo; `tests/contracts/` confere que registros, HTML e textos continuam ligados.
-- Playwright e Chromium ficam **fora do projeto**. O Chromium já está em `~/Library/Caches/ms-playwright/` e o módulo `playwright-core` no cache do `npx`; `PW=... npm run smoke` os usa. Não instalar dentro do repositório. Para testar por script, depois de `scene.start('Main', ...)` chame `endIntro()`: com o cartão de entrada aberto, a `update` não roda e nada anda (nem `forms.update`).
+- O Playwright agora é devDependency do projeto (`npx playwright install chromium` uma vez); `npm run smoke` o usa. Para testar por script, depois de `scene.start('Main', ...)` chame `endIntro()`: com o cartão de entrada aberto, a `update` não roda e nada anda (nem `forms.update`).
 - Áudio não pode ser ouvido em teste: medir com `AnalyserNode` (ver histórico da sessão) e pedir feedback ao usuário.
 
 ## Armadilhas já encontradas (não repetir)
@@ -154,3 +183,5 @@ Não entregue código Phaser nem imagem gerada por IA.
 | música e sons | `src/audio/AudioEngine.ts`, `src/audio/tracks.ts` |
 | textos de ajuda | `index.html` (`#help-overlay`) |
 | cores e layout | `src/styles/main.css` |
+
+- **Smoke de verdade (2026-11-15):** `npm run smoke` usa o Playwright do projeto (instalar o navegador uma vez: `npx playwright install chromium`) e sobe o dev sozinho. Cobre menu, formas, 5 chefes na Arena, as 20 fases, 30 reinícios sem vazamento, semente repetindo o mapa e páginas de apoio. Passa 100%. Falta: jogar de verdade (andar, vencer fase pela porta) e a tela de derrota com a dica.

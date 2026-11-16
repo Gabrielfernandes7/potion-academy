@@ -24,7 +24,7 @@ index.html ──► src/main.ts ──► game/launcher.ts (cria o Phaser.Game 
 | Cena | Arquivo | Papel |
 |---|---|---|
 | `BootScene` | `scenes/BootScene.ts` | gera as texturas procedurais e avisa `TEXTURES_READY` |
-| `MenuScene` | `scenes/MenuScene.ts` | Roo mexendo a poção no caldeirão (só animação; os botões são DOM) |
+| `MenuScene` | `scenes/MenuScene.ts` | Roo lendo à luz de vela, com estante e alambique (só animação; os botões são DOM) |
 | `MainScene` | `scenes/MainScene.ts` | a partida: grade, jogador, inimigos, pickups, chefe, regras das fases |
 | `HudScene` | `scenes/HudScene.ts` | a faixa da HUD no canvas; roda em paralelo com `MainScene` |
 | `MapScene` | `scenes/MapScene.ts` | mapa do castelo com o progresso das fases |

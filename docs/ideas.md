@@ -1,4 +1,4 @@
-# Ideias de alquimia para Potion Academy (só o que falta)
+# Ideias para Potion Academy (só o que falta)
 
 > A direção da história (fome, Belladona com razão, Roo nascida de uma bolha, o evangelho vivido como serviço aos pobres, às viúvas e aos órfãos) já foi decidida: veja `12-historia.md`, `/history.html` e `/livro.html`.
 >
@@ -63,6 +63,31 @@
 
 **Habilidade para a Roo normal:**
 - **Bolhas de sabão** (a origem dela): bloquear um tiro, carregar uma poção ou flutuar sobre uma casa. Deve ser equilibrado, sem deixar o jogo fácil.
+
+
+## Da revisão de 2026-11-15 (a decidir; o que for problema está em `task.md`)
+
+**Gameplay: um risco de repetição.** Vinte fases de "quebrar caixotes, 3 gemas, porta" podem cansar. Ideia central: **uma mecânica própria por capítulo**, reaproveitando a arquitetura (sem cinco sistemas novos):
+
+| Capítulo | Mecânica proposta |
+|---|---|
+| Vale | transformação da natureza: vapor, lama e névoa como terreno (depende das reações no chão) |
+| Torre | selos e mecanismos: portas seladas que só uma poção abre |
+| Biblioteca | conhecimento: símbolos a interpretar, correntes a soltar, manuscritos a achar (protótipo de um puzzle antes de generalizar) |
+| Observatório | ciclos: astrolábios e mecanismos temporizados que conversam com a fraqueza rotativa do Ouroboros |
+| Retorno | consequência: menos combate, mais pequenas interações com o vale e seus habitantes |
+
+**Reações no chão (`FieldSystem`).** Uma matriz de reações pura (sem Phaser) entre brasa, poça, lama, vapor e sal: duração, sobreposição, ordem e teste para cada par. Ilustrativo, a definir: fogo + poça = vapor; água + terra = lama; vento + vapor = dispersão. **Começar só por vapor e lama**; os cristais de sal esperam a validação dos dois.
+
+**Manuscrito como diário de descobertas.** A primeira vez que a Roo vê uma reação, uma fraqueza, um comportamento de chefe ou uma forma, abre-se uma anotação do mestre ("Caderno de experimentos"). Mais: um **Bestiário** progressivo (origem, comportamento, elemento, fraquezas, onde foi visto, notas do mestre), revelado aos poucos, sem enciclopédia no começo.
+
+**Chefes: leitura e contramedidas (sem chefe novo).** Quimera: a prata como terreno. Belladona: ataques que combinam poções e mudam a arena por um tempo. Leão Verde: o ácido corrói partes do cenário. Ouroboros: o ciclo muda também o ambiente. Mandrágora: raízes e plantas bloqueiam rotas por um tempo. Regra: todo ataque tem de ser legível no celular.
+
+**Lore.** (1) A **Academia** como antiga instituição de alquimia da qual o mestre fazia parte, que preservou o saber mas se afastou do povo; reforça a Biblioteca Proibida e dá sentido ao nome. (2) As **quatro operações** (Calcinação/fogo, Solução/água, Coagulação/terra, Sublimação/ar) como estrutura visual no Manuscrito, ligando as formas ao que a Roo aprendeu. (3) **Prima Materia** como decisão no fim (já nas ideias acima): "o que você vai fazer com aquilo que encontrou?"; só avança se não contradisser o desfecho.
+
+**Técnicas.** Semente por partida (mapa, posição inicial e inimigos reproduzíveis; depois, desafio diário). Exportar e importar o progresso. PWA (instalável e offline). Mais ADRs (`docs/adr/`): Phaser como motor, regras puras, geração procedural, persistência local, sistema de formas, interações ambientais. Verificação executável dos docs (links, ids de chefes e inimigos, controles, mecânicas removidas, números divergentes).
+
+**Evitar por ora:** mais tipos de inimigo e novos chefes (validar os 11 e os 5), companheiros (versão 2), crafting complexo, ECS.
 
 ## Pontos em aberto
 
