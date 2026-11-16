@@ -87,3 +87,30 @@ describe('storage: vitórias na Arena', () => {
     expect(s.arenaWins()).toEqual([]);
   });
 });
+
+describe('storage (dados inválidos)', () => {
+  beforeEach(() => { vi.resetModules(); });
+
+  it('descarta poções desconhecidas, tipos errados e duplicatas', async () => {
+    installLocalStorage({ bombroo_owned: JSON.stringify(['mega', 'mega', 'xyz', 7, null]) });
+    const s = await import('../src/storage');
+    expect(s.hasBombType('normal')).toBe(true);
+    expect(s.hasBombType('mega')).toBe(true);
+    expect(s.hasBombType('xyz' as never)).toBe(false);
+  });
+
+  it('JSON quebrado ou do tipo errado não derruba o jogo', async () => {
+    installLocalStorage({ bombroo_owned: '{nao e json', bombroo_stages_completed: '"oi"', bombroo_forms: '42', bombroo_arena_wins: '{"a":1}' });
+    const s = await import('../src/storage');
+    expect(s.hasBombType('normal')).toBe(true);
+    expect(s.isStageCompleted(1)).toBe(false);
+    expect(s.arenaWins()).toEqual([]);
+    expect(s.knowsForm('fire')).toBe(true);
+  });
+
+  it('fases salvas: só inteiros positivos, sem repetir', async () => {
+    const { cleanStageList, cleanStrings } = await import('../src/storage');
+    expect(cleanStageList([1, 1, 2.5, -3, '4', 5, 99999])).toEqual([1, 5]);
+    expect(cleanStrings(['a', 'b', 'a', 3], ['a'])).toEqual(['a']);
+  });
+});
