@@ -16,9 +16,9 @@ import { LAST_STAGE } from '../game/stages/index';
 
 const ROW_A = 17;
 const ROW_B = 41;
-const SLOT_W = 36;
-const SLOT_H = 22;
-const SLOT_GAP = 4;
+const SLOT_W = 38;
+const SLOT_H = 28;
+const SLOT_GAP = 3;
 const SLOT_X0 = 12;
 const HEART_X = 16; // vida da Roo: coração e barra
 const HP_X = 30;
@@ -147,10 +147,10 @@ export class HudScene extends Phaser.Scene {
 
     BOMB_ORDER.forEach((id, i) => {
       const x0 = SLOT_X0 + i * (SLOT_W + SLOT_GAP);
-      const y0 = ROW_B - SLOT_H / 2;
-      this.slotIcons.push(this.add.image(x0 + 12, ROW_B, 'bomb_' + id).setScale(0.55).setDepth(2));
-      this.slotKeys.push(this.text(x0 + 25, ROW_B, String(i + 1), 12, t.textMuted).setDepth(2));
-      const zone = this.add.zone(x0, y0, SLOT_W, SLOT_H).setOrigin(0).setInteractive({ useHandCursor: true });
+      this.slotIcons.push(this.add.image(x0 + 13, ROW_B - 2, 'bomb_' + id).setScale(0.62).setDepth(2));
+      this.slotKeys.push(this.text(x0 + 27, ROW_B + 5, String(i + 1), 11, t.textMuted).setDepth(2));
+      // a área de toque é a faixa inteira da HUD, sem vãos entre os frascos (o desenho continua pequeno, o dedo erra menos)
+      const zone = this.add.zone(x0 - SLOT_GAP / 2, 0, SLOT_W + SLOT_GAP, CONFIG.hudHeight).setOrigin(0).setInteractive({ useHandCursor: true });
       zone.on('pointerdown', () => this.game.events.emit(HUD_SELECT_BOMB, id));
     });
 
@@ -347,11 +347,24 @@ export class HudScene extends Phaser.Scene {
       const owned = canUseBomb(id);
       const isSel = id === selected;
       const x0 = SLOT_X0 + i * (SLOT_W + SLOT_GAP);
-      const y0 = ROW_B - SLOT_H / 2;
-      this.slotGfx.fillStyle(isSel ? 0x3a2f1c : 0x1d2321, 1);
-      this.slotGfx.fillRoundedRect(x0, y0, SLOT_W, SLOT_H, 4);
-      this.slotGfx.lineStyle(isSel ? 2 : 1, isSel ? t.gold : t.panelEdge, owned ? 1 : 0.5);
-      this.slotGfx.strokeRoundedRect(x0, y0, SLOT_W, SLOT_H, 4);
+      const y0 = ROW_B - SLOT_H / 2 - 1;
+      const el = ELEMENTS[BOMB_TYPES[id].element].color;
+      const g = this.slotGfx;
+      // fundo da tabuleta: o escolhido é mais claro e quente; o bloqueado, apagado
+      g.fillStyle(isSel ? 0x4a3a20 : 0x1d2321, 1).fillRoundedRect(x0, y0, SLOT_W, SLOT_H, 4);
+      g.fillStyle(0xffffff, isSel ? 0.1 : 0.04).fillRect(x0 + 2, y0 + 2, SLOT_W - 4, 2); // brilho do topo
+      // a barra da cor do elemento (o frasco se reconhece também pela cor, não só pelo desenho)
+      g.fillStyle(el, owned ? (isSel ? 1 : 0.6) : 0.2).fillRect(x0 + 3, y0 + SLOT_H - 5, SLOT_W - 6, 3);
+      g.lineStyle(isSel ? 2 : 1, isSel ? t.gold : t.panelEdge, owned ? 1 : 0.5).strokeRoundedRect(x0, y0, SLOT_W, SLOT_H, 4);
+      if (isSel) { // cantos dourados: o selo de "na mão"
+        g.fillStyle(t.goldBright, 1);
+        g.fillRect(x0 - 1, y0 - 1, 4, 2).fillRect(x0 - 1, y0 - 1, 2, 4);
+        g.fillRect(x0 + SLOT_W - 3, y0 - 1, 4, 2).fillRect(x0 + SLOT_W - 1, y0 - 1, 2, 4);
+      }
+      if (!owned) { // ainda não aprendida (ou bloqueada pela forma): uma tranca pequena
+        g.fillStyle(0x9a8a6a, 0.9).fillRect(x0 + SLOT_W - 12, y0 + 5, 7, 5).fillStyle(0x1d2321, 1).fillRect(x0 + SLOT_W - 10, y0 + 7, 3, 3);
+        g.lineStyle(1, 0x9a8a6a, 0.9).strokeRect(x0 + SLOT_W - 11, y0 + 2, 5, 4);
+      }
       this.slotIcons[i].setAlpha(owned ? 1 : 0.3);
       this.slotKeys[i].setAlpha(owned ? 1 : 0.5);
       this.slotKeys[i].setColor(isSel ? '#' + t.goldBright.toString(16).padStart(6, '0') : t.textMuted);
