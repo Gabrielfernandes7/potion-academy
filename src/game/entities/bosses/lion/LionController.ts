@@ -17,6 +17,7 @@ import {
   LION_DAMAGE, LION_EXPOSED_BONUS, LION_EXPOSED_MS, LION_HP, LION_NAME, LionSkill,
   dissolveTiles, lionCooldown, pickLionSkill,
 } from './rules';
+import { random } from '../../../rng';
 
 const GREEN = 0x9be564;
 
@@ -113,7 +114,7 @@ export class LionController extends BossBase {
     this.setPose('cast');
     this.scene.play('powerup');
     const target = this.targetTile();
-    const horizontal = Math.random() < 0.5;
+    const horizontal = random() < 0.5;
     const tiles = dissolveTiles(target, horizontal, this.phase === 2, this.isOpen);
     const ms = CONFIG.bossTelegraphMs + 200;
     this.telegraph(tiles, 'earth', target, ms);

@@ -18,6 +18,7 @@ import {
   MANDRAKE_DAMAGE, MANDRAKE_HP, MANDRAKE_NAME, MandrakeSkill,
   lineTiles, mandrakeCooldown, pickMandrakeSkill, ringTiles, shriekPlan,
 } from './rules';
+import { random } from '../../../rng';
 
 const GREEN = 0x9be564;
 const EXPOSED_MS = 2400;
@@ -85,7 +86,7 @@ export class MandrakeController extends BossBase {
     this.setPose('cast');
     this.scene.play('powerup');
     const target = this.targetTile();
-    const horizontal = Math.random() < 0.5;
+    const horizontal = random() < 0.5;
     const tiles = lineTiles(target.x, target.y, horizontal, this.isOpen);
     // furiosa: raízes nos dois sentidos, em cruz
     if (this.phase === 2) {
@@ -103,7 +104,7 @@ export class MandrakeController extends BossBase {
     this.setPose('cast');
     this.scene.play('powerup');
     const center0 = { x: this.gridX, y: this.gridY };
-    const gap = Math.random() < 0.5 ? 'vertical' : 'horizontal';
+    const gap = random() < 0.5 ? 'vertical' : 'horizontal';
     const rings = this.phase === 2 ? [2, 3, 4, 5] : [2, 3, 4];
     rings.forEach((d, i) => {
       const tiles = ringTiles(center0, d, this.isOpen, gap);

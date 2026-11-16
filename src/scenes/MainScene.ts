@@ -10,6 +10,8 @@ import { audio, SfxName } from '../audio/AudioEngine';
 import { ARENA_STAGE, arenaStageDef, duelStageDef } from '../game/arena';
 import { ObjectPool } from '../game/fx/objectPool';
 import { duelOutcome, validDuel } from '../game/duel';
+import { currentSeed, seedFromUrl, startRun } from '../game/rng';
+import { deathTip, type DeathCause } from '../game/deathTip';
 import { canUseBomb, isBlockedBomb, setArenaLoadout } from '../game/loadout';
 import { rooOriginY } from '../textures/rooGeometry';
 import type { Facing, Player, PowerupCounts, StageData } from '../game/types';
@@ -72,6 +74,7 @@ export class MainScene extends Phaser.Scene {
   gems = 0;
   bombType: BombId = 'normal';
   gameOver = false;
+  private lastCause: DeathCause | null = null; // o que machucou a Roo por último (dica da tela de derrota)
   won = false;
   player!: Player;
   lastDir = { x: 0, y: 0 };
@@ -130,6 +133,9 @@ export class MainScene extends Phaser.Scene {
   }
 
   init(data?: StageData): void {
+    // a semente vale para o mapa e os sorteios da fase: `?seed=123` na URL repete a mesma fase (bugs e equilíbrio)
+    startRun(data?.seed ?? seedFromUrl(window.location.search));
+    if (import.meta.env.DEV) console.info(`[semente] ${currentSeed()}`);
     this.arena = data?.arena ?? null;
     this.duel = this.arena && validDuel(this.arena, data?.duel) ? data?.duel ?? null : null;
     this.boss2 = null;
@@ -149,6 +155,7 @@ export class MainScene extends Phaser.Scene {
     this.gems = 0;
     this.bombType = start.bombType;
     this.gameOver = false;
+    this.lastCause = null;
     this.won = false;
     this.step = beginStep(0, 220);
     this.player = {
@@ -481,6 +488,7 @@ export class MainScene extends Phaser.Scene {
   damagePlayer(bypassInvuln = false, element?: ElementId): void {
     if (this.duel) return; // a Roo só assiste ao duelo
     if (!bypassInvuln && this.player.invulnerable > 0) return;
+    this.lastCause = bypassInvuln ? 'overtime' : element ?? 'contact';
     const raw = damageToRoo(element, this.forms.profile()); // transformada, o que a machuca muda
     const damage = this.forms.reduceDamage(raw); // com a defesa da forma de pé, o dano cai pela metade
     if (damage < raw) this.floatingText(this.player.gridX, this.player.gridY - 1, 'DEFENDIDO', '#bfe6ff', 11, 700);
@@ -754,6 +762,7 @@ export class MainScene extends Phaser.Scene {
       timeLeft: Math.max(0, this.timeLeft),
       stage: this.stage,
       arenaBoss: this.arena ? (this.boss?.name ?? this.def.name) : undefined,
+      ...(this.won ? {} : { cause: deathTip(this.lastCause).by, tip: deathTip(this.lastCause).tip }),
     });
   }
 

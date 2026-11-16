@@ -4,6 +4,7 @@ import { ElementId } from '../../../../config';
 import { damageTo } from '../../damage';
 import { PROFILES } from '../../profiles';
 import type { BossPhase, Tile } from '../common';
+import { random } from '../../../rng';
 
 export const CHIMERA_NAME = 'QUIMERA';
 export const CHIMERA_HP = PROFILES.chimera.maxHp;
@@ -25,7 +26,7 @@ export function chimeraCooldown(phase: BossPhase): number {
 
 // Sorteia a próxima habilidade: nunca repete a anterior. A Onda só existe na fase 2.
 export function pickChimeraSkill(
-  phase: BossPhase, last: ChimeraSkill | null, rng: () => number = Math.random,
+  phase: BossPhase, last: ChimeraSkill | null, rng: () => number = random,
 ): ChimeraSkill {
   const weights: Array<[ChimeraSkill, number]> = phase === 1
     ? [['spit', 0.4], ['drops', 0.35], ['slide', 0.25]]
@@ -62,7 +63,7 @@ export function spitTiles(
 // Escorrer: onde ela ressurge, perto da jogadora (de `minDist` a `maxDist` passos), nunca na casa dela.
 export function slideDestination(
   player: Tile, isOpen: (x: number, y: number) => boolean,
-  rng: () => number = Math.random, minDist = 2, maxDist = 4,
+  rng: () => number = random, minDist = 2, maxDist = 4,
 ): Tile | null {
   const pool: Tile[] = [];
   for (let dy = -maxDist; dy <= maxDist; dy++) {
@@ -124,7 +125,7 @@ export function stepsFrom(
 // precisa se mexer. Se nenhuma linha serve (ela está cercada de caixotes), a linha dela fica seca.
 export function waveGapRow(
   player: Tile, rows: number, isOpen: (x: number, y: number) => boolean,
-  rng: () => number = Math.random, maxSteps = 4,
+  rng: () => number = random, maxSteps = 4,
 ): number {
   const reach = stepsFrom(player, isOpen, maxSteps);
   const best = new Map<number, number>(); // linha -> menor distância até uma casa livre dela

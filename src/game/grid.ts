@@ -1,6 +1,7 @@
 // Regras da grade (puro, sem Phaser): que casa é muralha, onde nasce o caixote, onde fica a porta
 // e quando a Roo pode entrar numa casa. A MainScene desenha o que estes valores decidem.
 import { BLOCK, EMPTY, WALL } from '../config';
+import { random } from './rng';
 
 export type Tiles = number[][];
 export type BossSpawn = 'top' | 'bottom';
@@ -44,7 +45,7 @@ export function buildTiles(
   rows: number,
   blockChance: number,
   safe: (x: number, y: number) => boolean,
-  roll: () => number = Math.random,
+  roll: () => number = random,
 ): BuiltTiles {
   const tiles: Tiles = [];
   const blockKeys: string[] = [];

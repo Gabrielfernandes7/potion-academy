@@ -7,6 +7,7 @@
 import type { ElementId } from '../../../../config';
 import type { BossPhase } from '../common';
 import { PROFILES } from '../../profiles';
+import { random } from '../../../rng';
 
 export const OUROBOROS_NAME = 'OUROBOROS';
 export const OUROBOROS_HP = PROFILES.ouroboros.maxHp;
@@ -27,7 +28,8 @@ export function weakAt(index: number): ElementId {
 
 export const OUROBOROS_HIT_WEAK = 4; // dano no elemento da vez
 export const OUROBOROS_HIT_NEUTRAL = 1; // dano nos elementos vizinhos no ciclo
-// o oposto (dois passos adiante) não causa dano: ele o devora
+// o oposto (dois passos adiante) não causa dano: ele o devora e se cura
+export const OUROBOROS_DEVOUR_HEAL = 1;
 
 /** Dano de uma explosão do `element` quando a fraqueza do momento é `weak`. */
 export function ouroborosDamage(element: ElementId, weak: ElementId): number {
@@ -41,11 +43,11 @@ export function ouroborosDamage(element: ElementId, weak: ElementId): number {
 export type OuroborosSkill = 'ring' | 'bite' | 'cycle';
 
 export function ouroborosCooldown(phase: BossPhase): number {
-  return phase === 1 ? 3800 : 2600;
+  return phase === 1 ? 3200 : 2100;
 }
 
 /** Sorteia a próxima habilidade: nunca repete a anterior; o Ciclo só existe na fúria. */
-export function pickOuroborosSkill(phase: BossPhase, last: OuroborosSkill | null, rng: () => number = Math.random): OuroborosSkill {
+export function pickOuroborosSkill(phase: BossPhase, last: OuroborosSkill | null, rng: () => number = random): OuroborosSkill {
   const weights: Array<[OuroborosSkill, number]> = phase === 1
     ? [['ring', 0.55], ['bite', 0.45]]
     : [['ring', 0.35], ['bite', 0.3], ['cycle', 0.35]];

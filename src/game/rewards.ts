@@ -1,6 +1,7 @@
 import { BOMB_TYPES, ELEMENTS, type BombId } from '../config';
 import { POWERUP_COLORS } from '../textures/entities';
 import type { ChestOdd } from './stages/types';
+import { random } from './rng';
 
 // Tabela de drop: o que sai quando um bloco é destruído.
 // Probabilidades acumuladas: roll < limite => tipo.
@@ -60,7 +61,7 @@ export function pickupHalo(type: PickupType, potion?: BombId): number | undefine
   return PICKUP_HALO[type];
 }
 
-export function rollReward(roll: number = Math.random()): PickupType | null {
+export function rollReward(roll: number = random()): PickupType | null {
   for (const [limit, type] of REWARD_TABLE) {
     if (roll < limit) return type;
   }
@@ -68,7 +69,7 @@ export function rollReward(roll: number = Math.random()): PickupType | null {
 }
 
 // Que item o baú guarda, sorteado pela tabela da fase (roll em [0, 1)).
-export function rollChestPrize(table: ReadonlyArray<ChestOdd>, roll: number = Math.random()): PickupType {
+export function rollChestPrize(table: ReadonlyArray<ChestOdd>, roll: number = random()): PickupType {
   let acc = 0;
   for (const odd of table) {
     acc += odd.chance;

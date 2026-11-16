@@ -17,6 +17,7 @@ import { ENEMY_TYPES, EnemyKind } from './defs';
 import { PROFILES } from '../profiles';
 import { fxPool } from '../../fx/particlePool';
 import { EMBER_TICK_MS, PUDDLE_SLOW, emberDamage } from '../../forms';
+import { random } from '../../rng';
 
 // Movimento de cada inimigo: pulo vertical e horizontal do passo, e o balanço parado (altura e velocidade).
 const MOTION: Record<EnemyKind, { hopV: number; hopH: number; bob: number; bobMs: number }> = {
@@ -121,10 +122,10 @@ export class EnemySystem {
     s.tweens.add({ targets: sprite, scale: 1, duration: 250, ease: 'Back.easeOut' });
     const enemy: Enemy = {
       kind, gridX: x, gridY: y, sprite, moveTimer: def.moveInterval, alive: true,
-      moveT: def.stepMs, fromX: sprite.x, fromY: sprite.y, hopY: false, phase: Math.random() * 1000,
-      lashMs: CONFIG.flowerLashCycleMs * (0.5 + Math.random() * 0.5), fxCooldown: 0, trapMs: 0,
+      moveT: def.stepMs, fromX: sprite.x, fromY: sprite.y, hopY: false, phase: random() * 1000,
+      lashMs: CONFIG.flowerLashCycleMs * (0.5 + random() * 0.5), fxCooldown: 0, trapMs: 0,
       dir: Phaser.Utils.Array.GetRandom([{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }]), steps: 0,
-      actMs: def.behavior === 'dive' ? OWL_CYCLE_MS : MOLE_WALK_MS * (0.5 + Math.random() * 0.5), state: 'walk', target: null,
+      actMs: def.behavior === 'dive' ? OWL_CYCLE_MS : MOLE_WALK_MS * (0.5 + random() * 0.5), state: 'walk', target: null,
       loot: null, used: false,
       hp, maxHp: PROFILES[kind].maxHp, bar: s.add.graphics().setDepth(12).setVisible(false),
     };
@@ -410,7 +411,7 @@ export class EnemySystem {
     if (enemy.actMs > 0) return false;
     const me = s.playerTile();
     const spot = moleSpot(me, (x, y) => s.isFree(x, y) && !(x === s.doorX && y === s.doorY)
-      && !this.enemies.some(e => e !== enemy && e.alive && e.gridX === x && e.gridY === y), CONFIG.cols, CONFIG.rows, Math.random());
+      && !this.enemies.some(e => e !== enemy && e.alive && e.gridX === x && e.gridY === y), CONFIG.cols, CONFIG.rows, random());
     if (!spot) {
       enemy.actMs = 1500; // sem lugar para brotar agora: tenta de novo daqui a pouco
       return false;

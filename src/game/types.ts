@@ -103,5 +103,6 @@ export interface StageData {
   carry?: Carry;
   arena?: BossId; // treino na Arena contra este chefe (stage = ARENA_STAGE; nada vale para a campanha)
   form?: FormId; // na Arena: a transformação fixa em que a Roo luta (sem fim; só para treinar)
+  seed?: number; // semente dos sorteios da fase (game/rng.ts); sem ela, `?seed=` na URL ou uma nova
   duel?: BossId; // com `arena`: duelo de chefes (arena contra duel, sem a Roo; game/duel.ts)
 }

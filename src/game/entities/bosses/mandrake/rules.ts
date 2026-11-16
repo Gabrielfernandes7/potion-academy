@@ -4,6 +4,7 @@ import { ElementId } from '../../../../config';
 import { damageTo } from '../../damage';
 import type { BossPhase, Tile } from '../common';
 import { PROFILES } from '../../profiles';
+import { random } from '../../../rng';
 
 export const MANDRAKE_NAME = 'MANDRÁGORA';
 export const MANDRAKE_HP = PROFILES.mandrake.maxHp;
@@ -26,7 +27,7 @@ export function mandrakeCooldown(phase: BossPhase): number {
 // Sorteia a próxima habilidade: nunca repete a anterior. Grito e Brotos só na fase 2; Brotos
 // só se ainda couber outra flor (`canSprout`).
 export function pickMandrakeSkill(
-  phase: BossPhase, last: MandrakeSkill | null, canSprout: boolean, rng: () => number = Math.random,
+  phase: BossPhase, last: MandrakeSkill | null, canSprout: boolean, rng: () => number = random,
 ): MandrakeSkill {
   const weights: Array<[MandrakeSkill, number]> = phase === 1
     ? [['roots', 0.4], ['tide', 0.3], ['burrow', 0.3]]
@@ -76,7 +77,7 @@ export function ringTiles(
 // Grito: quase o mapa todo é perigoso. `safeCount` casas seguras ficam à vista, ao alcance da
 // jogadora (até `reach` passos), mas nunca a casa em que ela está agora: precisa se mexer.
 export function shriekPlan(
-  open: Tile[], player: Tile, safeCount: number, rng: () => number = Math.random, reach = 3,
+  open: Tile[], player: Tile, safeCount: number, rng: () => number = random, reach = 3,
 ): { danger: Tile[]; safe: Tile[] } {
   const dist = (t: Tile): number => Math.abs(t.x - player.x) + Math.abs(t.y - player.y);
   let pool = open.filter(t => dist(t) >= 1 && dist(t) <= reach);

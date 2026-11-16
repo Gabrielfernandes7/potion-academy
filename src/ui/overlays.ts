@@ -9,6 +9,8 @@ export interface GameOverData {
   blocksDestroyed: number;
   timeLeft: number;
   stage: number;
+  cause?: string; // derrota: o que levou a Roo ao chão (ex.: "uma explosão de fogo")
+  tip?: string; // e como evitar
   arenaBoss?: string; // luta de treino na Arena: o nome do chefe (muda o título e os números)
 }
 
@@ -45,6 +47,9 @@ export function showGameOver(d: GameOverData): void {
   const title = byId('go-title');
   const arena = d.arenaBoss !== undefined;
   title.textContent = arena ? (d.won ? 'ARENA VENCIDA' : 'DERROTA NA ARENA') : d.won ? 'JORNADA CUMPRIDA' : 'GAME OVER';
+  const tipEl = byId('go-tip');
+  tipEl.hidden = d.won || !d.tip;
+  if (!tipEl.hidden) tipEl.textContent = `Caiu por ${d.cause ?? 'um golpe'}. ${d.tip}`;
   const story = byId('go-story');
   story.hidden = !d.won || arena;
   title.className = d.won ? 'win' : 'lose';

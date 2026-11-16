@@ -7,6 +7,7 @@ import { ElementId } from '../../../../config';
 import { damageTo } from '../../damage';
 import { PROFILES } from '../../profiles';
 import type { BossPhase } from '../common';
+import { random } from '../../../rng';
 
 export const LION_NAME = 'LEÃO VERDE';
 export const LION_HP = PROFILES.lion.maxHp;
@@ -30,7 +31,7 @@ export const LION_EXPOSED_BONUS = 2;
 
 // Sorteia a próxima habilidade: nunca repete a anterior; o Rugido só existe na fase 2.
 export function pickLionSkill(
-  phase: BossPhase, last: LionSkill | null, rng: () => number = Math.random,
+  phase: BossPhase, last: LionSkill | null, rng: () => number = random,
 ): LionSkill {
   const weights: Array<[LionSkill, number]> = phase === 1
     ? [['pounce', 0.5], ['dissolve', 0.5]]

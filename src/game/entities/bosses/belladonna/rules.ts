@@ -2,6 +2,7 @@
 // O comportamento visual está em BelladonnaController.ts. Ver docs/03-mundo.md.
 import { CONFIG, ElementId } from '../../../../config';
 import type { BossPhase, Tile } from '../common';
+import { random } from '../../../rng';
 
 export type BossSkill = 'fire' | 'rain' | 'blink';
 
@@ -27,7 +28,7 @@ export function cooldownFor(phase: BossPhase): number {
 }
 
 // Sorteia a próxima habilidade: nunca repete a anterior; a chuva só existe na fase 2.
-export function pickBossSkill(phase: BossPhase, last: BossSkill | null, rng: () => number = Math.random): BossSkill {
+export function pickBossSkill(phase: BossPhase, last: BossSkill | null, rng: () => number = random): BossSkill {
   const weights: Array<[BossSkill, number]> = phase === 1
     ? [['fire', 0.65], ['blink', 0.35]]
     : [['fire', 0.4], ['rain', 0.35], ['blink', 0.25]];
@@ -44,7 +45,7 @@ export function pickBossSkill(phase: BossPhase, last: BossSkill | null, rng: () 
 // Alvos da chuva de gotas: sempre a casa do jogador (para obrigá-lo a se mexer) e outras perto dele.
 export function rainTargets(
   player: Tile, count: number, isOpen: (x: number, y: number) => boolean,
-  rng: () => number = Math.random, maxDist = 4,
+  rng: () => number = random, maxDist = 4,
 ): Tile[] {
   const others: Tile[] = [];
   for (let dy = -maxDist; dy <= maxDist; dy++) {
@@ -63,7 +64,7 @@ export function rainTargets(
 }
 
 // Onde ela reaparece depois do teletransporte: longe do jogador, se possível.
-export function blinkDestination(player: Tile, candidates: Tile[], minDist: number, rng: () => number = Math.random): Tile | null {
+export function blinkDestination(player: Tile, candidates: Tile[], minDist: number, rng: () => number = random): Tile | null {
   if (candidates.length === 0) return null;
   const far = candidates.filter(t => Math.abs(t.x - player.x) + Math.abs(t.y - player.y) >= minDist);
   const pool = far.length > 0 ? far : candidates;

@@ -14,8 +14,9 @@ import { dissolveTiles } from '../lion/rules';
 import { shriekPlan } from '../mandrake/rules';
 import { OuroborosLine, pickOuroborosLine } from './lines';
 import {
-  OUROBOROS_NAME, OUROBOROS_HP, OuroborosSkill, cycleMs, ouroborosCooldown, ouroborosDamage, pickOuroborosSkill, ringTiles, weakAt,
+  OUROBOROS_NAME, OUROBOROS_HP, OUROBOROS_DEVOUR_HEAL, OuroborosSkill, cycleMs, ouroborosCooldown, ouroborosDamage, pickOuroborosSkill, ringTiles, weakAt,
 } from './rules';
+import { random } from '../../../rng';
 
 const TEAL = 0x3fa58f;
 
@@ -69,9 +70,10 @@ export class OuroborosController extends BossBase {
   }
 
   protected onResisted(element: ElementId, damage: number): void {
-    // o oposto no ciclo: ele o devora
-    this.scene.floatingText(this.gridX, this.gridY, damage < 0 ? `+${-damage}` : 'DEVORADO', '#b0bec5');
-    void element;
+    // o oposto no ciclo: ele o devora e se cura um pouco (escolher o elemento errado tem custo)
+    void element; void damage;
+    this.scene.floatingText(this.gridX, this.gridY - 1, 'DEVORADO', '#b0bec5');
+    this.heal(OUROBOROS_DEVOUR_HEAL);
   }
 
   protected defeat(): void {
@@ -135,7 +137,7 @@ export class OuroborosController extends BossBase {
     this.scene.play('powerup');
     const target = this.targetTile();
     const element = this.weak;
-    const tiles = dissolveTiles(target, Math.random() < 0.5, this.phase === 2, this.isOpen);
+    const tiles = dissolveTiles(target, random() < 0.5, this.phase === 2, this.isOpen);
     const ms = CONFIG.bossTelegraphMs + 100;
     this.telegraph(tiles, element, target, ms);
     this.after(ms, () => { if (this.state !== 'defeated') this.explode(tiles, element); });
