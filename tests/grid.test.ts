@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BLOCK, EMPTY, WALL } from '../src/config';
 import {
-  buildTiles, cellKey, doorCell, isPassable, isSpawnSafe, isWallCell, tileAt,
+  buildTiles, cellKey, clampCenter, doorCell, isPassable, isSpawnSafe, isWallCell, tileAt,
 } from '../src/game/grid';
 
 const COLS = 15;
@@ -116,5 +116,18 @@ describe('isPassable', () => {
     expect(isPassable({ ...free, bomb: true })).toBe(false);
     expect(isPassable({ ...free, doorClosed: true })).toBe(false);
     expect(isPassable({ ...free, rootedEnemy: true })).toBe(false);
+  });
+});
+
+describe('clampCenter (avisos dentro da grade)', () => {
+  it('não mexe no que já cabe', () => {
+    expect(clampCenter(300, 100, 600)).toBe(300);
+  });
+  it('empurra para dentro na borda esquerda e na direita', () => {
+    expect(clampCenter(20, 120, 600)).toBe(63); // metade da largura + margem
+    expect(clampCenter(590, 120, 600)).toBe(537);
+  });
+  it('um texto mais largo que o espaço fica centrado', () => {
+    expect(clampCenter(10, 700, 600)).toBe(300);
   });
 });

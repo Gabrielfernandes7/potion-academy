@@ -97,3 +97,11 @@ export function isPassable(o: Occupancy): boolean {
 export function cellKey(x: number, y: number): string {
   return `${x},${y}`;
 }
+
+// Mantém um texto centrado em `center` (largura `width`) dentro de [0, limit]: um aviso largo perto da borda da
+// grade não sai da tela. Se o texto for mais largo que o espaço, fica centrado.
+export function clampCenter(center: number, width: number, limit: number, margin = 3): number {
+  const half = width / 2 + margin;
+  if (half * 2 >= limit) return limit / 2;
+  return Math.min(Math.max(center, half), limit - half);
+}

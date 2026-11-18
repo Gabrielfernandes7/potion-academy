@@ -38,7 +38,7 @@ import { ENEMY_TYPES, EnemyKind } from '../game/entities/enemies/defs';
 import { LAST_STAGE, stageDef } from '../game/stages/index';
 import { blockTextureOf } from '../game/stages/blockStyles';
 import { BossId, StageDef, StageTheme } from '../game/stages/types';
-import { buildTiles, cellKey, doorCell, isPassable, isSpawnSafe, tileAt } from '../game/grid';
+import { buildTiles, cellKey, clampCenter, doorCell, isPassable, isSpawnSafe, tileAt } from '../game/grid';
 import { advanceStep, beginStep, facingFor, lerp, moveDurationMs, tileCenter, walkTimeScale, type StepState } from '../game/movement';
 import { carryForward, doorOutcome, startingState } from '../game/stageFlow';
 
@@ -776,6 +776,8 @@ export class MainScene extends Phaser.Scene {
     // contorno escuro: o aviso lê sobre qualquer chão (o verde do jardim apagava o +1 e o -2)
     t.setStyle({ fontFamily: 'monospace', fontSize: `${size}px`, color, fontStyle: 'bold', stroke: '#14100c', strokeThickness: Math.max(3, Math.round(size / 4)) });
     t.setText(text).setPosition(gx * CONFIG.tile + CONFIG.tile / 2, gy * CONFIG.tile + CONFIG.tile / 2).setAlpha(1);
+    // um aviso largo perto da borda não sai da grade (o 'APRENDEU: ROO TERRA' da primeira coluna saía cortado)
+    t.setX(clampCenter(t.x, t.width, CONFIG.cols * CONFIG.tile));
     // sobe e some só depois da permanência
     this.tweens.add({
       targets: t, y: t.y - 24, alpha: 0,
