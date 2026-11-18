@@ -118,29 +118,29 @@ export function drawNewEnemies(make: MakeFn): void {
     }
   };
 
-  // Coruja do scriptorium: penas marrom-claras, olhos grandes e dourados, tufos nas orelhas e um livrinho nas garras.
+  // Coruja do scriptorium: penas marrom-escuras de ponta cremosa, olhos grandes e dourados, tufos nas orelhas e um livrinho nas garras.
   const owl = (g: Graphics, T: number, v: 0 | 1 | 2 = 0): void => {
     const c = T / 2;
     g.fillStyle(0x000000, 0.2); g.fillEllipse(c, T - 3, 20, 5);
     // asas abertas, atrás do corpo
     const wy = v === 2 ? 15 : 22; // mirando: as asas sobem
     g.fillStyle(OUT); g.fillEllipse(c - 15, wy, 12, 22); g.fillEllipse(c + 15, wy, 12, 22);
-    g.fillStyle(0x8a6d4b); g.fillEllipse(c - 15, wy, 10, 20); g.fillEllipse(c + 15, wy, 10, 20);
-    g.fillStyle(0xb99a73); g.fillRect(c - 18, wy - 8, 2, 14); g.fillRect(c + 16, wy - 8, 2, 14);
+    g.fillStyle(0x4f3626); g.fillEllipse(c - 15, wy, 10, 20); g.fillEllipse(c + 15, wy, 10, 20);
+    g.fillStyle(0x9a7458); g.fillRect(c - 18, wy - 8, 2, 14); g.fillRect(c + 16, wy - 8, 2, 14);
     // corpo
     g.fillStyle(OUT); g.fillEllipse(c, 23, 24, 28);
-    g.fillStyle(0xa98a63); g.fillEllipse(c, 23, 22, 26);
+    g.fillStyle(0x74503c); g.fillEllipse(c, 23, 22, 26);
     g.fillStyle(0xf0e2c4); g.fillEllipse(c, 28, 14, 14);
     // listras do peito
-    g.fillStyle(0xa98a63);
+    g.fillStyle(0x74503c);
     for (let i = 0; i < 3; i++) g.fillRect(c - 4, 25 + i * 3.4, 8, 1.4);
     // tufos das orelhas
     g.fillStyle(OUT); g.fillTriangle(c - 11, 6, c - 4, 12, c - 12, 14); g.fillTriangle(c + 11, 6, c + 4, 12, c + 12, 14);
-    g.fillStyle(0x8a6d4b); g.fillTriangle(c - 10, 8, c - 5, 12, c - 11, 13); g.fillTriangle(c + 10, 8, c + 5, 12, c + 11, 13);
+    g.fillStyle(0x4f3626); g.fillTriangle(c - 10, 8, c - 5, 12, c - 11, 13); g.fillTriangle(c + 10, 8, c + 5, 12, c + 11, 13);
     // olhos grandes
     g.fillStyle(OUT); g.fillCircle(c - 5.5, 16, 6); g.fillCircle(c + 5.5, 16, 6);
     if (v === 1) { // piscando
-      g.fillStyle(0xa98a63); g.fillCircle(c - 5.5, 16, 5); g.fillCircle(c + 5.5, 16, 5);
+      g.fillStyle(0x74503c); g.fillCircle(c - 5.5, 16, 5); g.fillCircle(c + 5.5, 16, 5);
       g.fillStyle(OUT); g.fillRect(c - 9.5, 16, 8, 1.6); g.fillRect(c + 1.5, 16, 8, 1.6);
     } else {
       const big = v === 2 ? 1.5 : 0; // mirando: olhos arregalados e dourados, brilhando
@@ -228,7 +228,7 @@ export function drawNewEnemies(make: MakeFn): void {
     g.fillStyle(0xfff0b0); g.fillTriangle(c + lean * 0.6, 5, c - 1, 7.6, c + 1, 7.6);
   };
 
-  // Ratinho do celeiro: pardo, de orelhas grandes e rosadas, cauda comprida; no segundo quadro mexe o focinho.
+  // Ratinho do celeiro: cor de palha, de orelhas grandes e rosadas, cauda comprida; no segundo quadro mexe o focinho.
   const rat = (g: Graphics, T: number, v: 0 | 1 | 2 = 0): void => {
     const c = T / 2;
     g.fillStyle(0x000000, 0.22); g.fillEllipse(c, T - 4, 22, 5);
@@ -237,11 +237,11 @@ export function drawNewEnemies(make: MakeFn): void {
     g.lineStyle(1, 0xe8a7a0); g.beginPath(); g.moveTo(c - 10, T - 9); g.lineTo(c - 17, T - 7); g.lineTo(c - 18, T - 13); g.strokePath();
     // corpo
     g.fillStyle(OUT); g.fillEllipse(c, T - 12, 24, 16);
-    g.fillStyle(0xa58a6e); g.fillEllipse(c, T - 12, 22, 14);
-    g.fillStyle(0xd9c3a3); g.fillEllipse(c + 1, T - 9, 14, 7);
+    g.fillStyle(0xd6b46e); g.fillEllipse(c, T - 12, 22, 14);
+    g.fillStyle(0xfbeccb); g.fillEllipse(c + 1, T - 9, 14, 7);
     // cabeça e orelhas
     g.fillStyle(OUT); g.fillCircle(c + 9, T - 17, 7); g.fillCircle(c + 4, T - 23, 5); g.fillCircle(c + 13, T - 23, 5);
-    g.fillStyle(0xa58a6e); g.fillCircle(c + 9, T - 17, 6);
+    g.fillStyle(0xd6b46e); g.fillCircle(c + 9, T - 17, 6);
     g.fillStyle(0xe8a7a0); g.fillCircle(c + 4, T - 23, 3.6); g.fillCircle(c + 13, T - 23, 3.6);
     // focinho, olho e bigodes
     const nose = v === 1 ? 1.2 : 0;

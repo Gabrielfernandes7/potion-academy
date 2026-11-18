@@ -350,3 +350,6 @@ Novas decisões entram no fim.
 
 ## Quimera e Leão Verde com silhuetas próprias (2026-11-18, issue #28)
 - **A Quimera deixou de ser um leão sentado de frente**, igual ao Leão Verde (mesma pose, só a cor mudava). Agora é uma criatura comprida e baixa, de quatro patas e de lado: cabeça de leão à frente, cabeça de bode com chifres saindo de um pescoço nas costas e cauda de serpente que sobe atrás. O Leão Verde continua sentado, compacto e de juba grande, e a cauda dele ficou baixa, enrolada no chão. Poses e chaves das texturas não mudaram.
+
+## Rato, toupeira e coruja separados por cor e valor (2026-11-18, issue #30)
+- As três silhuetas já eram diferentes, mas rato e coruja usavam o mesmo marrom-acinzentado. Agora cada um tem a sua família: **toupeira** cinza-azulada (fria, média), **coruja** marrom-escura com ventre cremoso (escura) e **ratinho** cor de palha (clara). Separam também em escala de cinza.
