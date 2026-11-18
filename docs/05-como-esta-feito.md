@@ -47,6 +47,6 @@ Cada fase é um objeto em `stages` de um capítulo (`src/game/stages/chapters/`)
 
 ## Cuidados
 
-- As chaves do `localStorage` (`bombroo_owned`, `bombroo_stages_completed`, `bombroo_forms`, `bombroo_arena_wins`...) estão em `src/storage.ts` e não podem mudar de nome sem migração. `bombroo_bank` (o ouro) não é mais usada.
+- As chaves do `localStorage` (`bombroo_owned`, `bombroo_stages_completed`, `bombroo_forms`, `bombroo_arena_wins`...) estão em `src/storage.ts` e não podem mudar de nome sem migração. `bombroo_bank` (o ouro) não é mais usada. O progresso pode ser salvo e carregado em arquivo JSON pelo menu (`src/saveFile.ts`, `src/ui/saveTransfer.ts`): carregar junta o arquivo ao progresso atual, sem apagar nada; arquivos de versão mais nova são recusados.
 - Os textos ficam em português e os números de equilíbrio ficam em `config.ts` e nas tabelas de `entities/profiles.ts`.
 - Testes ficam em `tests/`. Rode `npm run check` (tipos, testes e build) depois de cada mudança; `npm run smoke` confere o jogo num navegador.

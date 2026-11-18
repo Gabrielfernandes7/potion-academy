@@ -36,6 +36,14 @@ export function cleanStageList(raw: unknown): number[] {
 /** As chaves que formam o progresso do jogador (o que exportar e importar). As preferências de áudio ficam de fora. */
 export const SAVE_KEYS = [OWNED_KEY, STAGES_KEY, STAGES_SCHEMA_KEY, FORMS_KEY, ARENA_KEY] as const;
 
+/** O progresso numa forma só: poções, fases (na numeração atual), formas aprendidas e chefes vencidos na Arena. */
+export interface SaveData {
+  owned: BombId[];
+  stages: number[];
+  forms: string[];
+  arena: string[];
+}
+
 export const Storage = {
   get<T>(k: string, def: T): T {
     try {
@@ -159,4 +167,36 @@ export function learnForm(f: FormId): void {
   if (have.includes(f)) return;
   have.push(f);
   Storage.set(FORMS_KEY, have);
+}
+
+/** Uma cópia do progresso atual (já migrado para a numeração atual das fases). */
+export function snapshotSave(): SaveData {
+  loadSave();
+  return {
+    owned: [...owned],
+    stages: cleanStageList(Storage.get<unknown>(STAGES_KEY, [])),
+    forms: cleanStrings(Storage.get<unknown>(FORMS_KEY, [])),
+    arena: cleanStrings(Storage.get<unknown>(ARENA_KEY, [])),
+  };
+}
+
+/**
+ * Junta um progresso ao atual (união: nada do que o jogador já tem se perde). `data` deve estar na numeração atual das
+ * fases e já validado (veja saveFile.ts). Devolve quantos itens novos entraram.
+ */
+export function mergeSave(data: SaveData): number {
+  loadSave();
+  const before = snapshotSave();
+  const union = <T>(a: readonly T[], b: readonly T[]): T[] => [...new Set([...a, ...b])];
+  owned = union(before.owned, data.owned).sort((a, b) => BOMB_ORDER.indexOf(a) - BOMB_ORDER.indexOf(b));
+  const stages = union(before.stages, data.stages).sort((a, b) => a - b);
+  const forms = union(before.forms, data.forms);
+  const arena = union(before.arena, data.arena);
+  Storage.set(OWNED_KEY, owned);
+  Storage.set(STAGES_KEY, stages);
+  Storage.set(STAGES_SCHEMA_KEY, STAGE_SCHEMA);
+  Storage.set(FORMS_KEY, forms);
+  Storage.set(ARENA_KEY, arena);
+  return (owned.length - before.owned.length) + (stages.length - before.stages.length)
+    + (forms.length - before.forms.length) + (arena.length - before.arena.length);
 }

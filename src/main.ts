@@ -16,6 +16,7 @@ import { bindMenuButtons, isMenuVisible } from './ui/menu';
 import { closeMusicRoom, initMusicRoom, isMusicRoomOpen, openMusicRoom } from './ui/musicRoom';
 import { bindHelp } from './ui/help';
 import { bindArena, isArenaOpen, openArena } from './ui/arena';
+import { bindSaveTransfer } from './ui/saveTransfer';
 
 function setupLayout(): void {
   const root = document.documentElement;
@@ -110,6 +111,7 @@ function bindButtons(): void {
   const openManuscript = (): void => { location.assign('/manuscrito.html'); };
   bindMenuButtons({ play, music: openMusicRoom, map: showMap, arena: openArena, manuscript: openManuscript });
   bindArena();
+  bindSaveTransfer();
   byId('music-overlay').addEventListener('keydown', e => { if (e.key === 'Escape') closeMusicRoom(); });
   bindHelp();
   // botões do topo não ficam com o foco: senão Espaço/Enter no jogo os apertariam de novo

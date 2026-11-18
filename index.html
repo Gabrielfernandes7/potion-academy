@@ -44,6 +44,12 @@
         <a class="big-btn alt" id="menu-book" href="/livro.html">O LIVRO</a>
         <p class="menu-hint">Pressione <kbd>Enter</kbd> para jogar</p>
       </div>
+      <div class="menu-save">
+        <button class="save-btn" id="menu-save-export" type="button" title="Baixa o seu progresso num arquivo, para guardar ou levar a outro navegador">Salvar progresso</button>
+        <button class="save-btn" id="menu-save-import" type="button" title="Junta o progresso de um arquivo salvo ao que você já tem">Carregar progresso</button>
+        <input id="menu-save-file" type="file" accept="application/json,.json" hidden>
+        <p class="menu-save-msg" id="menu-save-msg" role="status" aria-live="polite"></p>
+      </div>
     </div>
   </div>
 
