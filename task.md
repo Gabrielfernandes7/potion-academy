@@ -36,7 +36,7 @@ Feito nesta rodada:
 
 Pendente, em ordem (os itens de `improv.md` que ainda faltam: objetivos alternativos, estrelas por fase, dificuldade selecionável, hit-stop, 4 botões no toque, protótipo de vapor e lama):
 1. **Versão global do save** (um campo `bombroo_version` com migração) e testes de saves antigos; exportar/importar progresso fica para depois.
-2. **Mobile:** texto da HUD com 6 a 7 px num celular em pé; ajuste de escala; cor não pode ser o único indicador do elemento; testar em celular real; PWA.
+2. **Mobile:** ~~texto da HUD com 6 a 7 px num celular em pé~~ (feito em 2026-11-18, issue #21: números dos frascos e tecla da forma em 15, nome do chefe em 12, tempo em 24; ficam com 7 a 9 px em 390 px de largura); cor não pode ser o único indicador do elemento; testar em celular real; PWA.
 3. **Refatoração** (só com o jogo aberto num navegador para conferir; hoje não tive um): extrair `PlayerController` da `MainScene` (913 linhas), depois a preparação das fases (`StageRuntime`), separar os efeitos visuais das regras em `RooFormSystem` (917) e modularizar o `EnemySystem` (579) só se precisar. Sem ECS.
 4. ~~Semente por partida~~ feita: `game/rng.ts`, `?seed=123` na URL (o console do dev mostra a semente), `tests/rng.test.ts` e contrato em `tests/contracts/rng.test.ts`. Falta: mostrar a semente na tela de pausa e o desafio diário.
 5. **Docs:** ADRs em `docs/adr/`; ampliar os testes de contrato (links entre docs, ids de chefes e inimigos, controles de cada forma, referências a mecânicas removidas, números de vida e dano).

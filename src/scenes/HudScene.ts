@@ -25,6 +25,11 @@ const HP_X = 30;
 const HP_Y = ROW_A - 5;
 const HP_W = 134;
 const HP_H = 10;
+// Tamanhos de texto em px do canvas. O canvas é reduzido para caber (num celular em pé ele fica a ~0,6x), então o que
+// é 11 aqui aparece com ~6,6 px na tela: por isso os textos pequenos da HUD são generosos (docs/21 e issue #21).
+const FONT_SLOT_KEY = 15; // o número de cada frasco
+const FONT_FIRE_KEY = 15; // a tecla que vale agora no medidor da Roo
+const FONT_BOSS = 12;     // nome do chefe (mais que isso encosta na barra, no duelo)
 const SEP_1 = 188; // filetes entre as zonas
 const SEP_2 = 384;
 const TIMER_X = 204; // ampulheta e tempo
@@ -130,15 +135,15 @@ export class HudScene extends Phaser.Scene {
 
     // tempo
     this.add.image(TIMER_X, ROW_A, 'hud_hourglass').setDepth(2);
-    this.timerText = this.text(TIMER_X + 16, ROW_A, '90', 22, t.info, true).setDepth(2);
+    this.timerText = this.text(TIMER_X + 16, ROW_A, '90', 24, t.info, true).setDepth(2);
     // frasco vazio: só aparece na última fase (lembrança do fim)
     this.emptyFlask = this.add.image(TIMER_X + 82, ROW_A, 'hud_flask_empty').setDepth(2).setVisible(false);
 
     // GEMAS em losangos; na fase do chefe, a vida dele ocupa o lugar
     this.gemGfx = this.add.graphics().setDepth(2);
     this.bossGfx = this.add.graphics().setDepth(2).setVisible(false);
-    this.bossName = this.text(BOSS_X, ROW_A - 7, '', 10, '#9be564').setDepth(2).setVisible(false);
-    this.bossName2 = this.text(BOSS_X, ROW_B - 9, '', 10, '#9be564').setDepth(2).setVisible(false);
+    this.bossName = this.text(BOSS_X, ROW_A - 7, '', FONT_BOSS, '#9be564').setDepth(2).setVisible(false);
+    this.bossName2 = this.text(BOSS_X, ROW_B - 9, '', FONT_BOSS, '#9be564').setDepth(2).setVisible(false);
   }
 
   private createRowB(): void {
@@ -148,7 +153,7 @@ export class HudScene extends Phaser.Scene {
     BOMB_ORDER.forEach((id, i) => {
       const x0 = SLOT_X0 + i * (SLOT_W + SLOT_GAP);
       this.slotIcons.push(this.add.image(x0 + 13, ROW_B - 2, 'bomb_' + id).setScale(0.62).setDepth(2));
-      this.slotKeys.push(this.text(x0 + 27, ROW_B + 5, String(i + 1), 11, t.textMuted).setDepth(2));
+      this.slotKeys.push(this.text(x0 + 26, ROW_B + 5, String(i + 1), FONT_SLOT_KEY, t.textMuted).setDepth(2));
       // a área de toque é a faixa inteira da HUD, sem vãos entre os frascos (o desenho continua pequeno, o dedo erra menos)
       const zone = this.add.zone(x0 - SLOT_GAP / 2, 0, SLOT_W + SLOT_GAP, CONFIG.hudHeight).setOrigin(0).setInteractive({ useHandCursor: true });
       zone.on('pointerdown', () => this.game.events.emit(HUD_SELECT_BOMB, id));
@@ -157,7 +162,7 @@ export class HudScene extends Phaser.Scene {
     // medidor da Roo Fire: chama, 4 degraus e a tecla que vale agora
     this.fireGfx = this.add.graphics().setDepth(2);
     this.fireKey = this.add.text(FIRE_BAR_X + 4 * FIRE_SEG_W + 3 * FIRE_SEG_GAP + 10, ROW_B, '', {
-      fontFamily: t.fontBody, fontSize: '11px', fontStyle: 'bold', color: '#ffe9c4',
+      fontFamily: t.fontBody, fontSize: `${FONT_FIRE_KEY}px`, fontStyle: 'bold', color: '#ffe9c4',
     }).setOrigin(0, 0.5).setResolution(2).setDepth(2);
 
     // frascos já colocados: uma bolinha por poção, na cor do elemento escolhido
