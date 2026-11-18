@@ -25,7 +25,7 @@ npm run test       # Vitest (tests/)
 
 Em `npm run dev`, o jogo fica exposto em `window.__game` (só em desenvolvimento) para inspeção por console/testes. Abra `/?touch` para ver os controles de toque no desktop.
 
-Game state is persisted in `localStorage` under these keys: `bombroo_owned` (bombas/poções possuídas), `bombroo_stages_completed` + `bombroo_stages_schema` (fases), `bombroo_forms` (formas aprendidas), `bombroo_arena_wins` (chefes vencidos na Arena). The old `bombroo_bank` (OURO, removido do jogo) is no longer read or written. **Do not rename these keys without a migration**: existing players would lose progress. They are centralized in `src/storage.ts`.
+Game state is persisted in `localStorage` under these keys: `bombroo_owned` (bombas/poções possuídas), `bombroo_stages_completed` + `bombroo_stages_schema` (fases), `bombroo_forms` (formas aprendidas), `bombroo_arena_wins` (chefes vencidos na Arena), `bombroo_save_version` (versão do formato do save; migração em `storage.ts`). The old `bombroo_bank` (OURO, removido do jogo) is no longer read or written. **Do not rename these keys without a migration**: existing players would lose progress. They are centralized in `src/storage.ts`.
 
 ## Project Layout
 

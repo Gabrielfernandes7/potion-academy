@@ -7,6 +7,10 @@ import { STAGE_SCHEMA, migrateCompleted } from './game/stages/migration';
 import { FORM_LESSONS, learnedAfter, type LessonForm } from './game/learning';
 import type { FormId } from './game/forms/types';
 
+// Versão do formato do save inteiro (as seis chaves juntas). A numeração das fases tem a sua própria versão
+// (STAGES_SCHEMA_KEY). Ao mudar o formato de uma chave, aumente SAVE_VERSION e acrescente o passo em `SAVE_STEPS`.
+export const SAVE_VERSION = 1;
+const SAVE_VERSION_KEY = 'bombroo_save_version';
 const OWNED_KEY = 'bombroo_owned';
 const STAGES_KEY = 'bombroo_stages_completed';
 const STAGES_SCHEMA_KEY = 'bombroo_stages_schema'; // versão da numeração das fases (game/stages/migration.ts)
@@ -29,6 +33,9 @@ export function cleanStageList(raw: unknown): number[] {
   return out;
 }
 
+/** As chaves que formam o progresso do jogador (o que exportar e importar). As preferências de áudio ficam de fora. */
+export const SAVE_KEYS = [OWNED_KEY, STAGES_KEY, STAGES_SCHEMA_KEY, FORMS_KEY, ARENA_KEY] as const;
+
 export const Storage = {
   get<T>(k: string, def: T): T {
     try {
@@ -47,10 +54,43 @@ export const Storage = {
   },
 };
 
-let owned = cleanStrings(Storage.get<unknown>(OWNED_KEY, ['normal']), BOMB_ORDER) as BombId[];
-if (!owned.includes('normal')) owned.push('normal');
+// O save é carregado (e migrado) na primeira vez que alguém o usa, não ao importar o módulo: assim os testes
+// preparam o localStorage antes e importar `storage.ts` não grava nada.
+let owned: BombId[] = [];
+let loaded = false;
+
+// SAVE_STEPS[v] leva o save da versão v para a v + 1. Hoje só existe a versão 1 (a versão 0 é o save de antes de ela
+// existir, que tem o mesmo formato): o passo 0 só carimba. Veja também game/stages/migration.ts, para as fases.
+const SAVE_STEPS: Record<number, () => void> = {
+  0: () => {},
+};
+
+function loadSave(): void {
+  if (loaded) return;
+  loaded = true;
+  owned = cleanStrings(Storage.get<unknown>(OWNED_KEY, ['normal']), BOMB_ORDER) as BombId[];
+  if (!owned.includes('normal')) owned.push('normal');
+  migrateStageProgress();
+  stampSaveVersion();
+}
+
+// Um save mais novo que este jogo (versão maior) fica como está: não migramos nem rebaixamos o que não conhecemos.
+function stampSaveVersion(): void {
+  const stored = Storage.get<unknown>(SAVE_VERSION_KEY, 0);
+  const version = typeof stored === 'number' && Number.isInteger(stored) && stored >= 0 ? stored : 0;
+  if (version >= SAVE_VERSION) return;
+  for (let v = version; v < SAVE_VERSION; v++) SAVE_STEPS[v]();
+  Storage.set(SAVE_VERSION_KEY, SAVE_VERSION);
+}
+
+/** Só para testes: esquece o que foi carregado, para ler o localStorage de novo. */
+export function resetSaveCache(): void {
+  loaded = false;
+  owned = [];
+}
 
 export function hasBombType(t: BombId): boolean {
+  loadSave();
   return owned.includes(t);
 }
 
@@ -63,20 +103,22 @@ export function grantBombType(t: BombId): void {
 
 // Rastreamento de fases concluídas. A numeração das fases tem versão: se o jogo inseriu fases desde
 // a última vez, o progresso salvo é renumerado uma vez, ao carregar.
-(function migrateStageProgress(): void {
+function migrateStageProgress(): void {
   const version = Storage.get<unknown>(STAGES_SCHEMA_KEY, null);
   if (version === STAGE_SCHEMA) return;
   const list = cleanStageList(Storage.get<unknown>(STAGES_KEY, []));
   Storage.set(STAGES_KEY, migrateCompleted(list, typeof version === 'number' ? version : 1));
   Storage.set(STAGES_SCHEMA_KEY, STAGE_SCHEMA);
-})();
+}
 
 export function isStageCompleted(stage: number): boolean {
+  loadSave();
   const completed = cleanStageList(Storage.get<unknown>(STAGES_KEY, []));
   return completed.includes(stage);
 }
 
 export function markStageCompleted(stage: number): void {
+  loadSave();
   const completed = cleanStageList(Storage.get<unknown>(STAGES_KEY, []));
   if (!completed.includes(stage)) {
     completed.push(stage);
@@ -88,10 +130,12 @@ export function markStageCompleted(stage: number): void {
 
 // Vitórias na Arena de treino: guardam só o id de cada chefe vencido (abre a página dele no Manuscrito).
 export function arenaWins(): string[] {
+  loadSave();
   return cleanStrings(Storage.get<unknown>(ARENA_KEY, []));
 }
 
 export function markArenaWin(boss: string): void {
+  loadSave();
   const wins = arenaWins();
   if (!wins.includes(boss)) {
     wins.push(boss);
@@ -102,12 +146,14 @@ export function markArenaWin(boss: string): void {
 // Transformações: o fogo é de nascença. As outras são aprendidas na lição da fase (game/learning.ts) e ficam
 // guardadas; quem já concluiu a fase da lição conta como tendo aprendido (saves antigos não perdem nada).
 export function knowsForm(f: FormId): boolean {
+  loadSave();
   if (f === 'fire') return true;
   if (cleanStrings(Storage.get<unknown>(FORMS_KEY, [])).includes(f)) return true;
   return isStageCompleted(FORM_LESSONS[f as LessonForm].stage);
 }
 
 export function learnForm(f: FormId): void {
+  loadSave();
   if (f === 'fire') return;
   const have = cleanStrings(Storage.get<unknown>(FORMS_KEY, []));
   if (have.includes(f)) return;

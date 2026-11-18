@@ -114,3 +114,37 @@ describe('storage (dados inválidos)', () => {
     expect(cleanStrings(['a', 'b', 'a', 3], ['a'])).toEqual(['a']);
   });
 });
+
+describe('storage: versão do save e importação sem efeitos colaterais', () => {
+  beforeEach(() => { vi.resetModules(); });
+
+  it('importar o módulo não lê nem grava nada', async () => {
+    installLocalStorage();
+    await import('../src/storage');
+    expect(localStorage.getItem('bombroo_save_version')).toBeNull();
+    expect(localStorage.getItem('bombroo_stages_schema')).toBeNull();
+  });
+
+  it('o primeiro uso carimba a versão do save', async () => {
+    installLocalStorage();
+    const s = await import('../src/storage');
+    s.hasBombType('normal');
+    expect(JSON.parse(localStorage.getItem('bombroo_save_version')!)).toBe(s.SAVE_VERSION);
+  });
+
+  it('um save de versão mais nova não é rebaixado', async () => {
+    installLocalStorage({ bombroo_save_version: '99', bombroo_owned: '["normal","mega"]' });
+    const s = await import('../src/storage');
+    expect(s.hasBombType('mega')).toBe(true);
+    expect(JSON.parse(localStorage.getItem('bombroo_save_version')!)).toBe(99);
+  });
+
+  it('resetSaveCache faz ler o localStorage de novo', async () => {
+    installLocalStorage();
+    const s = await import('../src/storage');
+    expect(s.hasBombType('mega')).toBe(false);
+    localStorage.setItem('bombroo_owned', '["normal","mega"]');
+    s.resetSaveCache();
+    expect(s.hasBombType('mega')).toBe(true);
+  });
+});
