@@ -122,3 +122,11 @@ Regra de nome: `papel_nome[_estado][_quadro]`, por exemplo `enemy_ghost`, `boss_
 7. Atualize esta tabela e a foto `docs/img/sprites.png`.
 
 Dica: desenhe em camadas, do fundo para a frente (sombra, corpo, roupa, rosto, acessórios). O que é desenhado depois cobre o que veio antes.
+
+## Legibilidade a 40 px (`npm run silhouettes`)
+
+`scripts/silhouettes.cjs` abre o catálogo de sprites num navegador e confere os chefes e os inimigos:
+- **Silhueta:** a sobreposição (IoU) das máscaras de cada par no mesmo quadro. É uma guarda contra regressão, não uma prova: acima de 0,72 avisa (diferencie também pela cor); acima de 0,80 (chefes) ou 0,85 (inimigos) falha. Medido em 2026-11-18: pior par de chefes 0,77 (Belladona e Leão Verde), de inimigos 0,82 (toupeira e gosma, que se distinguem pela cor).
+- **Contorno:** sobre os quatro chãos do jogo (Vale, Torre e jardim), pelo menos 30% da borda de cada criatura precisa ter contraste de 1,6:1 com o chão. Todos os chefes têm contorno escuro de 1 px (dado em `textures/index.ts`).
+- `npm run silhouettes -- --sheet` grava `silhuetas.png`, a folha de silhuetas em preto e branco, para olhar a olho nu.
+- **Fantasma pálido (issue #31):** medido, a borda dele passa nos quatro chãos (100%, 100%, 85% e 99%); não precisou de mudança de desenho.
