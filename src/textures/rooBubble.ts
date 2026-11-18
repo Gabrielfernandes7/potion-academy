@@ -1,5 +1,5 @@
 // Roo bebê dentro da bolha iridescente (capítulo "A bolha", docs/12-historia.md; GIFs em docs/img/).
-// Mesma Roo do jogo (paleta de roo.ts: pelo laranja, orelhas altas com miolo claro, chapéu e manto roxos com
+// Mesma Roo do jogo (paleta de roo.ts: pelo laranja, orelhas caídas com miolo claro, chapéu e manto roxos com
 // ferragens douradas, olhos escuros, contorno escuro), só que bebê: cabeça grande, corpo pequeno, chapéu e manto miúdos.
 // Pixel art desenhada em código, num canvas de 112x112, em laço de BUBBLE_FRAMES quadros. Duas poses:
 //   'fetal'   : deitadinha de lado, em posição fetal, dormindo (sem chapéu)
@@ -201,6 +201,15 @@ function drawFetal(c: Ctx, k: number): void {
   for (const hx of [-13, -11, -6, -4]) rect(c, FUR_LIGHT, hx, 0 + hem + (hx > -8 ? 1 : 0), 1, 1);
 }
 
+// Orelha caída: nasce no alto do lado da cabeça e pende junto do rosto, com o rosado por dentro e a ponta mais escura.
+function droopEar(c: Ctx, x: number, y: number, side: -1 | 1, flick: number): void {
+  const sx = x + side * 2;
+  shape(c, EAR, x, y, 3, 3);                       // a raiz, no alto da cabeça
+  shape(c, EAR, sx, y + 8 + flick, 4, 9);          // o corpo, pendendo
+  ellipse(c, EAR_IN, sx - side, y + 8 + flick, 1, 6);
+  ellipse(c, EAR_TIP, sx, y + 15 + flick, 3, 2);   // a ponta
+}
+
 // ---------------------------------------------------------------- pose observando
 function drawObserve(c: Ctx, k: number): void {
   const t = k / BUBBLE_FRAMES;
@@ -218,17 +227,6 @@ function drawObserve(c: Ctx, k: number): void {
   // rabo
   shape(c, FUR_DARK, 70, 78, 8, 3);
   ellipse(c, FUR_LIGHT, 74, 76, 2, 1);
-
-  // orelhas altas
-  for (const s of [-1, 1] as const) {
-    const flick = s === 1 ? earFlick : 0;
-    const ex = 48 + s * 10 + hx;
-    shape(c, EAR, ex, 24, 4, 9);
-    shape(c, EAR, ex + s, 14 - flick, 3, 6);
-    ellipse(c, EAR_IN, ex, 25, 2, 7);
-    ellipse(c, EAR_IN, ex + s, 15 - flick, 1, 4);
-    ellipse(c, EAR_TIP, ex + s, 9 - flick, 2, 1);
-  }
 
   // corpo e manto: abas dos dois lados, barriga clara no meio
   shape(c, FUR, 48, 64, 12, 12 + breathe);
@@ -263,6 +261,9 @@ function drawObserve(c: Ctx, k: number): void {
   // cabeça grande
   shape(c, HEAD, 48 + hx, 42, 16, 13);
   ellipse(c, FUR_LIGHT, 42 + hx, 35, 7, 3);
+
+  // orelhas caídas de cachorro, uma de cada lado do rosto (antes eram altas e retas e liam como coelho)
+  for (const s of [-1, 1] as const) droopEar(c, 48 + hx + s * 16, 36, s, s === 1 ? earFlick : 0);
 
   // chapeuzinho, meio de lado, com a faixa dourada
   hat(c, 48 + hx + 2, 21, 9, 11, 3);

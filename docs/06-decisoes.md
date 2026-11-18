@@ -353,3 +353,6 @@ Novas decisões entram no fim.
 
 ## Rato, toupeira e coruja separados por cor e valor (2026-11-18, issue #30)
 - As três silhuetas já eram diferentes, mas rato e coruja usavam o mesmo marrom-acinzentado. Agora cada um tem a sua família: **toupeira** cinza-azulada (fria, média), **coruja** marrom-escura com ventre cremoso (escura) e **ratinho** cor de palha (clara). Separam também em escala de cinza.
+
+## A Roo da bolha também é um cachorro (2026-11-18, issue #33)
+- A Roo andando já tinha orelhas caídas, mas a pose "observando" da bolha (a Roo bebê no Livro e no final) ainda tinha orelhas altas e retas, que liam como coelho. Agora as duas orelhas caem junto do rosto, como na Roo do jogo. As chaves das texturas (`roo_bubble_*`) não mudaram.
