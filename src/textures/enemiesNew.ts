@@ -179,53 +179,64 @@ export function drawNewEnemies(make: MakeFn): void {
     g.fillStyle(0xe4edf5); g.fillCircle(c - 15, T - 12, 1.8); g.fillCircle(c + 15, T - 15, 1.4);
   };
 
-  // Sentinela de cera: um cavaleiro-vela. Cabeça de cera derretida com viseira de olhos âmbar e o pavio aceso no topo,
-  // corpo de vela com um cinto de latão e gotas escorrendo, um escudo-castiçal e os pés numa poça de cera.
-  // Tudo cabe nos 40 px: no segundo quadro a chama se inclina e as gotas descem.
+  // Sentinela de cera: uma vela que anda. O corpo é o toco de vela, mais estreito, com uma cabeça de cera derretida
+  // mais larga em cima, de onde a cera escorre pelos lados em gotas de comprimentos diferentes (é isso que lê como
+  // "cera", e não como um robô); dois olhos fundos, âmbar, o pavio aceso no topo e um pires de latão como escudo.
+  // Os pés se derretem na poça. Tudo cabe nos 40 px: no segundo quadro a chama se inclina e as gotas descem.
   const sentinel = (g: Graphics, T: number, v: 0 | 1 | 2 = 0): void => {
     const c = T / 2;
-    const WAX = 0xf1e6c4, LIGHT = 0xfffbe8, SHADE = 0xd2c08c, DEEP = 0xb7a56f, BRASS = 0xb58a2f, BRASS_L = 0xe6c15a;
+    const WAX = 0xf3e7bd, LIGHT = 0xfffbe8, SHADE = 0xd6c186, DEEP = 0xb7a56f, BRASS = 0xb58a2f, BRASS_L = 0xe6c15a;
     const drip = v === 1 ? 1.5 : 0;
-    // poça de cera aos pés
-    g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 2.5, 28, 5);
-    g.fillStyle(DEEP); g.fillEllipse(c, T - 4, 26, 6);
-    g.fillStyle(SHADE); g.fillEllipse(c - 1, T - 4.6, 20, 4);
-    // pés
-    g.fillStyle(OUT); g.fillRoundedRect(c - 10, 31, 8, 7, 2); g.fillRoundedRect(c + 2, 31, 8, 7, 2);
-    g.fillStyle(WAX); g.fillRoundedRect(c - 9, 32, 6, 5, 1.5); g.fillRoundedRect(c + 3, 32, 6, 5, 1.5);
-    // corpo de vela
-    g.fillStyle(OUT); g.fillRoundedRect(c - 11, 19, 22, 15, 3);
-    g.fillStyle(WAX); g.fillRoundedRect(c - 10, 20, 20, 13, 2);
-    g.fillStyle(SHADE); g.fillRect(c + 4, 21, 6, 12);
-    g.fillStyle(LIGHT); g.fillRect(c - 9, 21, 2, 10);
-    // cinto de latão
-    g.fillStyle(OUT); g.fillRect(c - 11, 27, 22, 4);
-    g.fillStyle(BRASS); g.fillRect(c - 10, 28, 20, 2); g.fillStyle(BRASS_L); g.fillRect(c - 10, 28, 20, 1); g.fillStyle(OUT); g.fillRect(c - 1.5, 27.4, 3, 3);
-    // gotas escorrendo pelo peito
-    g.fillStyle(WAX); g.fillRect(c - 6, 20, 3, 5 + drip); g.fillCircle(c - 4.5, 25 + drip, 1.8);
-    g.fillRect(c + 1, 20, 2.4, 3 + drip); g.fillCircle(c + 2.2, 23 + drip, 1.4);
-    // braço direito (livre) e braço esquerdo com o escudo-castiçal
-    g.fillStyle(OUT); g.fillRoundedRect(c + 10, 21, 6, 10, 2);
-    g.fillStyle(WAX); g.fillRoundedRect(c + 11, 22, 4, 8, 1.5); g.fillStyle(SHADE); g.fillRect(c + 13.4, 23, 1.6, 6);
+    // poça de cera aos pés (o corpo se derrete nela)
+    g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 2.5, 30, 5);
+    g.fillStyle(DEEP); g.fillEllipse(c, T - 4, 28, 6.5);
+    g.fillStyle(SHADE); g.fillEllipse(c - 1, T - 4.6, 22, 4.4);
+    // base alargada do toco
+    g.fillStyle(OUT); g.fillRoundedRect(c - 11, 31, 22, 6, 3);
+    g.fillStyle(WAX); g.fillRoundedRect(c - 10, 32, 20, 4, 2);
+    g.fillStyle(SHADE); g.fillRect(c + 4, 32, 6, 4);
+    // toco de vela (mais estreito que a cabeça)
+    g.fillStyle(OUT); g.fillRoundedRect(c - 9, 17, 18, 17, 3);
+    g.fillStyle(WAX); g.fillRoundedRect(c - 8, 18, 16, 15, 2);
+    g.fillStyle(SHADE); g.fillRect(c + 3, 19, 5, 13);
+    g.fillStyle(LIGHT); g.fillRect(c - 6.5, 19, 2, 11);
+    // um anel de latão no meio do toco (o pires de latão do escudo é o outro latão)
+    g.fillStyle(OUT); g.fillRect(c - 9, 27, 18, 3);
+    g.fillStyle(BRASS); g.fillRect(c - 8, 27.8, 16, 1.4); g.fillStyle(BRASS_L); g.fillRect(c - 8, 27.8, 16, 0.8);
+    // braço direito: um toco de cera com uma gota
+    g.fillStyle(OUT); g.fillRoundedRect(c + 8, 22, 7, 11 + drip, 3);
+    g.fillStyle(WAX); g.fillRoundedRect(c + 9, 23, 5, 9 + drip, 2.2); g.fillStyle(SHADE); g.fillRect(c + 12, 24, 2, 7 + drip);
+    // braço esquerdo: o pires de latão como escudo, com um tocotinho de vela no meio
     g.fillStyle(OUT); g.fillCircle(c - 14, 27, 6);
     g.fillStyle(BRASS); g.fillCircle(c - 14, 27, 5); g.fillStyle(BRASS_L); g.fillCircle(c - 15, 25.6, 2.4);
-    g.fillStyle(0x7d5c1d); g.fillCircle(c - 13.5, 28.4, 2.2); g.fillStyle(WAX); g.fillCircle(c - 14, 27, 1.2); // um tocoto de vela no meio
-    g.fillStyle(OUT); g.fillRect(c - 11, 24, 2, 5);
-    g.fillStyle(WAX); g.fillRect(c - 11, 25, 1, 3);
-    // cabeça: capuz de cera derretida (as bordas escorrem) com a viseira
-    g.fillStyle(OUT); g.fillRoundedRect(c - 10, 9, 20, 14, 5); g.fillRoundedRect(c - 11.5, 15, 4, 8 + drip, 2); g.fillRoundedRect(c + 7.5, 15, 4, 6 + drip, 2);
-    g.fillStyle(WAX); g.fillRoundedRect(c - 9, 10, 18, 12, 4); g.fillRoundedRect(c - 10.5, 16, 2.4, 6 + drip, 1.2); g.fillRoundedRect(c + 8.1, 16, 2.4, 4 + drip, 1.2);
-    g.fillStyle(SHADE); g.fillRect(c + 4, 12, 4, 9); g.fillStyle(LIGHT); g.fillRect(c - 7, 11, 5, 1.6);
-    g.fillStyle(OUT); g.fillRoundedRect(c - 7.5, 14, 15, 5, 1.5);
-    g.fillStyle(0xffc34d); g.fillRect(c - 6, 15, 4, 3); g.fillRect(c + 2, 15, 4, 3);
-    g.fillStyle(0xfff0b0); g.fillRect(c - 5.4, 15.4, 1.6, 1.4); g.fillRect(c + 2.6, 15.4, 1.6, 1.4);
+    g.fillStyle(0x7d5c1d); g.fillCircle(c - 13.5, 28.4, 2.2); g.fillStyle(WAX); g.fillCircle(c - 14, 27, 1.2);
+    // cabeça de cera derretida: mais larga que o toco, com gotas escorrendo pelos lados em comprimentos diferentes
+    const drops: ReadonlyArray<readonly [number, number, number]> = [[-10.5, 12, 3.4], [-7.4, 7, 2.8], [8.4, 9, 3], [11, 5, 2.6]]; // [x, comprimento, largura]
+    for (const [dx, len, w] of drops) {
+      g.fillStyle(OUT); g.fillRoundedRect(c + dx - w / 2 - 1, 15, w + 2, len + 2 + drip, 2);
+    }
+    g.fillStyle(OUT); g.fillRoundedRect(c - 12, 7, 24, 12, 6);
+    for (const [dx, len, w] of drops) {
+      g.fillStyle(WAX); g.fillRoundedRect(c + dx - w / 2, 15, w, len + 1 + drip, 1.5);
+      g.fillStyle(SHADE); g.fillRect(c + dx + w / 2 - 0.9, 16, 0.9, len - 1 + drip);
+    }
+    g.fillStyle(WAX); g.fillRoundedRect(c - 11, 8, 22, 10, 5);
+    g.fillStyle(SHADE); g.fillRect(c + 5, 10, 6, 7); g.fillStyle(LIGHT); g.fillRect(c - 8, 9, 6, 1.6);
+    // a cabeça se funde no toco (sem a linha escura entre os dois)
+    g.fillStyle(WAX); g.fillRect(c - 7.6, 17, 15.2, 5); g.fillStyle(SHADE); g.fillRect(c + 3, 17, 4.6, 5); g.fillStyle(LIGHT); g.fillRect(c - 6.5, 17, 2, 5);
+    // rosto: dois olhos fundos, âmbar, e uma boquinha séria
+    for (const ex of [c - 4.2, c + 4.2]) {
+      g.fillStyle(OUT); g.fillEllipse(ex, 13.4, 5.6, 6.2);
+      g.fillStyle(0xffc34d); g.fillEllipse(ex, 13.6, 3.4, 4); g.fillStyle(0xfff0b0); g.fillRect(ex - 1.2, 12.2, 1.3, 1.3);
+    }
+    g.fillStyle(OUT); g.fillRect(c - 2, 17, 4, 1);
     // pavio e chama (a chama se inclina no segundo quadro)
     const lean = v === 1 ? 1.6 : 0;
-    g.fillStyle(OUT); g.fillRect(c - 1, 6, 2, 5);
-    g.fillStyle(OUT); g.fillTriangle(c + lean, 0, c - 4.4, 8, c + 4.4, 8);
-    g.fillStyle(0xe8501f); g.fillTriangle(c + lean, 1.2, c - 3.4, 7.6, c + 3.4, 7.6);
-    g.fillStyle(0xffa94d); g.fillTriangle(c + lean, 3, c - 2.2, 7.6, c + 2.2, 7.6);
-    g.fillStyle(0xfff0b0); g.fillTriangle(c + lean * 0.6, 5, c - 1, 7.6, c + 1, 7.6);
+    g.fillStyle(OUT); g.fillRect(c - 1, 4.4, 2, 4.4);
+    g.fillStyle(OUT); g.fillTriangle(c + lean, -1.6, c - 4.6, 6.6, c + 4.6, 6.6);
+    g.fillStyle(0xe8501f); g.fillTriangle(c + lean, -0.4, c - 3.6, 6.2, c + 3.6, 6.2);
+    g.fillStyle(0xffa94d); g.fillTriangle(c + lean, 1.4, c - 2.3, 6.2, c + 2.3, 6.2);
+    g.fillStyle(0xfff0b0); g.fillTriangle(c + lean * 0.6, 3.4, c - 1, 6.2, c + 1, 6.2);
   };
 
   // Ratinho do celeiro: cor de palha, de orelhas grandes e rosadas, cauda comprida; no segundo quadro mexe o focinho.

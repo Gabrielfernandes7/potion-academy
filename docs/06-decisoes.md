@@ -356,3 +356,6 @@ Novas decisões entram no fim.
 
 ## A Roo da bolha também é um cachorro (2026-11-18, issue #33)
 - A Roo andando já tinha orelhas caídas, mas a pose "observando" da bolha (a Roo bebê no Livro e no final) ainda tinha orelhas altas e retas, que liam como coelho. Agora as duas orelhas caem junto do rosto, como na Roo do jogo. As chaves das texturas (`roo_bubble_*`) não mudaram.
+
+## Sentinela de cera redesenhada como vela (2026-11-18, issue #32)
+- A sentinela lia como um robô creme (viseira de caixa, cinto, pés quadrados). Agora é uma vela que anda: toco de vela estreito com a cabeça de cera derretida mais larga em cima, de onde a cera escorre pelos lados em gotas de comprimentos diferentes (as gotas descem no segundo quadro), olhos âmbar fundos, pavio aceso, um pires de latão como escudo e os pés derretidos na poça. Chaves (`enemy_sentinel`, `enemy_sentinel_1`) e comportamento iguais.
