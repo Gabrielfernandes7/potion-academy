@@ -1,5 +1,7 @@
 # Análise de game design: Potion Academy
 
+> **Documento de análise (2026-11-15), não é lista de pendências.** As ações que saíram dela estão nas Issues do GitHub (objetivos variados, tensão, rejogabilidade, acessibilidade...). Ao decidir algo daqui, registre em `docs/06-decisoes.md`.
+
 Escrita em 2026-11-15, com o olhar de quem projeta jogos. **Aviso de método:** li o código, os docs, os números e os sprites; **não joguei** (não tenho navegador aqui). Tudo sobre "sensação" é hipótese a confirmar em 5 a 10 partidas com gente de verdade. Onde afirmo um número, ele vem de `docs/10-equilibrio.md`, `profiles.ts` ou das fases.
 
 ---

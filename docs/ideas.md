@@ -65,7 +65,7 @@
 - **Bolhas de sabão** (a origem dela): bloquear um tiro, carregar uma poção ou flutuar sobre uma casa. Deve ser equilibrado, sem deixar o jogo fácil.
 
 
-## Da revisão de 2026-11-15 (a decidir; o que for problema está em `task.md`)
+## Da revisão de 2026-11-15 (a decidir; o que for problema está nas Issues do GitHub)
 
 **Gameplay: um risco de repetição.** Vinte fases de "quebrar caixotes, 3 gemas, porta" podem cansar. Ideia central: **uma mecânica própria por capítulo**, reaproveitando a arquitetura (sem cinco sistemas novos):
 

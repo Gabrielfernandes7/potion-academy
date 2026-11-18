@@ -21,6 +21,13 @@ Cada arquivo responde uma pergunta e cabe em uma tela.
 | [20-publicar.md](20-publicar.md) | Como servir o `dist/`, a 404 e a 500 em Nginx, Apache e hospedeiros estáticos? E o endereço final das prévias? |
 | [21-desempenho.md](21-desempenho.md) | O jogo engasga? O que foi medido, o que mudou, quais regras evitam o lag e como medir de novo |
 | [22-livro.md](22-livro.md) | O Livro de Roo: a história como manuscrito animado à luz de vela. Onde está, as 13 aberturas, as gravuras que abrem cada fase, como acrescentar uma |
+| [23-analise-design.md](23-analise-design.md) | Onde o jogo é forte e onde repete ou falta tensão? (análise de game design; as ações estão nas Issues) |
 
 Regra geral: se uma informação muda, mude no arquivo certo, e não copie em outros lugares.
+
+**Onde registrar o quê (uma só fonte para cada coisa):**
+- **O que falta fazer:** Issues do GitHub (simples, em português).
+- **Por que algo é do jeito que é:** `06-decisoes.md`.
+- **Ideias sem decisão:** `ideas.md`.
+- **Estado, armadilhas e como testar (memória entre sessões):** `task.md`, na raiz. O histórico do que já foi feito fica em `solved.md` (só leitura).
 

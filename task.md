@@ -1,9 +1,9 @@
 # Potion Academy: estado do trabalho
 
-Este arquivo é a memória do projeto entre sessões: **só o que está em aberto**. Leia antes de começar e atualize ao terminar cada tarefa.
+Este arquivo é a memória do projeto entre sessões: o estado, o que só você pode decidir, as armadilhas e como testar. **As pendências estão nas Issues do GitHub.** Leia antes de começar e atualize ao terminar cada tarefa.
 O que já foi feito (e o histórico por rodada) está em `solved.md`. Para o "como funciona", veja `CLAUDE.md` (técnico) e `docs/` (jogo).
 
-Última atualização: 2026-11-15. A rodada de hoje (desempenho, UI de tabuleta e pergaminho, Ouroboros, 8 inimigos novos, segunda habilidade das formas, o Livro de Roo animado, o desfecho da história, a mensagem sem versículos, as gravuras antes de cada fase e o novo Mestre) foi **commitada junto** no fim da sessão (`git log -1`).
+Última atualização: 2026-11-18 (pendências movidas para as Issues; antes: 2026-11-15). A rodada de hoje (desempenho, UI de tabuleta e pergaminho, Ouroboros, 8 inimigos novos, segunda habilidade das formas, o Livro de Roo animado, o desfecho da história, a mensagem sem versículos, as gravuras antes de cada fase e o novo Mestre) foi **commitada junto** no fim da sessão (`git log -1`).
 
 ## O que foi feito nesta sessão (resumo; o detalhe está em `solved.md`, partes 5 a 9)
 
@@ -16,32 +16,21 @@ O que já foi feito (e o histórico por rodada) está em `solved.md`. Para o "co
 - **O Mestre** (`textures/mestre.ts`) redesenhado: chapéu de ponta dobrada com lua, capuz com dois pontos de luz, livro no cinto, runas na barra rasgada, cajado com cristal que pulsa e lanterna na corrente. Mesmas chaves (`mestre_sombra_0/1`).
 - **Docs:** `docs/ideas.md` podado (só o que falta), `docs/22-livro.md` reescrito, CLAUDE.md, `docs/16` e `docs/README.md` atualizados.
 
-## Problemas a resolver (revisão de 2026-11-15)
+## Pendências: estão nas Issues do GitHub
 
-Feito nesta rodada:
-- [x] README e docs antigos atualizados (20 fases, 5 capítulos, formas, sem loja).
-- [x] `scripts/smoke.cjs` sem `menu-shop` e com T no lugar do Y (agora roda de verdade: `npm run smoke`).
-- [x] ~~GitHub Actions~~ removido a pedido: sem CI por enquanto.
-- [x] Persistência validada (`cleanStrings`, `cleanStageList` em `storage.ts`; poções desconhecidas, tipos errados e duplicatas são descartados; testes em `tests/storage.test.ts`).
-- [x] Área de toque dos frascos na HUD: agora é a faixa inteira da HUD (antes 36x22 px de canvas). O botão TROCAR FRASCO já existia.
-- [x] Sentinela de cera e Lanterna viva redesenhadas (sem recortes nas bordas, gotas e chama dentro dos 40 px).
-- [x] `docs/ideas.md` virou `docs/ideas.md`, com as ideias novas da revisão.
+**A lista de pendências vive nas Issues** (`gh issue list`, repositório `Gabrielfernandes7/potion-academy`), não aqui: uma só fonte de verdade. Este arquivo guarda o estado, o que só você pode decidir, as armadilhas e como testar. Ao terminar uma tarefa, feche a Issue com um commit que cite o número; ao achar uma pendência nova, abra uma Issue (simples, em português).
 
-- [x] (improv.md §8) Tela de derrota mostra o que matou a Roo e uma dica (`game/deathTip.ts`, `go-tip` no `index.html`).
-- [x] Ouroboros mais forte (40 de vida, ataques mais rápidos, devorar cura 1).
+Onde cada assunto está: testes e refatoração (#5, #6, #7), save (#8, #9), projeto (#11 lint, #12 licença, #14 este arquivo, #26 PWA), design do jogo (#15 a #19, #25), acessibilidade e celular (#20, #22), áudio (#23), jogadores de verdade (#24), arte (#27, #32, #33).
 
-- [x] Menu: a Roo mexendo o caldeirão (lenta) virou a Roo lendo, com estante e alambique (`MenuScene.ts`; cenário numa textura, 60 fps no navegador de teste). HUD: frascos maiores, com barra na cor do elemento, cantos dourados no escolhido e tranca nos bloqueados.
+Pendências que ainda **não têm Issue** (abra uma quando for trabalhar nelas):
+- Mostrar a semente (`?seed=`) na tela de pausa e o desafio diário.
+- ADRs leves em `docs/adr/` e mais testes de contrato (links entre docs, números de vida e dano).
+- Uma gravura de abertura da Arena por capítulo (hoje usa a do duelo) e uma moldura diferente para os chefes.
+- Teste automático do cartão de entrada de fase no navegador (o `npm run smoke` não o abre).
+- Tamanho do toque dos seletores de frasco (o ideal é 44 px), vibração curta ao acertar ou levar dano e `touch-action` conferido em todas as telas.
+- A Torre tem pouco além de fantasmas e sentinelas (só com a sua opinião depois de jogar).
 
-- [x] Responsividade: nenhum painel (carta, entrada de fase, diálogo, fim de jogo, pausa, Arena, ajuda, sala de música) precisa de rolagem em 360x640, 390x844, 667x375, 800x360 e 1024x768 (o smoke confere). Deitado, retrato/gravura à esquerda e texto à direita; a ajuda virou abas; na Arena, as opções são recolhíveis e os 5 chefes ficam em fila ou em 2 colunas compactas. Frascos de campo com contorno escuro e luz do elemento no chão.
-
-Pendente, em ordem (os itens de `improv.md` que ainda faltam: objetivos alternativos, estrelas por fase, dificuldade selecionável, hit-stop, 4 botões no toque, protótipo de vapor e lama):
-1. **Versão global do save** (um campo `bombroo_version` com migração) e testes de saves antigos; exportar/importar progresso fica para depois.
-2. **Mobile:** ~~texto da HUD com 6 a 7 px num celular em pé~~ (feito em 2026-11-18, issue #21: números dos frascos e tecla da forma em 15, nome do chefe em 12, tempo em 24; ficam com 7 a 9 px em 390 px de largura); cor não pode ser o único indicador do elemento; testar em celular real; PWA.
-3. **Refatoração** (só com o jogo aberto num navegador para conferir; hoje não tive um): extrair `PlayerController` da `MainScene` (913 linhas), depois a preparação das fases (`StageRuntime`), separar os efeitos visuais das regras em `RooFormSystem` (917) e modularizar o `EnemySystem` (579) só se precisar. Sem ECS.
-4. ~~Semente por partida~~ feita: `game/rng.ts`, `?seed=123` na URL (o console do dev mostra a semente), `tests/rng.test.ts` e contrato em `tests/contracts/rng.test.ts`. Falta: mostrar a semente na tela de pausa e o desafio diário.
-5. **Docs:** ADRs em `docs/adr/`; ampliar os testes de contrato (links entre docs, ids de chefes e inimigos, controles de cada forma, referências a mecânicas removidas, números de vida e dano).
-6. **Licença** (código e assets separados): decisão sua.
-7. **Visual dos inimigos:** discutir o padrão visual do jogo (próxima conversa) e então alinhar os 11 inimigos novos e os 3 clássicos.
+Já feito: ver `solved.md` (histórico por rodada, só leitura).
 
 ## Aguardando você: jogar, ouvir e olhar
 
@@ -66,7 +55,7 @@ Eu verifico por script (regra pura, testes, simulações e o jogo rodando num na
 ## Decisões que só você pode tomar
 
 - **Qual ideia de `docs/ideas.md` trabalhar a seguir** (plano e ordem sugerida no fim do arquivo): reações no chão (lama, vapor, cristais), grimório de reações no Manuscrito e a Prima Materia entregue a Anselmo.
-- **Acessibilidade no celular** (ver a resposta da sessão de 2026-11-15; resumo em `docs/21-desempenho.md` não cobre isso): HUD no canvas fica com letra de 6 a 7 px num celular em pé e os seletores de frasco têm 21x13 px de toque; não há manifesto de app (instalável, tela cheia).
+- **Acessibilidade no celular** (ver a resposta da sessão de 2026-11-15; resumo em `docs/21-desempenho.md` não cobre isso): a HUD já subiu para 7 a 9 px num celular em pé (issue #21), mas os seletores de frasco ainda têm toque pequeno; não há manifesto de app (instalável, tela cheia; issue #26).
 
 - **Licença do projeto** (o README segue sem): é uma escolha jurídica, não minha.
 - **Endereço final do site** (`og:image` e `og:url` absolutos): depende de onde será hospedado. A 404 e a 500 estão explicadas para Nginx, Apache e hospedeiros estáticos em `docs/20-publicar.md`.
@@ -78,18 +67,6 @@ Eu verifico por script (regra pura, testes, simulações e o jogo rodando num na
 - **O Livro de Roo animado** (`/livro.html`, `docs/22-livro.md`): revise o texto das 13 aberturas, as glosas do copista (sem versículo) e a frase de Belladona ("de um sopro e de sabão nasce pão"). Só vi no navegador de teste; falta ver num celular de verdade e ouvir a música de cada abertura.
 - Você revisa os furos de roteiro e o texto dos interlúdios novos no livro (Biblioteca e Observatório). A Roo é masculina na prosa; os cartões ficam por ora, e no futuro um vídeo da história no lugar.
 - Os nomes das etapas da Obra (Nigredo, Albedo...) como subtítulo dos atos: hoje só como cor e tom.
-
-## Fila técnica (o que sobrou e eu posso fazer)
-
-- **Feito (2026-11-15, revisão externa):** README e docs 01, 02, 03, 04, 05, 10 e 14 atualizados para as 20 fases, 5 capítulos, 4 formas e sem loja; `scripts/smoke.cjs` sem `menu-shop` e com T (poção na mão) no lugar do Y. **Falta rodar o smoke** num navegador (`PW=... npm run smoke` com o dev ligado): só conferi a sintaxe.
-
-- **Acessibilidade no celular** (decisão sua, ver acima): subir o texto da HUD para o mínimo legível (hoje 6 a 7 px), aumentar o toque dos seletores de frasco (21x13 px; o ideal é 44 px), manifesto de app (instalável, tela cheia, ícone), vibração curta ao acertar ou levar dano e `touch-action` conferido em todas as telas.
-- **Gravuras de fase:** poderia haver uma gravura própria por capítulo para a abertura da Arena (hoje usa a do duelo) e os chefes terem uma moldura diferente.
-- **Ideias de `docs/ideas.md`** (em ordem): reações no chão, grimório de reações, Prima Materia entregue a Anselmo.
-- **Teste automático do cartão de entrada no navegador** (hoje só os puros e o fake de contexto; o `npm run smoke` não abre o cartão).
-
-- HUD no canvas fica serrilhada em telas muito grandes (decisão visual do estilo pixel art; mudar só se você quiser texto nítido).
-- A Torre ainda tem pouco além de fantasmas e sentinelas; mais variedade só com a sua opinião depois de jogar.
 
 ## Como testar por script (para a próxima sessão)
 

@@ -118,7 +118,7 @@ tests/                     # testes unitários (lógica pura, storage, toque, fa
 
 ## Estado do trabalho
 
-Antes de começar, leia `task.md`: ele lista o que está em aberto, as armadilhas já encontradas e como testar. Atualize-o ao fim de cada tarefa.
+Antes de começar, leia `task.md` (estado, armadilhas já encontradas e como testar) e veja as Issues abertas do GitHub, onde está a lista do que falta (`gh issue list`). Atualize o `task.md` ao fim de cada tarefa e feche a Issue com um commit que cite o número.
 
 ## Game Design Documentation
 
