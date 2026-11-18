@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "tsc --noEmit && vitest run && vite build",
-    "smoke": "node scripts/smoke.cjs"
+    "smoke": "node scripts/smoke.cjs",
+    "silhouettes": "node scripts/silhouettes.cjs"
   },
   "dependencies": {
     "@fontsource/cinzel": "^5.3.0",
