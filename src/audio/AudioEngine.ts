@@ -61,8 +61,20 @@ class AudioEngine {
         return false;
       }
     }
-    if (this.ctx.state === 'suspended') void this.ctx.resume();
+    this.resumeContext();
     return true;
+  }
+
+  // O navegador deixa o contexto "suspenso" até um gesto do jogador (e o suspende de novo em troca de aba,
+  // economia de energia ou chamada). Retomar pode ser recusado: a próxima tentativa vem no próximo gesto.
+  private resumeContext(): void {
+    const ctx = this.ctx;
+    if (!ctx || ctx.state === 'running') return;
+    try {
+      void Promise.resolve(ctx.resume()).catch(() => { /* sem gesto ainda: tenta de novo depois */ });
+    } catch {
+      // idem
+    }
   }
 
   // Usa um contexto já criado (testes e benchmarks): monta a cadeia de áudio nele.
@@ -77,9 +89,10 @@ class AudioEngine {
     this.resumeIfNeeded();
   }
 
-  // Se a música deveria estar tocando mas o contexto ficou suspenso, retoma.
+  // Se a música ou os efeitos deveriam soar mas o contexto ficou suspenso, retoma. (Antes só a música retomava:
+  // com a música desligada e os EFEITOS ligados, o som não voltava depois de uma suspensão.)
   resumeIfNeeded(): void {
-    if (this.ctx && this.playing && this.ctx.state !== 'running') void this.ctx.resume();
+    if (this.playing || this.sfx) this.resumeContext();
   }
 
   // ------------------------------------------------------------------ música
@@ -229,7 +242,12 @@ class AudioEngine {
 
   // variant: elemento da poção ou da forma (muda o timbre).
   play(name: SfxName, variant?: ElementId): void {
-    if (!this.sfx || !this.ctx || !this.graph) return;
+    if (!this.sfx) return;
+    if (!this.ctx) this.ensureContext();
+    if (!this.ctx || !this.graph) return;
+    // Com o contexto suspenso o som ficaria na fila e sairia todo de uma vez ao retomar: melhor pular este
+    // efeito e pedir a retomada.
+    if (this.ctx.state !== 'running') { this.resumeContext(); return; }
     playSfx(this.graph, name, this.ctx.currentTime, variant);
   }
 

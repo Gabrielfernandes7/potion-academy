@@ -106,6 +106,11 @@ function bindButtons(): void {
   };
   document.addEventListener('pointerdown', wake, { passive: true });
   document.addEventListener('keydown', wake);
+  // iOS Safari só libera o áudio em 'touchend' e 'click' (um 'pointerdown' não conta como gesto para o som)
+  document.addEventListener('touchend', wake, { passive: true });
+  document.addEventListener('click', wake, { passive: true });
+  // voltar para a aba: o navegador pode ter suspendido o áudio enquanto estava escondida
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) audio.resumeIfNeeded(); });
 
   // o manuscrito do alquimista é uma página própria (manuscrito.html), no mesmo molde do livro da história
   const openManuscript = (): void => { location.assign('/manuscrito.html'); };
