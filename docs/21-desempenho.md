@@ -24,7 +24,7 @@ Investigação de 2026-11-15, num Chromium de teste (GL por software, então os 
 
 ## Regras para não voltar atrás
 
-- **Nunca crie um emissor de partículas por efeito.** Use `fxPool(scene).burst(chave, textura, config, x, y, quantidade)`.
+- **Nunca crie um emissor de partículas por efeito.** Use `fxPool(scene).burst(chave, textura, config, x, y, quantidade)`. Isto é verificado: `tests/contracts/particles.test.ts` falha se um arquivo fora do reservatório (e da cena final) chamar `add.particles`. As faíscas do pavio de cada poção também saem do reservatório (`BombSystem.emitFuseSpark`).
 - **Nunca crie e destrua imagens ou textos por efeito.** Use `ObjectPool` (`acquire` e `release`). Criar um texto cria uma textura de canvas.
 - **Um `Graphics` só se limpa e redesenha quando há o que mostrar** (e uma vez ao ficar vazio). Formas vetoriais (círculo, elipse, retângulo arredondado, arco) custam triangulação a cada quadro; `fillRect` é barato.
 - **Uma textura grande (névoa) só se refaz quando muda.**

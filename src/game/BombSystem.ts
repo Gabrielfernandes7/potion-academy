@@ -11,6 +11,7 @@ import type { MainScene } from '../scenes/MainScene';
 import { fxPool } from './fx/particlePool';
 import { ObjectPool } from './fx/objectPool';
 
+const SPARK_MS = 90; // intervalo entre as faíscas do pavio de uma poção
 const FLASH_MS = 420; // duração do miolo e do anel de cada casa de uma explosão
 
 const EXPLOSION_FX: Record<ElementId, {
@@ -50,21 +51,9 @@ export class BombSystem {
     const el = ELEMENTS[type.element];
     const halo = this.scene.add.image(sprite.x, sprite.y, 'menu_puff').setTint(el.color)
       .setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.25).setScale(0.85).setDepth(4);
-    const fx = this.scene.add.particles(0, 0, 'menu_spark', {
-      follow: sprite,
-      followOffset: { x: 0, y: -15 },
-      lifespan: 420,
-      speed: { min: 10, max: 38 },
-      angle: { min: -125, max: -55 },
-      scale: { start: 0.9, end: 0 },
-      alpha: { start: 1, end: 0 },
-      frequency: 90,
-      blendMode: 'ADD',
-      tint: [0xffd54f, el.color],
-    }).setDepth(6);
     this.bombs.push({
       gridX: this.scene.player.gridX, gridY: this.scene.player.gridY,
-      type: this.scene.bombType, element: type.element, sprite, halo, fx,
+      type: this.scene.bombType, element: type.element, sprite, halo, sparkMs: 0,
       fuseMs: type.fuse, age: 0,
       timer: type.fuse, detonated: false,
     });
@@ -106,7 +95,6 @@ export class BombSystem {
     this.scene.tweens.killTweensOf(bomb.sprite);
     bomb.sprite.destroy();
     bomb.halo.destroy();
-    bomb.fx.destroy();
     this.scene.play('explosion', bomb.element);
     this.scene.cameras.main.shake(70, 0.003);
   }
@@ -145,7 +133,6 @@ export class BombSystem {
     this.scene.tweens.killTweensOf(bomb.sprite);
     bomb.sprite.destroy();
     bomb.halo.destroy();
-    bomb.fx.destroy();
     fxPool(this.scene).burst('steam', 'menu_puff', {
       speed: { min: 8, max: 30 },
       angle: { min: -120, max: -60 },
@@ -170,11 +157,30 @@ export class BombSystem {
       if (bomb.age > 180) bomb.sprite.setScale(1 + 0.07 * k + 0.12 * closeness);
       bomb.halo.setPosition(bomb.sprite.x, bomb.sprite.y)
         .setAlpha(0.18 + 0.2 * (0.5 + 0.5 * k) + 0.25 * closeness);
-      if (bomb.timer <= 0) this.detonate(bomb);
+      if (bomb.timer <= 0) { this.detonate(bomb); continue; }
+      this.emitFuseSpark(bomb, delta);
     }
     const before = this.bombs.length;
     this.bombs = this.bombs.filter(b => !b.detonated);
     if (this.bombs.length !== before) this.scene.updateHud();
+  }
+
+  // Faísca do pavio a cada SPARK_MS. Sai do reservatório de partículas (um emissor por elemento, compartilhado por todas
+  // as poções), em vez de um emissor por poção (docs/21-desempenho.md).
+  private emitFuseSpark(bomb: Bomb, delta: number): void {
+    bomb.sparkMs -= delta;
+    if (bomb.sparkMs > 0) return;
+    bomb.sparkMs += SPARK_MS;
+    const color = ELEMENTS[bomb.element].color;
+    fxPool(this.scene).burst(`fuse:${bomb.element}`, 'menu_spark', {
+      lifespan: 420,
+      speed: { min: 10, max: 38 },
+      angle: { min: -125, max: -55 },
+      scale: { start: 0.9, end: 0 },
+      alpha: { start: 1, end: 0 },
+      blendMode: 'ADD',
+      tint: [0xffd54f, color],
+    }, bomb.sprite.x, bomb.sprite.y - 15, 1, 6);
   }
 
   updateExplosions(delta: number): void {

@@ -27,7 +27,7 @@ export interface Bomb {
   element: ElementId;
   sprite: Phaser.GameObjects.Image;
   halo: Phaser.GameObjects.Image; // brilho do elemento atrás do frasco
-  fx: Phaser.GameObjects.Particles.ParticleEmitter; // faíscas do pavio
+  sparkMs: number; // tempo até a próxima faísca do pavio (soltas pelo reservatório de partículas, não por um emissor próprio)
   fuseMs: number; // fusível total (Infinity nas poções remotas)
   age: number; // ms desde que foi colocada
   timer: number;
