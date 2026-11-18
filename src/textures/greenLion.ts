@@ -2,7 +2,7 @@
 // aparece devorando o sol. Aqui: um leão sentado, de pelo verde, juba de espinhos escuros, olhos de ouro e
 // um sol de ouro no peito; ao lançar, segura o sol entre as presas. Mesmo tamanho da Roo (tile + folga no topo).
 //
-// Poses: 'idle' (2 quadros: a cauda e a juba balançam), 'cast' (boca aberta com o sol entre as presas),
+// Poses: 'idle' (2 quadros: a cauda baixa e a juba balançam), 'cast' (boca aberta com o sol entre as presas),
 //        'hurt' (olhos em X), 'talk' (2 quadros: boca abre e fecha),
 //        'defeat' (vencido: olhos fechados, cabeça baixa, juba caída).
 import Phaser from 'phaser';
@@ -54,13 +54,13 @@ function drawLionFrame(g: Gfx, T: number, frame: number, pose: LionPose): void {
   g.fillStyle(0x000000, 0.22);
   g.fillEllipse(cx, B - 2, 28, 4);
 
-  // cauda: sobe pela direita, com um tufo escuro na ponta
+  // cauda: baixa, enrolada no chão ao lado da pata (a da Quimera, que também tem cauda, sobe alta e é uma serpente)
   if (!defeat) {
-    const tail: Pt[] = [[cx + 10, B - 8], [cx + 15 + wob, B - 14], [cx + 17 + wob * 1.5, B - 21], [cx + 14 + wob * 2, B - 26]];
+    const tail: Pt[] = [[cx + 11, B - 6], [cx + 15, B - 4.6 + wob * 0.3], [cx + 17.4 + wob * 0.6, B - 7.6], [cx + 15.6 + wob, B - 11]];
     for (let i = 0; i < tail.length - 1; i++) seg(g, tail[i], tail[i + 1], FUR_SHADE, 3.4 - i * 0.4);
     for (let i = 0; i < tail.length - 1; i++) seg(g, tail[i], tail[i + 1], FUR, 2 - i * 0.3);
-    g.fillStyle(MANE_DARK); g.fillEllipse(tail[3][0], tail[3][1] - 1, 6, 7);
-    g.fillStyle(MANE); g.fillEllipse(tail[3][0] - 0.6, tail[3][1] - 1.6, 3.6, 4.6);
+    g.fillStyle(MANE_DARK); g.fillEllipse(tail[3][0], tail[3][1] - 1, 5.6, 6.4);
+    g.fillStyle(MANE); g.fillEllipse(tail[3][0] - 0.5, tail[3][1] - 1.5, 3.2, 4);
   }
 
   // corpo sentado: patas de trás, tronco, peito e patas da frente
