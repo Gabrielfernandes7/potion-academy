@@ -143,6 +143,7 @@ Os três abaixo são os clássicos; os outros oito (Lanterna viva, Relógio de c
 ## Mandrágora (chefe do jardim, fase 20)
 
 **Mandrágora, a feiticeira do jardim** (28 de vida)
+- *Aparência:* uma raiz de mandrágora viva, como na lenda (a raiz com forma de gente, que grita quando é arrancada): figura baixa e larga, cabeça e corpo num bulbo só, cor de raiz clara, coroa de folhas no topo, pernas de raiz bifurcadas e uma boca grande (o grito). Não usa chapéu nem manto, para não se confundir com a Belladona (alta, de chapéu pontudo e vestido).
 - *Poder:* terra e água. Resiste às duas (dano baixo, sem cura). O **fogo** é a fraqueza (dano alto); o ar machuca normal.
 - *Raízes:* raízes de terra sobem na linha e na coluna em que você está (na fase 2, em cruz).
 - *Maré:* anéis de água se expandem a partir dela, um depois do outro. Uma faixa fica seca: é o caminho seguro.

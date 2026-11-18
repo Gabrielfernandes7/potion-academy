@@ -343,3 +343,7 @@ Novas decisões entram no fim.
 - **UI:** tema de tabuleta de madeira, latão, pergaminho e luz de vela (ver `src/styles/main.css`); carta, diálogos e ajuda ficam em papel.
 - **Texturas das formas** (1536) são geradas em segundo plano depois do menu abrir.
 - **Licença e endereço final** continuam com o autor: dependem de escolha jurídica e de onde o jogo será hospedado.
+
+## Mandrágora redesenhada (2026-11-18, issue #29)
+- **A Mandrágora deixou de ser uma bruxa de chapéu e manto.** Era o mesmo molde da Belladona (túnica, chapéu pontudo, gola, barra), só mudando a cor. Agora é uma raiz de mandrágora viva, como na lenda: baixa e larga, cabeça e corpo num bulbo, coroa de folhas, pernas de raiz bifurcadas e boca grande (o grito). As poses e as chaves das texturas (`mandrake_*`) continuam as mesmas.
+- **Contorno e mais quadros:** a Mandrágora ganhou contorno escuro de 1 px (`outlineTexture` ganhou o parâmetro `minAlpha`, para a sombra e o brilho do orbe não ganharem borda), 6 quadros de respiração (com piscada) e 4 de caminhada. O `BossBase` monta a animação de parada com todos os `_idle_N` que existirem e, se houver `_walk_N`, anda de verdade enquanto o chefe desliza para outra casa. Os outros chefes não mudam (2 quadros).

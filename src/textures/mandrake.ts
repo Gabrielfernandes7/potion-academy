@@ -1,31 +1,36 @@
-// Mandrágora, feiticeira do jardim (chefe): uma árvore humanoide. Pele de madeira (veios, nós),
-// folhas brotando do cabelo e do chapéu, chapéu pontudo de bruxa, manto verde-musgo, galho-cajado
-// com orbe e pés de raiz. Mesmo tamanho da Roo (tile + folga no topo).
+// Mandrágora, feiticeira do jardim (chefe): uma raiz de mandrágora viva, como na lenda (a raiz com forma
+// de gente, que grita quando é arrancada). Sem chapéu e sem manto, para não se confundir com a Belladona
+// (alta, chapéu pontudo, vestido): aqui é uma figura baixa e larga, cabeça e corpo num bulbo só, coroa de
+// folhas largas no topo, pernas de raiz bifurcadas, braços finos de radicela e boca grande.
+// Silhueta: copa de folhas redonda + bulbo + duas pernas abertas. Mesmo tamanho da Roo (tile + folga no topo).
 //
-// Poses: 'idle' (2 quadros: manto e folhas balançam), 'cast' (boca aberta, braço erguido, orbe brilhando),
-//        'hurt' (olhos em X), 'talk' (2 quadros: boca abre e fecha),
-//        'defeat' (vencida, calma: olhos fechados, chapéu torto, cajado baixo).
+// Poses: 'idle' (6 quadros: respira, folhas e radículas balançam com atraso, pisca), 'walk' (4 quadros: passo
+//        com um pé de cada vez, corpo que sobe e desce, braços que balançam), 'cast' (grita de boca aberta, braço
+//        erguido com o orbe), 'hurt' (olhos em X), 'talk' (2 quadros: boca abre e fecha),
+//        'defeat' (vencida, calma: olhos fechados, folhas caídas, braços baixos).
+// Tem contorno escuro de 1 px (legibilidade sobre o chão claro do jardim); a sombra e o brilho do orbe ficam sem.
 import Phaser from 'phaser';
 import { ROO_HEAD_ROOM, rooTextureHeight } from './rooGeometry';
+import { outlineTexture } from './outline';
 
 type Gfx = Phaser.GameObjects.Graphics;
 type Pt = readonly [number, number];
-type MandrakePose = 'idle' | 'cast' | 'hurt' | 'talk' | 'defeat';
+type MandrakePose = 'idle' | 'walk' | 'cast' | 'hurt' | 'talk' | 'defeat';
+interface FrameOpts { t?: number; blink?: boolean; open?: boolean }
 
-const WOOD = 0xb88a54;        // pele de madeira clara
-const WOOD_SHADE = 0x8c6238;
-const WOOD_DARK = 0x4a3018;
-const ROBE = 0x2f5a2c;        // manto verde-musgo
-const ROBE_LIGHT = 0x4a8038;
-const ROBE_DARK = 0x1c3a1d;
-const HAT = 0x3b2a52;         // chapéu roxo-escuro
-const HAT_LIGHT = 0x5a3f7a;
+const TAU = Math.PI * 2;
+export const MANDRAKE_IDLE_FRAMES = 6;
+export const MANDRAKE_WALK_FRAMES = 4;
+
+const ROOT = 0xdcc08e;        // raiz clara, cor de mandrágora
+const ROOT_SHADE = 0xb08a58;
+const ROOT_DARK = 0x5a3a1c;
+const LEAF_DARK = 0x2f6b2a;
 const LEAF = 0x5fb043;
 const LEAF_LIGHT = 0xa5e060;
 const ORB = 0xd9ff66;
 const EYE = 0xffd54f;
 const HOLE = 0x1d1008;
-const GOLD = 0xffd54f;
 
 function poly(g: Gfx, pts: Pt[], color: number, alpha = 1): void {
   g.fillStyle(color, alpha);
@@ -41,154 +46,178 @@ function seg(g: Gfx, a: Pt, b: Pt, color: number, width: number, alpha = 1): voi
   g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.strokePath();
 }
 
-function drawMandrakeFrame(g: Gfx, T: number, frame: number, pose: MandrakePose): void {
+/** Uma folha larga: da base (bx, by) até a ponta (tx, ty), com a metade clara. */
+function leaf(g: Gfx, bx: number, by: number, tx: number, ty: number, w: number): void {
+  const mx = (bx + tx) / 2, my = (by + ty) / 2;
+  const nx = -(ty - by), ny = tx - bx;           // normal da folha
+  const len = Math.hypot(nx, ny) || 1;
+  const ox = (nx / len) * w, oy = (ny / len) * w;
+  poly(g, [[bx, by], [mx + ox, my + oy], [tx, ty], [mx - ox, my - oy]], LEAF);
+  poly(g, [[bx, by], [mx + ox, my + oy], [tx, ty]], LEAF_LIGHT, 0.55);
+  seg(g, [bx, by], [tx, ty], LEAF_DARK, 0.8, 0.8);
+}
+
+function drawMandrakeFrame(g: Gfx, T: number, pose: MandrakePose, o: FrameOpts = {}): void {
   g.clear();
-  const f = frame % 2;
+  const t = o.t ?? 0;
   const defeat = pose === 'defeat';
   const casting = pose === 'cast';
   const hurt = pose === 'hurt';
-  const talkOpen = pose === 'talk' && f === 1;
+  const walk = pose === 'walk';
+  const talkOpen = pose === 'talk' && !!o.open;
+  const calm = defeat || hurt || casting;          // poses fixas: nada balança
   const B = rooTextureHeight(T);
   const cx = T / 2;
-  const sway = defeat ? 0 : f === 0 ? -0.8 : 0.8;
-  const breath = pose === 'talk' ? 0 : f === 1 ? 0.6 : 0;
-  const cy = T / 2 + 1 + ROO_HEAD_ROOM + (hurt ? 0.8 : defeat ? 1.4 : 0);
+  const s1 = calm ? 0 : Math.sin(TAU * t);          // balanço do corpo e das radículas
+  const s2 = calm ? 0 : Math.sin(TAU * (t - 0.18)); // folhas: seguem o corpo com atraso
+  const breath = calm || walk ? 0 : (1 - Math.cos(TAU * t)) / 2; // 0..1: o bulbo enche e sobe
+  const stride = walk ? Math.sin(TAU * t) : 0;      // passo: um pé sobe de cada vez
+  const liftL = Math.max(0, stride) * 3;
+  const liftR = Math.max(0, -stride) * 3;
+  const up = walk ? Math.abs(stride) * 1.2 : breath * 0.7; // corpo sobe a cada passo ou respiração
+  const cy = T / 2 + 1 + ROO_HEAD_ROOM + (hurt ? 0.8 : defeat ? 1.4 : 0) - up;
+  const droop = defeat ? 5 : 0; // folhas caem quando vencida
 
-  // sombra
+  // sombra larga (encolhe um pouco quando o corpo sobe)
   g.fillStyle(0x000000, 0.22);
-  g.fillEllipse(cx, B - 2, 24, 4);
+  g.fillEllipse(cx, B - 2, 26 - up * 1.5, 4);
 
-  // pés de raiz
-  g.fillStyle(WOOD_DARK);
-  g.fillTriangle(cx - 9, B - 2, cx - 5, B - 8, cx - 2, B - 5);
-  g.fillTriangle(cx + 9, B - 2, cx + 5, B - 8, cx + 2, B - 5);
-  g.fillTriangle(cx - 3, B - 1.5, cx + 3, B - 1.5, cx, B - 8);
-
-  // manto com barra de folhas que balança
-  const hemY = cy + 15 + breath;
-  const hem: Pt[] = [14, 9, 3.5, -3.5, -9, -14].map((dx, i) => [
-    cx + dx + sway * (i % 2 === 0 ? 1 : -0.6),
-    hemY + (i % 2 === 0 ? 0 : 2.2) + (casting ? -0.6 : 0),
-  ] as const);
-  poly(g, [[cx - 8, cy - 3], [cx + 8, cy - 3], [cx + 11, cy + 6], ...hem, [cx - 11, cy + 6]], ROBE);
-  poly(g, [[cx - 3, cy - 3], [cx + 3, cy - 3], [cx + 5, cy + 10], [cx - 5, cy + 10]], ROBE_LIGHT, 0.55);
-  seg(g, [cx - 4, cy], [cx - 7, cy + 13], ROBE_DARK, 1, 0.8);
-  seg(g, [cx + 4, cy], [cx + 7, cy + 13], ROBE_DARK, 1, 0.8);
-  // folhinhas na barra
-  g.fillStyle(LEAF_LIGHT);
-  hem.forEach(([hx, hy], i) => g.fillTriangle(hx - 1.4, hy, hx + 1.4, hy, hx + (i % 2 ? -0.6 : 0.6), hy + 2.8));
-
-  // braço esquerdo (na cintura): manga e mão de madeira
-  g.fillStyle(ROBE);
-  g.fillEllipse(cx - 9.5, cy + 4, 5, 9);
-  g.fillStyle(WOOD); g.fillCircle(cx - 10, cy + 9, 2.5);
-  seg(g, [cx - 10, cy + 9], [cx - 12, cy + 12], WOOD_DARK, 1);
-
-  // braço direito: segura o cajado (erguido ao lançar, baixo quando vencida)
-  const hx = casting ? cx + 14 : cx + 12.5;
-  const hy = casting ? cy - 12 : defeat ? cy + 10 : cy + 8.5;
-  if (casting) {
-    poly(g, [[cx + 7, cy - 2], [cx + 11, cy - 3.5], [cx + 15, cy - 11], [cx + 12, cy - 12.5]], ROBE);
-  } else {
-    g.fillStyle(ROBE); g.fillEllipse(cx + 9.5, cy + 4, 5, 9);
+  // pernas de raiz, abertas e bifurcadas; no passo, uma sobe e a outra apoia
+  for (const s of [-1, 1]) {
+    const lift = s < 0 ? liftL : liftR;
+    const yb = B - 2 - lift;
+    const knee = cy + 12 - lift * 0.4;
+    poly(g, [[cx + s * 1, cy + 4], [cx + s * 8, cy + 4], [cx + s * 9.5, knee], [cx + s * 11, yb], [cx + s * 6.5, yb - 0.5], [cx + s * 4.5, knee]], ROOT);
+    poly(g, [[cx + s * 6, cy + 5], [cx + s * 8, cy + 5], [cx + s * 9.5, knee], [cx + s * 8.5, yb - 1]], ROOT_SHADE, 0.6);
+    g.fillStyle(ROOT_DARK);
+    g.fillTriangle(cx + s * 11, yb, cx + s * 14, yb + 0.5, cx + s * 10, yb - 4); // dedão de raiz
+    g.fillTriangle(cx + s * 6.5, yb - 0.5, cx + s * 4, yb + 1, cx + s * 7.5, yb - 4);
   }
-  seg(g, [hx, hy + (defeat ? 5 : 11)], [hx, hy - 13], WOOD_SHADE, 2.2); // cajado: galho
-  seg(g, [hx, hy - 8], [hx + 2.6, hy - 11], WOOD_SHADE, 1.2);
-  g.fillStyle(WOOD); g.fillCircle(hx, hy, 2.5);
-  const orbY = hy - 15;
+
+  // braços finos de radícula (atrás do bulbo); no passo balançam em oposição
+  const armSwing = walk ? stride * 2.2 : s2 * 0.6;
+  const rx = casting ? cx + 13 : cx + 15;
+  const ry = casting ? cy - 10 : defeat ? cy + 9 : cy + 6 - armSwing;
+  const lx = cx - 15, ly = defeat ? cy + 9 : cy + 6 + armSwing;
+  seg(g, [cx - 10, cy - 2], [lx, ly], ROOT_SHADE, 2.4);
+  seg(g, [cx + 10, cy - 2], [rx, ry], ROOT_SHADE, 2.4);
+  g.fillStyle(ROOT);
+  g.fillCircle(lx, ly, 2.4);
+  g.fillCircle(rx, ry, 2.4);
+  seg(g, [lx, ly], [lx - 2, ly + 2.4], ROOT_DARK, 1);
+  seg(g, [rx, ry], [rx + 2, ry - 2.4 * (casting ? 1 : -1)], ROOT_DARK, 1);
+
+  // orbe: flutua sobre a mão que ergue (só ao lançar); parado, a raiz carrega uma folha-orbe
   if (casting) {
-    g.fillStyle(ORB, 0.22); g.fillCircle(hx, orbY, 8);
-    g.fillStyle(ORB, 0.32); g.fillCircle(hx, orbY, 5.5);
+    g.fillStyle(ORB, 0.22); g.fillCircle(rx, ry - 6, 8);
+    g.fillStyle(ORB, 0.32); g.fillCircle(rx, ry - 6, 5.5);
   }
-  g.fillStyle(defeat ? ROBE_DARK : LEAF_LIGHT); g.fillCircle(hx, orbY, 3);
-  g.fillStyle(0xffffff, 0.75); g.fillCircle(hx - 0.8, orbY - 0.8, 0.9);
+  const orbY = ry - (casting ? 6 : 4);
+  g.fillStyle(defeat ? LEAF_DARK : LEAF_LIGHT);
+  g.fillCircle(rx, orbY, 2.6);
+  g.fillStyle(0xffffff, 0.75); g.fillCircle(rx - 0.8, orbY - 0.8, 0.8);
 
-  // gola de folhas
-  g.fillStyle(ROBE);
-  g.fillEllipse(cx, cy - 4, 16, 5.5);
+  // bulbo: cabeça e corpo numa raiz só, larga em cima e afinando para as pernas (enche ao respirar)
+  const puff = breath * 0.9;
+  poly(g, [[cx - 12, cy - 10], [cx - 8, cy - 15], [cx + 8, cy - 15], [cx + 12, cy - 10], [cx + 11, cy - 1], [cx + 7, cy + 7], [cx - 7, cy + 7], [cx - 11, cy - 1]], ROOT);
+  g.fillStyle(ROOT);
+  g.fillEllipse(cx, cy - 6, 25 + puff, 20 + puff * 0.6);
+  g.fillStyle(ROOT_SHADE, 0.55);
+  g.fillEllipse(cx + 5.5, cy - 3, 11, 14);
+  // anéis da raiz (as rugas da mandrágora)
+  g.lineStyle(1, ROOT_DARK, 0.5);
+  g.beginPath(); g.arc(cx, cy + 3, 9, 0.35, 2.8, false); g.strokePath();
+  g.beginPath(); g.arc(cx, cy - 1, 11, 0.5, 2.65, false); g.strokePath();
+  seg(g, [cx + 8, cy - 11], [cx + 10, cy - 5], ROOT_DARK, 1, 0.45);
+  // radículas penduradas dos lados (balançam)
+  seg(g, [cx - 11.5, cy], [cx - 13 + s1 * 0.8, cy + 6], ROOT_DARK, 0.9, 0.8);
+  seg(g, [cx - 10, cy + 3], [cx - 11 - s1 * 0.8, cy + 8], ROOT_DARK, 0.9, 0.8);
+  seg(g, [cx + 11.5, cy], [cx + 13 - s1 * 0.8, cy + 6], ROOT_DARK, 0.9, 0.8);
+
+  // saiote de folhinhas na cintura (ondula com o passo)
   g.fillStyle(LEAF);
-  for (const dx of [-6, -3, 0, 3, 6]) g.fillTriangle(cx + dx - 1.6, cy - 5, cx + dx + 1.6, cy - 5, cx + dx, cy - 1.8);
-
-  // cabeça de madeira: veios, anel de tronco e nó
-  g.fillStyle(WOOD);
-  g.fillEllipse(cx, cy - 10, 13, 14);
-  g.fillStyle(WOOD_SHADE, 0.55);
-  g.fillEllipse(cx + 2.8, cy - 7, 5, 7);
-  g.lineStyle(1, WOOD_DARK, 0.55);
-  g.beginPath(); g.arc(cx - 3.5, cy - 12.5, 2.2, 0.3, 3.4, false); g.strokePath(); // anel de madeira
-  seg(g, [cx + 4, cy - 15], [cx + 3.4, cy - 10], WOOD_DARK, 1, 0.5);
-  g.fillStyle(WOOD_DARK, 0.7); g.fillEllipse(cx + 4.4, cy - 6.4, 1.8, 2.4); // nó
-
-  // folhas brotando dos lados da cabeça (cabelo)
-  g.fillStyle(LEAF);
-  g.fillTriangle(cx - 6.5, cy - 12, cx - 6, cy - 7, cx - 11, cy - 6 + (defeat ? 2 : sway * 0.4));
-  g.fillTriangle(cx + 6.5, cy - 12, cx + 6, cy - 7, cx + 11, cy - 6 + (defeat ? 2 : -sway * 0.4));
+  for (const dx of [-8, -4, 0, 4, 8]) {
+    const w = s2 * 0.5 * (dx < 0 ? -1 : 1);
+    g.fillTriangle(cx + dx - 2.2, cy + 5, cx + dx + 2.2, cy + 5, cx + dx + (dx < 0 ? -0.6 : 0.6) + w, cy + 9);
+  }
   g.fillStyle(LEAF_LIGHT);
-  g.fillTriangle(cx - 6.5, cy - 10, cx - 6.2, cy - 7, cx - 9.4, cy - 5.6);
+  for (const dx of [-6, 2, 6]) g.fillTriangle(cx + dx - 1.2, cy + 5, cx + dx + 1.2, cy + 5, cx + dx, cy + 7.6);
 
-  // rosto
+  // rosto grande
   if (hurt) {
-    g.lineStyle(1.2, HOLE);
-    for (const ex of [cx - 3.2, cx + 3.2]) {
-      seg(g, [ex - 1.6, cy - 11.2], [ex + 1.6, cy - 8.8], HOLE, 1.2);
-      seg(g, [ex + 1.6, cy - 11.2], [ex - 1.6, cy - 8.8], HOLE, 1.2);
+    for (const ex of [cx - 4.4, cx + 4.4]) {
+      seg(g, [ex - 2, cy - 10.5], [ex + 2, cy - 6.5], HOLE, 1.3);
+      seg(g, [ex + 2, cy - 10.5], [ex - 2, cy - 6.5], HOLE, 1.3);
     }
-  } else if (defeat) {
-    g.lineStyle(1.2, HOLE);
-    for (const ex of [cx - 3.2, cx + 3.2]) {
-      g.beginPath(); g.arc(ex, cy - 10.4, 2, 0.2, Math.PI - 0.2, false); g.strokePath();
+  } else if (defeat || o.blink) {
+    g.lineStyle(1.3, HOLE);
+    for (const ex of [cx - 4.4, cx + 4.4]) {
+      g.beginPath(); g.arc(ex, cy - (defeat ? 9 : 8.6), 2.4, 0.2, Math.PI - 0.2, false); g.strokePath();
+    }
+    if (o.blink) {
+      seg(g, [cx - 8, cy - 12.6], [cx - 2.2, cy - 10.6], ROOT_DARK, 1.4);
+      seg(g, [cx + 8, cy - 12.6], [cx + 2.2, cy - 10.6], ROOT_DARK, 1.4);
     }
   } else {
+    const eh = casting ? 5.4 : 4.4;
     g.fillStyle(HOLE);
-    g.fillEllipse(cx - 3.2, cy - 10, 4.2, casting ? 4 : 3);
-    g.fillEllipse(cx + 3.2, cy - 10, 4.2, casting ? 4 : 3);
+    g.fillEllipse(cx - 4.4, cy - 8.5, 5.6, eh + 0.8);
+    g.fillEllipse(cx + 4.4, cy - 8.5, 5.6, eh + 0.8);
     g.fillStyle(EYE);
-    g.fillEllipse(cx - 3.2, cy - 10, 2.6, casting ? 2.8 : 1.8);
-    g.fillEllipse(cx + 3.2, cy - 10, 2.6, casting ? 2.8 : 1.8);
-    seg(g, [cx - 6, cy - 12.6], [cx - 1.8, cy - 11.4], WOOD_DARK, 1.2);
-    seg(g, [cx + 6, cy - 12.6], [cx + 1.8, cy - 11.4], WOOD_DARK, 1.2);
+    g.fillEllipse(cx - 4.4, cy - 8.5, 3.6, eh - 0.8);
+    g.fillEllipse(cx + 4.4, cy - 8.5, 3.6, eh - 0.8);
+    g.fillStyle(HOLE);
+    g.fillRect(cx - 4.9 + s1 * 0.5, cy - 9.2, 1, casting ? 2.6 : 1.8); // o olhar acompanha o balanço
+    g.fillRect(cx + 3.9 + s1 * 0.5, cy - 9.2, 1, casting ? 2.6 : 1.8);
+    // sobrancelhas de galho: franzidas
+    seg(g, [cx - 8, cy - 12.6], [cx - 2.2, cy - 10.6], ROOT_DARK, 1.4);
+    seg(g, [cx + 8, cy - 12.6], [cx + 2.2, cy - 10.6], ROOT_DARK, 1.4);
   }
-  // nariz de graveto
-  poly(g, [[cx - 0.8, cy - 9.4], [cx - 1.3, cy - 6.4], [cx + 1.8, cy - 6.8]], WOOD_SHADE);
-  // boca
-  if (casting) { g.fillStyle(HOLE); g.fillEllipse(cx, cy - 4.2, 3.6, 3.2); }
-  else if (talkOpen) { g.fillStyle(HOLE); g.fillEllipse(cx, cy - 4.4, 3.2, 2.2); }
-  else if (hurt) seg(g, [cx - 2.4, cy - 3.8], [cx, cy - 5], WOOD_DARK, 1.1), seg(g, [cx, cy - 5], [cx + 2.4, cy - 3.8], WOOD_DARK, 1.1);
-  else if (defeat) seg(g, [cx - 2, cy - 4.4], [cx + 2, cy - 4.4], WOOD_DARK, 1.1);
-  else seg(g, [cx - 2.6, cy - 4.8], [cx + 2.6, cy - 4.8], WOOD_DARK, 1.1);
+  // nariz de tocão
+  g.fillStyle(ROOT_SHADE);
+  g.fillEllipse(cx, cy - 4.8, 2.6, 2.2);
+  // boca: o grito da mandrágora (grande ao lançar)
+  if (casting) {
+    g.fillStyle(HOLE); g.fillEllipse(cx, cy - 0.6, 8, 6.6);
+    g.fillStyle(0x7a2f2f); g.fillEllipse(cx, cy + 0.8, 4.6, 2.6);
+  } else if (talkOpen) {
+    g.fillStyle(HOLE); g.fillEllipse(cx, cy - 1, 5, 3.4);
+  } else if (hurt) {
+    seg(g, [cx - 3, cy], [cx, cy - 1.6], ROOT_DARK, 1.2);
+    seg(g, [cx, cy - 1.6], [cx + 3, cy], ROOT_DARK, 1.2);
+  } else if (defeat) {
+    seg(g, [cx - 2.4, cy - 1.2], [cx + 2.4, cy - 1.2], ROOT_DARK, 1.2);
+  } else {
+    seg(g, [cx - 3, cy - 1.8], [cx, cy - 0.6], ROOT_DARK, 1.2);
+    seg(g, [cx, cy - 0.6], [cx + 3, cy - 1.8], ROOT_DARK, 1.2);
+  }
 
-  // chapéu de bruxo: aba larga, copa pontuda torta (ponta cai quando vencida), fita e folhas brotando
-  const tipDx = defeat ? -2 : f === 0 ? 0.5 : -0.5;
-  g.fillStyle(HAT);
-  g.fillEllipse(cx, cy - 14.6, 24, 4.8);
-  seg(g, [cx - 11, cy - 14.2], [cx - 5, cy - 12.6], HAT_LIGHT, 1, 0.9);
-  poly(g, [[cx - 6.5, cy - 15], [cx + 6.5, cy - 15], [cx + 1 + tipDx, cy - 28]], HAT);
-  poly(g, [[cx + 1 + tipDx, cy - 28], [cx - 1.6 + tipDx, cy - 24.5], [cx + 8 + tipDx + (defeat ? -3 : 0), cy - 27 + (defeat ? 3 : 0)]], HAT_LIGHT);
-  poly(g, [[cx - 6.5, cy - 15], [cx + 6.5, cy - 15], [cx + 5.4, cy - 18], [cx - 5.4, cy - 18]], ROBE);
-  g.fillStyle(GOLD); g.fillRect(cx - 1.6, cy - 18.1, 3.6, 3.4);
-  g.fillStyle(0x6d4c41); g.fillRect(cx - 0.6, cy - 17.1, 1.6, 1.4);
-  // folhas brotando da aba e da ponta do chapéu
-  g.fillStyle(LEAF);
-  g.fillTriangle(cx + 8, cy - 15, cx + 12, cy - 17 + (defeat ? 2 : 0), cx + 10.5, cy - 13);
-  g.fillTriangle(cx - 9, cy - 15, cx - 12.5, cy - 16.5 + (defeat ? 2 : 0), cx - 11, cy - 13);
-  g.fillStyle(LEAF_LIGHT);
-  g.fillTriangle(cx + 1 + tipDx, cy - 28, cx - 1.6 + tipDx, cy - 30.4, cx + 2.8 + tipDx, cy - 30.6);
+  // coroa de folhas largas brotando do topo; cada folha balança com um atraso próprio (efeito de mola)
+  const top = cy - 14;
+  const lag = (k: number): number => (calm ? 0 : Math.sin(TAU * (t - 0.18 - k * 0.07)));
+  const bounce = walk ? Math.abs(stride) * -1.2 : breath * -0.8; // as pontas sobem na inspiração, caem no passo
+  leaf(g, cx - 5, top + 1, cx - 14, top - 5 + droop + lag(0) * 0.7 + bounce * -0.4, 2.8);
+  leaf(g, cx + 5, top + 1, cx + 14, top - 5 + droop - lag(0) * 0.7 + bounce * -0.4, 2.8);
+  leaf(g, cx - 3, top, cx - 8 + lag(1) * 1.3, top - 12 + droop * 1.3 + bounce, 3.2);
+  leaf(g, cx + 3, top, cx + 8 + lag(2) * 1.3, top - 12 + droop * 1.3 + bounce, 3.2);
+  leaf(g, cx, top, cx + lag(3) * 1.6, top - 13 + droop * 1.6 + bounce * 1.3, 3.4);
 }
 
+/** Gera os quadros e dá o contorno a cada um. Chaves: idle_0..5, walk_0..3, cast, hurt, talk_0/1, defeat. */
 export function drawMandrakeTextures(g: Gfx, T: number): void {
   const H = rooTextureHeight(T);
-  for (let fi = 0; fi < 2; fi++) {
-    drawMandrakeFrame(g, T, fi, 'idle');
-    g.generateTexture(`mandrake_idle_${fi}`, T, H);
+  const scene = g.scene;
+  const make = (key: string, pose: MandrakePose, o?: FrameOpts): void => {
+    drawMandrakeFrame(g, T, pose, o);
+    g.generateTexture(key, T, H);
+    outlineTexture(scene, key, 0.5); // só pixels firmes entram no contorno: a sombra e o brilho do orbe ficam de fora
+  };
+  for (let i = 0; i < MANDRAKE_IDLE_FRAMES; i++) {
+    make(`mandrake_idle_${i}`, 'idle', { t: i / MANDRAKE_IDLE_FRAMES, blink: i === 4 });
   }
-  drawMandrakeFrame(g, T, 0, 'cast');
-  g.generateTexture('mandrake_cast', T, H);
-  drawMandrakeFrame(g, T, 0, 'hurt');
-  g.generateTexture('mandrake_hurt', T, H);
-  for (let fi = 0; fi < 2; fi++) {
-    drawMandrakeFrame(g, T, fi, 'talk');
-    g.generateTexture(`mandrake_talk_${fi}`, T, H);
-  }
-  drawMandrakeFrame(g, T, 0, 'defeat');
-  g.generateTexture('mandrake_defeat', T, H);
+  for (let i = 0; i < MANDRAKE_WALK_FRAMES; i++) make(`mandrake_walk_${i}`, 'walk', { t: i / MANDRAKE_WALK_FRAMES });
+  make('mandrake_cast', 'cast');
+  make('mandrake_hurt', 'hurt');
+  for (let i = 0; i < 2; i++) make(`mandrake_talk_${i}`, 'talk', { t: i / 2, open: i === 1 });
+  make('mandrake_defeat', 'defeat');
 }

@@ -65,7 +65,16 @@ export abstract class BossBase {
     this.cooldownMs = setup.firstCastMs;
     const p = setup.prefix;
     if (!scene.anims.exists(`${p}_idle`)) {
-      scene.anims.create({ key: `${p}_idle`, frames: [{ key: `${p}_idle_0` }, { key: `${p}_idle_1` }], frameRate: 2, repeat: -1 });
+      // todos os quadros `${p}_idle_N` que existirem (a maioria tem 2; a Mandrágora tem 6); o ciclo dura sempre 1 s
+      const idle: Array<{ key: string }> = [];
+      while (scene.textures.exists(`${p}_idle_${idle.length}`)) idle.push({ key: `${p}_idle_${idle.length}` });
+      scene.anims.create({ key: `${p}_idle`, frames: idle, frameRate: idle.length, repeat: -1 });
+    }
+    // quadros de caminhada (opcionais): `${p}_walk_N`
+    if (!scene.anims.exists(`${p}_walk`) && scene.textures.exists(`${p}_walk_0`)) {
+      const walk: Array<{ key: string }> = [];
+      while (scene.textures.exists(`${p}_walk_${walk.length}`)) walk.push({ key: `${p}_walk_${walk.length}` });
+      scene.anims.create({ key: `${p}_walk`, frames: walk, frameRate: walk.length * 2, repeat: -1 });
     }
     if (!scene.anims.exists(`${p}_talk`)) {
       scene.anims.create({ key: `${p}_talk`, frames: [{ key: `${p}_talk_0` }, { key: `${p}_talk_1` }], frameRate: 6, repeat: -1 });
@@ -229,6 +238,12 @@ export abstract class BossBase {
     this.gridX += dx;
     this.gridY += dy;
     this.scene.tweenSpriteTo(this.sprite, this.gridX, this.gridY, 520, 'Sine.easeInOut');
+    // se o chefe tem quadros de caminhada, anda de verdade enquanto desliza e volta a respirar ao chegar
+    const walkKey = `${this.setup.prefix}_walk`;
+    if (this.state === 'idle' && this.scene.anims.exists(walkKey)) {
+      this.sprite.anims.play(walkKey, true);
+      this.after(520, () => { if (this.state === 'idle') this.setPose('idle'); });
+    }
   }
 
   // ---------- habilidades: ferramentas comuns ----------

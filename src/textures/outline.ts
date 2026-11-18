@@ -8,7 +8,11 @@ export const OUTLINE_OFFSETS: ReadonlyArray<readonly [number, number]> = [
   [-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1],
 ];
 
-export function outlineTexture(scene: Phaser.Scene, key: string): void {
+/**
+ * `minAlpha` (0..1): só pixels com pelo menos essa opacidade entram no contorno. Com 0 (padrão) qualquer pixel
+ * visível conta; use um valor maior quando a textura tem sombra ou brilho translúcido que não deve ganhar borda.
+ */
+export function outlineTexture(scene: Phaser.Scene, key: string, minAlpha = 0): void {
   const tex = scene.textures.get(key);
   const src = tex.getSourceImage() as HTMLCanvasElement;
   if (!src || !('getContext' in src)) return;
@@ -22,6 +26,13 @@ export function outlineTexture(scene: Phaser.Scene, key: string): void {
   const sctx = src.getContext('2d');
   if (!dctx || !sctx) return;
   dctx.drawImage(src, 0, 0);
+  if (minAlpha > 0) {
+    // limiar: apaga os pixels translúcidos da camada escura (a sombra e o brilho não ganham contorno)
+    const data = dctx.getImageData(0, 0, w, h);
+    const cut = minAlpha * 255;
+    for (let i = 3; i < data.data.length; i += 4) if (data.data[i] < cut) data.data[i] = 0;
+    dctx.putImageData(data, 0, 0);
+  }
   dctx.globalCompositeOperation = 'source-in';
   dctx.fillStyle = OUTLINE_COLOR;
   dctx.fillRect(0, 0, w, h);
