@@ -39,7 +39,13 @@ export function generateTextures(scene: Phaser.Scene): void {
   make('fx_ring', (g, T) => { g.lineStyle(2, 0xffffff, 0.95); g.strokeCircle(T / 2, T / 2, 10.5); g.fillStyle(0xffffff, 0.18); g.fillCircle(T / 2, T / 2, 10.5); });
   drawHudIcons(g);
   drawMenuTextures(g);
-  for (const id of BOSS_IDS) BOSS_DEFS[id].sprite.draw(g, CONFIG.tile); // os chefes vêm do registro
+  for (const id of BOSS_IDS) {
+    const { prefix, draw } = BOSS_DEFS[id].sprite; // os chefes vêm do registro
+    draw(g, CONFIG.tile);
+    // contorno escuro em todos os quadros do chefe (legível sobre qualquer chão). `minAlpha`: a sombra e o brilho
+    // translúcidos não ganham borda. scripts/silhouettes.cjs confere o contraste da borda.
+    for (const key of scene.textures.getTextureKeys()) if (key.startsWith(prefix + '_')) outlineTexture(scene, key, 0.5);
+  }
   drawAnselmoTextures(scene);
   g.destroy();
 }

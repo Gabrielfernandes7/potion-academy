@@ -8,10 +8,9 @@
 //        com um pé de cada vez, corpo que sobe e desce, braços que balançam), 'cast' (grita de boca aberta, braço
 //        erguido com o orbe), 'hurt' (olhos em X), 'talk' (2 quadros: boca abre e fecha),
 //        'defeat' (vencida, calma: olhos fechados, folhas caídas, braços baixos).
-// Tem contorno escuro de 1 px (legibilidade sobre o chão claro do jardim); a sombra e o brilho do orbe ficam sem.
+// O contorno escuro de 1 px (legibilidade sobre o chão claro do jardim) é dado a todos os chefes em textures/index.ts.
 import Phaser from 'phaser';
 import { ROO_HEAD_ROOM, rooTextureHeight } from './rooGeometry';
-import { outlineTexture } from './outline';
 
 type Gfx = Phaser.GameObjects.Graphics;
 type Pt = readonly [number, number];
@@ -203,14 +202,12 @@ function drawMandrakeFrame(g: Gfx, T: number, pose: MandrakePose, o: FrameOpts =
   leaf(g, cx, top, cx + lag(3) * 1.6, top - 13 + droop * 1.6 + bounce * 1.3, 3.4);
 }
 
-/** Gera os quadros e dá o contorno a cada um. Chaves: idle_0..5, walk_0..3, cast, hurt, talk_0/1, defeat. */
+/** Gera os quadros. Chaves: idle_0..5, walk_0..3, cast, hurt, talk_0/1, defeat. */
 export function drawMandrakeTextures(g: Gfx, T: number): void {
   const H = rooTextureHeight(T);
-  const scene = g.scene;
   const make = (key: string, pose: MandrakePose, o?: FrameOpts): void => {
     drawMandrakeFrame(g, T, pose, o);
     g.generateTexture(key, T, H);
-    outlineTexture(scene, key, 0.5); // só pixels firmes entram no contorno: a sombra e o brilho do orbe ficam de fora
   };
   for (let i = 0; i < MANDRAKE_IDLE_FRAMES; i++) {
     make(`mandrake_idle_${i}`, 'idle', { t: i / MANDRAKE_IDLE_FRAMES, blink: i === 4 });
