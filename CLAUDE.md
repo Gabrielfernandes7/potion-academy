@@ -25,7 +25,7 @@ npm run test       # Vitest (tests/)
 
 Em `npm run dev`, o jogo fica exposto em `window.__game` (só em desenvolvimento) para inspeção por console/testes. Abra `/?touch` para ver os controles de toque no desktop.
 
-Game state is persisted in `localStorage` under `bombroo_bank` (coins) and `bombroo_owned` (bought bomb types). **Do not rename these keys without a migration**: existing players would lose progress. They are centralized in `src/storage.ts`.
+Game state is persisted in `localStorage` under these keys: `bombroo_owned` (bombas/poções possuídas), `bombroo_stages_completed` + `bombroo_stages_schema` (fases), `bombroo_forms` (formas aprendidas), `bombroo_arena_wins` (chefes vencidos na Arena). The old `bombroo_bank` (OURO, removido do jogo) is no longer read or written. **Do not rename these keys without a migration**: existing players would lose progress. They are centralized in `src/storage.ts`.
 
 ## Project Layout
 
@@ -37,7 +37,7 @@ history.html              # livro da história em prosa (/history.html); script 
 src/
   main.ts                  # layout (vars CSS do canvas, modo toque), botões do DOM, nome da faixa
   config.ts                # CONFIG, CANVAS, ELEMENTS, BOMB_TYPES, BOMB_ORDER (balanceamento)
-  storage.ts               # Storage, Bank, owned bombs (localStorage)
+  storage.ts               # Storage, owned bombs, fases, formas e Arena (localStorage)
   audio/AudioEngine.ts     # motor: contexto, flags, agendador da música (playTrack), API `audio` (fachada)
   audio/synth.ts           # primitivas WebAudio: cadeia + reverb, voz, grão de ruído, sopro (sem regra de jogo)
   audio/sounds.ts          # qual som toca para cada efeito (playSfx), por elemento, e as fanfarras
