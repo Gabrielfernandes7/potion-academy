@@ -136,6 +136,8 @@ Não entregue código Phaser nem imagem gerada por IA.
 
 ## Armadilhas já encontradas (não repetir)
 
+- **Lint e formatador (issue #11):** `npm run lint` (ESLint, regras de erro de verdade) roda dentro do `npm run check`. O Prettier está configurado (`.prettierrc.json`) mas o código existente **não foi reformatado**: 162 arquivos fugiriam do padrão (estilo denso, escrito à mão) e o diff apagaria o histórico do `git blame`. Use `npm run format -- <arquivo>` só em arquivos novos; `npm run format:check -- <arquivo>` confere um arquivo.
+
 - **Safari e leitura de pixels:** onde o navegador bloqueia `getImageData` (Safari com proteção de impressão digital, modo de bloqueio, extensões), o Phaser cai ao importar (`InvalidStateError`, 1 x 1) e nada aparece. `src/canvasGuard.ts` tem de ser o **primeiro import** de toda página (e, no build, fica no começo do mesmo arquivo do Phaser, em `vite.config.ts`). Teste com WebKit do Playwright: `npx playwright install webkit` e um `addInitScript` que faça `getImageData` lançar.
 
 - `scene.restart()` sem dados reaproveita os dados anteriores. Passe sempre os dados.

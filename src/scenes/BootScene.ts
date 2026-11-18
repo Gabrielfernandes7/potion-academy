@@ -16,7 +16,6 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    const scene = this;
     generateTextures(this);
     this.game.events.emit(TEXTURES_READY);
     this.scene.start('Menu');
@@ -27,7 +26,7 @@ export class BootScene extends Phaser.Scene {
     const next = (): void => {
       const job = jobs[i++];
       if (!job) return;
-      addRooFormTextures(scene, { forms: [job.form], stages: [job.stage] });
+      addRooFormTextures(this, { forms: [job.form], stages: [job.stage] });
       window.setTimeout(next, CHUNK_DELAY_MS);
     };
     window.setTimeout(next, CHUNK_DELAY_MS * 4);
