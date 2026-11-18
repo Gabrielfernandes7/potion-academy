@@ -18,6 +18,7 @@ import { closeMusicRoom, initMusicRoom, isMusicRoomOpen, openMusicRoom } from '.
 import { bindHelp } from './ui/help';
 import { bindArena, isArenaOpen, openArena } from './ui/arena';
 import { bindSaveTransfer } from './ui/saveTransfer';
+import { registerServiceWorker } from './pwa';
 
 function setupLayout(): void {
   const root = document.documentElement;
@@ -155,3 +156,4 @@ setSfxButton(prefs.sfx);
 audio.sfx = prefs.sfx;
 audio.enabled = prefs.music;
 bootGame();
+registerServiceWorker();

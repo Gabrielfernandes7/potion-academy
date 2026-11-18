@@ -36,3 +36,13 @@ Quando o endereço for conhecido, troque em `index.html` as metatags `og:image` 
 ## Verificar
 
 Depois de publicar: abra `/` (o jogo), `/algo-que-nao-existe` (deve mostrar a 404 com status 404), `/manuscrito.html` e `/history.html`.
+
+## App instalável e jogo sem conexão (PWA)
+
+O build publica `manifest.webmanifest`, os ícones (`icons/`) e o service worker `sw.js` (registrado por `src/pwa.ts`, só em produção). O que isso dá:
+- **Instalar:** no Chrome/Edge (menu, "Instalar Potion Academy") e no Safari do iPhone/iPad (Compartilhar, "Adicionar à Tela de Início"); abre em janela própria, sem a barra do navegador.
+- **Sem conexão:** depois da primeira visita o jogo abre offline. Os arquivos com hash (`/assets/*`) vêm do cache; a página e as imagens tentam a rede primeiro (para pegar versões novas) e caem no cache. Conferido: com a rede desligada, o recarregamento mostra o menu e o jogo.
+- **Hospedagem:** `sw.js` e o manifesto precisam ser servidos na **mesma pasta** do jogo (a raiz do site, ou o `base` do Vite) e por **HTTPS** (ou `localhost`). Serviço de worker não funciona em `file://`.
+- **Atualizar tudo à força:** aumente `CACHE` em `public/sw.js` (`potion-academy-v1` para `-v2`); o worker apaga os caches antigos ao ativar. Para desligar num aparelho, abra o jogo com `?nosw` e limpe os dados do site.
+- **Ícones:** `node scripts/make-icons.cjs` os refaz a partir de `public/favicon.svg` (192, 512, "maskable" 512 e o do iOS, 180).
+- **Pendências do endereço final** (ver acima) valem também para o manifesto: `start_url` e `scope` são relativos (`./`), então funcionam em qualquer pasta.

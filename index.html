@@ -7,6 +7,13 @@
 <title>Potion Academy</title>
 <meta name="description" content="Potion Academy: um jogo de alquimia em navegador. Lance poções de quatro elementos, quebre caixotes e encare a Belladona.">
 <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg">
+<!-- App instalável e jogável sem conexão (PWA): manifesto e ícones; o service worker é registrado em src/pwa.ts -->
+<link rel="manifest" href="%BASE_URL%manifest.webmanifest">
+<link rel="apple-touch-icon" href="%BASE_URL%icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Potion Academy">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <!-- Open Graph: para a prévia ao compartilhar o link. og:url e og:image precisam do endereço final do site. -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Potion Academy">
