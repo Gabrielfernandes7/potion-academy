@@ -42,7 +42,9 @@ export default defineConfig({
         notFound: '404.html',
         serverError: '500.html',
       },
-      output: { manualChunks: id => (id.includes('node_modules/phaser') ? 'phaser' : undefined) },
+      // canvasGuard vai junto, no começo do mesmo arquivo: ele precisa rodar ANTES do Phaser (se ficasse em outro
+      // arquivo, o navegador executaria o arquivo do Phaser primeiro e o jogo cairia onde a leitura de pixels é bloqueada)
+      output: { manualChunks: id => (id.includes('node_modules/phaser') || id.endsWith('/src/canvasGuard.ts') ? 'phaser' : undefined) },
     },
   },
 });

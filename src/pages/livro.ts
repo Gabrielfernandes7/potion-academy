@@ -1,6 +1,7 @@
 // O Livro de Roo (livro.html): um livro de 12 aberturas com gravuras animadas, virada de página, glosas à margem e música
 // opcional. O texto está em game/livro.ts, as cenas em livroScenes.ts. Os personagens das gravuras são os do próprio jogo:
 // as texturas vêm de um Phaser escondido (como em birthScene.ts e no manuscrito) e são copiadas para canvases comuns.
+import '../canvasGuard'; // primeiro de todos: sem leitura de pixels, o Phaser cai ao carregar (ver canvasGuard.ts)
 import '@fontsource/cinzel/600.css';
 import '@fontsource/cinzel/700.css';
 import '@fontsource/nunito/400.css';

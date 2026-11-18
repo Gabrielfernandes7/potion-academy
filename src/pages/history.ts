@@ -1,5 +1,6 @@
 // Livro da história (history.html): navegação do índice e interruptor das notas para o jogo.
 // O texto vive no HTML; aqui só há comportamento. Fonte do roteiro: docs/12-historia.md.
+import '../canvasGuard'; // primeiro de todos: sem leitura de pixels, o Phaser cai ao carregar (ver canvasGuard.ts)
 import '@fontsource/cinzel/600.css';
 import '@fontsource/cinzel/700.css';
 import '@fontsource/nunito/400.css';

@@ -1,5 +1,6 @@
 // Catálogo de sprites: gera as mesmas texturas do jogo e as mostra ampliadas, agrupadas.
 // Abra /sprites.html com o servidor de desenvolvimento ligado (npm run dev).
+import '../canvasGuard'; // primeiro de todos: sem leitura de pixels, o Phaser cai ao carregar (ver canvasGuard.ts)
 import '@fontsource/cinzel/700.css';
 import '@fontsource/nunito/400.css';
 import '@fontsource/nunito/700.css';

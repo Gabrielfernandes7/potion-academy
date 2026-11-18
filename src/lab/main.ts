@@ -1,5 +1,6 @@
 // Entrada do lab (só desenvolvimento): escolhe o experimento pela URL (?exp=<id>), monta a barra e
 // o painel e cria o jogo Phaser com a cena dele. Abra /lab.html com `npm run dev`.
+import '../canvasGuard'; // primeiro de todos: sem leitura de pixels, o Phaser cai ao carregar (ver canvasGuard.ts)
 import Phaser from 'phaser';
 import { EXPERIMENTS, findExperiment } from './registry';
 

@@ -1,4 +1,5 @@
 // Ponto de entrada: liga os botões de DOM ao jogo.
+import './canvasGuard'; // primeiro de todos: sem leitura de pixels, o Phaser cai ao carregar (ver canvasGuard.ts)
 import '@fontsource/cinzel/600.css';
 import '@fontsource/cinzel/700.css';
 import '@fontsource/nunito/400.css';

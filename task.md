@@ -136,6 +136,8 @@ Não entregue código Phaser nem imagem gerada por IA.
 
 ## Armadilhas já encontradas (não repetir)
 
+- **Safari e leitura de pixels:** onde o navegador bloqueia `getImageData` (Safari com proteção de impressão digital, modo de bloqueio, extensões), o Phaser cai ao importar (`InvalidStateError`, 1 x 1) e nada aparece. `src/canvasGuard.ts` tem de ser o **primeiro import** de toda página (e, no build, fica no começo do mesmo arquivo do Phaser, em `vite.config.ts`). Teste com WebKit do Playwright: `npx playwright install webkit` e um `addInitScript` que faça `getImageData` lançar.
+
 - `scene.restart()` sem dados reaproveita os dados anteriores. Passe sempre os dados.
 - Câmera com `setViewport` tem offset: para o centro do mundo use `CONFIG.cols/rows * tile / 2`, não `camera.centerX`.
 - Frase de `Enter`: na partida é pausa, no menu inicia o jogo. Não misturar.
