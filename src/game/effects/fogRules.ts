@@ -18,10 +18,3 @@ export function fogRadiusPx(radiusTiles: number, tile: number, timeMs: number, b
   if (!breathe) return base;
   return base * (1 + BREATH * Math.sin((timeMs / BREATH_MS) * Math.PI * 2));
 }
-
-// A casa (tx, ty) está dentro da visão da Roo (em casas)? Distância em linha reta, do centro das casas.
-export function inVision(tx: number, ty: number, playerX: number, playerY: number, radiusTiles: number): boolean {
-  const dx = tx - playerX;
-  const dy = ty - playerY;
-  return dx * dx + dy * dy <= clampFogRadius(radiusTiles) ** 2;
-}

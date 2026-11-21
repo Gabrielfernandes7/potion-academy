@@ -4,7 +4,7 @@ import { damageTo } from '../../src/game/entities/damage';
 import { damageToRoo } from '../../src/game/entities/roo';
 import {
   EmberField, FORMS, FORM_COOLDOWN_MS, FORM_IDS, FORM_MS, FORM_STAGES, RooForm, boostFactor, boostedDamage,
-  bubbleAt, bubblePath, emberDamage, emberMs, embersHurt, fireLight, flameTiles, formStage, formView, profileOf, trapMs,
+  bubbleAt, bubblePath, emberDamage, emberMs, fireLight, flameTiles, formStage, formView, profileOf, trapMs,
   BUBBLE_STEP_MS, IRIDESCENT, iridescent, formForElement,
   PUDDLE_SLOW, PuddleField, novaTiles, puddleMs, puddleTiles,
   BUBBLE_HEAL, BUBBLE_HEAL_EVERY_MS, bubbleHealTick, GUARD_COOLDOWN_MS, GUARD_MS, GUARD_REDUCE, RING_PUSH_STEPS, aimMove, guardedDamage, ringNeighbors, rootCandidates,
@@ -97,8 +97,6 @@ describe('Roo Fire', () => {
     expect(f.lit(2, 2, 1000 + emberMs(4))).toBe(false);
     expect(f.douse([{ x: 2, y: 2 }, { x: 8, y: 8 }])).toBe(1);
     expect(f.lit(3, 2, 1010)).toBe(true);
-    expect(embersHurt('enemy')).toBe(true);
-    expect(embersHurt('boss')).toBe(false);
     expect(emberDamage(PROFILES.flower)).toBeGreaterThan(emberDamage(PROFILES.frog));
   });
   it('Labareda: à frente até o alcance, parando na primeira casa que não é livre', () => {

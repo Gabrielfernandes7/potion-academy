@@ -28,7 +28,6 @@ Quando mudar um sprite, atualize as fotos: com `npm run dev` ligado, gere de nov
 |---|---|
 | `roo_down_0-3`, `roo_up_0-3`, `roo_side_0-3` | andando de frente, de costas e de lado (4 quadros cada) |
 | `roo_sleep_{down,up,side}_0-1` | dormindo: olhos fechados, cabeça caída, respiração |
-| `roo_stir_0-1` | pose do menu: de lado, sem braço e sem varinha (a cena os desenha em movimento) |
 | `roo_maestro_0-1` | de casaca e cabelo de Beethoven, batendo a batuta (Sala de Música) |
 | `roo_read_0-8` | de frente, lendo: quem olha vê a **capa** do livro (roxa, com losangos dourados) e a Roo vê as páginas. 0 e 8 são parados; de 1 a 7 a mão puxa a folha, que passa por cima do livro (GIF do README) |
 

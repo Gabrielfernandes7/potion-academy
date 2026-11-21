@@ -40,10 +40,6 @@ function carregar(textures: Phaser.Textures.TextureManager): Sprites {
   return out;
 }
 
-export function isStageIntroOpen(): boolean {
-  return aberto;
-}
-
 export function showStageIntro(o: StageIntro): void {
   const canvas = byId<HTMLCanvasElement>('intro-canvas');
   canvas.width = W;

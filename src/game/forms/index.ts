@@ -33,8 +33,3 @@ export function boostedDamage(form: FormId | null, baseDamage: number, element: 
   const f = boostFactor(form, element, stage);
   return f === 1 ? baseDamage : Math.max(baseDamage, Math.round(baseDamage * f));
 }
-
-/** Dano que a Roo leva de um golpe do elemento, na forma e no degrau dados (sem elemento, o contato neutro). */
-export function formHit(form: FormId | null, element: ElementId | undefined, stage: FormStage, neutral: number, damageTo: (p: DamageProfile, e: ElementId) => number): number {
-  return element ? damageTo(profileOf(form, stage), element) : neutral;
-}

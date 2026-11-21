@@ -20,10 +20,6 @@ export function setFormElement(element: ElementId | null): void {
   formElement = element;
 }
 
-export function currentFormElement(): ElementId | null {
-  return formElement;
-}
-
 /** A poção está bloqueada agora pela forma (um elemento que não é o da forma)? */
 export function isBlockedBomb(type: BombId): boolean {
   return formElement !== null && BOMB_TYPES[type].element !== formElement;

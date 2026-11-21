@@ -518,8 +518,6 @@ export function drawRooTextures(g: Gfx, T: number): void {
       drawRooFrame(g, T, fi, dir, 'sleep');
       g.generateTexture(`roo_sleep_${dir}_${fi}`, T, H);
     }
-    drawRooFrame(g, T, fi, 'side', 'stir');
-    g.generateTexture(`roo_stir_${fi}`, T, H);
     drawRooFrame(g, T, fi, 'side', 'maestro');
     g.generateTexture(`roo_maestro_${fi}`, T, H);
   }

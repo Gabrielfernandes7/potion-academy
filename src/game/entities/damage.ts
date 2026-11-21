@@ -27,10 +27,6 @@ export function damageTo(profile: DamageProfile, element: ElementId): number {
   return m === 0 ? 0 : Math.max(1, Math.round(BASE_HIT * m));
 }
 
-export function isImmuneTo(profile: DamageProfile, element: ElementId): boolean {
-  return profile.immune.includes(element);
-}
-
 // Quantos golpes do elemento são precisos para zerar a vida (Infinity se imune).
 export function hitsToKill(profile: DamageProfile, element: ElementId): number {
   const d = damageTo(profile, element);

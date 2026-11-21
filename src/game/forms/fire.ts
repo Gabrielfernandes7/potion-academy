@@ -49,7 +49,6 @@ export function emberMs(stage: FormStage): number {
 }
 
 export const EMBER_TICK_MS = 800; // intervalo entre queimaduras no mesmo alvo
-export const embersHurt = (target: 'enemy' | 'boss'): boolean => target === 'enemy';
 
 /** Dano de uma queimadura de brasa num alvo (o dano de fogo da tabela dele, sem bônus). */
 export function emberDamage(target: DamageProfile): number {

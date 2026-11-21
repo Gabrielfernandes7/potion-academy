@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  FOG_MAX_RADIUS, FOG_MIN_RADIUS, clampFogRadius, fogRadiusPx, inVision,
+  FOG_MAX_RADIUS, FOG_MIN_RADIUS, clampFogRadius, fogRadiusPx,
 } from '../../src/game/effects/fogRules';
 
 describe('névoa: raio', () => {
@@ -16,15 +16,5 @@ describe('névoa: raio', () => {
       expect(r).toBeGreaterThanOrEqual(120 * 0.94);
       expect(r).toBeLessThanOrEqual(120 * 1.06);
     }
-  });
-});
-
-describe('névoa: visão', () => {
-  it('vê o que está dentro do círculo, em linha reta', () => {
-    expect(inVision(5, 5, 5, 5, 3)).toBe(true);
-    expect(inVision(8, 5, 5, 5, 3)).toBe(true);
-    expect(inVision(9, 5, 5, 5, 3)).toBe(false);
-    expect(inVision(7, 7, 5, 5, 3)).toBe(true);  // diagonal: 2,83 casas
-    expect(inVision(8, 8, 5, 5, 3)).toBe(false); // diagonal: 4,24 casas
   });
 });

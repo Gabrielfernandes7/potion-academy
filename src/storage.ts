@@ -33,9 +33,6 @@ export function cleanStageList(raw: unknown): number[] {
   return out;
 }
 
-/** As chaves que formam o progresso do jogador (o que exportar e importar). As preferências de áudio ficam de fora. */
-export const SAVE_KEYS = [OWNED_KEY, STAGES_KEY, STAGES_SCHEMA_KEY, FORMS_KEY, ARENA_KEY] as const;
-
 /** O progresso numa forma só: poções, fases (na numeração atual), formas aprendidas e chefes vencidos na Arena. */
 export interface SaveData {
   owned: BombId[];

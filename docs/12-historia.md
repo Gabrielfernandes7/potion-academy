@@ -93,7 +93,7 @@ Em um inverno de fome, de madrugada, o mestre misturou o que restava de Prima Ma
 - **Faz da culpa de Anselmo algo maior:** ele sabia que o mestre tratava um presente como prova de técnica.
 - **Combina com o frasco vazio e com a bolha:** um frasco vazio é o oposto de um recipiente que se enche, e a bolha é feita de ar dentro de uma película.
 
-**Cena animada:** em `history.html` (capítulo II, botão "Ver a cena do nascimento"), em pixel art com a Roo do próprio jogo: o mestre sopra, a bolha flutua até a bolsa da capa, estoura e a Roo respira. Código em `src/birthScene.ts`; serve de rascunho para uma cena do jogo.
+**Cena animada:** em `history.html` (capítulo II, botão "Ver a cena do nascimento"), em pixel art com a Roo do próprio jogo: o mestre sopra, a bolha flutua até a bolsa da capa, estoura e a Roo respira. Código em `src/pages/birthScene.ts`; serve de rascunho para uma cena do jogo.
 
 **Cuidados:** não explicar por que cachorro; a Roo não é "de laboratório", não tem valor menor por isso; o final não deve revelar que ele pode estourar.
 

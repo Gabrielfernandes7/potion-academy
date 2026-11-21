@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { canUseBomb, currentFormElement, isBlockedBomb, setArenaLoadout, setFormElement } from '../src/game/loadout';
+import { canUseBomb, isBlockedBomb, setArenaLoadout, setFormElement } from '../src/game/loadout';
 
 afterEach(() => { setArenaLoadout(false); setFormElement(null); });
 
@@ -8,7 +8,6 @@ describe('poções que a Roo pode usar', () => {
     setArenaLoadout(true);
     expect(canUseBomb('mega')).toBe(true);
     setFormElement('water');
-    expect(currentFormElement()).toBe('water');
     expect(isBlockedBomb('mega')).toBe(false);
     for (const t of ['normal', 'pierce', 'remote'] as const) {
       expect(isBlockedBomb(t), t).toBe(true);

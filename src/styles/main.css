@@ -904,11 +904,7 @@ kbd {
 @media (max-width: 600px) {
   .arena-grid { grid-template-columns: 1fr; }
 
-  .element-line { margin: 0; min-height: 0; text-align: left; }
-  .stats, .tags { grid-column: 1 / -1; }
-  .stats { margin: 8px 0 4px; }
-  .tags { justify-content: flex-start; min-height: 0; }
-  .tags:empty { display: none; }
+  .stats { grid-column: 1 / -1; margin: 8px 0 4px; }
 }
 
 @media (max-width: 480px) {
