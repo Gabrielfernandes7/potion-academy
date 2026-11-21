@@ -10,6 +10,7 @@ import { addBombSlot, addFireLevel } from './upgrades';
 import type { Pickup } from './types';
 import { HEART_HEAL, healRoo } from './entities/roo';
 import type { MainScene } from '../scenes/MainScene';
+import { collectSparkle } from './fx/battleFx';
 
 export class PickupSystem {
   pickups: Pickup[] = [];
@@ -81,6 +82,7 @@ export class PickupSystem {
     const s = this.scene;
     // o baú abre na hora e dá o item sorteado para ele
     this.applyItem(pickup.type === 'chest' ? (pickup.prize ?? 'heart') : pickup.type, pickup);
+    collectSparkle(s, pickup.sprite.x, pickup.sprite.y, pickupHalo(pickup.type, pickup.potion) ?? 0xffe082);
     s.tweens.killTweensOf(pickup.sprite);
     pickup.sprite.destroy();
     if (pickup.halo) {

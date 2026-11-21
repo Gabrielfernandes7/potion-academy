@@ -77,7 +77,7 @@ src/
   game/upgrades.ts         # power-ups por poção: alcance e frascos valem só para a poção escolhida (puro)
   game/blast.ts            # alcance de uma explosão, como gerador (puro, testável)
   game/BombSystem.ts + PickupSystem.ts + SleepSystem.ts  # sistemas tirados da MainScene (regras puras em *Rules.ts)
-  game/fx/                 # partículas e objetos reaproveitados (particlePool.ts, objectPool.ts): o que evita o lag das explosões
+  game/fx/                 # partículas e objetos reaproveitados (particlePool.ts, objectPool.ts): o que evita o lag das explosões; battleFx.ts: efeitos de batalha (lascas, clarão de golpe, sumiço do inimigo, brilho de item, poeira dos passos), docs/24
   game/events.ts + launcher.ts  # eventos globais; cria o Phaser.Game e navega menu/partida
   game/entities/           # personagens que sofrem dano: inimigos e chefes (ver docs/14-estrutura-do-codigo.md)
   game/entities/damage.ts  # regra pura de dano por elemento (multiplicadores, damageTo, hitsToKill)

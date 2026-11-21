@@ -12,6 +12,7 @@ import {
 } from './enemyRules';
 import type { Enemy } from '../../types';
 import { hitFx } from '../hitEffects';
+import { deathPoof, hitFlash } from '../../fx/battleFx';
 import type { MainScene } from '../../../scenes/MainScene';
 import { ENEMY_TYPES, EnemyKind } from './defs';
 import { PROFILES } from '../profiles';
@@ -157,7 +158,7 @@ export class EnemySystem {
     this.scene.tweens.killTweensOf(enemy.sprite);
     const px = enemy.sprite.x;
     const py = enemy.sprite.y;
-    enemy.sprite.destroy();
+    deathPoof(this.scene, enemy.sprite, element); // achata e some em fumaça; o sprite é destruído no fim
     enemy.bar.destroy();
     enemy.badge?.destroy();
     this.enemies = this.enemies.filter(e => e !== enemy);
@@ -188,6 +189,7 @@ export class EnemySystem {
     if (enemy.kind === 'slime' && element === 'fire') this.splitSlime(enemy); // o fogo divide a gosma em duas
     hitFx(this.scene, enemy.sprite.x, enemy.sprite.y - 6, element);
     this.scene.floatingText(enemy.gridX, enemy.gridY, `-${damage}`, '#ff80ab');
+    hitFlash(this.scene, enemy.sprite);
     this.scene.tweens.add({ targets: enemy.sprite, alpha: 0.45, duration: 90, yoyo: true, repeat: 1 });
   }
 
@@ -212,6 +214,7 @@ export class EnemySystem {
     }
     hitFx(this.scene, enemy.sprite.x, enemy.sprite.y - 6, 'fire');
     this.scene.floatingText(enemy.gridX, enemy.gridY, `-${damage}`, '#ffa94d');
+    hitFlash(this.scene, enemy.sprite);
     this.scene.tweens.add({ targets: enemy.sprite, alpha: 0.45, duration: 90, yoyo: true, repeat: 1 });
   }
 

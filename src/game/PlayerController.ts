@@ -7,6 +7,7 @@ import type { MainScene } from '../scenes/MainScene';
 import { deathTip, type DeathCause } from './deathTip';
 import { damageToRoo } from './entities/roo';
 import { HIT_TINT, hitFx } from './entities/hitEffects';
+import { stepDust } from './fx/battleFx';
 import { advanceStep, beginStep, facingFor, lerp, moveDurationMs, tileCenter, walkTimeScale, type StepState } from './movement';
 import { chooseMove, nextLastDir, type Dir, type DirFlags } from './playerInput';
 
@@ -16,6 +17,7 @@ export class PlayerController {
   private moveFrom = { x: 0, y: 0 };
   private moveTo = { x: 0, y: 0 };
   private step: StepState = beginStep(0, 220);
+  private stepCount = 0; // a poeira sai a cada dois passos
 
   constructor(private readonly scene: MainScene) {}
 
@@ -50,6 +52,8 @@ export class PlayerController {
     s.player.gridY = ny;
     s.player.moving = true;
     this.moveFrom = { x: s.playerSprite.x, y: s.playerSprite.y };
+    // poeirinha nos pés a cada dois passos; a Roo Ar flutua e não levanta pó
+    if (++this.stepCount % 2 === 0 && s.forms?.form?.formElement !== 'air') stepDust(s, this.moveFrom.x, this.moveFrom.y + CONFIG.tile * 0.35);
     this.moveTo = { x: tileCenter(nx, CONFIG.tile), y: tileCenter(ny, CONFIG.tile) };
     this.step = beginStep(this.step.carry, duration);
     s.playWalk();

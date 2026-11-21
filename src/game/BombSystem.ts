@@ -13,6 +13,10 @@ import { ObjectPool } from './fx/objectPool';
 
 const SPARK_MS = 90; // intervalo entre as faíscas do pavio de uma poção
 const FLASH_MS = 420; // duração do miolo e do anel de cada casa de uma explosão
+const WHITE_MS = 50; // o miolo nasce branco por um instante (o "estalo" da explosão) e só depois toma a cor
+const SCORCH_MS = 1600; // a marca que a poção deixa no chão onde estourou
+// cor da marca no chão: fuligem (fogo), poça escura (água), terra revolvida (terra), um halo frio (ar)
+const SCORCH_TINT: Record<ElementId, number> = { fire: 0x2b1a12, water: 0x1e3a4a, earth: 0x3e2f22, air: 0x4a4560 };
 
 const EXPLOSION_FX: Record<ElementId, {
   texture: string; speed: { min: number; max: number }; angle: { min: number; max: number };
@@ -31,9 +35,12 @@ export class BombSystem {
   // imagens das explosões, reaproveitadas (o miolo e o anel de cada casa atingida)
   private readonly corePool = new ObjectPool(() => this.scene.add.image(0, 0, 'menu_puff').setBlendMode(Phaser.BlendModes.ADD).setDepth(8));
   private readonly ringPool = new ObjectPool(() => this.scene.add.image(0, 0, 'fx_ring').setDepth(9));
+  // marca no chão (entre o piso e as paredes), também reaproveitada
+  private readonly scorchPool = new ObjectPool(() => this.scene.add.image(0, 0, 'menu_puff').setDepth(0.5));
+  private scorches: Array<{ img: Phaser.GameObjects.Image; t: number }> = [];
 
   // as explosões em andamento (miolo e anel de cada casa): crescem e somem em FLASH_MS
-  private flashes: Array<{ core: Phaser.GameObjects.Image; ring: Phaser.GameObjects.Image; t: number }> = [];
+  private flashes: Array<{ core: Phaser.GameObjects.Image; ring: Phaser.GameObjects.Image; t: number; color: number }> = [];
 
   constructor(private readonly scene: MainScene) {}
 
@@ -93,6 +100,7 @@ export class BombSystem {
       }
     }
     this.applyBlast(tiles, bomb.element);
+    this.scorch(bomb.sprite.x, bomb.sprite.y, bomb.element);
     this.scene.tweens.killTweensOf(bomb.sprite);
     bomb.sprite.destroy();
     bomb.halo.destroy();
@@ -189,7 +197,9 @@ export class BombSystem {
     this.explosions = this.explosions.filter(e => (e.timer -= delta) > 0);
     // anima o miolo e o anel de cada casa: escala 0,9 -> 1,9 (miolo) e 1 -> 1,9 (anel), e a transparência a zero
     for (const f of this.flashes) {
+      const wasWhite = f.t < WHITE_MS;
       f.t += delta;
+      if (wasWhite && f.t >= WHITE_MS) f.core.setTint(f.color);
       const k = Math.min(1, f.t / FLASH_MS);
       const ease = 1 - (1 - k) * (1 - k); // freia no fim, como o antigo tween
       f.core.setScale(0.9 + 1.0 * ease).setAlpha(0.95 * (1 - k));
@@ -199,6 +209,21 @@ export class BombSystem {
       for (const f of this.flashes) if (f.t >= FLASH_MS) { this.corePool.release(f.core); this.ringPool.release(f.ring); }
       this.flashes = this.flashes.filter(f => f.t < FLASH_MS);
     }
+    if (!this.scorches.length) return;
+    for (const s of this.scorches) {
+      s.t += delta;
+      s.img.setAlpha(0.4 * Math.max(0, 1 - s.t / SCORCH_MS));
+    }
+    if (this.scorches.some(s => s.t >= SCORCH_MS)) {
+      for (const s of this.scorches) if (s.t >= SCORCH_MS) this.scorchPool.release(s.img);
+      this.scorches = this.scorches.filter(s => s.t < SCORCH_MS);
+    }
+  }
+
+  // A marca escura que a poção deixa onde estourou e que some devagar.
+  private scorch(px: number, py: number, element: ElementId): void {
+    const img = this.scorchPool.acquire().setPosition(px, py + 4).setTint(SCORCH_TINT[element]).setScale(0.75, 0.55).setAlpha(0.4);
+    this.scorches.push({ img, t: 0 });
   }
 
   // `lite` pula as partículas (para explosões em muitas casas ao mesmo tempo, como o Grito da Mandrágora).
@@ -206,9 +231,9 @@ export class BombSystem {
     const px = x * CONFIG.tile + CONFIG.tile / 2;
     const py = y * CONFIG.tile + CONFIG.tile / 2;
     // dois desenhos por casa (o miolo e o anel), vindos de um reservatório e animados no update (sem tweens: eram 2 por casa)
-    const core = this.corePool.acquire().setPosition(px, py).setTint(color).setScale(0.9).setAlpha(0.95);
+    const core = this.corePool.acquire().setPosition(px, py).setTint(0xffffff).setScale(0.9).setAlpha(0.95);
     const ring = this.ringPool.acquire().setPosition(px, py).setTint(glow).setScale(1).setAlpha(0.9);
-    this.flashes.push({ core, ring, t: 0 });
+    this.flashes.push({ core, ring, t: 0, color });
     if (!lite) this.explosionFx(px, py, color, glow, element);
     this.explosions.push({ x, y, timer: 380, key: `${x},${y}`, hitPlayer: false, element, fromRoo });
   }

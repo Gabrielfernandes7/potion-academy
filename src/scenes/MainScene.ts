@@ -39,7 +39,8 @@ import { SleepSystem } from '../game/SleepSystem';
 import { markStageCompleted } from '../storage';
 import { ENEMY_TYPES, EnemyKind } from '../game/entities/enemies/defs';
 import { LAST_STAGE, stageDef } from '../game/stages/index';
-import { blockTextureOf } from '../game/stages/blockStyles';
+import { blockStyleOf, blockTextureOf } from '../game/stages/blockStyles';
+import { blockBreak } from '../game/fx/battleFx';
 import { BossId, StageDef, StageTheme } from '../game/stages/types';
 import { buildTiles, cellKey, clampCenter, doorCell, isPassable, isSpawnSafe, tileAt } from '../game/grid';
 import { carryForward, doorOutcome, startingState } from '../game/stageFlow';
@@ -502,6 +503,7 @@ export class MainScene extends Phaser.Scene {
       this.tweens.killTweensOf(sprite);
       sprite.destroy();
       this.blockSprites.delete(key);
+      blockBreak(this, x * CONFIG.tile + CONFIG.tile / 2, y * CONFIG.tile + CONFIG.tile / 2, blockStyleOf(this.def));
     }
     this.grid[y][x] = EMPTY;
     this.blocksDestroyed++;

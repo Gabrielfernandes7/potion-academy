@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CONFIG } from '../../src/config';
 import { makeFakeScene, type FakeScene } from './fakeScene';
 
+vi.mock('../../src/game/fx/battleFx', () => ({ stepDust: vi.fn() }));
 vi.mock('../../src/game/entities/hitEffects', () => ({ HIT_TINT: { fire: 1, water: 2, earth: 3, air: 4 }, hitFx: vi.fn() }));
 
 import { PlayerController } from '../../src/game/PlayerController';

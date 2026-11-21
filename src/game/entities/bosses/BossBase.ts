@@ -12,6 +12,7 @@ import { readTheme } from '../../../ui/theme';
 import type { MainScene } from '../../../scenes/MainScene';
 import { BossPhase, Tile, phaseFor } from './common';
 import { fxPool } from '../../fx/particlePool';
+import { hitFlash } from '../../fx/battleFx';
 
 const WINDUP_MS = 260; // tempo de preparo do corpo antes de cada golpe
 
@@ -352,6 +353,7 @@ export abstract class BossBase {
     this.scene.floatingText(this.gridX, this.gridY, `-${damage}`, '#ff80ab');
     this.scene.play('pickup');
     this.burst(this.sprite.x, this.sprite.y - 10, 'menu_spark', [0xffd54f, 0xffffff, this.setup.furiousTint], 12, 100);
+    hitFlash(this.scene, this.sprite, 90);
     this.scene.tweens.add({
       targets: this.sprite, alpha: 0.35, duration: 110, yoyo: true, repeat: 5,
       onComplete: () => { if (!this.hidden) this.sprite.setAlpha(1); },
