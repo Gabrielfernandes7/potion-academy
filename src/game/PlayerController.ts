@@ -1,6 +1,7 @@
 // O controle da Roo na partida: passo à mão, escolha de direção, dano e acerto de explosão.
 // A MainScene guarda o estado (player, sprite) e delega aqui; a matemática está em movement.ts,
 // playerInput.ts e entities/roo.ts.
+import { buzz } from '../ui/haptics';
 import { CONFIG, ElementId } from '../config';
 import type { MainScene } from '../scenes/MainScene';
 import { deathTip, type DeathCause } from './deathTip';
@@ -117,6 +118,7 @@ export class PlayerController {
     s.floatingText(s.player.gridX, s.player.gridY, `-${amount}`, '#ff8a80');
     s.updateHud();
     s.play('hurt');
+    buzz(45);
     s.playerSprite.setTint(element ? HIT_TINT[element] : 0xff5252);
     if (element) hitFx(s, s.playerSprite.x, s.playerSprite.y - 8, element);
     s.tweens.add({
