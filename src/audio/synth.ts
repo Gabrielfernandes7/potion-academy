@@ -153,7 +153,9 @@ export function crackle(g: Graph, time: number, count: number, span: number, fre
 }
 
 // Sopro de ruído filtrado: sobe e desce suave (como vento ou borbulhar).
-export function breath(g: Graph, time: number, dur: number, gain: number, fromHz: number, toHz: number, send = 0.3): void {
+export function breath(
+  g: Graph, time: number, dur: number, gain: number, fromHz: number, toHz: number, send = 0.3, attackFrac = 0.25,
+): void {
   const src = g.ctx.createBufferSource();
   src.buffer = g.noise;
   const filter = g.ctx.createBiquadFilter();
@@ -162,7 +164,7 @@ export function breath(g: Graph, time: number, dur: number, gain: number, fromHz
   filter.frequency.exponentialRampToValueAtTime(toHz, time + dur);
   const env = g.ctx.createGain();
   env.gain.setValueAtTime(0.0001, time);
-  env.gain.linearRampToValueAtTime(gain, time + dur * 0.25);
+  env.gain.linearRampToValueAtTime(gain, time + dur * attackFrac);
   env.gain.exponentialRampToValueAtTime(0.0001, time + dur);
   src.connect(filter);
   filter.connect(env);

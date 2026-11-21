@@ -55,7 +55,7 @@ class AudioEngine {
       try {
         const Ctor = window.AudioContext ?? (window as unknown as WebkitWindow).webkitAudioContext;
         if (!this.makeContext && !Ctor) return false;
-        this.ctx = this.makeContext ? this.makeContext() : new (Ctor as typeof AudioContext)();
+        this.ctx = this.makeContext ? this.makeContext() : new (Ctor as typeof AudioContext)({ latencyHint: 'interactive' });
         this.graph = createGraph(this.ctx);
         this.applySfxVolume();
         // o navegador pode suspender o áudio sozinho (troca de aba, economia de energia, ligação)

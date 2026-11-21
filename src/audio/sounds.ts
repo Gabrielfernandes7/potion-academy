@@ -13,31 +13,42 @@ export type SfxName =
   | 'bomb' | 'explosion' | 'pickup' | 'powerup' | 'hurt' | 'door' | 'fizzle'
   | 'transform' | 'formEnd' | 'flame' | 'bubble' | 'pop' | 'wall' | 'gust' | 'root' | 'tick' | 'hoot'; // transformações da Roo (variante = o elemento da forma)
 
-// Som da explosão de uma poção, conforme o elemento.
+// O "estalo" do início da explosão: um grão curto de ruído na faixa média, que notebook e celular reproduzem (o grave
+// de 58 a 72 Hz quase não sai deles). Dá o ataque no instante da explosão, sem esperar o sopro crescer.
+function blastOnset(g: Graph, t: number, gain: number, freq: number): void {
+  grain(g, t, 0.035, gain, 'bandpass', freq, 0.9, 0.12);
+}
+
+// Som da explosão de uma poção, conforme o elemento. Todas começam com ataque curto (o jogador vê e ouve junto).
 function elementSound(g: Graph, element: ElementId, t: number): void {
   switch (element) {
     case 'fire':
-      breath(g, t, 0.9, 0.08, 1600, 260, 0.3);
+      blastOnset(g, t, 0.07, 1100);
+      breath(g, t, 0.9, 0.08, 1600, 260, 0.3, 0.05);
       voice(g, 72, t, 0.6, { gain: 0.09, type: 'sine', attack: 0.004, glideTo: 36, glideTime: 0.5, send: 0.2 });
       crackle(g, t + 0.05, 16, 0.6, 3000, 0.05);
       break;
     case 'water':
-      breath(g, t, 0.6, 0.05, 420, 2400, 0.3);
-      [0.08, 0.17, 0.27, 0.38, 0.5, 0.6].forEach((d, i) => {
+      blastOnset(g, t, 0.05, 700);
+      breath(g, t, 0.6, 0.05, 420, 2400, 0.3, 0.08);
+      [0.02, 0.17, 0.27, 0.38, 0.5, 0.6].forEach((d, i) => {
         const f = 300 + i * 70 + Math.random() * 40;
         voice(g, f, t + d, 0.12, { gain: 0.05 * (1 - i * 0.08), type: 'sine', attack: 0.002, glideTo: f * 2.2, glideTime: 0.08, send: 0.3 });
       });
       break;
     case 'earth':
+      blastOnset(g, t, 0.07, 500);
       voice(g, 58, t, 0.5, { gain: 0.12, type: 'sine', attack: 0.003, glideTo: 34, glideTime: 0.3 });
       crackle(g, t + 0.02, 10, 0.25, 1800, 0.05);
       grain(g, t, 0.35, 0.05, 'highpass', 3000, 0.7, 0.1);
       breath(g, t, 0.5, 0.04, 500, 180, 0.1);
       break;
     case 'air':
-      breath(g, t, 1.5, 0.05, 300, 2800, 0.8);
-      voice(g, 880, t + 0.5, 0.8, { gain: 0.012, type: 'sine', attack: 0.3, send: 0.8 });
-      voice(g, 1320, t + 0.6, 0.8, { gain: 0.008, type: 'sine', attack: 0.3, send: 0.8 });
+      // o vento começa já audível (antes subia por 375 ms) e os sinos entram logo, em vez de meio segundo depois
+      blastOnset(g, t, 0.045, 1800);
+      breath(g, t, 1.5, 0.05, 300, 2800, 0.8, 0.06);
+      voice(g, 880, t + 0.06, 0.8, { gain: 0.014, type: 'sine', attack: 0.04, send: 0.8 });
+      voice(g, 1320, t + 0.14, 0.8, { gain: 0.009, type: 'sine', attack: 0.06, send: 0.8 });
       break;
   }
 }
