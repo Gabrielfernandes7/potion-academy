@@ -16,6 +16,8 @@ import { byId } from './ui/dom';
 import { bindMenuButtons, isMenuVisible } from './ui/menu';
 import { closeMusicRoom, initMusicRoom, isMusicRoomOpen, openMusicRoom } from './ui/musicRoom';
 import { bindHelp } from './ui/help';
+import { bindSettings } from './ui/settings';
+import { startGamepad } from './input/gamepad';
 import { bindArena, isArenaOpen, openArena } from './ui/arena';
 import { bindSaveTransfer } from './ui/saveTransfer';
 import { registerServiceWorker } from './pwa';
@@ -34,6 +36,8 @@ function setupLayout(): void {
 
 // Estado da escolha de áudio da jogadora (preferências), separado do que está tocando agora.
 const prefs = loadAudioPrefs();
+audio.setMusicVolume(prefs.musicVolume);
+audio.setSfxVolume(prefs.sfxVolume);
 
 function setChip(id: string, label: string, on: boolean): void {
   const btn = byId(id);
@@ -131,6 +135,13 @@ function bindButtons(): void {
   byId('pause-menu-btn').onclick = showMenu;
   byId('resume-btn').onclick = () => touch.press('pause'); // consumido pela cena no próximo frame
 
+  bindSettings({
+    musicVolume: () => prefs.musicVolume,
+    sfxVolume: () => prefs.sfxVolume,
+    setMusicVolume: v => { prefs.musicVolume = v; saveAudioPrefs(prefs); audio.setMusicVolume(v); },
+    setSfxVolume: v => { prefs.sfxVolume = v; saveAudioPrefs(prefs); audio.setSfxVolume(v); },
+  });
+  startGamepad();
   byId('music-btn').onclick = () => applyMusicPref(!prefs.music);
   byId('sfx-btn').onclick = () => applySfxPref(!prefs.sfx);
 

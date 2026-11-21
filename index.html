@@ -31,6 +31,7 @@
       <span id="track-name" class="track-name" aria-live="polite"></span>
       <button class="chip-btn" id="music-btn" type="button" title="Liga e desliga a música" aria-pressed="true">MÚSICA ON</button>
       <button class="chip-btn" id="sfx-btn" type="button" title="Liga e desliga os efeitos sonoros" aria-pressed="true">EFEITOS ON</button>
+      <button class="chip-btn" id="settings-btn" type="button" title="Volume, teclas e controle" aria-label="Ajustes">AJUSTES</button>
       <button class="chip-btn help-btn" id="help-btn" type="button" title="Como jogar (tecla ?)" aria-label="Como jogar">?</button>
     </div>
   </header>
@@ -98,6 +99,29 @@
     <div class="music-list" id="music-list"></div>
     <p class="music-off" id="music-off" hidden>A música está desligada. Ligue MÚSICA no topo para ouvir.</p>
     <button class="big-btn alt" id="music-back-btn" type="button">VOLTAR</button>
+  </div>
+</div>
+
+<!-- Ajustes: volume, teclas e controle -->
+<div id="settings-overlay" class="overlay" role="dialog" aria-labelledby="settings-title">
+  <div class="panel settings paper">
+    <h2 id="settings-title">AJUSTES</h2>
+    <section>
+      <h3>Volume</h3>
+      <label class="set-row" for="vol-music"><span>Música</span><input type="range" id="vol-music" min="0" max="100" step="5" aria-valuetext=""><output id="vol-music-out"></output></label>
+      <label class="set-row" for="vol-sfx"><span>Efeitos</span><input type="range" id="vol-sfx" min="0" max="100" step="5"><output id="vol-sfx-out"></output></label>
+    </section>
+    <section>
+      <h3>Teclas</h3>
+      <p class="letter-note">Clique numa ação e aperte a nova tecla. As setas, Enter, R e 1 a 4 não mudam.</p>
+      <div id="keymap-list" class="keymap-list"></div>
+      <button class="big-btn alt" id="keymap-reset" type="button">TECLAS PADRÃO</button>
+    </section>
+    <section>
+      <h3>Controle</h3>
+      <p class="letter-note">Controles conectados funcionam sozinhos: direcional ou analógico anda, A poção, X habilidade, B segunda habilidade, Y transforma, LB troca o frasco, RB defesa, RT detona, Start pausa.</p>
+    </section>
+    <button class="big-btn" id="settings-close" type="button">FECHAR</button>
   </div>
 </div>
 
@@ -191,6 +215,7 @@
 
     <section>
       <h3>Teclas</h3>
+      <p class="note">As teclas das ações podem ser trocadas em AJUSTES; o controle (gamepad) também funciona.</p>
       <table class="keys">
         <thead><tr><th>Ação</th><th>Teclado</th><th>Celular</th></tr></thead>
         <tbody>

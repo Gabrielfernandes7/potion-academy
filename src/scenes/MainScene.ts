@@ -21,6 +21,8 @@ import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
 import { touch } from '../input/touch';
 import { hideGameOver, setPauseVisible, showDuelResult, showGameOver } from '../ui/overlays';
 import { isHelpOpen } from '../ui/help';
+import { isSettingsOpen } from '../ui/settings';
+import { getKeymap } from '../input/keymap';
 import { Fog } from '../game/effects/Fog';
 import { BossBase } from '../game/entities/bosses/BossBase';
 import { BOSS_DEFS } from '../game/entities/bosses/defs';
@@ -517,8 +519,9 @@ export class MainScene extends Phaser.Scene {
     if (!keyboard) throw new Error('Teclado não disponível');
     this.cursors = keyboard.createCursorKeys();
     const K = Phaser.Input.Keyboard.KeyCodes;
+    const km = getKeymap(); // as teclas das ações podem ter sido trocadas em AJUSTES
     this.keys = keyboard.addKeys({
-      space: K.SPACE, x: K.X, c: K.C, v: K.V, t: K.T, d: K.D, r: K.R,
+      space: km.bomb, x: km.ability, c: km.ability2, v: km.defense, t: km.transform, d: km.detonate, r: K.R,
       one: K.ONE, two: K.TWO, three: K.THREE, four: K.FOUR,
       enter: K.ENTER,
     }) as unknown as MainKeys;
@@ -773,7 +776,7 @@ export class MainScene extends Phaser.Scene {
   // ---------- Loop principal ----------
 
   update(_time: number, delta: number): void {
-    if (isHelpOpen()) {
+    if (isHelpOpen() || isSettingsOpen()) {
       this.holdForHelp();
       return;
     }

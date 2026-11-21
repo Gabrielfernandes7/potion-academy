@@ -42,6 +42,7 @@ src/
   audio/synth.ts           # primitivas WebAudio: cadeia + reverb, voz, grão de ruído, sopro (sem regra de jogo)
   audio/sounds.ts          # qual som toca para cada efeito (playSfx), por elemento, e as fanfarras
   audio/tracks.ts          # 6 faixas procedurais (uma por parte do jogo, SCENE_TRACKS) e gerador de compassos (puro)
+  input/keymap.ts + gamepad.ts + ui/settings.ts # AJUSTES: teclas das ações trocáveis (bombroo_keymap), controle (gamepad -> touch) e volume (bombroo_audio)
   input/touch.ts           # entrada por toque (d-pad e botões em DOM -> jogo)
   textures/                # texturas procedurais (terrain, potions, roo, entities, hud, menu)
   textures/rooGeometry.ts  # constantes do sprite da Roo (sem Phaser, testável)

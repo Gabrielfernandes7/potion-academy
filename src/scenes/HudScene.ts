@@ -5,7 +5,7 @@
 // Sem legendas de texto: ícone, número e cor dizem o resto. Na fase de chefe, a vida dele ocupa o lugar das gemas.
 // Recebe o estado da MainScene por evento (HUD_UPDATE) e devolve a escolha de frasco por HUD_SELECT_BOMB.
 import Phaser from 'phaser';
-import { BOMB_ORDER, BOMB_TYPES, CANVAS, CONFIG, ELEMENTS, BombId } from '../config';
+import { BOMB_ORDER, BOMB_TYPES, CANVAS, CONFIG, ELEMENTS, BombId, ElementId } from '../config';
 import { canUseBomb } from '../game/loadout';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState, pipsView, segmentFill, timerView } from '../game/hudState';
 import { hpBarView, hpColor } from '../game/entities/roo';
@@ -16,6 +16,19 @@ import { LAST_STAGE } from '../game/stages/index';
 
 const ROW_A = 17;
 const ROW_B = 41;
+
+// Símbolo alquímico do elemento em 7 px, desenhado por código (sem emoji): serve a quem não distingue as cores.
+function drawElementGlyph(g: Phaser.GameObjects.Graphics, element: ElementId, cx: number, cy: number, color: number, alpha: number): void {
+  const up = element === 'fire' || element === 'air';
+  const bar = element === 'air' || element === 'earth';
+  g.lineStyle(1, 0x1d2321, alpha).fillStyle(0x1d2321, alpha * 0.9);
+  g.fillRect(cx - 5, cy - 5, 10, 10); // fundo escuro para o símbolo ler sobre qualquer cor
+  g.lineStyle(1.5, color, alpha).beginPath();
+  if (up) { g.moveTo(cx - 3.5, cy + 3); g.lineTo(cx, cy - 3.5); g.lineTo(cx + 3.5, cy + 3); g.closePath(); }
+  else { g.moveTo(cx - 3.5, cy - 3); g.lineTo(cx, cy + 3.5); g.lineTo(cx + 3.5, cy - 3); g.closePath(); }
+  g.strokePath();
+  if (bar) { g.beginPath(); g.moveTo(cx - 3, cy); g.lineTo(cx + 3, cy); g.strokePath(); }
+}
 const SLOT_W = 38;
 const SLOT_H = 28;
 const SLOT_GAP = 3;
@@ -370,6 +383,8 @@ export class HudScene extends Phaser.Scene {
         g.fillStyle(0x9a8a6a, 0.9).fillRect(x0 + SLOT_W - 12, y0 + 5, 7, 5).fillStyle(0x1d2321, 1).fillRect(x0 + SLOT_W - 10, y0 + 7, 3, 3);
         g.lineStyle(1, 0x9a8a6a, 0.9).strokeRect(x0 + SLOT_W - 11, y0 + 2, 5, 4);
       }
+      // símbolo do elemento (além da cor): fogo △, água ▽, ar △ com barra, terra ▽ com barra (tabela da alquimia)
+      if (owned) drawElementGlyph(g, BOMB_TYPES[id].element, x0 + SLOT_W - 8, y0 + 8, el, isSel ? 1 : 0.8); // bloqueado: fica a tranca
       this.slotIcons[i].setAlpha(owned ? 1 : 0.3);
       this.slotKeys[i].setAlpha(owned ? 1 : 0.5);
       this.slotKeys[i].setColor(isSel ? '#' + t.goldBright.toString(16).padStart(6, '0') : t.textMuted);

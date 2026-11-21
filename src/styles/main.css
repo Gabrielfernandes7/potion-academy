@@ -796,6 +796,14 @@ kbd {
   letter-spacing: 0;
 }
 
+.panel.settings { width: min(100%, 460px); gap: 10px; }
+.panel.settings section { width: 100%; }
+.panel.settings h3 { font-size: 13px; margin: 0 0 6px; color: var(--gold-bright); }
+.panel.settings .letter-note { margin: 0 0 6px; }
+.set-row { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 4px 0; font-size: 14px; color: var(--text); }
+.set-row input[type="range"] { flex: 1; min-width: 0; min-height: 32px; accent-color: var(--gold); }
+.set-row output { width: 3.2em; text-align: right; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.key-btn { min-width: 110px; min-height: 36px; }
 .panel.help {
   width: min(100%, 640px);
   max-height: calc(100dvh - 24px);

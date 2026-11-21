@@ -13,6 +13,7 @@ export { release } from './synth';
 type WebkitWindow = { webkitAudioContext?: typeof AudioContext };
 
 const MUSIC_LEVEL = 0.55;
+const SFX_LEVEL = 0.9; // o mesmo valor de sfxBus em synth.ts
 // Agenda notas com 1 s de antecedência: navegadores aceleram os timers de abas em segundo plano
 // e, com pouca antecedência, a música falhava em silêncio.
 const LOOKAHEAD_S = 1.0;
@@ -25,6 +26,8 @@ class AudioEngine {
   playing = false;
   enabled = false;
   sfx = false;
+  private musicVolume = 1; // escolha da jogadora (0 a 1), multiplica o nível da música
+  private sfxVolume = 1; // idem para os efeitos
 
   // música
   private track: Track | null = null;
@@ -54,6 +57,7 @@ class AudioEngine {
         if (!this.makeContext && !Ctor) return false;
         this.ctx = this.makeContext ? this.makeContext() : new (Ctor as typeof AudioContext)();
         this.graph = createGraph(this.ctx);
+        this.applySfxVolume();
         // o navegador pode suspender o áudio sozinho (troca de aba, economia de energia, ligação)
         this.ctx.onstatechange = () => this.resumeIfNeeded();
       } catch {
@@ -81,6 +85,7 @@ class AudioEngine {
   attachContext(ctx: AudioContext): void {
     this.ctx = ctx;
     this.graph = createGraph(ctx);
+    this.applySfxVolume();
   }
 
   // Cria/retoma o AudioContext. Deve ser chamado dentro de um clique (exigência dos navegadores).
@@ -169,7 +174,24 @@ class AudioEngine {
     if (!this.ctx || !this.graph) return;
     const g = this.graph.musicBus.gain;
     g.cancelScheduledValues(this.ctx.currentTime);
-    g.setTargetAtTime(Math.max(0.0001, target), this.ctx.currentTime, timeConstant);
+    g.setTargetAtTime(Math.max(0.0001, target * this.musicVolume), this.ctx.currentTime, timeConstant);
+  }
+
+  /** Volume da música (0 a 1): vale já, com a música tocando. */
+  setMusicVolume(v: number): void {
+    this.musicVolume = Math.min(1, Math.max(0, v));
+    if (this.playing) this.fadeMusic(MUSIC_LEVEL, 0.05);
+  }
+
+  /** Volume dos efeitos (0 a 1). */
+  setSfxVolume(v: number): void {
+    this.sfxVolume = Math.min(1, Math.max(0, v));
+    this.applySfxVolume();
+  }
+
+  private applySfxVolume(): void {
+    if (!this.ctx || !this.graph) return;
+    this.graph.sfxBus.gain.setValueAtTime(SFX_LEVEL * this.sfxVolume, this.ctx.currentTime);
   }
 
   private beginTrack(): void {
