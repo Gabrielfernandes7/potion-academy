@@ -11,7 +11,7 @@ import { ARENA_STAGE, arenaStageDef, duelStageDef } from '../game/arena';
 import { ObjectPool } from '../game/fx/objectPool';
 import { duelOutcome, validDuel } from '../game/duel';
 import { currentSeed, seedFromUrl, startRun } from '../game/rng';
-import { deathTip, type DeathCause } from '../game/deathTip';
+import { PlayerController } from '../game/PlayerController';
 import { canUseBomb, isBlockedBomb, setArenaLoadout } from '../game/loadout';
 import { rooOriginY } from '../textures/rooGeometry';
 import type { Facing, Player, PowerupCounts, StageData } from '../game/types';
@@ -25,7 +25,6 @@ import { Fog } from '../game/effects/Fog';
 import { BossBase } from '../game/entities/bosses/BossBase';
 import { BOSS_DEFS } from '../game/entities/bosses/defs';
 import { createBoss } from '../game/entities/bosses/registry';
-import { damageToRoo } from '../game/entities/roo';
 import { RooFormSystem } from '../game/RooFormSystem';
 import { StoryDirector } from '../game/StoryDirector';
 import { BombSystem } from '../game/BombSystem';
@@ -33,13 +32,11 @@ import { PickupSystem } from '../game/PickupSystem';
 import { EnemySystem } from '../game/entities/enemies/EnemySystem';
 import { SleepSystem } from '../game/SleepSystem';
 import { markStageCompleted } from '../storage';
-import { HIT_TINT, hitFx } from '../game/entities/hitEffects';
 import { ENEMY_TYPES, EnemyKind } from '../game/entities/enemies/defs';
 import { LAST_STAGE, stageDef } from '../game/stages/index';
 import { blockTextureOf } from '../game/stages/blockStyles';
 import { BossId, StageDef, StageTheme } from '../game/stages/types';
 import { buildTiles, cellKey, clampCenter, doorCell, isPassable, isSpawnSafe, tileAt } from '../game/grid';
-import { advanceStep, beginStep, facingFor, lerp, moveDurationMs, tileCenter, walkTimeScale, type StepState } from '../game/movement';
 import { carryForward, doorOutcome, startingState } from '../game/stageFlow';
 
 type MainKeys = Record<'space' | 'x' | 'c' | 'v' | 't' | 'd' | 'r' | 'one' | 'two' | 'three' | 'four' | 'enter', Phaser.Input.Keyboard.Key>;
@@ -74,10 +71,9 @@ export class MainScene extends Phaser.Scene {
   gems = 0;
   bombType: BombId = 'normal';
   gameOver = false;
-  private lastCause: DeathCause | null = null; // o que machucou a Roo por último (dica da tela de derrota)
   won = false;
   player!: Player;
-  lastDir = { x: 0, y: 0 };
+  readonly playerCtl = new PlayerController(this);
   doorX = 0;
   doorY = 0;
   doorOpen = false;
@@ -155,9 +151,8 @@ export class MainScene extends Phaser.Scene {
     this.gems = 0;
     this.bombType = start.bombType;
     this.gameOver = false;
-    this.lastCause = null;
+    this.playerCtl.reset();
     this.won = false;
-    this.step = beginStep(0, 220);
     this.player = {
       gridX: 1, gridY: 1,
       dir: { x: 0, y: 1 }, facing: 'down', moving: false,
@@ -165,7 +160,6 @@ export class MainScene extends Phaser.Scene {
       upgrades: start.upgrades,
       speedUp: start.speedUp,
     };
-    this.lastDir = { x: 0, y: 0 };
     // sem porta na fase do chefe (-1 nunca coincide com uma casa)
     const door = doorCell(CONFIG.cols, CONFIG.rows, this.def.door);
     this.doorX = door.x;
@@ -477,59 +471,17 @@ export class MainScene extends Phaser.Scene {
   }
 
   // Casa onde a jogadora está de fato (posição do sprite, como o dano).
-  playerTile(): { x: number; y: number } {
-    const T = CONFIG.tile;
-    return { x: Math.floor(this.playerSprite.x / T), y: Math.floor(this.playerSprite.y / T) };
-  }
+  playerTile(): { x: number; y: number } { return this.playerCtl.tile(); }
 
-  // ---------- Explosões e dano ----------
+  // ---------- Explosões e dano (game/PlayerController.ts) ----------
 
-  // Dano à Roo; o efeito do elemento vive em game/entities/hitEffects.ts.
-  damagePlayer(bypassInvuln = false, element?: ElementId): void {
-    if (this.duel) return; // a Roo só assiste ao duelo
-    if (!bypassInvuln && this.player.invulnerable > 0) return;
-    this.lastCause = bypassInvuln ? 'overtime' : element ?? 'contact';
-    const raw = damageToRoo(element, this.forms.profile()); // transformada, o que a machuca muda
-    const damage = this.forms.reduceDamage(raw); // com a defesa da forma de pé, o dano cai pela metade
-    if (damage < raw) this.floatingText(this.player.gridX, this.player.gridY - 1, 'DEFENDIDO', '#bfe6ff', 11, 700);
-    this.player.hp -= damage;
-    this.player.invulnerable = CONFIG.invulnTime;
-    this.floatingText(this.player.gridX, this.player.gridY, `-${damage}`, '#ff8a80');
-    this.updateHud();
-    this.play('hurt');
-    this.playerSprite.setTint(element ? HIT_TINT[element] : 0xff5252);
-    if (element) hitFx(this, this.playerSprite.x, this.playerSprite.y - 8, element);
-    this.tweens.add({
-      targets: this.playerSprite, alpha: 0.3,
-      duration: 120, yoyo: true, repeat: 5,
-      onComplete: () => {
-        this.playerSprite.setAlpha(1);
-        this.playerSprite.clearTint();
-      },
-    });
-    if (this.player.hp <= 0) {
-      this.player.hp = 0;
-      this.updateHud();
-      this.triggerGameOver();
-    }
-  }
+  damagePlayer(bypassInvuln = false, element?: ElementId): void { this.playerCtl.damage(bypassInvuln, element); }
 
-  checkPlayerHit(): void {
-    if (this.player.invulnerable > 0) return;
-    const T = CONFIG.tile;
-    const key = `${Math.floor(this.playerSprite.x / T)},${Math.floor(this.playerSprite.y / T)}`;
-    const blast = this.bombSystem.explosions.find(e => e.key === key && !e.hitPlayer);
-    if (blast) {
-      blast.hitPlayer = true;
-      this.damagePlayer(false, blast.element);
-    }
-  }
+  checkPlayerHit(): void { this.playerCtl.checkHit(); }
 
   // ---------- Movimento e entrada ----------
 
-  moveDuration(): number {
-    return moveDurationMs(CONFIG.baseMoveDuration, this.player.speedUp) * (this.forms?.walkFactor() ?? 1); // Roo Terra: o peso
-  }
+  moveDuration(): number { return this.playerCtl.moveDuration(); }
 
   tweenSpriteTo(
     sprite: Phaser.GameObjects.Image,
@@ -549,51 +501,8 @@ export class MainScene extends Phaser.Scene {
     });
   }
 
-  // Movimento da Roo feito à mão (não por tween): o tempo que sobra ao chegar numa casa
-  // (`moveCarry`) vai para o passo seguinte, então andar em linha reta tem velocidade constante,
-  // sem a pausa de ~1 quadro entre casas que fazia parecer pulo de bloco em bloco.
-  // A matemática do passo (tempo, excedente, direção) está em game/movement.ts.
-  private moveFrom = { x: 0, y: 0 };
-  private moveTo = { x: 0, y: 0 };
-  private step: StepState = beginStep(0, 220);
-
-  movePlayerTo(nx: number, ny: number, duration: number): void {
-    this.player.gridX = nx;
-    this.player.gridY = ny;
-    this.player.moving = true;
-    this.moveFrom = { x: this.playerSprite.x, y: this.playerSprite.y };
-    this.moveTo = { x: tileCenter(nx, CONFIG.tile), y: tileCenter(ny, CONFIG.tile) };
-    this.step = beginStep(this.step.carry, duration);
-    this.playWalk();
-    this.playerSprite.anims.timeScale = walkTimeScale(duration);
-  }
-
-  // Avança o passo atual; ao chegar, guarda o excedente de tempo e libera o próximo passo.
-  private stepPlayerMove(delta: number): void {
-    if (!this.player.moving) return;
-    const tick = advanceStep(this.step, delta);
-    this.step = tick.state;
-    this.playerSprite.x = lerp(this.moveFrom.x, this.moveTo.x, tick.t);
-    this.playerSprite.y = lerp(this.moveFrom.y, this.moveTo.y, tick.t);
-    if (!tick.finished) return;
-    // sem playIdle aqui: se a tecla segue pressionada, o próximo passo continua o mesmo ciclo
-    this.player.moving = false;
-    this.pickupSystem.checkPickups();
-    this.checkWin();
-  }
-
-  tryMove(dx: number, dy: number): void {
-    if (this.player.moving) return;
-    this.player.dir = { x: dx, y: dy };
-    this.player.facing = facingFor(dx, dy, this.player.facing);
-    const nx = this.player.gridX + dx;
-    const ny = this.player.gridY + dy;
-    if (!this.isFree(nx, ny)) {
-      this.playIdle();
-      return;
-    }
-    this.movePlayerTo(nx, ny, this.moveDuration());
-  }
+  movePlayerTo(nx: number, ny: number, duration: number): void { this.playerCtl.moveToTile(nx, ny, duration); }
+  tryMove(dx: number, dy: number): void { this.playerCtl.tryMove(dx, dy); }
 
   // Começa a fase: fecha o cartão de entrada (ver StoryDirector.showBanner).
   endIntro(): void {
@@ -658,24 +567,10 @@ export class MainScene extends Phaser.Scene {
       touch.clearJust();
       return;
     }
-    if (justUp) this.lastDir = { x: 0, y: -1 };
-    else if (justDown) this.lastDir = { x: 0, y: 1 };
-    else if (justLeft) this.lastDir = { x: -1, y: 0 };
-    else if (justRight) this.lastDir = { x: 1, y: 0 };
-
-    if (!this.player.moving) {
-      const d = this.lastDir;
-      const held =
-        (d.x === 0 && d.y === -1 && up) ||
-        (d.x === 0 && d.y === 1 && down) ||
-        (d.x === -1 && d.y === 0 && left) ||
-        (d.x === 1 && d.y === 0 && right);
-      if (held) this.tryMove(d.x, d.y);
-      else if (up) this.tryMove(0, -1);
-      else if (down) this.tryMove(0, 1);
-      else if (left) this.tryMove(-1, 0);
-      else if (right) this.tryMove(1, 0);
-    }
+    this.playerCtl.steer(
+      { up: justUp, down: justDown, left: justLeft, right: justRight },
+      { up, down, left, right },
+    );
 
     if (JD(this.keys.space) || touch.consumeAction('bomb')) this.bombSystem.placeBomb();
     if (touch.consumeAction('cycle')) this.cycleBomb();
@@ -762,7 +657,7 @@ export class MainScene extends Phaser.Scene {
       timeLeft: Math.max(0, this.timeLeft),
       stage: this.stage,
       arenaBoss: this.arena ? (this.boss?.name ?? this.def.name) : undefined,
-      ...(this.won ? {} : { cause: deathTip(this.lastCause).by, tip: deathTip(this.lastCause).tip }),
+      ...(this.won ? {} : { cause: this.playerCtl.tip().by, tip: this.playerCtl.tip().tip }),
     });
   }
 
@@ -898,15 +793,10 @@ export class MainScene extends Phaser.Scene {
       this.updateDuel(delta);
       return;
     }
-    if (!this.isPaused) this.stepPlayerMove(delta);
+    if (!this.isPaused) this.playerCtl.advance(delta);
     if (this.gameOver || this.won || this.transitioning) return;
     this.handleInput();
-    // se não começou outro passo neste quadro, o tempo sobrando não vale
-    if (!this.player.moving) this.step = beginStep(0, this.step.length);
-    if (!this.player.moving && this.playerSprite.anims.currentAnim?.key.startsWith('roo_walk_')) {
-      this.playerSprite.anims.timeScale = 1;
-      this.playIdle();
-    }
+    this.playerCtl.settle();
     if (this.isPaused) return;
     this.sleepSystem.update(delta);
     this.updateTimer(delta);

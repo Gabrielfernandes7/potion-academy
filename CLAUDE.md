@@ -65,6 +65,7 @@ src/
   game/stages/blockStyles.ts # o bloco destrutível de cada fase (textures/blocks.ts, terrain.ts, garden.ts)
   game/forms/              # as transformações da Roo (puro): registry.ts (uma linha por forma), RooForm.ts (máquina de estados), fire.ts, water.ts, earth.ts, air.ts, defense.ts (a defesa V de cada forma)
   game/learning.ts         # o que a Roo aprende na jornada: poções (fim de fase) e lições das formas (FORM_LESSONS), puro
+  game/PlayerController.ts + playerInput.ts # o controle da Roo (passo à mão, dano, acerto de explosão) e a escolha de direção (pura); a MainScene delega. Testes com cena falsa em tests/scene/
   game/RooFormSystem.ts    # as formas na partida (Phaser): habilidade, brasas, bolhas, sprite, luz; a MainScene só delega
   game/StoryDirector.ts    # a direção da história na partida: cartão de fase, passagens, final, despedida dos chefes
   textures/enemiesNew.ts   # sprites dos 8 inimigos novos (lanterna, relógio, toupeira, coruja, gosma, sentinela, ratinho, salamandra)
