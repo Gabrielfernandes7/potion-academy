@@ -176,3 +176,19 @@ export function stealable(type: string): boolean {
 // ---------- salamandra do caldeirão ----------
 
 export const SALAMANDER_HEAL = 4; // cura uma vez por fase, quando a Roo chega perto dela
+
+// ---------- perseguição curta (sapo mago, issue #17) ----------
+
+// O sapo só persegue quando a Roo está perto (até 2 casas, Manhattan). Longe, anda ao acaso como antes. A Roo anda
+// 260 ms por casa e o sapo leva 800 ms por passo (teste em tests/entities/stalk.test.ts): ela sempre escapa andando,
+// mas parada perto do sapo (esperando o pavio de uma poção) ele chega. É a tensão sem reflexo.
+export const STALK_NOTICE_DISTANCE = 2;
+
+/** O passo que aproxima o perseguidor da Roo, se ele a nota (até `notice` casas); null se ela está longe. */
+export function stalkDir(
+  from: { x: number; y: number }, me: { x: number; y: number }, canEnter: (x: number, y: number) => boolean,
+  notice: number = STALK_NOTICE_DISTANCE,
+): Dir2 | null {
+  if (manhattan(from, me) > notice) return null;
+  return stepToward(from, me, canEnter);
+}

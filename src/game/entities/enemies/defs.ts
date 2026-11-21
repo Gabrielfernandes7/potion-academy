@@ -7,9 +7,10 @@ import { PROFILES } from '../profiles';
 
 export type EnemyKind = 'frog' | 'ghost' | 'flower' | 'lantern' | 'clock' | 'mole' | 'owl' | 'slime' | 'sentinel' | 'rat' | 'salamander';
 
-// Como o inimigo age: 'wander' anda ao acaso; 'patrol' anda em linha reta e volta ao bater; 'burrow' afunda e brota
-// perto da Roo; 'dive' marca a casa da Roo e mergulha nela; 'rooted' fica fixo (a flor).
-export type EnemyBehavior = 'wander' | 'patrol' | 'burrow' | 'dive' | 'rooted' | 'thief' | 'friend';
+// Como o inimigo age: 'wander' anda ao acaso; 'stalk' anda ao acaso, mas persegue a Roo quando ela está perto
+// (enemyRules.stalkDir); 'patrol' anda em linha reta e volta ao bater; 'burrow' afunda e brota perto da Roo;
+// 'dive' marca a casa da Roo e mergulha nela; 'rooted' fica fixo (a flor).
+export type EnemyBehavior = 'wander' | 'stalk' | 'patrol' | 'burrow' | 'dive' | 'rooted' | 'thief' | 'friend';
 
 export interface EnemyDef {
   name: string;
@@ -23,7 +24,7 @@ export interface EnemyDef {
 }
 
 export const ENEMY_TYPES: Record<EnemyKind, EnemyDef> = {
-  frog:   { name: 'Sapo mago',   texture: 'enemy',        moveInterval: 800,      stepMs: 300, passWalls: false, rooted: false, behavior: 'wander' },
+  frog:   { name: 'Sapo mago',   texture: 'enemy',        moveInterval: 800,      stepMs: 300, passWalls: false, rooted: false, behavior: 'stalk' },
   ghost:  { name: 'Fantasma',    texture: 'enemy_ghost',  moveInterval: 1500,     stepMs: 700, passWalls: true,  rooted: false, behavior: 'wander' },
   flower: { name: 'Flor do mal', texture: 'enemy_flower', moveInterval: Infinity, stepMs: 300, passWalls: false, rooted: true,  behavior: 'rooted' },
   lantern: { name: 'Lanterna viva',       texture: 'enemy_lantern', moveInterval: 700,  stepMs: 280, passWalls: false, rooted: false, behavior: 'patrol' },

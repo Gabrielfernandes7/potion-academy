@@ -65,6 +65,8 @@ export interface Enemy {
   target: { x: number; y: number } | null; // casa onde brota ou onde mergulha
   loot: { type: PickupType; prize?: PickupType; potion?: BombId } | null; // ratinho: o item que roubou
   used: boolean; // salamandra: já aqueceu a Roo nesta fase
+  chases: boolean; // a regra da fase manda perseguir (EnemyRule.chase); sem isso, o sapo anda ao acaso
+  noticed: boolean; // sapo: está perseguindo a Roo (o "!" avisa quando começa)
   trapMs: number; // preso numa bolha de sabão da Roo Água: não anda, não machuca e não chicoteia até estourar
   fxCooldown: number; // evita repetir o aviso "IMUNE" e o dano a cada quadro enquanto a explosão dura
   hp: number;

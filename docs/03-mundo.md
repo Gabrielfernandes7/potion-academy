@@ -87,9 +87,10 @@ As gemas são escolhidas no começo de cada fase com porta então a porta sempre
 Os três abaixo são os clássicos; os outros oito (Lanterna viva, Relógio de cobre, Toupeira de sal, Gosma de mercúrio, Sentinela de cera, Ratinho do celeiro, Salamandra do caldeirão e Coruja do scriptorium) estão em `19-criaturas.md`. Vida, fraqueza e imunidade de todos ficam em `src/game/entities/profiles.ts`.
 
 **Sapo mago** (Vale e jardim)
-- *Faz:* anda sem rumo, com pulinhos, e tira 1 de vida ao encostar. Morre com uma explosão.
+- *Faz:* anda sem rumo, com pulinhos, e tira 4 de vida ao encostar (a barra da Roo tem 24). Morre com uma explosão.
+- *Persegue (da 2ª fase em diante):* quando a Roo está a até 2 casas, ele dá o passo na direção dela e mostra um `!` ao começar. Ela anda 260 ms por casa e ele 800 ms, então fugir andando sempre funciona; parada perto dele (esperando o pavio de uma poção) ele chega. No laboratório (1ª fase) ele não persegue, para ensinar a regra sem pressa.
 - *Detalhe:* no laboratório aparecem mais conforme você quebra caixotes (2 no início, até 5); a contagem muda por fase (`stages/chapters/`).
-- *Limite:* não persegue.
+- *Limite:* não persegue longe, nem sai do alcance de 2 casas.
 
 **Fantasma, o espírito do alambique** (Salão dos Ecos, Névoa e Torre)
 - *Aparência:* um vapor em S que sai do gargalo de um frasco de vidro, com dois fiapos de braço.

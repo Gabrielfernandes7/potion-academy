@@ -14,7 +14,7 @@ Status: **as oito criaturas propostas estão no jogo** (lanterna viva, relógio 
 | Mandrágora | chefe | terra | fogo | — | O Jardim |
 | Leão Verde | chefe | terra | ar | terra | O Cofre (Biblioteca) |
 
-Os inimigos comuns não se movem em perseguição. A Roo precisa de pouco para sobreviver, e a dificuldade vem de posição, tempo e as poções.
+Os inimigos comuns não perseguem à distância. O sapo mago é a exceção desde a issue #17: a partir da segunda fase, persegue a Roo quando ela está a até 2 casas (`chase: true` na regra da fase). A dificuldade vem de posição, tempo, as poções e, agora, de um sapo que chega se a Roo parar perto dele.
 
 ## 2. Critérios para uma criatura nova
 

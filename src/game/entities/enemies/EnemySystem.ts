@@ -8,7 +8,7 @@ import { damageTo } from '../damage';
 import {
   CLOCK_PAUSE_MS, CLOCK_STEPS_BETWEEN_PAUSES, MOLE_BURROW_MS, MOLE_WALK_MS, OWL_AIM_MS, OWL_CYCLE_MS, RAT_ESCAPE_MS, RAT_FLEE_DISTANCE,
   SALAMANDER_HEAL, SLIME_MAX_TOTAL,
-  canSpawnEnemyAt, countKind, enemyMoveOptions, moleSpot, nearestOf, patrolDir, splitHp, stealable, stepAway, stepToward,
+  canSpawnEnemyAt, countKind, enemyMoveOptions, moleSpot, nearestOf, patrolDir, splitHp, stalkDir, stealable, stepAway, stepToward,
 } from './enemyRules';
 import type { Enemy } from '../../types';
 import { hitFx } from '../hitEffects';
@@ -132,7 +132,8 @@ export class EnemySystem {
       lashMs: CONFIG.flowerLashCycleMs * (0.5 + random() * 0.5), fxCooldown: 0, trapMs: 0,
       dir: Phaser.Utils.Array.GetRandom([{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }]), steps: 0,
       actMs: def.behavior === 'dive' ? OWL_CYCLE_MS : MOLE_WALK_MS * (0.5 + random() * 0.5), state: 'walk', target: null,
-      loot: null, used: false,
+      loot: null, used: false, noticed: false,
+      chases: s.def.enemies.find(r => r.kind === kind)?.chase === true,
       hp, maxHp: PROFILES[kind].maxHp, bar: s.add.graphics().setDepth(12).setVisible(false),
       badge: null,
     };
@@ -237,8 +238,9 @@ export class EnemySystem {
       this.ratStep(enemy);
       return;
     }
+    const from = { x: enemy.gridX, y: enemy.gridY };
     const valid = enemyMoveOptions({
-      from: { x: enemy.gridX, y: enemy.gridY },
+      from,
       passWalls: def.passWalls,
       door: { x: s.doorX, y: s.doorY },
       cols: CONFIG.cols,
@@ -247,8 +249,24 @@ export class EnemySystem {
       occupied: (x, y) => this.enemies.some(e => e !== enemy && e.alive && e.gridX === x && e.gridY === y),
     });
     if (valid.length === 0) return;
+    if (def.behavior === 'stalk' && enemy.chases) {
+      // perseguição curta (fases 2 em diante): se a Roo está perto, o passo é na direção dela; longe, passeio ao acaso
+      const me = s.playerTile();
+      const chase = stalkDir(from, me, (x, y) => valid.some(([vx, vy]) => from.x + vx === x && from.y + vy === y));
+      if (chase) {
+        if (!enemy.noticed) s.floatingText(enemy.gridX, enemy.gridY - 1, '!', '#ffd54f', 14, 600); // o aviso: ele viu a Roo
+        enemy.noticed = true;
+        this.startStep(enemy, chase.x, chase.y);
+        return;
+      }
+      enemy.noticed = false;
+    }
     const [dx, dy] = Phaser.Utils.Array.GetRandom(valid);
-    // o passo é animado em animateEnemy (deslize, pulo e balanço), não por tween
+    this.startStep(enemy, dx, dy);
+  }
+
+  // Começa o passo (a animação em animateEnemy: deslize, pulo e balanço, não tween); a casa lógica muda já.
+  private startStep(enemy: Enemy, dx: number, dy: number): void {
     enemy.fromX = enemy.sprite.x;
     enemy.fromY = enemy.sprite.y;
     enemy.hopY = dy !== 0;

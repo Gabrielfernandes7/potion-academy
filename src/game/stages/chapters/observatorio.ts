@@ -16,7 +16,7 @@ export const OBSERVATORIO: ChapterSpec = {
       chest: CHEST_RICH, tip: 'A lanterna viva anda em linha reta e volta ao bater. A água a apaga; o fogo não a fere.',
       time: 100000, blockChance: 0.5, door: true, theme: 'observatory', block: 'slab', track: 'ecos',
       objective: { type: 'hunt', kind: 'lantern' },
-      enemies: [{ kind: 'lantern', start: 3, max: 3 }, { kind: 'frog', start: 1, max: 1 }],
+      enemies: [{ kind: 'lantern', start: 3, max: 3 }, { kind: 'frog', start: 1, max: 1, chase: true }],
     },
     {
       kind: 'crypt', name: 'O SALÃO DOS RELÓGIOS', place: 'Salão dos Relógios',

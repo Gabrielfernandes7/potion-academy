@@ -11,7 +11,7 @@ Destrua caixotes com poções, pegue 3 gemas e abra a porta. Atravesse vinte fas
 
 ## O que o torna diferente
 
-- **Calmo.** Os inimigos não perseguem (o ratinho só corre atrás de itens). A música muda a cada partida e os sons são suaves.
+- **Calmo, com pressão.** Os inimigos não perseguem à distância; o sapo persegue de perto (2 casas) a partir da segunda fase, e o ratinho só corre atrás de itens. A música muda a cada partida e os sons são suaves.
 - **Alquímico.** As bombas são poções de quatro elementos (fogo, água, terra e ar), e eles reagem entre si:
   o fogo acende outras poções, a água apaga as de fogo e a terra é estável.
 - **Feito à mão, sem imagens prontas.** Todos os desenhos são gerados pelo código.

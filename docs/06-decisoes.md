@@ -22,7 +22,9 @@ Novas decisões entram no fim.
 
 ## Sem personagens que perseguem
 - **Motivo:** o jogo é sobre planejar, não sobre reflexo. Pode mudar se quisermos mais desafio.
-- **Em aberto.**
+- **Mudou em 2026-11-21 (issue #17):** o sapo mago persegue **de perto**: só quando a Roo está a até 2 casas, e só a partir da 2ª fase (a regra `chase` de `EnemyRule`; a 1ª fase, o tutorial, fica sem). Motivo: a única pressão contínua era o relógio, e a vida de 24 pontos deixava quase todo erro sem custo. A perseguição não é reflexo: a Roo anda cerca de três vezes mais rápido que o sapo (260 ms por casa contra 800 ms), então fugir andando sempre funciona; o perigo é parar perto dele.
+- **Ficou de fora:** perseguição à distância (o sapo nota a Roo só de perto), inimigos que perseguem pelas paredes (o fantasma continua passeando) e a vida menor. A vida fica em 24 até termos 5 a 10 partidas (issue #24): com a perseguição, o plano sem fuga usa 13 a 20 pontos nas primeiras fases, então 24 já é pouca folga; não mexemos em dois números ao mesmo tempo.
+- **Teste:** `tests/entities/stalk.test.ts` (regra e a conta da fuga) e `tests/threat.test.ts` (a perseguição soma no máximo 3 toques por fase, e a fase 1 fica igual).
 
 ## Elementos ainda sem efeito na regra
 - **Motivo:** primeiro o visual e o som, depois a regra. Em aberto: o elemento pode mudar o alcance, o tempo ou o efeito da explosão.

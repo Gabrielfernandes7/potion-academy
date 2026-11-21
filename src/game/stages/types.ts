@@ -13,6 +13,7 @@ export interface EnemyRule {
   start: number;
   max: number;
   every?: number;
+  chase?: boolean; // o sapo desta regra persegue a Roo quando ela está perto (issue #17; a 1ª fase fica sem)
 }
 
 // O item que um baú pode guardar, com a chance de cada um (as chances somam 1).

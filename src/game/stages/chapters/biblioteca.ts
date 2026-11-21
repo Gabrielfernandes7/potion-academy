@@ -13,14 +13,14 @@ export const BIBLIOTECA: ChapterSpec = {
       kind: 'crypt', name: 'AS ESTANTES', place: 'Estantes da Biblioteca',
       story: 'Estantes de carvalho sobem até o teto. Os livros estão presos por correntes finas, mas alguém deixou as lâmpadas acesas: aqui ainda se lê.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'stone', block: 'books', track: 'alambique',
-      enemies: [{ kind: 'frog', start: 1, max: 2, every: 10 }, { kind: 'lantern', start: 1, max: 2, every: 12 }],
+      enemies: [{ kind: 'frog', start: 1, max: 2, every: 10, chase: true }, { kind: 'lantern', start: 1, max: 2, every: 12 }],
     },
     {
       kind: 'crypt', name: 'O SCRIPTORIUM', place: 'Mesas dos copistas',
       story: 'Mesas de copistas, tinteiros cheios e páginas secando ao ar. Os monges copiavam aqui à luz de velas, e a cera ainda perfuma a sala.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'stone', block: 'scroll', track: 'ecos',
       objective: { type: 'hunt', kind: 'ghost' }, tip: 'Os espíritos do alambique temem a água e atravessam paredes. Derrote os dois.',
-      enemies: [{ kind: 'frog', start: 1, max: 2, every: 9 }, { kind: 'ghost', start: 2, max: 2 }, { kind: 'owl', start: 1, max: 1 }],
+      enemies: [{ kind: 'frog', start: 1, max: 2, every: 9, chase: true }, { kind: 'ghost', start: 2, max: 2 }, { kind: 'owl', start: 1, max: 1 }],
     },
     {
       kind: 'crypt', name: 'O COFRE', place: 'Cofre das Escrituras',
