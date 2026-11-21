@@ -1,5 +1,6 @@
 // Regras puras dos itens do chão (sem Phaser, testáveis). Ver game/PickupSystem.ts.
-import type { BombId } from '../config';
+import { CONFIG, type BombId } from '../config';
+import type { Objective } from './objective';
 import type { PickupType } from './rewards';
 import { random } from './rng';
 
@@ -24,4 +25,9 @@ export function timeAfterBonus(timeLeft: number, bonus: number, stageTime: numbe
 // (assim o item nunca é inútil e a cor dele diz qual poção recebe o bônus).
 export function pickPowerupPotion(owned: readonly BombId[], rng: () => number = random): BombId {
   return owned[Math.min(owned.length - 1, Math.floor(rng() * owned.length))];
+}
+
+/** A gema abre a porta? Só na fase de gemas, fora do chefe e com a porta ainda fechada. */
+export function doorOpensByGem(o: Objective, gems: number, bossStage: boolean, doorOpen: boolean): boolean {
+  return o.type === 'gems' && !bossStage && gems >= CONFIG.gemsForDoor && !doorOpen;
 }

@@ -5,7 +5,7 @@ import Phaser from 'phaser';
 import { BOMB_ORDER, BOMB_TYPES, BombId, CONFIG } from '../config';
 import { canUseBomb } from './loadout';
 import { PickupType, isPotionPowerup, pickupHalo, pickupTexture, rollChestPrize, rollReward } from './rewards';
-import { pickPowerupPotion, pickupAt, resolveRewardType, timeAfterBonus } from './pickupRules';
+import { doorOpensByGem, pickPowerupPotion, pickupAt, resolveRewardType, timeAfterBonus } from './pickupRules';
 import { addBombSlot, addFireLevel } from './upgrades';
 import type { Pickup } from './types';
 import { HEART_HEAL, healRoo } from './entities/roo';
@@ -100,7 +100,7 @@ export class PickupSystem {
       case 'gem':
         s.gems += 1;
         s.play('pickup');
-        if (s.gems >= CONFIG.gemsForDoor && !s.doorOpen) s.openDoor();
+        if (doorOpensByGem(s.objective, s.gems, s.isBossStage, s.doorOpen)) s.openDoor();
         break;
       case 'chest':
         // nunca chega aqui: o baú é aberto em collectPickup
