@@ -2,7 +2,7 @@
 // e a luz. As regras puras estão em game/forms/ (testadas); aqui só há desenho, som e ligação com a cena.
 // A MainScene cria um destes em create() e só delega: transform(), useAbility(), update(), boost(), onBlast().
 import Phaser from 'phaser';
-import { BOMB_ORDER, BOMB_TYPES, CONFIG, EMPTY, ElementId } from '../config';
+import { BOMB_ORDER, BOMB_TYPES, CONFIG, ELEMENTS, EMPTY, ElementId } from '../config';
 import type { MainScene } from '../scenes/MainScene';
 import { hitFx } from './entities/hitEffects';
 import { inArenaLoadout, setFormElement } from './loadout';
@@ -199,6 +199,7 @@ export class RooFormSystem {
     s.floatingText(gridX, gridY - 1, `${def.nome.toUpperCase()}!`, look.text, 16, 1200);
     s.play('transform', def.element);
     s.cameras.main.flash(200, look.flash[0], look.flash[1], look.flash[2]);
+    this.transformBurst(id);
     this.syncFormElement();
     setAbilityLabel(def.ability.short);
     setAbility2Label(def.ability2?.short ?? null);
@@ -521,6 +522,36 @@ export class RooFormSystem {
     s.play('gust');
   }
 
+  // A transformação deixou de ser um corte seco: um círculo alquímico se abre sob os pés, o corpo vira um clarão branco e o
+  // elemento estoura (fogo: brasas que sobem; água: gotas; terra: cascalho; ar: sopro). Dura cerca de meio segundo.
+  private transformBurst(id: FormId): void {
+    const s = this.scene;
+    const el = FORMS[id].element;
+    const x = s.playerSprite.x;
+    const y = s.playerSprite.y;
+    const ring = s.add.image(x, y + 12, `fx_circle_${el}`).setDepth(5).setAlpha(0.95).setScale(0.45);
+    s.tweens.add({ targets: ring, scale: 1.7, alpha: 0, duration: 520, ease: 'Quad.easeOut', onComplete: () => ring.destroy() });
+    s.playerSprite.setTintFill(0xffffff); // o clarão: a forma nova aparece logo depois
+    s.time.delayedCall(90, () => { if (s.playerSprite?.active) s.playerSprite.clearTint(); });
+    const color = ELEMENTS[el].color;
+    const fx = fxPool(s);
+    const up = id === 'fire' || id === 'air';
+    fx.burst(`transform:${el}`, 'menu_puff', {
+      speed: { min: 30, max: up ? 90 : 60 }, angle: up ? { min: 240, max: 300 } : { min: 0, max: 360 },
+      lifespan: { min: 350, max: 700 }, scale: { start: 0.3, end: up ? 0.1 : 0.7 }, alpha: { start: 0.9, end: 0 },
+      gravityY: id === 'earth' ? 120 : id === 'water' ? 60 : -30, tint: [color, 0xffffff],
+    }, x, y, 14, 12);
+  }
+
+  // A forma acaba: o corpo pisca em branco e o elemento vira fumaça (antes, um corte seco).
+  private endBurst(id: FormId): void {
+    const s = this.scene;
+    s.playerSprite.setAlpha(1);
+    s.playerSprite.setTintFill(0xffffff);
+    s.time.delayedCall(80, () => { if (s.playerSprite?.active) s.playerSprite.clearTint(); });
+    this.puff(s.playerSprite.x, s.playerSprite.y, ELEMENTS[FORMS[id].element].color);
+  }
+
   // Um sopro de poeira ou vento na cor dada.
   private puff(x: number, y: number, color: number): void {
     const s = this.scene;
@@ -618,6 +649,7 @@ export class RooFormSystem {
     }
     if (was.active && !this.form.active && was.id) {
       s.play('formEnd', FORMS[was.id].element);
+      this.endBurst(was.id);
       setAbility2Label(null);
       setDefenseLabel(null);
       this.endGuard();
@@ -632,6 +664,7 @@ export class RooFormSystem {
     }
     this.updateBubbles(delta);
     this.applyTexture();
+    if (this.form.active && this.form.stage === 1 && s.player.invulnerable <= 0) s.playerSprite.setAlpha(Math.floor(this.clockMs / 200) % 2 ? 0.55 : 1); // a forma está acabando
     this.drawEmbers();
     this.drawBubbles();
     this.drawWalls();

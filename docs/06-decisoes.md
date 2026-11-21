@@ -379,6 +379,11 @@ Novas decisões entram no fim.
 - **Cortado:** o "puzzle curto" da #16 (design e testes novos demais para um jogo que quer ser finito). A #16 fica atendida pelos braseiros e pelo sobreviver.
 - **Garantia:** o bot (`tests/helpers/playthroughBot.ts`) joga os quatro objetivos e confere que a porta é sempre alcançável.
 
+## Animações por quadros derivados (2026-11-21)
+- **Decisão:** as animações novas (poses da Roo, preparo e queda dos chefes, agachar do sapo) partem dos quadros que já existem e usam *squash and stretch* em linhas inteiras de pixels (`textures/derive.ts`), em vez de corpos novos desenhados à mão. É pixel art em escala inteira (sem girar, sem suavizar) e custa poucas texturas pequenas. O desenho feito à mão por personagem fica como evolução.
+- **Chefes:** todo golpe começa com 260 ms de preparo do corpo (`windup`), e só então a habilidade roda; como todos atrasam igual, o ritmo e o equilíbrio não mudam. A fúria (fase 2) acelera a respiração em 70%.
+- **Transformação:** deixou de ser um corte seco. Círculo alquímico do elemento (sem cruz: só triângulos e pontos), clarão branco, o elemento estoura e, ao acabar, clarão e fumaça. O último degrau (5 s finais) pisca.
+
 ## Menu, Manuscrito e desempenho no celular (2026-11-21)
 - **Menu:** os botões ficavam no meio da cena e cobriam a Roo lendo. Agora o rodapé (6 botões em grade 3 x 2, salvar e carregar) fica no chão vazio sob o tapete; a dica do Enter virou o tooltip do JOGAR. Em tela estreita (cena abaixo de 420 px) o rodapé sai da cena e fica logo abaixo da moldura, em 2 colunas de 46 px, e a legenda dos elementos some no menu.
 - **Manuscrito lento no celular:** medido com CPU 6x mais lenta, a primeira folha levava 2,2 s. O perfil mostrou a causa: `generateTextures` fabricava as 16 poses da Roo bebê na bolha (`rooBubble`, só do Livro de Roo) em **toda** página e no boot do jogo, mais da metade do JavaScript. Agora são opcionais (`generateTextures(scene, { bubble: true })`; só o Livro e o catálogo de sprites pedem). Resultado: 2,2 s para 1,0 s no Manuscrito e 317 para 94 ms de JavaScript. Também saíram o `drop-shadow` do sprite e o filtro de tinta (`feDisplacementMap`) dos ícones pequenos.

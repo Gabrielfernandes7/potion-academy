@@ -17,7 +17,7 @@ export function makeFakeScene(over: Partial<FakeScene> = {}): FakeScene {
   const sprite = {
     x: CONFIG.tile * 1.5, y: CONFIG.tile * 1.5, alpha: 1,
     anims: { timeScale: 1, currentAnim: null as { key: string } | null },
-    setTint: vi.fn(), clearTint: vi.fn(), setAlpha: vi.fn(), setTexture: vi.fn(),
+    setTint: vi.fn(), setTintFill: vi.fn(), clearTint: vi.fn(), setAlpha: vi.fn(), setTexture: vi.fn(), active: true,
   };
   const scene: FakeScene = {
     stage: 1, duel: null, bombType: 'normal' as BombId, floats,
@@ -34,7 +34,12 @@ export function makeFakeScene(over: Partial<FakeScene> = {}): FakeScene {
     playerTile: () => ({ x: 1, y: 1 }), isFree: () => true, hasBomb: () => false, doorX: -1, doorY: -1,
     getTile: () => EMPTY,
     tweens: { add: vi.fn() },
-    add: { graphics: () => gfx() },
+    time: { delayedCall: vi.fn() },
+    add: {
+      graphics: () => gfx(),
+      image: () => { const i: Record<string, unknown> = {}; for (const m of ['setDepth', 'setAlpha', 'setScale', 'destroy']) i[m] = () => i; return i; },
+      particles: () => { const e: Record<string, unknown> = { scene: true, explode: vi.fn() }; e.setDepth = () => e; return e; },
+    },
     cameras: { main: { flash: vi.fn(), shake: vi.fn() } },
     ...over,
   };

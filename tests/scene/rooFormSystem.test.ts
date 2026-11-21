@@ -3,7 +3,7 @@ import { makeFakeScene, type FakeScene } from './fakeScene';
 
 vi.mock('phaser', () => ({ default: { BlendModes: {}, Math: {}, Display: { Color: {} } } }));
 vi.mock('../../src/game/entities/hitEffects', () => ({ HIT_TINT: {}, hitFx: vi.fn() }));
-vi.mock('../../src/game/fx/particlePool', () => ({ fxPool: vi.fn() }));
+vi.mock('../../src/game/fx/particlePool', () => ({ fxPool: () => ({ burst: vi.fn() }) }));
 vi.mock('../../src/ui/abilityButton', () => ({
   NO_FORM_LABEL: '', setAbilityLabel: vi.fn(), setAbility2Label: vi.fn(), setDefenseLabel: vi.fn(),
 }));
@@ -50,6 +50,7 @@ describe('transformação', () => {
     expect(sys.form.id).toBe('water');
     expect(scene.play).toHaveBeenCalledWith('transform', 'water');
     expect(scene.cameras.main.flash).toHaveBeenCalled();
+    expect(scene.playerSprite.setTintFill).toHaveBeenCalledWith(0xffffff); // o clarão branco da transformação
   });
 
   it('o tempo da forma acaba e ela esfria', () => {

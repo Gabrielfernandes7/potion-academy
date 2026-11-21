@@ -15,7 +15,8 @@ import { BOSS_DEFS, BOSS_IDS } from '../game/entities/bosses/defs';
 import { drawAnselmoTextures } from './anselmo';
 import { drawWeaknessBadges } from './weaknessBadge';
 import { drawBraziers } from './brazier';
-import { addDerivedPoses } from './poses';
+import { addAnselmoBless, addBossPoses, addDerivedPoses } from './poses';
+import { drawTransformCircles } from './transformFx';
 import { BUBBLE_POSES, drawRooBubbleFrames } from './rooBubble';
 import { outlineTexture } from './outline';
 import { CONFIG } from '../config';
@@ -44,6 +45,7 @@ export function generateTextures(scene: Phaser.Scene, o: GenerateOptions = {}): 
   drawNewEnemies(make);
   drawMestre(make);
   drawBraziers(make);
+  drawTransformCircles(make);
   // o anel que se abre em cada casa de uma explosão (uma imagem, no lugar de um círculo vetorial por casa)
   make('fx_ring', (g, T) => { g.lineStyle(2, 0xffffff, 0.95); g.strokeCircle(T / 2, T / 2, 10.5); g.fillStyle(0xffffff, 0.18); g.fillCircle(T / 2, T / 2, 10.5); });
   drawHudIcons(g);
@@ -55,8 +57,10 @@ export function generateTextures(scene: Phaser.Scene, o: GenerateOptions = {}): 
     // translúcidos não ganham borda. scripts/silhouettes.cjs confere o contraste da borda.
     for (const key of scene.textures.getTextureKeys()) if (key.startsWith(prefix + '_')) outlineTexture(scene, key, 0.5);
   }
+  addBossPoses(scene, BOSS_IDS.map(id => BOSS_DEFS[id].sprite.prefix));
   drawAnselmoTextures(scene);
   drawWeaknessBadges(scene);
+  addAnselmoBless(scene);
   addDerivedPoses(scene); // poses derivadas dos quadros acima (precisa dos contornos já feitos)
   g.destroy();
 }

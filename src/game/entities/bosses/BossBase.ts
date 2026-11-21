@@ -13,6 +13,8 @@ import type { MainScene } from '../../../scenes/MainScene';
 import { BossPhase, Tile, phaseFor } from './common';
 import { fxPool } from '../../fx/particlePool';
 
+const WINDUP_MS = 260; // tempo de preparo do corpo antes de cada golpe
+
 export type { BossPhase, Tile };
 export type BossPose = 'idle' | 'cast' | 'hurt' | 'talk' | 'defeat';
 export type BossState = 'idle' | 'casting' | 'blinking' | 'stunned' | 'defeated';
@@ -54,6 +56,8 @@ export abstract class BossBase {
   protected timers: Timer[] = [];
   protected telegraphs = new Set<Phaser.GameObjects.GameObject>();
   protected aura: Phaser.GameObjects.Image | null = null;
+  private windupMs = 0; // >0: o corpo se prepara antes do golpe
+  private poseToken = 0; // invalida as trocas de quadro agendadas quando uma pose nova chega
   private bubble: Phaser.GameObjects.Text | null = null;
 
   protected constructor(protected readonly scene: MainScene, protected readonly setup: BossSetup) {
@@ -153,13 +157,30 @@ export abstract class BossBase {
     }
 
     if (this.state !== 'idle') return;
+    // o corpo se prepara um instante antes do golpe (agacha e recolhe), e só então a habilidade começa: o jogador lê o
+    // ataque no próprio chefe, além do aviso no chão. Todos os golpes atrasam o mesmo tempo, então o ritmo não muda.
+    if (this.windupMs > 0) {
+      this.windupMs -= delta;
+      if (this.windupMs <= WINDUP_MS / 2) this.windupFrame(1);
+      if (this.windupMs <= 0) { this.windupMs = 0; this.castNext(); }
+      return;
+    }
     this.moveMs -= delta;
     if (this.moveMs <= 0) {
       this.move();
       this.moveMs = this.setup.moveIntervalMs;
     }
     this.cooldownMs -= delta;
-    if (this.cooldownMs <= 0) this.castNext();
+    if (this.cooldownMs <= 0) {
+      if (this.scene.textures.exists(`${this.setup.prefix}_windup_0`)) { this.windupMs = WINDUP_MS; this.windupFrame(0); }
+      else this.castNext();
+    }
+  }
+
+  private windupFrame(n: 0 | 1): void {
+    this.poseToken++;
+    this.sprite.anims.stop();
+    this.sprite.setTexture(`${this.setup.prefix}_windup_${n}`);
   }
 
   // ---------- tempo e utilidades ----------
@@ -199,11 +220,19 @@ export abstract class BossBase {
 
   protected setPose(pose: BossPose): void {
     const p = this.setup.prefix;
+    const token = ++this.poseToken;
     if (pose === 'idle' || pose === 'talk') {
       this.sprite.anims.play(pose === 'idle' ? `${p}_idle` : `${p}_talk`, true);
       return;
     }
     this.sprite.anims.stop();
+    // derrotado, o chefe desaba em dois quadros antes da pose final (sem humilhação: de joelhos, depois sentado)
+    if (pose === 'defeat' && this.scene.textures.exists(`${p}_fall_0`)) {
+      this.sprite.setTexture(`${p}_fall_0`);
+      this.after(220, () => { if (this.poseToken === token) this.sprite.setTexture(`${p}_fall_1`); });
+      this.after(440, () => { if (this.poseToken === token) this.sprite.setTexture(`${p}_defeat`); });
+      return;
+    }
     this.sprite.setTexture(`${p}_${pose}`);
   }
 
@@ -252,7 +281,14 @@ export abstract class BossBase {
     if (this.state !== 'casting') return;
     this.state = 'idle';
     this.cooldownMs = this.cooldownFor(this.phase);
-    this.setPose('idle');
+    // recolhe depois do golpe: um quadro de fôlego, e volta a respirar
+    const p = this.setup.prefix;
+    if (this.scene.textures.exists(`${p}_recover`)) {
+      const token = ++this.poseToken;
+      this.sprite.anims.stop();
+      this.sprite.setTexture(`${p}_recover`);
+      this.after(240, () => { if (this.poseToken === token && this.state === 'idle') this.setPose('idle'); });
+    } else this.setPose('idle');
   }
 
   // Marca no chão onde a explosão vai cair: um quadrado em cada casa e, se houver alvo, um anel que encolhe.
@@ -349,6 +385,7 @@ export abstract class BossBase {
     const next = phaseFor(this.hp, this.maxHp);
     if (next === this.phase) return;
     this.phase = next;
+    this.sprite.anims.timeScale = next === 2 ? 1.7 : 1; // furiosa, respira mais depressa
     if (next === 2) this.furious();
     else if (this.aura) { this.aura.destroy(); this.aura = null; }
   }

@@ -1,6 +1,18 @@
 # Proposta: melhorar as animações dos personagens
 
-Documento de **proposta** (nada aqui está no jogo ainda). Escrito em 2026-11-21 a partir do que existe hoje no código e nos sprites. Serve para decidir o que desenhar primeiro, com quantos quadros e quanto isso custa em desempenho.
+> **Andamento (2026-11-21).** A proposta foi aprovada e implementada do mais fácil ao mais difícil, **com quadros derivados** dos que já existem (`textures/derive.ts`: squash and stretch em linhas inteiras de pixels, sem suavização), e não com corpos novos desenhados à mão. Isso entrega a antecipação e o impacto com quase nenhum custo de textura; os desenhos feitos à mão (um gesto próprio para cada chefe, por exemplo) continuam possíveis depois, com as mesmas chaves.
+>
+> | Fase | Feito | Onde |
+> |---|---|---|
+> | E | Mestre em 4 quadros (lanterna balança, olhos piscam, cristal pulsa); sapo se agacha antes de saltar; lanterna com 3 quadros de chama | `textures/mestre.ts`, `EnemySystem.applyFrame` |
+> | C | Poses da Roo: dano, pôr a poção, pegar item, chegar à porta e desabar | `textures/poses.ts`, `MainScene.playPose` |
+> | D | Frei Anselmo abençoa quando o portão do jardim abre (braço sobe em 3 quadros, com brilho) | `addAnselmoBless`, `spawnAnselmoAtGate` |
+> | A | Transformação: círculo alquímico sob os pés, clarão branco, o elemento estoura; fim da forma com clarão e fumaça; último degrau pisca | `textures/transformFx.ts`, `RooFormSystem.transformBurst` |
+> | B | Chefes: preparo do corpo antes de cada golpe (260 ms, em todos), fôlego depois, respiração em 4 quadros, queda em 2 quadros e idle mais rápido na fúria | `BossBase`, `addBossPoses` |
+>
+> **Adiado:** andar, falar e partir o pão do Anselmo (ainda não há onde mostrar), as expressões do retrato, poses de ataque da Roo transformada (a forma usa o próprio corpo), os quadros de cavar, voar e derreter dos inimigos e o *poof* de morte por elemento. Correção ao inventário abaixo: a Roo parada já respira em dois quadros (`roo_idle_*`, que reaproveita os quadros 0 e 1 do andar).
+
+Documento de **proposta** (a implementação está resumida acima). Escrito em 2026-11-21 a partir do que existe hoje no código e nos sprites. Serve para decidir o que desenhar primeiro, com quantos quadros e quanto isso custa em desempenho.
 
 ## 1. O ponto de partida
 

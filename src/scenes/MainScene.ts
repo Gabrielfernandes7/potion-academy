@@ -559,10 +559,15 @@ export class MainScene extends Phaser.Scene {
       .setOrigin(0.5, 47 / 50).setDepth(3.5).setAlpha(0);
     this.tweens.add({ targets: monk, alpha: 1, duration: 700 });
     let f = 0;
+    let blessing = true; // enquanto abençoa, a respiração espera
     this.time.addEvent({
       delay: 650, loop: true,
-      callback: () => { f = 1 - f; monk.setTexture(f ? 'anselmo_front_1' : 'anselmo_front_0'); },
+      callback: () => { f = 1 - f; if (!blessing) monk.setTexture(f ? 'anselmo_front_1' : 'anselmo_front_0'); },
     });
+    // ao ver a Roo, ele ergue a mão e abençoa: o braço sobe em três quadros, fica um instante e desce
+    const gesture = ['anselmo_bless_0', 'anselmo_bless_1', 'anselmo_bless_2', 'anselmo_bless_2', 'anselmo_bless_2', 'anselmo_bless_1', 'anselmo_bless_0'];
+    gesture.forEach((key, i) => this.time.delayedCall(900 + i * 260, () => { if (monk.active) monk.setTexture(key); }));
+    this.time.delayedCall(900 + gesture.length * 260, () => { blessing = false; if (monk.active) monk.setTexture('anselmo_front_0'); });
   }
 
   checkWin(): void {
