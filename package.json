@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "check": "tsc --noEmit && eslint . && vitest run && vite build",
     "smoke": "node scripts/smoke.cjs",
+    "bot": "vitest run tests/playthrough.test.ts --reporter=default",
     "silhouettes": "node scripts/silhouettes.cjs"
   },
   "dependencies": {
