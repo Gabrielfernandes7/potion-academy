@@ -105,6 +105,7 @@ export class BombSystem {
     const element = ELEMENTS[elementId] ?? ELEMENTS.fire;
     this.scene.boss?.onExplosion(tiles, elementId);
     for (const t of tiles) {
+      if (elementId === 'fire') this.scene.lightBrazier(t.x, t.y); // só o fogo acende um braseiro
       for (const enemy of this.scene.enemySystem.enemies) {
         if (enemy.alive && enemy.gridX === t.x && enemy.gridY === t.y) this.scene.enemySystem.hitEnemy(enemy, elementId, true);
       }

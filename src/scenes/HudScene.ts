@@ -8,6 +8,7 @@ import Phaser from 'phaser';
 import { BOMB_ORDER, BOMB_TYPES, CANVAS, CONFIG, ELEMENTS, BombId, ElementId } from '../config';
 import { canUseBomb } from '../game/loadout';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState, pipsView, segmentFill, timerView } from '../game/hudState';
+import type { GoalView } from '../game/objective';
 import { hpBarView, hpColor } from '../game/entities/roo';
 import type { FormId, FormView } from '../game/forms';
 import { readTheme, Theme } from '../ui/theme';
@@ -290,13 +291,36 @@ export class HudScene extends Phaser.Scene {
   }
 
   // Gemas em losangos: cheio = pegou. Some na fase do chefe.
-  private drawGems(gems: number, total: number, visible: boolean): void {
+  // O objetivo da fase na faixa: gemas (losangos), braseiros (bacia com chama), inimigos a derrotar (selo redondo) ou, no
+  // sobreviver, uma barra de tempo do mesmo comprimento da fileira de gemas.
+  private drawGoal(goal: GoalView, visible: boolean): void {
     const g = this.gemGfx;
     g.clear();
     if (!visible) return;
-    for (let i = 0; i < total; i++) {
+    if (goal.kind === 'survive') {
+      const w = 3 * 17 - 4;
+      const x0 = GEM_X - 6;
+      g.fillStyle(0x15222a, 1).fillRect(x0, ROW_A - 5, w, 10);
+      g.fillStyle(0xe6c15a, 1).fillRect(x0 + 1, ROW_A - 4, Math.max(0, (w - 2) * (goal.done / goal.total)), 8);
+      g.lineStyle(1.5, 0xb58a2f, 1).strokeRect(x0, ROW_A - 5, w, 10);
+      return;
+    }
+    for (let i = 0; i < goal.total; i++) {
       const x = GEM_X + i * 17;
-      const full = i < gems;
+      const full = i < goal.done;
+      if (goal.kind === 'braziers') {
+        g.fillStyle(0x7a5a1c, 1).fillTriangle(x - 6, ROW_A - 1, x + 6, ROW_A - 1, x, ROW_A + 7);
+        g.fillStyle(0x2b2b2f, 1).fillRect(x - 6, ROW_A - 3, 12, 3);
+        if (full) g.fillStyle(0xd6452f, 1).fillTriangle(x - 5, ROW_A - 3, x + 5, ROW_A - 3, x, ROW_A - 12).fillStyle(0xffd27a, 1).fillTriangle(x - 2, ROW_A - 3, x + 2, ROW_A - 3, x, ROW_A - 8);
+        g.lineStyle(1.5, full ? 0xffa94d : 0x7a5a1c, 1).strokeRect(x - 6, ROW_A - 3, 12, 3);
+        continue;
+      }
+      if (goal.kind === 'hunt') {
+        g.fillStyle(full ? 0x9be564 : 0x15222a, 1).fillCircle(x, ROW_A, 6);
+        g.lineStyle(1.5, full ? 0xd8f5b0 : 0x3a6a78, 1).strokeCircle(x, ROW_A, 6);
+        if (!full) g.fillStyle(0x3a6a78, 1).fillCircle(x, ROW_A, 2);
+        continue;
+      }
       g.fillStyle(full ? 0x4dd0e1 : 0x15222a, 1);
       g.fillTriangle(x - 6, ROW_A, x, ROW_A - 8, x + 6, ROW_A).fillTriangle(x - 6, ROW_A, x, ROW_A + 8, x + 6, ROW_A);
       if (full) g.fillStyle(0xe0f7fa, 0.8).fillTriangle(x - 3, ROW_A - 1, x, ROW_A - 5, x + 1, ROW_A - 1);
@@ -309,7 +333,7 @@ export class HudScene extends Phaser.Scene {
   private applyBoss(s: HudState): void {
     const bosses = [s.boss, s.boss2 ?? null].filter((x): x is NonNullable<HudState['boss']> => !!x);
     const boss = bosses[0];
-    this.drawGems(s.gems, s.gemsForDoor, !boss);
+    this.drawGoal(s.goal, !boss);
     this.bossGfx.setVisible(!!boss);
     this.bossName.setVisible(!!boss);
     this.bossName2.setVisible(bosses.length > 1);

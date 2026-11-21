@@ -85,5 +85,6 @@ export const BOMB_ORDER: BombId[] = ['normal', 'mega', 'pierce', 'remote'];
 export const EMPTY = 0;
 export const WALL = 1;
 export const BLOCK = 2;
+export const BRAZIER = 3; // braseiro da fase de braseiros (game/objective.ts): obstáculo que só o fogo acende
 
 export const DIRS: ReadonlyArray<readonly [number, number]> = [[0, -1], [0, 1], [-1, 0], [1, 0]];

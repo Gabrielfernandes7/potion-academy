@@ -1,5 +1,6 @@
 // Tipos das fases e dos capítulos (sem dados nem lógica).
 import type { EnemyKind } from '../entities/enemies/defs';
+import type { Objective } from '../objective';
 import type { BlockStyle } from './blockStyles';
 
 export type StageKind = 'lab' | 'crypt' | 'boss' | 'garden';
@@ -29,7 +30,8 @@ export interface StageSpec {
   fog?: { radius: number }; // névoa: a Roo só enxerga `radius` casas ao redor (ver game/effects/Fog.ts)
   time: number; // ms
   blockChance: number;
-  door: boolean; // fase de gemas e porta (o chefe não tem porta)
+  door: boolean; // fase com porta (o chefe não tem porta)
+  objective?: Objective; // o que abre a porta; sem ele, as 3 gemas (game/objective.ts)
   enemies: EnemyRule[];
   theme: StageTheme;
   block?: BlockStyle; // o bloco destrutível da fase (ver game/stages/blockStyles.ts); sem ele, madeira ou canteiro

@@ -9,6 +9,7 @@ import { showDialogue } from '../ui/dialogue';
 import { hideStageIntro, showStageIntro } from '../ui/stageIntro';
 import type { MainScene } from '../scenes/MainScene';
 import { BOSS_DEFS } from './entities/bosses/defs';
+import { introTip } from './objective';
 import { LAST_STAGE } from './stages/index';
 import { ANSELMO, ENDING_CARDS, PASSAGE_CARDS, type StoryCard } from './story';
 
@@ -33,7 +34,7 @@ export class StoryDirector {
       head: `${head} · ${def.place.toUpperCase()}`,
       name: def.name,
       story: def.story,
-      tip: def.tip,
+      tip: introTip(def),
       onStart: () => s.endIntro(),
     });
   }

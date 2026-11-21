@@ -1,7 +1,7 @@
 // Alcance de uma explosão (puro, testável). Em vez de uma lista pronta, é um gerador: o chamador
 // trata cada casa (reação em cadeia, quebrar bloco) antes de pedir a próxima, então uma casa que
 // uma reação mudou no meio do caminho é vista como já está (mesmo comportamento de antes).
-import { BLOCK, DIRS, WALL } from '../config';
+import { BLOCK, BRAZIER, DIRS, WALL } from '../config';
 
 export interface BlastTile {
   x: number;
@@ -25,6 +25,7 @@ export function* walkBlast(
       const tile = getTile(x, y);
       if (tile === null || tile === WALL) break; // parede e borda param o raio
       yield { x, y, tile, origin: false };
+      if (tile === BRAZIER) break; // o braseiro absorve a explosão (e é aceso por ela, se for fogo)
       if (tile === BLOCK && !pierce) break; // bloco para o raio, salvo na poção telúrica
     }
   }

@@ -369,3 +369,12 @@ Novas decisões entram no fim.
 - **Mais alquimia e Idade Média nos inimigos.** O fantasma era um lençol branco genérico: virou o **espírito do alambique**, um vapor em S que sai do gargalo de um frasco (o que se destila). A gosma virou uma **gota de mercúrio**, de prata-viva, com reflexo de metal e olhos estreitos, sem cara de gelatina. As chaves das texturas não mudaram (`enemy_ghost`, `enemy_slime`); o fantasma ganhou o segundo quadro `enemy_ghost_1`. O comportamento e o perfil de dano continuam os mesmos.
 - **Selo da fraqueza.** Cada inimigo que machuca leva um selinho de pergaminho com o glifo do primeiro elemento da fraqueza dele (`weaknessBadge`, puro, testado). Ensina a regra só de olhar. Ratinho e salamandra não levam (não são ameaça). **Nada de ☿**: o glifo do Mercúrio tem uma cruz, e a cruz não vai em inimigo.
 - Fica para depois (só proposta): sapo com saltos de 2 casas e agachada de aviso; fantasma translúcido só dentro de paredes; um sorriso torto no sapo.
+
+## Objetivos variados nas fases comuns (2026-11-21, issues #15 e #16)
+- **Problema:** as 15 fases comuns eram todas "3 gemas e porta". O `StageSpec` ganhou `objective` (`game/objective.ts`, puro e testado); sem ele a fase é de gemas.
+- **Quatro objetivos**, todos reaproveitando regras que o jogo já tem, para não crescer em complexidade: **gemas** (9 fases), **braseiros** (2: o Corredor e a Antecâmara da Torre), **sobreviver 60 s** (2: o Salão dos Relógios e a Ponte) e **caçar** um tipo de inimigo (2: o Scriptorium, os espíritos do alambique, e o Pátio, as lanternas vivas).
+- **Braseiros:** casas de corredor (coordenadas ímpares), longe do começo e da porta. É um novo tipo de casa (`BRAZIER`), obstáculo que absorve a explosão; **só o fogo** acende (água, terra e ar não), e aceso fica aceso. A porta abre com todos acesos.
+- **Sobreviver:** o tempo corre e chega uma onda de inimigos a cada 12 a 15 s (tipos que a fase já tem, com `max` maior). A fase tem 90 s e menos caixotes (30%), para sobrar tempo e espaço até a porta. A HUD mostra uma barra.
+- **Caçar:** o tipo caçado nasce todo no começo e **sem reforço** (`start == max`, sem `every`), senão a caçada nunca acabaria. Aproveita o selo da fraqueza sobre o inimigo.
+- **Cortado:** o "puzzle curto" da #16 (design e testes novos demais para um jogo que quer ser finito). A #16 fica atendida pelos braseiros e pelo sobreviver.
+- **Garantia:** o bot (`tests/helpers/playthroughBot.ts`) joga os quatro objetivos e confere que a porta é sempre alcançável.

@@ -19,12 +19,14 @@ export const TORRE: ChapterSpec = {
       kind: 'crypt', name: 'O CORREDOR', place: 'Corredor dos Selos',
       story: 'Portas com selos de cera. Atrás de uma delas, uma voz conhecida.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.55, door: true, theme: 'crypt', block: 'wax', track: 'ecos',
+      objective: { type: 'braziers', count: 3 }, tip: 'Só o fogo acende um braseiro. A explosão para nele: o braseiro é um obstáculo.',
       enemies: [{ kind: 'ghost', start: 1, max: 2, every: 9 }, { kind: 'sentinel', start: 2, max: 2 }],
     },
     {
       kind: 'crypt', name: 'A ANTECÂMARA', place: 'Antecâmara da Torre',
       story: 'Frascos cheios de um pó que brilha e cheira a farinha. A próxima sala é a de Belladona, que jurou nunca mais esperar, órfã de mãe e de irmão.',
       chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'crypt', block: 'flasks', track: 'ecos',
+      objective: { type: 'braziers', count: 3 },
       enemies: [{ kind: 'ghost', start: 2, max: 3, every: 8 }, { kind: 'sentinel', start: 1, max: 2, every: 12 }],
     },
     {

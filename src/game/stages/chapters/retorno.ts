@@ -17,8 +17,9 @@ export const RETORNO: ChapterSpec = {
     {
       kind: 'crypt', name: 'A PONTE', place: 'Ponte do Riacho',
       story: 'Uma ponte de pedra sobre o riacho. Os celeiros da margem estão trancados, e à porta de um deles alguém espera.',
-      chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'garden', block: 'cairn', track: 'jardim',
-      enemies: [{ kind: 'frog', start: 1, max: 2, every: 10 }, { kind: 'flower', start: 3, max: 4 }, { kind: 'rat', start: 1, max: 1 }],
+      chest: CHEST_RICH, time: 90000, blockChance: 0.3, door: true, theme: 'garden', block: 'cairn', track: 'jardim',
+      objective: { type: 'survive', ms: 60000, waveMs: 15000, waves: ['frog'] },
+      enemies: [{ kind: 'frog', start: 2, max: 4 }, { kind: 'flower', start: 3, max: 4 }, { kind: 'rat', start: 1, max: 1 }],
     },
     {
       kind: 'crypt', name: 'OS MUROS', place: 'Muralha do Mosteiro',

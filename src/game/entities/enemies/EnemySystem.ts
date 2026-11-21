@@ -162,6 +162,7 @@ export class EnemySystem {
     this.enemies = this.enemies.filter(e => e !== enemy);
     hitFx(this.scene, px, py, element);
     this.scene.cameras.main.shake(60, 0.003);
+    this.scene.onEnemyKilled();
   }
 
   // Uma explosão alcançou o inimigo: tira vida conforme a tabela de dano (game/entities/damage.ts). Fraqueza

@@ -14,6 +14,7 @@ import { drawMenuTextures } from './menu';
 import { BOSS_DEFS, BOSS_IDS } from '../game/entities/bosses/defs';
 import { drawAnselmoTextures } from './anselmo';
 import { drawWeaknessBadges } from './weaknessBadge';
+import { drawBraziers } from './brazier';
 import { BUBBLE_POSES, drawRooBubbleFrames } from './rooBubble';
 import { outlineTexture } from './outline';
 import { CONFIG } from '../config';
@@ -36,6 +37,7 @@ export function generateTextures(scene: Phaser.Scene): void {
   drawEntities(make);
   drawNewEnemies(make);
   drawMestre(make);
+  drawBraziers(make);
   // o anel que se abre em cada casa de uma explosão (uma imagem, no lugar de um círculo vetorial por casa)
   make('fx_ring', (g, T) => { g.lineStyle(2, 0xffffff, 0.95); g.strokeCircle(T / 2, T / 2, 10.5); g.fillStyle(0xffffff, 0.18); g.fillCircle(T / 2, T / 2, 10.5); });
   drawHudIcons(g);

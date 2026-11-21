@@ -1,14 +1,19 @@
 // Um bot que joga uma fase comum do começo ao fim (issue #5), só com as regras puras do jogo: sem Phaser, sem
 // navegador, sem desenhar nada (roda em milissegundos). Monta a grade como a MainScene (buildTiles + porta + gemas
-// escondidas), quebra caixotes com poções de Fogo, recolhe as gemas e vai à porta.
+// escondidas), quebra caixotes com poções de Fogo, recolhe as gemas e vai à porta. Cada objetivo (game/objective.ts):
+//   gems     : recolhe as 3 gemas, como acima
+//   braziers : acende os braseiros com a explosão de fogo
+//   survive  : o tempo da fase corre (no mínimo `ms`) e o bot só precisa chegar à porta
+//   hunt     : assume os inimigos derrotados e confere só o caminho até a porta
 //
 // O que ele responde: as 3 gemas e a porta são alcançáveis nesta grade? E quanto tempo leva um jogador cuidadoso e
 // SEQUENCIAL (uma poção por vez, espera cada explosão acabar, nenhum power-up)? Se ele termina dentro do tempo da fase,
 // um humano termina também. O que ele NÃO modela: inimigos, vida, baús e as formas da Roo.
-import { BLOCK, BOMB_TYPES, CONFIG, DIRS, EMPTY } from '../../src/config';
+import { BLOCK, BOMB_TYPES, BRAZIER, CONFIG, DIRS, EMPTY } from '../../src/config';
 import { buildTiles, cellKey, doorCell, isSpawnSafe, type Tiles } from '../../src/game/grid';
 import { walkBlast } from '../../src/game/blast';
 import { mulberry32 } from '../../src/game/rng';
+import { objectiveOf, pickBrazierCells } from '../../src/game/objective';
 import type { StageDef } from '../../src/game/stages/types';
 
 const EXPLOSION_LINGER_MS = 380; // quanto tempo a chama fica no chão (BombSystem)
@@ -48,12 +53,22 @@ export function playStage(def: StageDef, seed: number): BotResult {
   const roll = mulberry32(seed);
   const { tiles, blockKeys } = buildTiles(cols, rows, def.blockChance, (x, y) => isSpawnSafe(x, y, cols, rows), roll);
   const door = doorCell(cols, rows, def.door);
+  const objective = objectiveOf(def);
+  // fase de braseiros: as casas saem da mesma regra do jogo e cada uma troca o que houver nela
+  const braziers = new Set<string>();
+  if (objective.type === 'braziers') {
+    for (const c of pickBrazierCells(tiles, objective.count, door, roll)) {
+      tiles[c.y][c.x] = BRAZIER;
+      braziers.add(cellKey(c.x, c.y));
+    }
+  }
+  const lit = new Set<string>();
   tiles[door.y][door.x] = EMPTY; // placeDoor: a porta ocupa a casa e tira o caixote de lá
-  const blocks = blockKeys.filter(k => k !== cellKey(door.x, door.y));
+  const blocks = blockKeys.filter(k => k !== cellKey(door.x, door.y) && !braziers.has(k));
   // assignHiddenGems: embaralha e as 3 primeiras guardam as gemas
   const shuffled = [...blocks];
   for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(roll() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
-  const gemBlocks = new Set(shuffled.slice(0, CONFIG.gemsForDoor));
+  const gemBlocks = new Set(objective.type === 'gems' ? shuffled.slice(0, CONFIG.gemsForDoor) : []);
   const floorGems = new Set<string>();
 
   const step = CONFIG.baseMoveDuration;
@@ -61,7 +76,11 @@ export function playStage(def: StageDef, seed: number): BotResult {
   let pos: Pt = { x: 1, y: 1 };
   let time = 0, bombs = 0, gems = 0;
   const out = (won: boolean, reason: string): BotResult => ({ won, reason, timeMs: time, twoBombsMs: time - (bombs * (type.fuse + EXPLOSION_LINGER_MS)) / 2, bombs, blocks: blocks.length, gems });
-  const open = () => gems >= CONFIG.gemsForDoor;
+  const open = (): boolean => {
+    if (objective.type === 'gems') return gems >= CONFIG.gemsForDoor;
+    if (objective.type === 'braziers') return lit.size >= objective.count;
+    return true; // sobreviver e caçar: o objetivo se cumpre com o tempo e os golpes; o bot confere o caminho
+  };
   const passable = (x: number, y: number): boolean => {
     if (tiles[y][x] !== EMPTY) return false;
     return !(x === door.x && y === door.y && !open());
@@ -74,6 +93,7 @@ export function playStage(def: StageDef, seed: number): BotResult {
       const d = dist.get(cellKey(door.x, door.y));
       if (d !== undefined) {
         time += d * step;
+        if (objective.type === 'survive') time = Math.max(time, objective.ms + d * step);
         return out(true, 'porta aberta e alcançada');
       }
       // a porta abriu, mas ainda há caixotes no caminho: segue quebrando, em direção a ela
@@ -89,22 +109,24 @@ export function playStage(def: StageDef, seed: number): BotResult {
     // 3. põe uma poção onde derruba mais caixotes por passo andado, com fuga garantida
     const getTile = (x: number, y: number): number | null => (y < 0 || y >= rows || x < 0 || x >= cols ? null : tiles[y][x]);
     const doorish = open(); // porta aberta e cercada: o que importa é chegar perto dela
-    const cands: Array<{ at: Pt; hits: string[]; walk: number; blast: Set<string>; score: number }> = [];
+    const cands: Array<{ at: Pt; hits: string[]; lights: string[]; walk: number; blast: Set<string>; score: number }> = [];
     for (const [k, d] of dist) {
       const [x, y] = k.split(',').map(Number);
       const blast = new Set<string>();
       const hits: string[] = [];
+      const lights: string[] = [];
       for (const t of walkBlast(x, y, type.radius, !!type.pierce, getTile)) {
         blast.add(cellKey(t.x, t.y));
         if (t.tile === BLOCK) hits.push(cellKey(t.x, t.y));
+        if (t.tile === BRAZIER && !lit.has(cellKey(t.x, t.y))) lights.push(cellKey(t.x, t.y));
       }
-      if (!hits.length) continue;
-      let score = hits.length * 2 - d * 0.5;
+      if (!hits.length && !lights.length) continue;
+      let score = hits.length * 2 + lights.length * 12 - d * 0.5;
       if (doorish) score = -Math.min(...hits.map(h => { const [hx, hy] = h.split(',').map(Number); return Math.abs(hx - door.x) + Math.abs(hy - door.y); })) * 2 - d * 0.5;
-      cands.push({ at: { x, y }, hits, walk: d, blast, score });
+      cands.push({ at: { x, y }, hits, lights, walk: d, blast, score });
     }
     cands.sort((a, b) => b.score - a.score);
-    let pick: { at: Pt; hits: string[]; walk: number; flee: number; blast: Set<string> } | null = null;
+    let pick: { at: Pt; hits: string[]; lights: string[]; walk: number; flee: number; blast: Set<string> } | null = null;
     for (const c of cands) {
       // fuga: sai pela casa livre mais perto fora da cruz, sem passar pela poção
       const away = bfs(tiles, c.at, (px, py) => passable(px, py) && !(px === c.at.x && py === c.at.y));
@@ -121,6 +143,7 @@ export function playStage(def: StageDef, seed: number): BotResult {
     // anda, põe, foge e espera a explosão
     time += pick.walk * step + type.fuse + EXPLOSION_LINGER_MS;
     bombs++;
+    for (const k of pick.lights) lit.add(k);
     for (const k of pick.hits) {
       const [bx, by] = k.split(',').map(Number);
       tiles[by][bx] = EMPTY;

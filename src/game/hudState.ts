@@ -1,6 +1,7 @@
 // Contrato entre a cena de gameplay e a cena da HUD (comunicação por eventos do Phaser).
 import type { BombId } from '../config';
 import type { FormView } from './forms';
+import type { GoalView } from './objective';
 
 export const HUD_UPDATE = 'hud:update';
 export const HUD_SELECT_BOMB = 'hud:select-bomb';
@@ -10,6 +11,7 @@ export interface HudState {
   maxHp: number;
   gems: number;
   gemsForDoor: number;
+  goal: GoalView; // o objetivo da fase e quanto falta (gemas, braseiros, tempo ou inimigos)
   blocks: number;
   bombsActive: number;
   bombsMax: number;

@@ -5,7 +5,7 @@
 // - Pickups, bombas e vitória usam coordenadas de grade.
 // - update() espera o cartão de entrada da fase (ENTER ou toque) e, após gameOver/won, só trata a tecla R.
 import Phaser from 'phaser';
-import { BLOCK, BOMB_ORDER, BombId, CANVAS, CONFIG, ElementId, EMPTY, WALL } from '../config';
+import { BLOCK, BOMB_ORDER, BombId, BRAZIER, CANVAS, CONFIG, ElementId, EMPTY, WALL } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
 import { ARENA_STAGE, arenaStageDef, duelStageDef } from '../game/arena';
 import { ObjectPool } from '../game/fx/objectPool';
@@ -19,6 +19,8 @@ import type { FormId } from '../game/forms';
 import { retryData } from '../game/retry';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
 import { applyTouchContext } from '../ui/touchContext';
+import { goalView, isComplete, objectiveOf, pickBrazierCells, waveKind, wavesDue, type Objective } from '../game/objective';
+import { random } from '../game/rng';
 import { touch } from '../input/touch';
 import { hideGameOver, setPauseVisible, showDuelResult, showGameOver } from '../ui/overlays';
 import { isHelpOpen } from '../ui/help';
@@ -90,6 +92,15 @@ export class MainScene extends Phaser.Scene {
   powerupsCollected: PowerupCounts = { bomb_up: 0, fire_up: 0, speed_up: 0, time_up: 0 };
   isPaused = false;
   gemBlocks = new Set<string>();
+  // objetivo da fase (game/objective.ts): braseiros acesos, tempo resistido, ondas já chegadas e inimigos a caçar
+  litBraziers = new Set<string>();
+  brazierSprites = new Map<string, Phaser.GameObjects.Image>();
+  surviveMs = 0;
+  wavesSpawned = 0;
+  huntTotal = 0;
+  objectiveDone = false;
+  private brazierFlip = 0;
+  private brazierMs = 0;
   playerSprite!: Phaser.GameObjects.Sprite;
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   keys!: MainKeys;
@@ -184,6 +195,12 @@ export class MainScene extends Phaser.Scene {
     this.powerupsCollected = { bomb_up: 0, fire_up: 0, speed_up: 0, time_up: 0 };
     this.isPaused = false;
     this.gemBlocks = new Set();
+    this.litBraziers = new Set();
+    this.brazierSprites = new Map();
+    this.surviveMs = 0;
+    this.wavesSpawned = 0;
+    this.huntTotal = 0;
+    this.objectiveDone = false;
     setPauseVisible(false);
     this.tweens.resumeAll();
     this.anims.resumeAll();
@@ -198,9 +215,11 @@ export class MainScene extends Phaser.Scene {
     this.buildGrid();
     if (this.def.door) {
       this.placeDoor();
-      if (!this.isBossStage) this.assignHiddenGems(); // chefe com porta: ela abre quando ele cai
+      if (!this.isBossStage && this.objective.type === 'gems') this.assignHiddenGems(); // chefe com porta: ela abre quando ele cai
     }
     this.enemySystem.spawnEnemies();
+    const o = this.objective;
+    if (o.type === 'hunt') this.huntTotal = this.enemySystem.countEnemies(o.kind);
     this.playerSprite = this.add.sprite(
       this.player.gridX * CONFIG.tile + CONFIG.tile / 2,
       this.player.gridY * CONFIG.tile + CONFIG.tile / 2,
@@ -335,6 +354,79 @@ export class MainScene extends Phaser.Scene {
           if (this.look.blockTint !== undefined) sprite.setTint(this.look.blockTint);
           this.blockSprites.set(cellKey(x, y), sprite);
         }
+      }
+    }
+    this.placeBraziers();
+  }
+
+  get objective(): Objective {
+    return objectiveOf(this.def);
+  }
+
+  // Fase de braseiros: sorteia as casas (com a semente da partida), tira o caixote que houver e põe o braseiro apagado.
+  private placeBraziers(): void {
+    const o = this.objective;
+    if (o.type !== 'braziers') return;
+    const door = doorCell(CONFIG.cols, CONFIG.rows, this.def.door);
+    for (const c of pickBrazierCells(this.grid, o.count, door, random)) {
+      const key = cellKey(c.x, c.y);
+      this.blockSprites.get(key)?.destroy();
+      this.blockSprites.delete(key);
+      this.grid[c.y][c.x] = BRAZIER;
+      this.brazierSprites.set(key, this.add.image(c.x * CONFIG.tile, c.y * CONFIG.tile, 'brazier_off').setOrigin(0).setDepth(2));
+    }
+  }
+
+  /** Uma explosão de fogo alcançou a casa: se há um braseiro apagado nela, acende. */
+  lightBrazier(x: number, y: number): void {
+    const key = cellKey(x, y);
+    const sprite = this.brazierSprites.get(key);
+    if (!sprite || this.litBraziers.has(key)) return;
+    this.litBraziers.add(key);
+    sprite.setTexture('brazier_on');
+    this.floatingText(x, y - 1, 'ACESO!', '#ffd27a', 12, 900);
+    this.play('flame');
+    this.checkObjective();
+    this.updateHud();
+  }
+
+  // O objetivo foi cumprido? Então a porta abre (uma vez só). As gemas abrem a porta no PickupSystem.
+  checkObjective(): void {
+    const o = this.objective;
+    if (this.objectiveDone || !this.def.door || this.isBossStage || o.type === 'gems') return;
+    const alive = o.type === 'hunt' ? this.enemySystem.countEnemies(o.kind) : 0;
+    const progress = { gems: this.gems, gemsNeeded: CONFIG.gemsForDoor, lit: this.litBraziers.size, surviveMs: this.surviveMs, huntAlive: alive, huntTotal: this.huntTotal };
+    if (!isComplete(o, progress)) return;
+    this.objectiveDone = true;
+    if (!this.doorOpen) this.openDoor();
+  }
+
+  /** Um inimigo caiu: na caçada, pode ter sido o último. */
+  onEnemyKilled(): void {
+    this.checkObjective();
+    this.updateHud();
+  }
+
+  // Sobreviver: conta o tempo e chama as ondas. Braseiros acesos tremem (dois quadros, a cada 250 ms).
+  private updateObjective(delta: number): void {
+    const o = this.objective;
+    if (o.type === 'survive' && !this.objectiveDone) {
+      const due = wavesDue(o, this.surviveMs + delta, this.wavesSpawned);
+      this.surviveMs += delta;
+      for (let i = 0; i < due; i++) {
+        const kind = waveKind(o, this.wavesSpawned + i);
+        if (kind) this.enemySystem.spawnEnemy(kind);
+      }
+      this.wavesSpawned += due;
+      this.checkObjective();
+      if (Math.floor(this.surviveMs / 1000) !== Math.floor((this.surviveMs - delta) / 1000)) this.updateHud();
+    }
+    if (this.litBraziers.size) {
+      this.brazierMs += delta;
+      if (this.brazierMs >= 250) {
+        this.brazierMs = 0;
+        this.brazierFlip ^= 1;
+        for (const k of this.litBraziers) this.brazierSprites.get(k)?.setTexture(this.brazierFlip ? 'brazier_on_1' : 'brazier_on');
       }
     }
   }
@@ -599,6 +691,7 @@ export class MainScene extends Phaser.Scene {
       maxHp: CONFIG.maxHp,
       gems: this.gems,
       gemsForDoor: CONFIG.gemsForDoor,
+      goal: this.goalView(),
       blocks: this.blockSprites.size,
       bombsMax: this.player.upgrades[this.bombType].bombsMax,
       bombsActive: this.bombSystem.bombs.filter(b => b.type === this.bombType).length,
@@ -609,6 +702,14 @@ export class MainScene extends Phaser.Scene {
       boss2: this.boss2 ? this.boss2.hudView() : null,
       form: this.forms.hudView(),
     };
+  }
+
+  private goalView(): ReturnType<typeof goalView> {
+    const o = this.objective;
+    return goalView(o, {
+      gems: this.gems, gemsNeeded: CONFIG.gemsForDoor, lit: this.litBraziers.size, surviveMs: this.surviveMs,
+      huntAlive: o.type === 'hunt' ? this.enemySystem.countEnemies(o.kind) : 0, huntTotal: this.huntTotal,
+    });
   }
 
   updateHud(): void {
@@ -810,6 +911,7 @@ export class MainScene extends Phaser.Scene {
     this.forms.update(delta);
     this.bombSystem.update(delta);
     this.enemySystem.update(delta);
+    this.updateObjective(delta);
     this.boss?.update(delta);
     this.fog?.update(this.playerSprite.x, this.playerSprite.y);
     this.checkPlayerHit();

@@ -81,6 +81,7 @@ src/
   game/events.ts + launcher.ts  # eventos globais; cria o Phaser.Game e navega menu/partida
   game/entities/           # personagens que sofrem dano: inimigos e chefes (ver docs/14-estrutura-do-codigo.md)
   game/entities/damage.ts  # regra pura de dano por elemento (multiplicadores, damageTo, hitsToKill)
+  game/objective.ts        # o objetivo da fase (gemas, braseiros, sobreviver, caçar): tipos, progresso e posição dos braseiros (puro, testado); textures/brazier.ts desenha o braseiro
   game/entities/badge.ts   # o selo da fraqueza sobre cada inimigo (puro, testado); textures/weaknessBadge.ts desenha os 4 glifos
   game/entities/profiles.ts # tabela de personagens: vida, atributo, fraqueza, resistência, imunidade
   game/entities/hitEffects.ts # efeito visual de acerto por elemento
