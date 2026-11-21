@@ -145,7 +145,7 @@ const laboratorioCena: Cena = (c, t, s) => {
   vela(c, 114, 94, t, 6);
   // o mestre, em sombra, com a lanterna, debruçado
   const bob = Math.round(Math.sin(t * 1.6));
-  sprite(c, s[`mestre_sombra_${frame(t, 2, 1.3)}`], 30, 44 + bob, 2);
+  sprite(c, s[`mestre_sombra_${frame(t, 4, 1.3)}`], 30, 44 + bob, 2);
   brilho(c, 40, 120 + bob, 20, COR.chama, 0.06, 4);
   moldura(c);
 };
@@ -166,7 +166,7 @@ const bolhaCena: Cena = (c, t, s) => {
     rect(c, 100 + Math.cos(ang) * 38 + (vx < 100 ? 0 : -2), 52 + bob + (vx % 5), 2, 2, COR.chamaClara, 0.8);
   }
   // o mestre, ao fundo, soprando o tubo: só a silhueta e o brilho da lanterna
-  sprite(c, s[`mestre_sombra_${frame(t, 2, 1.2)}`], 4, 46, 2);
+  sprite(c, s[`mestre_sombra_${frame(t, 4, 1.2)}`], 4, 46, 2);
   // pozinhos de Prima Materia caindo da mesa
   subindo(c, 92, 114, t, 8, 18, '#ffe9a8', 10, 3);
   moldura(c);
@@ -482,7 +482,7 @@ export const SPRITES_DAS_CENAS: readonly string[] = [
   ...Array.from({ length: 4 }, (_, i) => `roo_side_${i}`),
   ...Array.from({ length: 4 }, (_, i) => `roo_down_${i}`),
   'witch_idle_0', 'witch_idle_1', 'witch_cast', 'anselmo_front_0', 'anselmo_front_1', 'anselmo_side',
-  'mestre_sombra_0', 'mestre_sombra_1', 'bomb_normal', 'bomb_mega', 'hud_flask_empty',
+  'mestre_sombra_0', 'mestre_sombra_1', 'mestre_sombra_2', 'mestre_sombra_3', 'bomb_normal', 'bomb_mega', 'hud_flask_empty',
 ];
 
 void chamaDeVela;

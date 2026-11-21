@@ -350,7 +350,11 @@ export class EnemySystem {
       // a coruja só pisca de vez em quando; os outros alternam sempre
       const flip = enemy.kind === 'owl' ? Math.floor(t / 300) % 9 === 0 : Math.floor(t / 380) % 2 === 1;
       if (flip) key = alt;
+      // a lanterna tem três quadros de chama: reta, inclinada para um lado, reta, inclinada para o outro
+      if (enemy.kind === 'lantern') key = [def.texture, alt, def.texture, 'enemy_lantern_2'][Math.floor(t / 230) % 4];
     }
+    // o sapo se agacha um instante antes de saltar: o jogador lê o salto e pode sair da frente
+    if (enemy.kind === 'frog' && enemy.trapMs === 0 && enemy.moveTimer > 0 && enemy.moveTimer < 230) key = 'enemy_crouch';
     if (enemy.kind === 'clock' && enemy.moveTimer > def.moveInterval) key = 'enemy_clock_pause'; // trava para dar corda
     if (enemy.kind === 'owl' && enemy.state === 'aim') key = 'enemy_owl_aim';
     if (enemy.sprite.texture.key !== key) enemy.sprite.setTexture(key);

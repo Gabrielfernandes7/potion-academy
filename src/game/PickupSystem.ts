@@ -93,6 +93,7 @@ export class PickupSystem {
 
   private applyItem(type: PickupType, pickup: Pickup): void {
     const s = this.scene;
+    if (type !== 'chest') s.playPose('pickup'); // ergue o item num pulinho
     switch (type) {
       case 'gem':
         s.gems += 1;

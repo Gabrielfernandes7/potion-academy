@@ -119,7 +119,7 @@ export const MANUSCRITO: readonly ManuscritoEntry[] = [
   {
     id: 'mestre', nome: 'O mestre', titulo: 'Quem me ensinou a medir o fogo', grupo: 'aliado',
     secao: 'balneologica',
-    sprite: { frames: ['mestre_sombra_0', 'mestre_sombra_1'], zoom: 6, ms: 700 },
+    sprite: { frames: ['mestre_sombra_0', 'mestre_sombra_1', 'mestre_sombra_2', 'mestre_sombra_3'], zoom: 6, ms: 420 },
     visto: 'Nas páginas que ele deixou, a partir do Salão dos Ecos', fase: 2,
     habilidades: [
       { nome: 'As quatro lições', texto: 'Ensinou a medir o fogo, ouvir a água, respeitar a terra e desconfiar do ar. Cada lição virou uma forma que aprendi a vestir: Roo Fire, Roo Água, Roo Terra e Roo Ar.' },

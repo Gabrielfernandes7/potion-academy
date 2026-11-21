@@ -40,6 +40,7 @@ export class BombSystem {
   placeBomb(): void {
     if (!canPlace(this.scene.player.upgrades, this.scene.bombType, this.bombs.map(b => b.type))) return;
     if (this.scene.hasBomb(this.scene.player.gridX, this.scene.player.gridY)) return;
+    this.scene.playPose('cast'); // um gesto curto ao soltar a poção
     const type = BOMB_TYPES[this.scene.bombType];
     const sprite = this.scene.add.image(
       this.scene.player.gridX * CONFIG.tile + CONFIG.tile / 2,

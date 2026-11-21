@@ -27,7 +27,7 @@ export function drawNewEnemies(make: MakeFn): void {
     g.fillStyle(0x5a3a22); g.fillRect(c - 10, 17, 20, 14);
     g.fillStyle(0xe58a3a, 0.55); g.fillEllipse(c, 24, 20, 18);
     // o espírito: gota de chama com ponta, miolo claro e rosto
-    const lean = v === 1 ? 2 : 0;
+    const lean = v === 1 ? 2 : v === 2 ? -2 : 0; // a chama se inclina para um lado, para o outro e volta
     g.fillStyle(OUT); g.fillTriangle(c + lean, 11, c - 7, 26, c + 7, 26); g.fillEllipse(c, 24.5, 17, 14);
     g.fillStyle(0xe8501f); g.fillTriangle(c + lean, 13, c - 6, 25, c + 6, 25); g.fillEllipse(c, 24.5, 15, 12);
     g.fillStyle(0xffa94d); g.fillTriangle(c + lean, 16, c - 4.6, 25, c + 4.6, 25); g.fillEllipse(c, 25.5, 11, 8.5);
@@ -303,6 +303,7 @@ export function drawNewEnemies(make: MakeFn): void {
   // um quadro de estado: o relógio dando corda na pausa e a coruja mirando.
   make('enemy_lantern', (g, T) => lantern(g, T, 0));
   make('enemy_lantern_1', (g, T) => lantern(g, T, 1));
+  make('enemy_lantern_2', (g, T) => lantern(g, T, 2));
   make('enemy_clock', (g, T) => clock(g, T, 0));
   make('enemy_clock_1', (g, T) => clock(g, T, 1));
   make('enemy_clock_pause', (g, T) => clock(g, T, 2));

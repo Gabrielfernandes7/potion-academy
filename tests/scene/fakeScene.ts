@@ -29,7 +29,7 @@ export function makeFakeScene(over: Partial<FakeScene> = {}): FakeScene {
     forms: { walkFactor: () => 1, profile: () => undefined, reduceDamage: (d: number) => d },
     bombSystem: { explosions: [] as Array<{ key: string; element: string; hitPlayer?: boolean }> },
     pickupSystem: { checkPickups: vi.fn() },
-    checkWin: vi.fn(), updateHud: vi.fn(), play: vi.fn(), playWalk: vi.fn(), playIdle: vi.fn(), triggerGameOver: vi.fn(),
+    checkWin: vi.fn(), updateHud: vi.fn(), play: vi.fn(), playPose: vi.fn(), playWalk: vi.fn(), playIdle: vi.fn(), triggerGameOver: vi.fn(),
     floatingText: (_x: number, _y: number, t: string) => { floats.push(t); },
     playerTile: () => ({ x: 1, y: 1 }), isFree: () => true, hasBomb: () => false, doorX: -1, doorY: -1,
     getTile: () => EMPTY,

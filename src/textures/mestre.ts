@@ -18,8 +18,13 @@ const CRYSTAL = 0x9a7cf0;
 const FLAME = 0xffd27a;
 
 export function drawMestre(make: MakeFn): void {
-  const frame = (v: 0 | 1) => (g: Phaser.GameObjects.Graphics, T: number): void => {
+  // 4 quadros: a lanterna balança na corrente (sw), o cristal pulsa (pulse) e, no terceiro, os olhos de luz piscam.
+  const frame = (v: 0 | 1 | 2 | 3) => (g: Phaser.GameObjects.Graphics, T: number): void => {
     const c = T / 2;
+    const b = (v % 2) as 0 | 1; // o balanço da barra e da chama continua alternando como antes
+    const sw = [0, 1, 0, -1][v];
+    const pulse = [0, 1, 2, 1][v];
+    const blink = v === 2;
     const px = (x: number, y: number, w: number, h: number, color: number, a = 1): void => {
       g.fillStyle(color, a); g.fillRect(Math.round(x), Math.round(y), w, h);
     };
@@ -38,7 +43,7 @@ export function drawMestre(make: MakeFn): void {
     for (const dx of [-5, 1, 6]) px(c + dx, 27, 1, 8, ROBE_DARK); // dobras do pano
     // barra rasgada: dentes que balançam entre os dois quadros
     for (let i = -8; i <= 8; i += 3) {
-      const down = (i + 8) % 6 === 0 ? 1 + v : 0;
+      const down = (i + 8) % 6 === 0 ? 1 + b : 0;
       px(c + i - 1, 35, 3, 1 + down, OUT);
       px(c + i, 35, 1, down, ROBE_DARK);
     }
@@ -70,9 +75,12 @@ export function drawMestre(make: MakeFn): void {
     g.fillStyle(ROBE); g.fillEllipse(c, 16, 15, 11);
     px(c - 6, 13, 3, 1, ROBE_LIGHT);
     g.fillStyle(0x0b0710); g.fillEllipse(c, 17, 9, 8);
-    px(c - 3, 16, 2, 2, FLAME);
-    if (v === 0) px(c + 2, 16, 2, 2, FLAME); else px(c + 2, 17, 2, 1, FLAME); // o segundo quadro pisca um olho
-    px(c - 3, 16, 1, 1, 0xfff3c4);
+    if (blink) { px(c - 3, 17, 2, 1, FLAME); px(c + 2, 17, 2, 1, FLAME); } // o terceiro quadro pisca os dois olhos
+    else {
+      px(c - 3, 16, 2, 2, FLAME);
+      if (b === 0) px(c + 2, 16, 2, 2, FLAME); else px(c + 2, 17, 2, 1, FLAME); // e o segundo pisca um só
+      px(c - 3, 16, 1, 1, 0xfff3c4);
+    }
 
     // chapéu: aba larga, cone alto com a ponta dobrada, fita de ouro com uma lua e estrelinhas
     g.fillStyle(OUT); g.fillEllipse(c, 11, 28, 6);
@@ -94,7 +102,7 @@ export function drawMestre(make: MakeFn): void {
     px(c + 13, 9, 3, 28, OUT);
     px(c + 14, 9, 1, 28, WOOD);
     px(c + 13, 20, 3, 2, GOLD);
-    g.fillStyle(CRYSTAL, 0.2 + 0.12 * v); g.fillCircle(c + 14.5, 5, 4.5);
+    g.fillStyle(CRYSTAL, 0.16 + 0.07 * pulse); g.fillCircle(c + 14.5, 5, 4.5 + pulse * 0.4);
     g.fillStyle(OUT); g.fillTriangle(c + 14.5, -1, c + 11, 5, c + 18, 5); g.fillTriangle(c + 14.5, 11, c + 11, 5, c + 18, 5);
     g.fillStyle(CRYSTAL); g.fillTriangle(c + 14.5, 0, c + 12, 5, c + 17, 5); g.fillTriangle(c + 14.5, 10, c + 12, 5, c + 17, 5);
     px(c + 13, 4, 1, 2, 0xe3d6ff);
@@ -103,15 +111,17 @@ export function drawMestre(make: MakeFn): void {
     px(c - 14, 19, 6, 6, OUT); px(c - 13, 19, 4, 5, ROBE);
     px(c - 13, 19, 1, 5, ROBE_LIGHT);
     px(c - 15, 24, 4, 3, OUT); px(c - 14, 25, 2, 1, 0x4a3a66);
-    px(c - 14, 27, 1, 3, GOLD); // corrente
-    g.fillStyle(0xffa94d, 0.2 + 0.1 * v); g.fillCircle(c - 11, 32, 5);
-    px(c - 17, 29, 7, 1, GOLD); // topo
-    px(c - 17, 30, 7, 7, OUT);
-    px(c - 16, 30, 5, 6, 0x6b4a30);
-    px(c - 15, 31, 3, 4 + v, FLAME);
-    px(c - 14, 32, 1, 2, 0xfff3c4);
-    px(c - 17, 36, 7, 1, GOLD);
+    px(c - 14, 27, 1, 3, GOLD); // corrente (presa à mão; só a lanterna balança)
+    g.fillStyle(0xffa94d, 0.2 + 0.1 * b); g.fillCircle(c - 11 + sw, 32, 5);
+    px(c - 17 + sw, 29, 7, 1, GOLD); // topo
+    px(c - 17 + sw, 30, 7, 7, OUT);
+    px(c - 16 + sw, 30, 5, 6, 0x6b4a30);
+    px(c - 15 + sw, 31, 3, 4 + b, FLAME);
+    px(c - 14 + sw, 32, 1, 2, 0xfff3c4);
+    px(c - 17 + sw, 36, 7, 1, GOLD);
   };
   make('mestre_sombra_0', frame(0));
   make('mestre_sombra_1', frame(1));
+  make('mestre_sombra_2', frame(2));
+  make('mestre_sombra_3', frame(3));
 }

@@ -15,6 +15,7 @@ import { BOSS_DEFS, BOSS_IDS } from '../game/entities/bosses/defs';
 import { drawAnselmoTextures } from './anselmo';
 import { drawWeaknessBadges } from './weaknessBadge';
 import { drawBraziers } from './brazier';
+import { addDerivedPoses } from './poses';
 import { BUBBLE_POSES, drawRooBubbleFrames } from './rooBubble';
 import { outlineTexture } from './outline';
 import { CONFIG } from '../config';
@@ -56,5 +57,6 @@ export function generateTextures(scene: Phaser.Scene, o: GenerateOptions = {}): 
   }
   drawAnselmoTextures(scene);
   drawWeaknessBadges(scene);
+  addDerivedPoses(scene); // poses derivadas dos quadros acima (precisa dos contornos já feitos)
   g.destroy();
 }

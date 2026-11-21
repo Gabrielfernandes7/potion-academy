@@ -119,6 +119,7 @@ export class PlayerController {
     s.updateHud();
     s.play('hurt');
     buzz(45);
+    s.playPose('hurt');
     s.playerSprite.setTint(element ? HIT_TINT[element] : 0xff5252);
     if (element) hitFx(s, s.playerSprite.x, s.playerSprite.y - 8, element);
     s.tweens.add({

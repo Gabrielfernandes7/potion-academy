@@ -155,3 +155,10 @@ describe('dano', () => {
     expect(ctl.lastDir).toEqual({ x: 0, y: 0 });
   });
 });
+
+describe('pose de dano', () => {
+  it('levar dano pede a pose de encolher', () => {
+    ctl.damage(false, undefined);
+    expect(scene.playPose).toHaveBeenCalledWith('hurt');
+  });
+});

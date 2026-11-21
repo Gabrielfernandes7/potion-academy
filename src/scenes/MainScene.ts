@@ -196,6 +196,7 @@ export class MainScene extends Phaser.Scene {
     this.isPaused = false;
     this.gemBlocks = new Set();
     this.litBraziers = new Set();
+    this.poseQueue = [];
     this.brazierSprites = new Map();
     this.surviveMs = 0;
     this.wavesSpawned = 0;
@@ -295,7 +296,48 @@ export class MainScene extends Phaser.Scene {
     return f === 'left' || f === 'right' ? 'side' : f;
   }
 
+  // Poses da Roo (textures/poses.ts, derivadas dos quadros que já existem): uma fila curta de quadros que congela a
+  // animação enquanto dura (levou dano, pôs a poção, pegou um item, chegou à porta, desabou). Transformada, o sprite é o da
+  // forma (RooFormSystem) e as poses não valem.
+  private poseQueue: Array<{ key: string; ms: number }> = [];
+  private poseLeft = 0;
+  private poseFlip = false;
+
+  playPose(kind: 'hurt' | 'cast' | 'pickup' | 'win' | 'fall'): void {
+    if (this.forms?.form.active || !this.playerSprite?.active) return;
+    const d = this.spriteDirection();
+    const flip = d === 'side' && this.player.facing === 'left';
+    const seq: Record<typeof kind, Array<[string, number]>> = {
+      hurt: [[`roo_hurt_${d}`, 260]],
+      cast: [[`roo_cast_${d}_0`, 70], [`roo_cast_${d}_1`, 110]],
+      pickup: [[`roo_pickup_${d}_0`, 90], [`roo_pickup_${d}_1`, 90]],
+      win: [['roo_win_0', 130], ['roo_win_1', 130], ['roo_win_2', 130], ['roo_win_0', 130], ['roo_win_1', 130], ['roo_win_2', 600]],
+      fall: [['roo_fall_0', 140], ['roo_fall_1', 160], ['roo_fall_2', 60000]],
+    };
+    this.poseQueue = seq[kind].map(([key, ms]) => ({ key, ms }));
+    this.poseFlip = kind === 'win' || kind === 'fall' ? false : flip;
+    this.showPoseFrame();
+  }
+
+  private showPoseFrame(): void {
+    const f = this.poseQueue[0];
+    this.poseLeft = f.ms;
+    if (!this.textures.exists(f.key)) { this.poseQueue = []; return; }
+    this.playerSprite.anims.stop();
+    this.playerSprite.setTexture(f.key).setFlipX(this.poseFlip);
+  }
+
+  private updatePose(delta: number): void {
+    if (!this.poseQueue.length) return;
+    this.poseLeft -= delta;
+    if (this.poseLeft > 0) return;
+    this.poseQueue.shift();
+    if (this.poseQueue.length) this.showPoseFrame();
+    else this.refreshSprite(this.player.moving ? 'walk' : 'idle');
+  }
+
   refreshSprite(mode: 'walk' | 'idle' | 'sleep'): void {
+    if (this.poseQueue.length && mode !== 'sleep') return; // uma pose em curso não é cortada pelo passo
     const f: Facing = this.player.facing;
     const direction = this.spriteDirection();
     if (mode !== 'walk') this.playerSprite.anims.timeScale = 1;
@@ -534,6 +576,7 @@ export class MainScene extends Phaser.Scene {
   stageClear(): void {
     if (this.transitioning || !this.def.door) return;
     this.transitioning = true;
+    this.playPose('win');
     this.play('door');
     if (doorOutcome(this.stage, LAST_STAGE) === 'finish') {
       this.story.gateReached(); // portão do jardim: frei Anselmo espera e a confissão fecha a história
@@ -747,7 +790,12 @@ export class MainScene extends Phaser.Scene {
     this.gameOver = true;
     this.isPaused = false;
     setPauseVisible(false);
-    this.playerSprite.setVisible(false);
+    if (this.won) this.playerSprite.setVisible(false);
+    else {
+      // derrotada, a Roo desaba antes de sumir
+      this.playPose('fall');
+      this.time.delayedCall(900, () => { if (this.playerSprite?.active) this.playerSprite.setVisible(false); });
+    }
     this.enemySystem.clearLash();
     if (this.won) {
       // sem fanfarra: as "Vésperas" da confissão seguem tocando no fim
@@ -900,7 +948,7 @@ export class MainScene extends Phaser.Scene {
       this.updateDuel(delta);
       return;
     }
-    if (!this.isPaused) this.playerCtl.advance(delta);
+    if (!this.isPaused) { this.playerCtl.advance(delta); this.updatePose(delta); }
     if (this.gameOver || this.won || this.transitioning) return;
     this.handleInput();
     this.playerCtl.settle();
