@@ -1,0 +1,29 @@
+Potion Academy
+Copyright (c) 2026 Gabriel Fernandes
+
+Este projeto foi feito para ser copiado, estudado e adaptado: ele é um exemplo
+de como levar uma ideia até um jogo, com brainstorm, protótipo e uma IA agêntica
+continuando o trabalho. Você pode:
+
+  - copiar, modificar e redistribuir o código, a arte, os textos, a história
+    e a música (inclusive o que é gerado por código);
+  - usar como base do seu próprio jogo ou de um projeto de estudo.
+
+Com duas condições:
+
+  1. CRÉDITO: cite o autor (Gabriel Fernandes) e o projeto Potion Academy, e
+     indique o que você mudou.
+  2. SEM USO COMERCIAL: não venda a obra nem a use para ganhar dinheiro
+     (venda, anúncios, assinatura) sem autorização por escrito do autor.
+
+Para pedir autorização comercial, abra uma Issue neste repositório.
+
+Isto segue o espírito da licença Creative Commons Atribuição-NãoComercial 4.0
+(CC BY-NC 4.0): https://creativecommons.org/licenses/by-nc/4.0/deed.pt-br
+Em caso de dúvida, vale o texto dela.
+
+Componentes de terceiros mantêm as próprias licenças (veja "Créditos" no
+README): Phaser (MIT), Cinzel e Nunito via @fontsource (SIL Open Font License
+1.1) e as demais dependências do package.json. Esta licença não se aplica a eles.
+
+A OBRA É FORNECIDA "COMO ESTÁ", SEM GARANTIA DE QUALQUER TIPO.

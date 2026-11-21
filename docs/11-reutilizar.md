@@ -1,6 +1,6 @@
 # Reaproveitar os personagens e o código
 
-Este jogo foi feito para ser copiado. Há três jeitos de usar o que está aqui, do mais simples ao mais profundo.
+Este jogo foi feito para ser copiado (com crédito ao autor e sem uso comercial; veja `LICENSE`). Há três jeitos de usar o que está aqui, do mais simples ao mais profundo.
 
 ## 1. Só as imagens (qualquer engine)
 

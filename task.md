@@ -3,7 +3,7 @@
 Este arquivo é a memória do projeto entre sessões: o estado, o que só você pode decidir, as armadilhas e como testar. **As pendências estão nas Issues do GitHub.** Leia antes de começar e atualize ao terminar cada tarefa.
 O que já foi feito (e o histórico por rodada) está em `solved.md`. Para o "como funciona", veja `CLAUDE.md` (técnico) e `docs/` (jogo).
 
-Última atualização: 2026-11-20 (#20: AJUSTES com volume, teclas e controle, e símbolo do elemento nos frascos, `ui/settings.ts`, `input/keymap.ts`, `input/gamepad.ts`; falta ver no navegador; PlayerController extraído da MainScene, #7; testes de cena com `tests/scene/fakeScene.ts`, #6; o `npm run smoke` não rodou: falta `npx playwright install`). Antes: 2026-11-18 (pendências movidas para as Issues; antes: 2026-11-15). A rodada de hoje (desempenho, UI de tabuleta e pergaminho, Ouroboros, 8 inimigos novos, segunda habilidade das formas, o Livro de Roo animado, o desfecho da história, a mensagem sem versículos, as gravuras antes de cada fase e o novo Mestre) foi **commitada junto** no fim da sessão (`git log -1`).
+Última atualização: 2026-11-21 (#18: botões de toque DETONAR, HABILIDADE e TROCAR FRASCO só aparecem quando servem, `input/touchContext.ts`; falta ver no celular; #12: LICENSE com crédito e sem uso comercial, e créditos). Antes: 2026-11-20 (#20: AJUSTES com volume, teclas e controle, e símbolo do elemento nos frascos, `ui/settings.ts`, `input/keymap.ts`, `input/gamepad.ts`; falta ver no navegador; PlayerController extraído da MainScene, #7; testes de cena com `tests/scene/fakeScene.ts`, #6; o `npm run smoke` não rodou: falta `npx playwright install`). Antes: 2026-11-18 (pendências movidas para as Issues; antes: 2026-11-15). A rodada de hoje (desempenho, UI de tabuleta e pergaminho, Ouroboros, 8 inimigos novos, segunda habilidade das formas, o Livro de Roo animado, o desfecho da história, a mensagem sem versículos, as gravuras antes de cada fase e o novo Mestre) foi **commitada junto** no fim da sessão (`git log -1`).
 
 ## O que foi feito nesta sessão (resumo; o detalhe está em `solved.md`, partes 5 a 9)
 
@@ -57,7 +57,7 @@ Eu verifico por script (regra pura, testes, simulações e o jogo rodando num na
 - **Qual ideia de `docs/ideas.md` trabalhar a seguir** (plano e ordem sugerida no fim do arquivo): reações no chão (lama, vapor, cristais), grimório de reações no Manuscrito e a Prima Materia entregue a Anselmo.
 - **Acessibilidade no celular** (ver a resposta da sessão de 2026-11-15; resumo em `docs/21-desempenho.md` não cobre isso): a HUD já subiu para 7 a 9 px num celular em pé (issue #21), mas os seletores de frasco ainda têm toque pequeno; não há manifesto de app (instalável, tela cheia; issue #26).
 
-- **Licença do projeto** (o README segue sem): é uma escolha jurídica, não minha.
+- **Licença do projeto:** `LICENSE` livre para copiar com crédito e sem uso comercial (no espírito da CC BY-NC 4.0; o jogo existe para ser copiado e ensinar o processo) e créditos no README (#12). Se um dia quiser abrir, troque o `LICENSE` e a seção Licença do README.
 - **Endereço final do site** (`og:image` e `og:url` absolutos): depende de onde será hospedado. A 404 e a 500 estão explicadas para Nginx, Apache e hospedeiros estáticos em `docs/20-publicar.md`.
 - **Versão 2 (adiado de propósito):** o Boticário (quem é, se é jogável) e o Ato II ampliado (puzzle de recomposição das páginas), e os companheiros que dependem deles (D3, P5, P6).
 

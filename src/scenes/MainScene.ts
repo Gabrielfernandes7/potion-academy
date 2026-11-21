@@ -18,6 +18,7 @@ import type { Facing, Player, PowerupCounts, StageData } from '../game/types';
 import type { FormId } from '../game/forms';
 import { retryData } from '../game/retry';
 import { HUD_SELECT_BOMB, HUD_UPDATE, HudState } from '../game/hudState';
+import { applyTouchContext } from '../ui/touchContext';
 import { touch } from '../input/touch';
 import { hideGameOver, setPauseVisible, showDuelResult, showGameOver } from '../ui/overlays';
 import { isHelpOpen } from '../ui/help';
@@ -611,7 +612,9 @@ export class MainScene extends Phaser.Scene {
   }
 
   updateHud(): void {
-    this.game.events.emit(HUD_UPDATE, this.buildHudState());
+    const state = this.buildHudState();
+    applyTouchContext(state.form.active);
+    this.game.events.emit(HUD_UPDATE, state);
   }
 
   // O cronômetro só reenvia o estado quando o segundo exibido muda.

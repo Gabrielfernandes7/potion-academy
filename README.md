@@ -105,4 +105,13 @@ docs/               # Documentação complementar do jogo e do código
 
 ## 📝 Licença
 
-Atualmente sem licença definida. Antes de reutilizar código ou imagens fora deste repositório, por favor, entre em contato com o autor.
+Livre para copiar, estudar e adaptar, **com crédito ao autor e sem uso comercial** (veja [`LICENSE`](LICENSE), no espírito da CC BY-NC 4.0). Para uso comercial, abra uma Issue.
+
+## 🙏 Créditos
+
+* **Gabriel Fernandes**: ideia, história, arte, música e código.
+* [Phaser 3](https://phaser.io) (licença MIT): motor do jogo.
+* [Cinzel](https://fontsource.org/fonts/cinzel) e [Nunito](https://fontsource.org/fonts/nunito), via `@fontsource` (SIL Open Font License 1.1): fontes.
+* Vite, Vitest, TypeScript, ESLint, Prettier e Playwright (ferramentas de desenvolvimento).
+
+Esses componentes de terceiros mantêm as próprias licenças.
