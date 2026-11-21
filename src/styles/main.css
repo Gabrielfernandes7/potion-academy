@@ -290,14 +290,24 @@ kbd {
   text-shadow: 0 2px 8px #000;
 }
 
-.menu-actions {
+/* O rodapé do menu (botões, dica e salvar) fica na parte de baixo da cena, no chão vazio sob o tapete: antes os botões
+   ficavam no meio e cobriam a Roo lendo. Em tela estreita não há chão sobrando, então o rodapé sai da cena (abaixo). */
+.menu-foot {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: 6px;
+  width: 100%;
+  margin-top: auto;
+}
+.menu-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: min(94%, 520px);
   pointer-events: auto;
 }
+.menu .big-btn { min-height: 40px; padding: 6px 10px; font-size: clamp(11px, 2.7cqw, 15px); letter-spacing: 0.08em; white-space: nowrap; }
 
 @container (min-width: 480px) {
   .menu .big-btn.alt {
@@ -938,15 +948,20 @@ kbd {
 /*  Menu em canvas pequeno  */
 /* #stage é um container: quando o jogo fica pequeno (celular deitado, janelas baixas), os botões do menu
    encolhem para não esconder a Roo e o caldeirão. */
+/* a dica do Enter ocupava duas linhas e empurrava os botões para cima da Roo: o atalho fica no tooltip do JOGAR */
+.menu-hint { display: none; }
+
 @container (max-width: 420px) {
-  /* seis botões em duas colunas (3 linhas), cada um com pelo menos 38 px de altura: dá para tocar com o dedo */
-  .menu-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; width: min(94%, 330px); }
-  .menu .big-btn { min-height: 38px; padding: 4px 8px; font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; }
-  .menu-hint { display: none; }
+  /* a cena é pequena demais para caber os botões: o rodapé sai dela e fica logo abaixo da moldura (a Roo aparece
+     inteira). Seis botões em duas colunas, de 46 px de altura: dá para tocar com o dedo. */
+  .menu-foot { position: absolute; top: calc(100% + 16px); left: 0; right: 0; margin-top: 0; gap: 10px; }
+  .menu-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: min(94%, 340px); }
+  .menu .big-btn { min-height: 46px; font-size: 13px; }
+  .menu-save { margin-top: 2px; }
 }
 
 @container (max-width: 330px) {
-  .menu .big-btn { min-height: 38px; padding: 4px 6px; font-size: 11px; letter-spacing: 0.06em; }
+  .menu .big-btn { padding: 4px 6px; font-size: 12px; letter-spacing: 0.06em; }
   .menu-tag { display: none; }
 }
 
@@ -1171,3 +1186,6 @@ kbd {
 @media (max-height: 700px) { .portrait { width: 64px; height: 64px; border-radius: 32px 32px var(--radius-m) var(--radius-m); } .panel { padding: 12px 14px; gap: 8px; } }
 @media (max-width: 600px) { .arena-sprite { width: 28px; height: 35px; } .arena-card { gap: 3px; padding: 5px; } .arena-card .big-btn { padding: 4px 6px; } }
 @media (max-height: 560px) and (min-width: 600px) { .arena-sprite { width: 30px; height: 38px; } .arena-card { padding: 4px; gap: 2px; } .arena-card .big-btn { padding: 4px 8px; } .panel.arena { padding: 8px 12px; gap: 5px; } }
+
+/* menu em tela estreita: o rodapé fica fora da cena, então a legenda dos elementos sai da frente */
+@media (max-width: 480px) { .in-menu .legend { display: none; } }
