@@ -7,6 +7,8 @@ O que já foi feito (e o histórico por rodada) está em `solved.md`. Para o "co
 
 ## O que foi feito nesta sessão (resumo; o detalhe está em `solved.md`, partes 5 a 9)
 
+- **Arquitetura e responsividade (não commitado):** `docs/25-arquitetura-para-agentes.md` e `tests/contracts/architecture.test.ts` (camadas e linha de base de dependências); regra do tempo esgotado extraída de `MainScene` para `game/timerRules.ts` (com teste). Responsividade medida em 7 tamanhos (Playwright, fora do projeto): celular em pé de 320 px e 375 px cabe sem rolar; menu deitado de celular mostra os botões (rodapé ao lado da cena); tablet em pé cabe. Falta ver a partida em celular de verdade (o cartão de entrada não fechou no navegador de teste). `npm run smoke` acusa 2 px de rolagem no painel de ajuda em 360x640 e 667x375, e 17 px em 800x360 (`help`). Nos dois primeiros, o valor é igual com e sem as mudanças de CSS desta rodada; o de 800x360 não foi medido separado: pendência para o próximo passo.
+
 - **Desempenho:** pools de partículas e objetos, gráficos só redesenhados quando há o que mostrar, névoa e HUD sem trabalho repetido (`docs/21-desempenho.md`). `fps.limit` foi tentado e revertido.
 - **UI:** tabuleta de madeira, latão, pergaminho e vela; Ouroboros (chefe do Observatório) e 8 inimigos novos; segunda habilidade em todas as formas; muro que barra explosões.
 - **O Livro de Roo** (`/livro.html`, botão O LIVRO): 13 aberturas animadas em pixel art como um manuscrito de alquimia (a Roo bebê na bolha iridescente, o laboratório de velas, o pão partido, Belladona...).

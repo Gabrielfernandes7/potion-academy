@@ -961,6 +961,41 @@ kbd {
   .menu-tag { display: none; }
 }
 
+/* Celular em pé e de altura curta (320x568, 375x667): os controles cabem sem rolar. O D-pad encolhe um pouco e os
+   botões de ação ficam em grade de duas colunas, não em pilha: a pilha de cinco botões é o que empurra a tela para baixo. */
+@media (orientation: portrait) and (max-height: 760px) {
+  .touch-on .app { gap: 8px; padding-bottom: 8px; }
+  .touch-on .dpad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 42px); gap: 3px; }
+  .touch-on .actions { max-width: none; gap: 4px; }
+  .touch-on .act { min-height: 36px; padding: 4px 2px; font-size: 10px; letter-spacing: 0; }
+  .touch-on .act.bomb,
+  .touch-on .act.small { grid-column: auto; min-height: 40px; } /* uma coluna cada: a linha inteira empilhava mais uma faixa */
+}
+
+/* Tablet em pé: o cabeçalho ocupa mais altura que no celular (barra em duas linhas), então a reserva é maior */
+@media (orientation: portrait) and (min-width: 600px) {
+  .touch-on { --chrome-h: 420px; }
+}
+
+/* Menu deitado e baixo (celular na horizontal): o rodapé dos botões sai para o lado da cena, em vez de cair abaixo
+   dela (fora da tela). Os controles de toque ficam ocultos no menu, então a largura lateral está livre. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .menu-foot {
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: min(190px, calc((100vw - var(--stage-w)) / 2 - 16px));
+    margin: 0;
+    gap: 6px;
+  }
+  .menu-actions { grid-template-columns: minmax(0, 1fr); gap: 5px; width: 100%; }
+  .menu .big-btn { min-height: 32px; font-size: 11px; padding: 4px 6px; }
+  .menu-save { gap: 4px; }
+  .menu-save .save-btn { font-size: 10px; min-height: 26px; }
+  .menu-save-msg { display: none; }
+}
+
 /*  Celular e tablet deitados  */
 /* Em pé, os controles ficam sob o jogo. Deitado, a altura é escassa: o jogo vai para o centro, o direcional
    para a esquerda e os botões para a direita, sem sobrepor o jogo (--side-w reserva as laterais). */

@@ -166,6 +166,8 @@ O conteúdo do jogo (regras, personagens, glossário, decisões) está em `docs/
 
 ## Como estender e como testar
 
+Antes de mexer no código, leia `docs/25-arquitetura-para-agentes.md`: o padrão (regra pura sem Phaser, ligação com Phaser), as receitas e as regras que `tests/contracts/architecture.test.ts` garante.
+
 Antes de acrescentar um chefe, uma forma da Roo, uma fase ou uma página, leia `docs/16-guia-de-extensao.md`: cada tipo de coisa tem uma **lista única** (registro) e uma receita curta. Depois de qualquer mudança rode `npm run check` (tipos, testes e build); `npm run smoke` abre o jogo num navegador (Playwright, `npx playwright install chromium` uma vez) e confere os caminhos principais. Regra de jogo vive em arquivo puro com teste; o arquivo do Phaser só desenha e liga.
 
 ## Desempenho (regra de código)

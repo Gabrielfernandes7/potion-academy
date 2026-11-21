@@ -7,6 +7,7 @@
 import Phaser from 'phaser';
 import { BLOCK, BOMB_ORDER, BombId, BRAZIER, CANVAS, CONFIG, ElementId, EMPTY, WALL } from '../config';
 import { audio, SfxName } from '../audio/AudioEngine';
+import { stepOvertime } from '../game/timerRules';
 import { ARENA_STAGE, arenaStageDef, duelStageDef } from '../game/arena';
 import { ObjectPool } from '../game/fx/objectPool';
 import { duelOutcome, validDuel } from '../game/duel';
@@ -778,13 +779,9 @@ export class MainScene extends Phaser.Scene {
 
   updateTimer(delta: number): void {
     this.timeLeft -= delta;
-    if (this.timeLeft <= 0 && !this.gameOver) {
-      this.overtimeDamageTimer -= delta;
-      if (this.overtimeDamageTimer <= 0) {
-        this.overtimeDamageTimer = CONFIG.overtimeDamageInterval;
-        this.damagePlayer(true);
-      }
-    }
+    const step = stepOvertime(this.overtimeDamageTimer, delta, CONFIG.overtimeDamageInterval, this.timeLeft <= 0 && !this.gameOver);
+    this.overtimeDamageTimer = step.timer;
+    if (step.hit) this.damagePlayer(true);
     this.updateTimerHud();
   }
 
