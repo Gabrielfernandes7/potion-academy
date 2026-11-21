@@ -12,6 +12,7 @@ src/lab/
   experiments/
     fog.ts                  # névoa (mesmo módulo da fase A NÉVOA)
     fireRoo.ts              # Roo de fogo
+    cast.ts                 # elenco: propostas de personagens (espírito do alambique, gota de mercúrio, selo da fraqueza); captura em docs/img/lab-elenco.png
 ```
 
 ## Experimento novo
