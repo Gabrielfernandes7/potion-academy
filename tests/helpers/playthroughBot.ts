@@ -15,6 +15,9 @@ import { walkBlast } from '../../src/game/blast';
 import { mulberry32 } from '../../src/game/rng';
 import { objectiveOf, pickBrazierCells } from '../../src/game/objective';
 import type { StageDef } from '../../src/game/stages/types';
+import { ENEMY_TYPES, type EnemyKind } from '../../src/game/entities/enemies/defs';
+import { canSpawnEnemyAt } from '../../src/game/entities/enemies/enemyRules';
+import { PROFILES } from '../../src/game/entities/profiles';
 
 const EXPLOSION_LINGER_MS = 380; // quanto tempo a chama fica no chão (BombSystem)
 const SAFETY_MS = 250; // folga: o bot sai da cruz antes de o pavio acabar
@@ -27,11 +30,25 @@ export interface BotResult {
   bombs: number;
   blocks: number; // caixotes gerados
   gems: number; // gemas recolhidas
+  // Trajeto (para a simulação de inimigos, tests/helpers/threatSim.ts): por onde a Roo anda, em que instante, e onde
+  // as explosões caem. `grid` é a grade de partida, antes de qualquer caixote quebrar.
+  trail: TrailPt[];
+  booms: Boom[];
+  grid: number[][];
+  door: Pt;
+  start: SimEnemy[]; // os inimigos de partida (nascem antes do plano; as flores são paredes para ele)
 }
 
-interface Pt { x: number; y: number }
+// Um inimigo de partida (sem Phaser): a posição de nascimento e o estado que a simulação de ameaças usa.
+export interface SimEnemy { kind: EnemyKind; x: number; y: number; hp: number; alive: boolean; timer: number; dir: Pt; chases: boolean }
 
-function bfs(tiles: Tiles, from: Pt, passable: (x: number, y: number) => boolean): Map<string, number> {
+export interface Pt { x: number; y: number }
+export interface TrailPt extends Pt { t: number } // a Roo está em (x, y) a partir do instante t (ms)
+export interface Boom { t: number; cells: Pt[]; hits: Pt[] } // explosão no instante t: cruz, e os caixotes que cai
+
+function bfs(
+  tiles: Tiles, from: Pt, passable: (x: number, y: number) => boolean, parents?: Map<string, string>,
+): Map<string, number> {
   const dist = new Map<string, number>([[cellKey(from.x, from.y), 0]]);
   const queue: Pt[] = [from];
   for (let i = 0; i < queue.length; i++) {
@@ -42,10 +59,57 @@ function bfs(tiles: Tiles, from: Pt, passable: (x: number, y: number) => boolean
       const k = cellKey(x, y);
       if (dist.has(k) || y < 0 || y >= tiles.length || x < 0 || x >= tiles[0].length || !passable(x, y)) continue;
       dist.set(k, d + 1);
+      parents?.set(k, cellKey(p.x, p.y));
       queue.push({ x, y });
     }
   }
   return dist;
+}
+
+/** As casas do caminho de `from` até `to` (sem a origem), em ordem, a partir dos pais de uma busca em largura. */
+function route(parents: Map<string, string>, from: Pt, to: Pt): Pt[] {
+  const start = cellKey(from.x, from.y);
+  const out: Pt[] = [];
+  let k = cellKey(to.x, to.y);
+  while (k !== start) {
+    const [x, y] = k.split(',').map(Number);
+    out.push({ x, y });
+    const p = parents.get(k);
+    if (p === undefined) break;
+    k = p;
+  }
+  return out.reverse();
+}
+
+const keyPt = (k: string): Pt => { const [x, y] = k.split(',').map(Number); return { x, y }; };
+
+/**
+ * Os inimigos de partida (a regra `start` de cada fase), nas casas livres, com a mesma regra de nascimento do jogo
+ * (canSpawnEnemyAt). As regras `every` (que nascem com os caixotes quebrados) não entram: é um piso da pressão.
+ */
+export function spawnStart(def: StageDef, tiles: Tiles, door: Pt, roll: () => number): SimEnemy[] {
+  const { cols, rows } = CONFIG;
+  const out: SimEnemy[] = [];
+  const dirs: Pt[] = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
+  for (const rule of def.enemies) {
+    for (let i = 0; i < rule.start; i++) {
+      for (let attempt = 0; attempt < 80; attempt++) {
+        const x = 1 + Math.floor(roll() * (cols - 2));
+        const y = 1 + Math.floor(roll() * (rows - 2));
+        const ok = canSpawnEnemyAt(x, y, {
+          tile: tiles[y][x], door, player: { x: 1, y: 1 },
+          enemyAt: out.some(e => e.alive && e.x === x && e.y === y), bombAt: false,
+        });
+        if (!ok) continue;
+        out.push({
+          kind: rule.kind, x, y, hp: PROFILES[rule.kind].maxHp, alive: true, timer: ENEMY_TYPES[rule.kind].moveInterval,
+          dir: dirs[Math.floor(roll() * 4)], chases: rule.chase === true,
+        });
+        break;
+      }
+    }
+  }
+  return out;
 }
 
 export function playStage(def: StageDef, seed: number): BotResult {
@@ -70,30 +134,47 @@ export function playStage(def: StageDef, seed: number): BotResult {
   for (let i = shuffled.length - 1; i > 0; i--) { const j = Math.floor(roll() * (i + 1)); [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; }
   const gemBlocks = new Set(objective.type === 'gems' ? shuffled.slice(0, CONFIG.gemsForDoor) : []);
   const floorGems = new Set<string>();
+  const grid = tiles.map(row => [...row]); // a grade de partida (a simulação de inimigos começa daqui)
+  // os inimigos nascem depois da grade e das gemas (o sorteio deles vem por último: a grade não muda)
+  const start = spawnStart(def, tiles, door, roll);
+  const flowers = new Set(start.filter(e => ENEMY_TYPES[e.kind].rooted).map(e => cellKey(e.x, e.y)));
 
   const step = CONFIG.baseMoveDuration;
   const type = BOMB_TYPES.normal;
   let pos: Pt = { x: 1, y: 1 };
   let time = 0, bombs = 0, gems = 0;
-  const out = (won: boolean, reason: string): BotResult => ({ won, reason, timeMs: time, twoBombsMs: time - (bombs * (type.fuse + EXPLOSION_LINGER_MS)) / 2, bombs, blocks: blocks.length, gems });
+  const trail: TrailPt[] = [{ t: 0, x: pos.x, y: pos.y }];
+  const booms: Boom[] = [];
+  const walkTo = (cells: Pt[]): void => {
+    for (const c of cells) { time += step; trail.push({ t: time, x: c.x, y: c.y }); }
+    if (cells.length) pos = cells[cells.length - 1];
+  };
+  const out = (won: boolean, reason: string): BotResult => ({
+    won, reason, timeMs: time, twoBombsMs: time - (bombs * (type.fuse + EXPLOSION_LINGER_MS)) / 2, bombs, blocks: blocks.length, gems,
+    trail, booms, grid, door, start,
+  });
   const open = (): boolean => {
     if (objective.type === 'gems') return gems >= CONFIG.gemsForDoor;
     if (objective.type === 'braziers') return lit.size >= objective.count;
     return true; // sobreviver e caçar: o objetivo se cumpre com o tempo e os golpes; o bot confere o caminho
   };
   const passable = (x: number, y: number): boolean => {
-    if (tiles[y][x] !== EMPTY) return false;
+    if (tiles[y][x] !== EMPTY || flowers.has(cellKey(x, y))) return false;
     return !(x === door.x && y === door.y && !open());
   };
 
   for (let guard = 0; guard < 400; guard++) {
-    const dist = bfs(tiles, pos, passable);
+    const parents = new Map<string, string>();
+    const dist = bfs(tiles, pos, passable, parents);
     // 1. a porta aberta e alcançável: fim
     if (open()) {
       const d = dist.get(cellKey(door.x, door.y));
       if (d !== undefined) {
-        time += d * step;
-        if (objective.type === 'survive') time = Math.max(time, objective.ms + d * step);
+        walkTo(route(parents, pos, door));
+        if (objective.type === 'survive') {
+          time = Math.max(time, objective.ms + d * step);
+          trail.push({ t: time, x: door.x, y: door.y }); // espera na porta até o tempo da fase
+        }
         return out(true, 'porta aberta e alcançada');
       }
       // a porta abriu, mas ainda há caixotes no caminho: segue quebrando, em direção a ela
@@ -103,7 +184,7 @@ export function playStage(def: StageDef, seed: number): BotResult {
     for (const k of open() ? [] : floorGems) { const d = dist.get(k); if (d !== undefined && (!best || d < best.d)) best = { k, d }; }
     if (best) {
       const [gx, gy] = best.k.split(',').map(Number);
-      time += best.d * step; pos = { x: gx, y: gy }; floorGems.delete(best.k); gems++;
+      walkTo(route(parents, pos, { x: gx, y: gy })); floorGems.delete(best.k); gems++;
       continue;
     }
     // 3. põe uma poção onde derruba mais caixotes por passo andado, com fuga garantida
@@ -126,22 +207,31 @@ export function playStage(def: StageDef, seed: number): BotResult {
       cands.push({ at: { x, y }, hits, lights, walk: d, blast, score });
     }
     cands.sort((a, b) => b.score - a.score);
-    let pick: { at: Pt; hits: string[]; lights: string[]; walk: number; flee: number; blast: Set<string> } | null = null;
+    let pick: { at: Pt; hits: string[]; lights: string[]; walk: number; flee: number; blast: Set<string>; fleeTo: Pt; awayParents: Map<string, string> } | null = null;
     for (const c of cands) {
       // fuga: sai pela casa livre mais perto fora da cruz, sem passar pela poção
-      const away = bfs(tiles, c.at, (px, py) => passable(px, py) && !(px === c.at.x && py === c.at.y));
+      const awayParents = new Map<string, string>();
+      const away = bfs(tiles, c.at, (px, py) => passable(px, py) && !(px === c.at.x && py === c.at.y), awayParents);
       let flee = Infinity;
+      let fleeTo: Pt | null = null;
       for (const [ek, ed] of away) {
-        if (!c.blast.has(ek) && ed * step + SAFETY_MS <= type.fuse) flee = Math.min(flee, ed);
+        if (!c.blast.has(ek) && ed * step + SAFETY_MS <= type.fuse && ed < flee) { flee = ed; fleeTo = keyPt(ek); }
       }
-      if (flee !== Infinity) { pick = { ...c, flee }; break; }
+      if (fleeTo) { pick = { ...c, flee, fleeTo, awayParents }; break; }
     }
     if (!pick) {
       const left = [...floorGems].length + gemBlocks.size;
       return out(false, `travou: sem caixote ao alcance (${left} gema(s) fora de alcance, ${gems} recolhida(s))`);
     }
-    // anda, põe, foge e espera a explosão
-    time += pick.walk * step + type.fuse + EXPLOSION_LINGER_MS;
+    // anda até a casa, põe a poção, foge pelo caminho fora da cruz e espera a explosão
+    walkTo(route(parents, pos, pick.at));
+    const placed = time;
+    const fleePath = route(pick.awayParents, pick.at, pick.fleeTo);
+    fleePath.forEach((c, i) => trail.push({ t: placed + (i + 1) * step, x: c.x, y: c.y }));
+    booms.push({ t: placed + type.fuse, cells: [...pick.blast].map(keyPt), hits: pick.hits.map(keyPt) });
+    time = placed + type.fuse + EXPLOSION_LINGER_MS;
+    trail.push({ t: time, x: pick.fleeTo.x, y: pick.fleeTo.y });
+    pos = { x: pick.fleeTo.x, y: pick.fleeTo.y };
     bombs++;
     for (const k of pick.lights) lit.add(k);
     for (const k of pick.hits) {
@@ -149,7 +239,6 @@ export function playStage(def: StageDef, seed: number): BotResult {
       tiles[by][bx] = EMPTY;
       if (gemBlocks.has(k)) { gemBlocks.delete(k); floorGems.add(k); }
     }
-    pos = { x: pick.at.x, y: pick.at.y };
   }
   return out(false, 'travou: passos demais (bot em laço)');
 }
