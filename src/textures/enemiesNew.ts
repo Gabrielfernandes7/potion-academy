@@ -157,26 +157,32 @@ export function drawNewEnemies(make: MakeFn): void {
     g.fillStyle(0xe0a030); g.fillRect(c - 7, T - 7, 4, 3); g.fillRect(c + 3, T - 7, 4, 3);
   };
 
-  // Gosma de mercúrio: uma gota de prata viva, com um brilho azulado, olhos redondos e uma poça aos pés. No segundo
-  // quadro achata e estica (respira).
+  // Gosma de mercúrio: uma gota de prata-viva, com reflexos de metal, olhos estreitos e frios, gotinhas soltas e uma
+  // poça de metal aos pés. No segundo quadro a gota estica e achata (respira).
   const slime = (g: Graphics, T: number, v: 0 | 1 | 2 = 0): void => {
     const c = T / 2;
-    const w = v === 1 ? 31 : 28;
-    const h = v === 1 ? 20 : 24;
-    g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 4, 30, 6);
-    g.fillStyle(0x9fb2c0, 0.55); g.fillEllipse(c, T - 6, 34, 8); // poça
-    g.fillStyle(OUT); g.fillEllipse(c, T - 8 - h / 2, w + 3, h + 3); g.fillTriangle(c - 4, T - 8 - h - 4, c - 9, T - 14 - h / 2, c + 6, T - 14 - h / 2);
-    g.fillStyle(0xb7c7d6); g.fillEllipse(c, T - 8 - h / 2, w, h); g.fillTriangle(c - 3, T - 8 - h - 2, c - 8, T - 14 - h / 2, c + 5, T - 14 - h / 2);
-    g.fillStyle(0xe4edf5); g.fillEllipse(c - 5, T - 12 - h / 2, w * 0.45, h * 0.4);
-    g.fillStyle(0x7e94a8); g.fillEllipse(c + 6, T - 5 - h / 2, w * 0.4, h * 0.4);
-    // olhos
-    const ey = T - 9 - h / 2;
-    g.fillStyle(OUT); g.fillCircle(c - 5.5, ey, 4.4); g.fillCircle(c + 5.5, ey, 4.4);
-    g.fillStyle(0xffffff); g.fillCircle(c - 5.5, ey, 3.4); g.fillCircle(c + 5.5, ey, 3.4);
-    g.fillStyle(OUT); g.fillCircle(c - 5, ey + 0.4, 1.6); g.fillCircle(c + 6, ey + 0.4, 1.6);
-    g.fillStyle(OUT); g.fillRect(c - 3, ey + 7, 6, 1.6); // boquinha
-    // gotinhas de prata soltas
-    g.fillStyle(0xe4edf5); g.fillCircle(c - 15, T - 12, 1.8); g.fillCircle(c + 15, T - 15, 1.4);
+    const MOUT = 0x2a3550;
+    const f = v === 1 ? 1 : 0;
+    const ry = f === 0 ? 13 : 11;
+    const tip = f === 0 ? 4 : 7;
+    const cy = f === 0 ? 24 : 26;
+    g.fillStyle(MOUT, 0.45); g.fillEllipse(c, T - 4, 28, 6);
+    g.fillStyle(0x93a3bd, 0.9); g.fillEllipse(c, T - 4, 24, 4);
+    // gotinhas soltas
+    for (const [x, y, r] of [[6, 33, 2.6], [34, 34, 2.1]] as const) {
+      g.fillStyle(MOUT); g.fillCircle(x, y, r + 1); g.fillStyle(0xaebbd0); g.fillCircle(x, y, r); g.fillStyle(0xffffff); g.fillRect(x - 1, y - 1, 1, 1);
+    }
+    // corpo em gota: contorno, prata, sombra de baixo e reflexos
+    g.fillStyle(MOUT); g.fillEllipse(c, cy, 27, ry * 2 + 2); g.fillTriangle(c, tip - 1, c - 8, cy - 4, c + 8, cy - 4);
+    g.fillStyle(0xaebbd0); g.fillEllipse(c, cy, 25, ry * 2); g.fillTriangle(c, tip + 1, c - 7, cy - 4, c + 7, cy - 4);
+    g.fillStyle(0x7686a3); g.fillEllipse(c + 4, cy + 5, 17, ry); // sombra
+    g.fillStyle(0x56658a); g.fillEllipse(c, cy + ry - 2, 20, 4); // borda escura embaixo (metal)
+    g.fillStyle(0xe3ebf7); g.fillRect(c + 8, cy - 3, 2, 7); // luz rebatida do lado
+    g.fillStyle(0xffffff); g.fillRect(c - 9, cy - 8, 3, 8); g.fillRect(c - 8, cy - 11, 2, 2); // brilho de metal
+    // olhos estreitos e frios
+    g.fillStyle(0x1a2238); g.fillRect(c - 7, cy - 1, 5, 3); g.fillRect(c + 2, cy - 1, 5, 3);
+    g.fillStyle(0xd9f3ff); g.fillRect(c - 6, cy - 1, 1, 1); g.fillRect(c + 3, cy - 1, 1, 1);
+    g.fillStyle(0x1a2238); g.fillRect(c - 3, cy + 5, 6, 1);
   };
 
   // Sentinela de cera: uma vela que anda. O corpo é o toco de vela, mais estreito, com uma cabeça de cera derretida

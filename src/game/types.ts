@@ -70,6 +70,7 @@ export interface Enemy {
   hp: number;
   maxHp: number;
   bar: Phaser.GameObjects.Graphics; // barra de vida (aparece depois do primeiro golpe)
+  badge: Phaser.GameObjects.Image | null; // selo da fraqueza sobre o inimigo (game/entities/badge.ts); null para os inofensivos
 }
 
 export interface Explosion {

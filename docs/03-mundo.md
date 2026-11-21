@@ -91,7 +91,8 @@ Os três abaixo são os clássicos; os outros oito (Lanterna viva, Relógio de c
 - *Detalhe:* no laboratório aparecem mais conforme você quebra caixotes (2 no início, até 5); a contagem muda por fase (`stages/chapters/`).
 - *Limite:* não persegue.
 
-**Fantasma** (Salão dos Ecos, Névoa e Torre)
+**Fantasma, o espírito do alambique** (Salão dos Ecos, Névoa e Torre)
+- *Aparência:* um vapor em S que sai do gargalo de um frasco de vidro, com dois fiapos de braço.
 - *Faz:* flutua sem rumo (um passo a cada 1,5 s), **atravessa muralhas, caixotes e poções** e tira 1 de vida ao encostar. Morre sem deixar nada.
 - *Detalhe:* dentro de uma muralha fica meio transparente e a explosão não o alcança. Começam 2, até 4 (mais um a cada 10 caixotes).
 - *Limite:* não persegue nem sai da sala.

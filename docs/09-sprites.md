@@ -71,7 +71,8 @@ Aparece na carta (retrato), no portão do jardim quando ele se abre (dois quadro
 ## Inimigos (`src/textures/entities.ts`)
 
 - `enemy`: **sapo mago**, da fase 1. Corpo verde com contorno escuro, olhos saltados, chapéu de cogumelo vermelho de pintas brancas e um cajado com orbe azul.
-- `enemy_ghost`: **fantasma** do salão dos fantasmas: atravessa obstáculos e anda devagar. Meio transparente (fica mais ainda dentro de uma parede), com a barra de baixo ondulada.
+- `enemy_ghost` e `enemy_ghost_1`: **espírito do alambique** (o "fantasma") do salão dos fantasmas: um vapor em S que sai do gargalo de um frasco de vidro. Atravessa obstáculos e anda devagar; fica mais transparente dentro de uma parede.
+- `badge_fire|water|earth|air` (`textures/weaknessBadge.ts`, 15 x 15 px): o **selo da fraqueza** que fica sobre cada inimigo que machuca, com o glifo do elemento que o fere (`game/entities/badge.ts`). Ratinho e salamandra não levam.
 - `enemy_flower`: **flor do mal** do jardim: fixa, pétalas escuras (magenta e roxo), olhos vermelhos e dentes. O sprite balança preso ao chão. É imune à Poção de Água.
 - Movimento: cada passo tem um pulo (7 px na vertical, 3 px na horizontal) e, parado, um balanço de 1 px (`animateEnemy` em `MainScene.ts`).
 
@@ -103,7 +104,7 @@ As categorias abaixo aparecem agrupadas no catálogo (`src/pages/sprites.ts`; os
 |---|---|---|
 | `heroes/` | a jogadora | Roo |
 | `bosses/` | chefes | Belladona (`witch_*`), Mandrágora, Quimera (`chimera_*`) e Leão Verde (`lion_*`) |
-| `enemies/` | inimigos comuns | sapo mago (`enemy`), fantasma (`enemy_ghost`) |
+| `enemies/` | inimigos comuns | sapo mago (`enemy`), espírito do alambique (`enemy_ghost`) |
 | `objects/` | o que se coleta ou se usa | poções (`bomb_*`), itens (`pickup_*`), caixotes e portas |
 | `effects/` | partículas e brilhos | `menu_spark`, `menu_bubble`, `menu_puff`, explosões |
 | `scenery/` | o chão e as paredes | `floor1`, `floor2`, `wall`, `block` |

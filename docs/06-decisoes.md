@@ -364,3 +364,8 @@ Novas decisões entram no fim.
 - A Roo, o sapo mago, a Belladona, a Mandrágora e o Mestre usavam o mesmo sinal (chapéu de bruxo) e viravam a mesma figura. A Mandrágora já tinha perdido o chapéu (#29). Agora fica **só a Roo e o Mestre**, e isso é de propósito: a Roo herdou o chapéu do mestre, e o sinal comum mostra quem foi aluna de quem.
 - **Belladona:** sem chapéu. Cabelo preso bem alto e diadema de beladona (três bagas roxas, folhas verde-limão, flor-sino magenta que pende quando ela é vencida). A silhueta ficou redonda, não pontuda. As chaves das texturas (`witch_*`) não mudaram.
 - **Sapo mago:** chapéu de cogumelo vermelho com pintas brancas, sem aba nem ponta (uma piada com o sapo e o *toadstool*).
+
+## Espírito do alambique, gota de mercúrio e selo da fraqueza (2026-11-21)
+- **Mais alquimia e Idade Média nos inimigos.** O fantasma era um lençol branco genérico: virou o **espírito do alambique**, um vapor em S que sai do gargalo de um frasco (o que se destila). A gosma virou uma **gota de mercúrio**, de prata-viva, com reflexo de metal e olhos estreitos, sem cara de gelatina. As chaves das texturas não mudaram (`enemy_ghost`, `enemy_slime`); o fantasma ganhou o segundo quadro `enemy_ghost_1`. O comportamento e o perfil de dano continuam os mesmos.
+- **Selo da fraqueza.** Cada inimigo que machuca leva um selinho de pergaminho com o glifo do primeiro elemento da fraqueza dele (`weaknessBadge`, puro, testado). Ensina a regra só de olhar. Ratinho e salamandra não levam (não são ameaça). **Nada de ☿**: o glifo do Mercúrio tem uma cruz, e a cruz não vai em inimigo.
+- Fica para depois (só proposta): sapo com saltos de 2 casas e agachada de aviso; fantasma translúcido só dentro de paredes; um sorriso torto no sapo.

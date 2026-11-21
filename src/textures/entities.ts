@@ -35,6 +35,33 @@ function heart(g: Gfx, cx: number, cy: number, s: number, fill: number): void {
   g.fillTriangle(cx - 12 * s, cy - 0.5 * s, cx + 12 * s, cy - 0.5 * s, cx, cy + 13 * s);
 }
 
+// Espírito do alambique: o vapor que se destila, saindo do gargalo de um frasco de vidro (alquimia). Corpo em S,
+// dois fiapos de braço e rosto; no frasco, líquido e bolhas. `f` é o quadro (0 ou 1).
+function spirit(g: Gfx, T: number, f: 0 | 1): void {
+  const c = T / 2;
+  const OUT = 0x3d5a80;
+  const dy = f; // o espírito sobe e desce um pixel
+  const sx = f === 0 ? 1 : -1;
+  g.fillStyle(0x000000, 0.25); g.fillEllipse(c, T - 3, 22, 5);
+  // frasco de vidro: bojo, gargalo e boca
+  g.fillStyle(0x2d4a5a); g.fillEllipse(c, 31, 22, 15); g.fillRect(c - 4, 16, 8, 13); g.fillRect(c - 6, 15, 12, 3);
+  g.fillStyle(0xcfeaf5, 0.9); g.fillEllipse(c, 31, 20, 13); g.fillRect(c - 3, 17, 6, 12);
+  g.fillStyle(0x7fd0e0); g.fillEllipse(c, 34, 18, 8); // o líquido no fundo
+  g.fillStyle(0xeaffff); g.fillRect(c - 7, 28, 2, 4); // reflexo no vidro
+  g.fillStyle(0xeaffff, 0.9); g.fillCircle(c - 3, 34, 1.2); g.fillCircle(c + 3, 35, 1); g.fillCircle(c + 1, 32, 0.8);
+  // o vapor que sai do gargalo: rabo em S, corpo e cabeça
+  g.fillStyle(OUT); g.fillCircle(c + sx, 17 + dy, 4.8); g.fillCircle(c - sx, 12 + dy, 7); g.fillCircle(c, 8 + dy, 9.4);
+  g.fillStyle(0xe6f1fb); g.fillCircle(c + sx, 17 + dy, 3.8); g.fillCircle(c - sx, 12 + dy, 6); g.fillCircle(c, 8 + dy, 8.4);
+  g.fillStyle(0xb7cfe6); g.fillEllipse(c + 4, 11 + dy, 5, 9); // sombra do lado direito
+  // dois fiapos de braço
+  g.fillStyle(OUT); g.fillEllipse(c - 10, 13 + dy, 6, 3.6); g.fillEllipse(c + 10, 13 + dy, 6, 3.6);
+  g.fillStyle(0xe6f1fb); g.fillEllipse(c - 10, 13 + dy, 4.4, 2.2); g.fillEllipse(c + 10, 13 + dy, 4.4, 2.2);
+  // rosto
+  g.fillStyle(0x1f2a44); g.fillEllipse(c - 3.4, 8 + dy, 3.4, 4.6); g.fillEllipse(c + 3.4, 8 + dy, 3.4, 4.6);
+  g.fillStyle(0xffffff); g.fillCircle(c - 3.9, 7 + dy, 0.9); g.fillCircle(c + 2.9, 7 + dy, 0.9);
+  g.fillStyle(0x1f2a44); g.fillEllipse(c, 13 + dy, 3, 2.6);
+}
+
 export function drawEntities(make: MakeFn): void {
   // Sapo mago (inimigo da fase 1): corpo verde com contorno escuro, olhos saltados, chapéu de cogumelo
   // vermelho de pintas brancas, e um cajado com orbe. Desenhado em 40 px (T).
@@ -75,20 +102,10 @@ export function drawEntities(make: MakeFn): void {
     g.fillStyle(0xe0f7fa); g.fillCircle(T - 5, 14, 1);
   });
 
-  // Fantasma (inimigo de fases avançadas): atravessa obstáculos, mas se move devagar.
-  // Meio transparente, com a barra de baixo ondulada.
-  make('enemy_ghost', (g, T) => {
-    const c = T / 2;
-    g.fillStyle(0x9fa8da, 0.35); g.fillCircle(c, c - 2, T / 2 - 1);
-    g.fillStyle(0xe8eaf6, 0.9); g.fillEllipse(c, 16, 26, 24); g.fillRect(7, 16, 26, 15);
-    // barra ondulada
-    g.fillCircle(9, 31, 4); g.fillCircle(c, 32, 4); g.fillCircle(31, 31, 4);
-    g.fillStyle(0xe8eaf6, 0.9); g.fillRect(9, 26, 22, 6);
-    // olhos e boca
-    g.fillStyle(0x263238); g.fillEllipse(15, 16, 4, 5.5); g.fillEllipse(25, 16, 4, 5.5);
-    g.fillStyle(0xffffff); g.fillCircle(15.8, 14.8, 1); g.fillCircle(25.8, 14.8, 1);
-    g.fillStyle(0x263238); g.fillEllipse(c, 23, 4, 3);
-  });
+  // Espírito do alambique (o "fantasma", inimigo de fases avançadas): um vapor que sai do gargalo de um frasco.
+  // Atravessa obstáculos, mas se move devagar. Dois quadros: o espírito sobe e desce um pixel.
+  make('enemy_ghost', (g, T) => spirit(g, T, 0));
+  make('enemy_ghost_1', (g, T) => spirit(g, T, 1));
 
   // Flor do mal (inimigo do jardim): fixa no chão, pétalas escuras, olhos vermelhos e dentes.
   make('enemy_flower', (g, T) => {

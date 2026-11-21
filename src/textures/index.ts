@@ -13,6 +13,7 @@ import { drawHudIcons } from './hud';
 import { drawMenuTextures } from './menu';
 import { BOSS_DEFS, BOSS_IDS } from '../game/entities/bosses/defs';
 import { drawAnselmoTextures } from './anselmo';
+import { drawWeaknessBadges } from './weaknessBadge';
 import { BUBBLE_POSES, drawRooBubbleFrames } from './rooBubble';
 import { outlineTexture } from './outline';
 import { CONFIG } from '../config';
@@ -47,5 +48,6 @@ export function generateTextures(scene: Phaser.Scene): void {
     for (const key of scene.textures.getTextureKeys()) if (key.startsWith(prefix + '_')) outlineTexture(scene, key, 0.5);
   }
   drawAnselmoTextures(scene);
+  drawWeaknessBadges(scene);
   g.destroy();
 }

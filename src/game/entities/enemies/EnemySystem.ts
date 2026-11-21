@@ -18,6 +18,12 @@ import { PROFILES } from '../profiles';
 import { fxPool } from '../../fx/particlePool';
 import { EMBER_TICK_MS, PUDDLE_SLOW, emberDamage } from '../../forms';
 import { random } from '../../rng';
+import { weaknessBadge } from '../badge';
+import { badgeKey } from '../../../textures/weaknessBadge';
+
+// Onde o selo da fraqueza fica em relação ao centro do sprite (canto de cima, à direita).
+const BADGE_DX = 14;
+const BADGE_DY = -15;
 
 // Movimento de cada inimigo: pulo vertical e horizontal do passo, e o balanço parado (altura e velocidade).
 const MOTION: Record<EnemyKind, { hopV: number; hopH: number; bob: number; bobMs: number }> = {
@@ -37,7 +43,7 @@ const MOTION: Record<EnemyKind, { hopV: number; hopH: number; bob: number; bobMs
 // O segundo quadro de vida de cada criatura nova (o que muda: a chama, os ponteiros, o focinho, a pálpebra).
 const ALT_FRAME: Partial<Record<EnemyKind, string>> = {
   lantern: 'enemy_lantern_1', clock: 'enemy_clock_1', mole: 'enemy_mole_1', owl: 'enemy_owl_1',
-  slime: 'enemy_slime_1', sentinel: 'enemy_sentinel_1', rat: 'enemy_rat_1', salamander: 'enemy_salamander_1',
+  ghost: 'enemy_ghost_1', slime: 'enemy_slime_1', sentinel: 'enemy_sentinel_1', rat: 'enemy_rat_1', salamander: 'enemy_salamander_1',
 };
 
 // O que a Roo "faz" a cada criatura quando acerta o elemento certo: um aviso que ensina a regra.
@@ -128,7 +134,10 @@ export class EnemySystem {
       actMs: def.behavior === 'dive' ? OWL_CYCLE_MS : MOLE_WALK_MS * (0.5 + random() * 0.5), state: 'walk', target: null,
       loot: null, used: false,
       hp, maxHp: PROFILES[kind].maxHp, bar: s.add.graphics().setDepth(12).setVisible(false),
+      badge: null,
     };
+    const weak = weaknessBadge(kind);
+    if (weak) enemy.badge = s.add.image(sprite.x + BADGE_DX, sprite.y + BADGE_DY, badgeKey(weak)).setDepth(8);
     this.enemies.push(enemy);
     return enemy;
   }
@@ -149,6 +158,7 @@ export class EnemySystem {
     const py = enemy.sprite.y;
     enemy.sprite.destroy();
     enemy.bar.destroy();
+    enemy.badge?.destroy();
     this.enemies = this.enemies.filter(e => e !== enemy);
     hitFx(this.scene, px, py, element);
     this.scene.cameras.main.shake(60, 0.003);
@@ -480,6 +490,16 @@ export class EnemySystem {
       enemy.sprite.setAlpha(tile === EMPTY ? 0.92 : 0.45);
     }
     if (def.rooted) enemy.sprite.setAngle(Math.sin(enemy.phase / 380) * 4);
+    this.syncBadge(enemy);
+  }
+
+  // O selo da fraqueza acompanha o sprite (posição, transparência e se está à mostra: a toupeira some na terra).
+  private syncBadge(enemy: Enemy): void {
+    const b = enemy.badge;
+    if (!b) return;
+    const sp = enemy.sprite;
+    b.setPosition(sp.x + BADGE_DX * sp.scaleX, sp.y + BADGE_DY * sp.scaleY).setScale(sp.scaleX, sp.scaleY).setAlpha(sp.alpha);
+    b.setVisible(sp.visible);
   }
 
   // Flor do mal: de tempos em tempos avisa no chão e chicoteia as quatro casas ao redor.
