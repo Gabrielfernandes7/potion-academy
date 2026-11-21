@@ -29,6 +29,11 @@ export function isBlockedBomb(type: BombId): boolean {
   return formElement !== null && BOMB_TYPES[type].element !== formElement;
 }
 
+/** A poção já é da Roo (aprendida, ou qualquer uma na Arena), sem olhar a forma? */
+export function isOwnedBomb(type: BombId): boolean {
+  return arena || hasBombType(type);
+}
+
 /** A poção está disponível agora? (aprendida ou na Arena, e não bloqueada pela forma) */
 export function canUseBomb(type: BombId): boolean {
   if (isBlockedBomb(type)) return false;
