@@ -111,7 +111,7 @@ Livre para copiar, estudar e adaptar, **com crédito ao autor e sem uso comercia
 
 * **Gabriel Fernandes**: ideia, história, arte, música e código.
 * [Phaser 3](https://phaser.io) (licença MIT): motor do jogo.
-* [Cinzel](https://fontsource.org/fonts/cinzel) e [Nunito](https://fontsource.org/fonts/nunito), via `@fontsource` (SIL Open Font License 1.1): fontes.
+* [Cinzel](https://fontsource.org/fonts/cinzel), [Nunito](https://fontsource.org/fonts/nunito) e [IM Fell English](https://fontsource.org/fonts/im-fell-english), via `@fontsource` (SIL Open Font License 1.1): fontes. A IM Fell English é a letra do Manuscrito.
 * Vite, Vitest, TypeScript, ESLint, Prettier e Playwright (ferramentas de desenvolvimento).
 
 Esses componentes de terceiros mantêm as próprias licenças.

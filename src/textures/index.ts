@@ -24,7 +24,12 @@ function addRooBubble(scene: Phaser.Scene): void {
   for (const pose of BUBBLE_POSES) drawRooBubbleFrames(pose).forEach((canvas, i) => scene.textures.addCanvas(`roo_bubble_${pose}_${i}`, canvas));
 }
 
-export function generateTextures(scene: Phaser.Scene): void {
+export interface GenerateOptions {
+  /** As 16 poses da Roo bebê na bolha (só o Livro de Roo e o catálogo usam; custavam ~180 ms no boot de todas as páginas e do jogo). */
+  bubble?: boolean;
+}
+
+export function generateTextures(scene: Phaser.Scene, o: GenerateOptions = {}): void {
   const { g, make } = createMaker(scene);
   drawTerrain(make);
   drawGarden(make);
@@ -33,7 +38,7 @@ export function generateTextures(scene: Phaser.Scene): void {
   drawRooTextures(g, CONFIG.tile);
   // contorno só na Roo que anda (as poses de menu e de leitura têm fundo próprio)
   for (let fi = 0; fi < 4; fi++) for (const dir of ['down', 'up', 'side']) outlineTexture(scene, `roo_${dir}_${fi}`);
-  addRooBubble(scene);
+  if (o.bubble) addRooBubble(scene);
   drawEntities(make);
   drawNewEnemies(make);
   drawMestre(make);

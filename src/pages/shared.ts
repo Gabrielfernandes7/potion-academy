@@ -11,10 +11,11 @@ import { ROUGH_FILTER } from '../ui/elementIcons';
 export interface PrepareOptions {
   forms?: FormTextureOptions; // gera também as texturas das formas da Roo (só as pedidas)
   roughFilter?: boolean; // põe o filtro de tinta (#rough) dos ícones SVG no documento
+  bubble?: boolean; // gera as poses da Roo bebê na bolha (o Livro de Roo e o catálogo de sprites)
 }
 
 export function prepareTextures(scene: Phaser.Scene, o: PrepareOptions = {}): void {
-  generateTextures(scene);
+  generateTextures(scene, { bubble: o.bubble });
   if (o.forms) addRooFormTextures(scene, o.forms);
   if (o.roughFilter && !document.getElementById('rough')) document.body.insertAdjacentHTML('afterbegin', ROUGH_FILTER);
 }

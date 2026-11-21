@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Language**: TypeScript (strict), ES modules
 - **Framework**: Phaser 3.90.0 (npm dependency, pinned exactly)
 - **Build**: Vite 7; tests with Vitest
-- **Fonts**: Cinzel (títulos) e Nunito (corpo), self-hosted via `@fontsource/*` (sem CDN)
+- **Fonts**: Cinzel (títulos) e Nunito (corpo), mais IM Fell English só no Manuscrito (letra de imprensa antiga), self-hosted via `@fontsource/*` (sem CDN)
 - **Localization**: Portuguese (Brazilian). All UI and game text is hardcoded in PT-BR; keep new text in PT-BR.
 - **Entry**: `index.html` → `src/main.ts`
 

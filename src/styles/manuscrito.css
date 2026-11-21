@@ -1,7 +1,8 @@
 /*
    Manuscrito do Alquimista (manuscrito.html). Não usa main.css: é uma página só de leitura, no estilo de um
-   manuscrito alquímico iluminado: pergaminho creme liso e envelhecido, sem pauta, margem nem argolas;
-   tinta marrom e aquarela levemente fora da linha. Os ícones dos atributos são SVG próprios
+   códice alquímico iluminado: capa de couro com filete de latão e costura na lombada, pergaminho envelhecido,
+   seções em filete duplo de tinta (sem caixas arredondadas), títulos em rubrica vermelha, letra capitular
+   iluminada, fitas de couro como marcadores e a letra IM Fell English (de imprensa antiga). Os ícones dos atributos são SVG próprios
    (ui/elementIcons.ts), com o traço de tinta tremido pelo filtro #rough.
 */
 :root {
@@ -25,7 +26,9 @@
   --g-chefe: #8c3b52;
 
   --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
-  --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-body: 'IM Fell English', Georgia, 'Times New Roman', serif;
+  --leather-hi: #6a4326;
+  --brass: #8a6a2a;
 }
 
 * { box-sizing: border-box; }
@@ -37,7 +40,8 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font-family: var(--font-body);
-  line-height: 1.5;
+  font-size: 17px; /* a IM Fell é miúda: um pouco maior para ler bem no celular */
+  line-height: 1.45;
   background:
     radial-gradient(ellipse at 50% 20%, rgba(255, 190, 110, 0.10), transparent 60%),
     repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.10) 0 2px, transparent 2px 9px),
@@ -71,26 +75,26 @@ body {
 .abas { display: flex; flex-direction: column; gap: 6px; padding-top: 26px; position: relative; z-index: 2; }
 .aba {
   --tab: var(--g-heroi);
-  font: inherit; font-weight: 700; font-size: 0.82rem; text-align: left; cursor: pointer;
+  font-family: var(--font-display); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.06em; text-align: left; cursor: pointer;
   color: #f6ecd0;
-  background: linear-gradient(90deg, var(--tab), color-mix(in srgb, var(--tab) 70%, #000));
-  border: 0; border-radius: 8px 0 0 8px;
-  padding: 9px 12px; margin-right: -8px;
-  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.4);
-  transition: transform 0.12s ease, filter 0.12s ease;
+  /* fita de couro com a ponta em V e pontos de costura: cada grupo tem o seu tom, mas sempre curtido */
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tab) 62%, #1a0e06), color-mix(in srgb, var(--tab) 36%, #120a04));
+  border: 0; border-radius: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%);
+  outline: 1px dashed rgba(240, 198, 116, 0.38); outline-offset: -4px;
+  padding: 10px 12px 10px 20px; margin-right: -8px;
+  transition: transform 0.12s ease;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .aba.grupo-aliado { --tab: var(--g-aliado); }
 .aba.grupo-inimigo { --tab: var(--g-inimigo); }
 .aba.grupo-chefe { --tab: var(--g-chefe); }
-.aba:hover { filter: brightness(1.12); transform: translateX(-4px); }
+.aba:hover { transform: translateX(-4px); }
 .aba.on {
   transform: translateX(-10px);
-  filter: none;
   color: var(--ink);
-  background: var(--paper);
-  box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.45);
-  border-left: 6px solid var(--tab);
+  background: linear-gradient(90deg, var(--tab) 0 6px, var(--paper) 6px);
+  outline-color: rgba(58, 40, 20, 0.35);
 }
 
 /* Pergaminho: creme liso com manchas de idade, fibras e grão, e a sombra da lombada. Sem pauta. */
@@ -106,7 +110,7 @@ body {
     linear-gradient(180deg, var(--paper-3), var(--paper) 40%, var(--paper-2));
   border: 9px solid var(--leather);
   border-radius: 6px 14px 14px 6px;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(110, 70, 20, 0.2);
+  box-shadow: 0 0 0 2px #0e0803, 0 0 0 4px var(--brass), 0 14px 36px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(110, 70, 20, 0.2);
   padding: 24px 28px 28px 52px;
   min-height: 560px;
 }
@@ -114,6 +118,13 @@ body {
   content: '';
   position: absolute; left: 0; top: 0; bottom: 0; width: 40px;
   background: linear-gradient(90deg, rgba(70, 40, 12, 0.38), rgba(70, 40, 12, 0.12) 55%, transparent);
+  pointer-events: none;
+}
+/* a costura da lombada */
+.pagina::after {
+  content: '';
+  position: absolute; left: 22px; top: 14px; bottom: 14px;
+  border-left: 2px dashed rgba(90, 55, 20, 0.5);
   pointer-events: none;
 }
 
@@ -167,73 +178,75 @@ body {
     radial-gradient(ellipse at 50% 35%, #f6ecd2, #e2cf9a 80%);
   box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.3), inset 0 0 0 7px var(--ink-soft), 0 4px 10px rgba(0, 0, 0, 0.25);
 }
-.sprite { image-rendering: pixelated; image-rendering: crisp-edges; max-width: 100%; max-height: calc(100% - 18px); width: auto; height: auto; /* o sprite nunca passa do medalhão (a legenda "Visto em" ficava sob ele) */ filter: drop-shadow(0 4px 0 rgba(58, 40, 20, 0.25)); }
+.sprite { image-rendering: pixelated; image-rendering: crisp-edges; max-width: 100%; max-height: calc(100% - 18px); width: auto; height: auto; /* o sprite nunca passa do medalhão (a legenda "Visto em" ficava sob ele) */ }
 .sprite.fechado { filter: brightness(0) opacity(0.4); }
+/* o filtro de tinta (feDisplacementMap) é caro no celular: só o medalhão do atributo o mantém; os ícones pequenos ficam limpos */
+.celula .el-icon, .chip .el-icon, .atributo .el-icon { filter: none !important; }
 .retrato figcaption { margin-top: 10px; font-size: 0.85rem; font-style: italic; color: var(--ink-soft); }
 
-/* cartas desenhadas a tinta sobre o pergaminho */
-.cartas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+/* seções separadas por filete duplo de tinta, como num códice (antes eram caixas arredondadas, de cara de aplicativo) */
+.cartas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 22px; }
 .carta {
-  background: rgba(255, 249, 226, 0.34);
-  border: 1.5px solid var(--ink);
-  outline: 1px solid var(--ink-faint); outline-offset: -5px;
-  border-radius: 6px 9px 7px 10px;
-  padding: 10px 12px 12px;
+  border-top: 3px double var(--ink-soft);
+  padding: 8px 2px 12px;
 }
-.cartas .carta:nth-child(odd) { transform: rotate(-0.4deg); }
-.cartas .carta:nth-child(even) { transform: rotate(0.4deg); }
-.carta.larga { grid-column: 1 / -1; transform: none !important; }
+.carta.larga { grid-column: 1 / -1; }
 .carta h3, .habilidades > h3, .nota h3 {
   font-family: var(--font-display); font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase;
-  margin: 0 0 8px; color: var(--gold);
+  margin: 0 0 8px; color: var(--seal); /* rubrica: os títulos em vermelho, como nos manuscritos */
 }
-.carta.fraqueza { border-color: var(--seal); }
-.carta.fraqueza h3 { color: var(--seal); }
 
 .atributo { display: flex; align-items: center; gap: 10px; }
 .atributo b { display: block; font-size: 0.95rem; }
 .atributo em { font-size: 0.88rem; color: var(--ink-soft); }
 
-.barra { height: 16px; border: 2px solid var(--ink); border-radius: 8px; background: #3a1a14; overflow: hidden; }
+.barra { height: 12px; border: 1.5px solid var(--ink); border-radius: 0; background: #3a1a14; overflow: hidden; }
 .barra i { display: block; height: 100%; width: 0; background: linear-gradient(180deg, #d9534a, #a32018); transition: width 0.7s ease-out; }
-.valor { margin: 6px 0 0; font-weight: 700; font-size: 0.95rem; }
+.valor { margin: 6px 0 0; font-family: var(--font-display); font-size: 0.85rem; letter-spacing: 0.04em; } /* números em Cinzel: os da IM Fell são de estilo antigo e o 1 parece um I */
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(255, 250, 230, 0.5); border: 1.5px solid var(--ink); border-radius: 999px;
-  padding: 1px 12px 1px 4px; font-size: 0.82rem; font-weight: 700; color: var(--ink);
+  border: 1px solid var(--ink-soft); border-radius: 2px;
+  padding: 1px 10px 1px 4px; font-size: 0.9rem; color: var(--ink);
 }
 .nada { font-style: italic; color: var(--ink-soft); font-size: 0.9rem; }
 
 .tabela { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .celula {
   display: grid; justify-items: center; gap: 0; padding: 6px 4px;
-  border: 1.5px solid var(--ink-faint); border-radius: 7px; background: rgba(255, 250, 230, 0.38);
+  border-left: 1px dotted var(--ink-faint); border-radius: 0;
 }
-.celula span { font-size: 0.72rem; letter-spacing: 0.08em; font-weight: 700; color: var(--ink-soft); }
+.celula:first-child { border-left: 0; }
+.celula span { font-size: 0.78rem; letter-spacing: 0.08em; color: var(--ink-soft); text-transform: uppercase; }
 .celula small { font-size: 0.7rem; font-style: italic; color: var(--ink-faint); margin-top: -2px; }
-.celula em { font-style: normal; font-weight: 800; font-size: 1.05rem; color: var(--ink); }
-.celula.mais { border-color: var(--seal); background: rgba(192, 57, 43, 0.12); }
+.celula em { font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; color: var(--ink); }
+.celula.mais { background: rgba(192, 57, 43, 0.1); }
 .celula.mais em { color: var(--seal); }
-.celula.menos { border-color: #3a6a8c; background: rgba(80, 130, 180, 0.12); }
+.celula.menos { background: rgba(80, 130, 180, 0.1); }
 .celula.menos em { color: #2d5a7a; }
 
 /* habilidades e nota */
 .habilidades { margin-top: 20px; }
-.habilidades .lista { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
-.carta.hab h4 { margin: 0 0 4px; font-family: var(--font-display); font-size: 0.98rem; color: var(--ink); }
-.carta.hab p { margin: 0; font-size: 0.9rem; color: var(--ink); }
+.habilidades .lista { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 2px 22px; }
+.carta.hab h4 { margin: 0 0 2px; font-family: var(--font-display); font-size: 0.92rem; color: var(--ink); }
+.carta.hab p { margin: 0; font-size: 1rem; color: var(--ink); }
 
 /* anotação à margem, a tinta, com um filete vermelho */
 .nota {
-  margin: 22px 0 0; padding: 12px 18px 12px 20px;
-  background: rgba(255, 249, 226, 0.3);
-  border-left: 3px solid var(--wash-red); border-radius: 2px;
+  margin: 22px 0 0; padding: 10px 6px 4px;
+  border-top: 3px double var(--ink-soft);
 }
-.nota p { margin: 0; font-style: italic; font-size: 1rem; }
+.nota p { margin: 0; font-style: italic; font-size: 1.08rem; overflow: hidden; }
+/* letra capitular iluminada: a primeira letra da nota, num quadrado de rubrica com filete de ouro */
+.nota p::first-letter {
+  float: left; margin: 2px 8px 0 0; padding: 2px 8px 0;
+  font-family: var(--font-display); font-style: normal; font-weight: 700; font-size: 2.7em; line-height: 1.05;
+  color: var(--paper-3); background: var(--seal);
+  border: 2px solid var(--gold); box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.28);
+}
 
-.em-branco { grid-column: 1 / -1; font-style: italic; color: var(--ink-soft); margin: 0; padding: 14px; border: 2px dashed var(--ink-faint); border-radius: 8px; }
+.em-branco { grid-column: 1 / -1; font-style: italic; color: var(--ink-soft); margin: 0; padding: 14px; border: 1px dashed var(--ink-faint); }
 .trancada .folha-topo h2 { color: var(--ink-faint); }
 
 .dica { text-align: center; color: #cdb98c; font-size: 0.85rem; margin: 14px 0 0; }
@@ -242,12 +255,15 @@ kbd { background: rgba(240, 198, 116, 0.15); border: 1px solid rgba(240, 198, 11
 /* ---------- telas estreitas: abas em fileira, página inteira ---------- */
 @media (max-width: 820px) {
   .manuscrito { grid-template-columns: minmax(0, 1fr); }
-  .abas { flex-direction: row; overflow-x: auto; padding: 0; gap: 4px; }
-  .aba { border-radius: 8px 8px 0 0; margin: 0; flex: none; }
-  .aba.on { transform: none; border-left: 0; border-bottom: 5px solid var(--tab); }
+  /* as fitas viram uma fileira que rola de lado; o esmaecer na ponta avisa que há mais */
+  .abas { flex-direction: row; overflow-x: auto; padding: 0 0 6px; gap: 4px; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); scrollbar-width: none; }
+  .abas::-webkit-scrollbar { display: none; }
+  .aba { clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 50%); margin: 0; flex: none; }
+  .aba.on { transform: none; background: linear-gradient(180deg, var(--paper), var(--paper) calc(100% - 4px), var(--tab) 0); }
   .aba:hover { transform: none; }
   .pagina { padding: 18px 16px 22px 34px; border-radius: 0 0 14px 14px; }
   .pagina::before { width: 26px; }
+  .pagina::after { left: 16px; }
   .folha-corpo { grid-template-columns: minmax(0, 1fr); }
   .abas { min-width: 0; }
   .folha-topo { flex-wrap: wrap; }
@@ -257,7 +273,10 @@ kbd { background: rgba(240, 198, 116, 0.15); border: 1px solid rgba(240, 198, 11
   .ornamento { width: 60px; height: 60px; }
 }
 @media (max-width: 520px) {
-  .cartas { grid-template-columns: minmax(0, 1fr); }
-  .cartas .carta:nth-child(odd), .cartas .carta:nth-child(even) { transform: none; }
-  .tabela { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cartas { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  /* a tabela de dano em uma só fileira (era 2 x 2): a folha fica bem mais curta de rolar */
+  .tabela { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; }
+  .celula small { display: none; }
+  .celula .el-icon { width: 30px; height: 30px; }
+  .celula span { font-size: 0.66rem; letter-spacing: 0.02em; }
 }

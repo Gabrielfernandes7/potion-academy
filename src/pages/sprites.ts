@@ -48,7 +48,7 @@ class CatalogScene extends Phaser.Scene {
   }
 
   create(): void {
-    prepareTextures(this, { forms: FORM_PREVIEW });
+    prepareTextures(this, { forms: FORM_PREVIEW, bubble: true });
     document.getElementById('atlas-btn')?.addEventListener('click', () => downloadAtlas(this));
     const zoom = Number(new URLSearchParams(location.search).get('zoom')) || 5;
     const keys = this.textures.getTextureKeys().filter(k => !k.startsWith('__')).sort();

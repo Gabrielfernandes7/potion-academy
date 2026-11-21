@@ -2,9 +2,9 @@
 // de alquimista. Os dados vêm de game/manuscrito.ts; os desenhos, das mesmas texturas procedurais do jogo.
 import '../canvasGuard'; // primeiro de todos: sem leitura de pixels, o Phaser cai ao carregar (ver canvasGuard.ts)
 import '@fontsource/cinzel/700.css';
-import '@fontsource/nunito/400.css';
-import '@fontsource/nunito/400-italic.css';
-import '@fontsource/nunito/700.css';
+// IM Fell English (OFL): a letra de imprensa dos séculos XVI e XVII, no lugar do Nunito. Só o latim, redondo e itálico.
+import '@fontsource/im-fell-english/latin-400.css';
+import '@fontsource/im-fell-english/latin-400-italic.css';
 import '../styles/manuscrito.css';
 import Phaser from 'phaser';
 import { ELEMENTS, ElementId } from '../config';

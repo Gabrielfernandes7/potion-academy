@@ -36,7 +36,7 @@ function carregarSprites(): Promise<Sprites> {
       create(): void {
         const out: Sprites = {};
         try {
-          prepareTextures(this);
+          prepareTextures(this, { bubble: true });
           for (const key of SPRITES_DAS_CENAS) {
             if (!this.textures.exists(key)) continue;
             const src = this.textures.get(key).getSourceImage() as HTMLCanvasElement;
