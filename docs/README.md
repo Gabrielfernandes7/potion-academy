@@ -22,6 +22,7 @@ Cada arquivo responde uma pergunta e cabe em uma tela.
 | [21-desempenho.md](21-desempenho.md) | O jogo engasga? O que foi medido, o que mudou, quais regras evitam o lag e como medir de novo |
 | [22-livro.md](22-livro.md) | O Livro de Roo: a história como manuscrito animado à luz de vela. Onde está, as 13 aberturas, as gravuras que abrem cada fase, como acrescentar uma |
 | [23-analise-design.md](23-analise-design.md) | Onde o jogo é forte e onde repete ou falta tensão? (análise de game design; as ações estão nas Issues) |
+| [24-animacoes-propostas.md](24-animacoes-propostas.md) | Proposta de melhora das animações (transformação da Roo, chefes, Frei Anselmo, inimigos): inventário atual, quadros, custo e ordem. Ainda não implementada |
 
 Regra geral: se uma informação muda, mude no arquivo certo, e não copie em outros lugares.
 
