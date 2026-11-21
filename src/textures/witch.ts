@@ -1,7 +1,7 @@
 // Belladona, a alquimista rival (chefe). Roupa verde-escura com detalhes em verde-limão,
 // cabelo carmim e olhos brilhantes. Mesmo tamanho da Roo (tile + folga no topo).
 //
-// Poses:  'idle' (2 frames: balança o manto e o chapéu), 'cast' (braço levantado com a poção),
+// Poses:  'idle' (2 frames: balança o manto e a flor da diadema), 'cast' (braço levantado com a poção),
 //         'hurt' (olhos fechados, sobrancelhas caídas), 'talk' (2 frames: boca abre e fecha, parada),
 //         'defeat' (vencida, sem humilhação: olhos fechados em calma, cabeça baixa, poção abaixada).
 import Phaser from 'phaser';
@@ -170,16 +170,31 @@ function drawWitchFrame(g: Gfx, T: number, frame: number, pose: WitchPose): void
   g.fillCircle(cx - 4.8, cy - 6.4, 1.5);
   g.fillCircle(cx + 4.8, cy - 6.4, 1.5);
 
-  // chapéu torto de bruxa
-  const tipDx = defeat ? -1.4 : f === 0 ? 0.4 : -0.4;
-  g.fillStyle(ROBE);
-  g.fillEllipse(cx, cy - 14.6, 22, 4.6);
-  line(g, [[cx - 10.5, cy - 14.2], [cx - 5, cy - 12.6], [cx + 5, cy - 12.6], [cx + 10.5, cy - 14.2]], LIME, 1, 0.9);
-  poly(g, [[cx - 6.5, cy - 15], [cx + 6.5, cy - 15], [cx + 1 + tipDx, cy - 28]], ROBE);
-  poly(g, [[cx + 1 + tipDx, cy - 28], [cx - 1.6 + tipDx, cy - 24.5], [cx + 8 + tipDx, cy - 27.5]], ROBE_LIGHT);
-  poly(g, [[cx - 6.5, cy - 15], [cx + 6.5, cy - 15], [cx + 5.4, cy - 18], [cx - 5.4, cy - 18]], BAND);
-  g.fillStyle(GOLD); g.fillRect(cx - 1.6, cy - 18.1, 3.6, 3.4);
-  g.fillStyle(0x6d4c41); g.fillRect(cx - 0.6, cy - 17.1, 1.6, 1.4);
+  // Sem chapéu: o chapéu de bruxo é da Roo e do mestre dela (ela o herdou dele). A Belladona usa o cabelo preso
+  // bem alto e uma diadema de beladona: três bagas roxas, folhas e uma flor-sino. Silhueta redonda, não pontuda.
+  const sag = defeat ? 1.6 : 0; // vencida, a flor pende
+  const sway2 = defeat ? -1 : f === 0 ? 0.4 : -0.4;
+  g.fillStyle(HAIR);
+  g.fillEllipse(cx, cy - 16.8, 15, 7.5); // o cabelo preso, alto
+  g.fillStyle(0x6e1038, 0.6);
+  g.fillEllipse(cx + 3, cy - 15.8, 6, 3);
+  line(g, [[cx - 6.8, cy - 14.6], [cx - 3, cy - 17.4], [cx + 3, cy - 17.4], [cx + 6.8, cy - 14.6]], BAND, 1.6); // aro
+  // folhas de beladona nas laterais
+  poly(g, [[cx - 6.2, cy - 15.6], [cx - 10, cy - 18.4], [cx - 8.2, cy - 14.2]], LIME);
+  poly(g, [[cx + 6.2, cy - 15.6], [cx + 10, cy - 18.4], [cx + 8.2, cy - 14.2]], LIME);
+  // bagas
+  for (const [bx, by] of [[-5.2, -16], [5.2, -16], [0, -18.2]] as const) {
+    g.fillStyle(0x2a0838); g.fillCircle(cx + bx, cy + by, 2.1);
+    g.fillStyle(0x4a1a68); g.fillCircle(cx + bx, cy + by, 1.6);
+    g.fillStyle(0xd1b3ff); g.fillRect(cx + bx - 0.9, cy + by - 1, 0.9, 0.9);
+  }
+  // flor-sino no topo
+  const fx = cx + sway2 + sag * 0.4;
+  const fy = cy - 20.4 + sag;
+  line(g, [[cx, cy - 18.6], [fx, fy + 1]], LIME, 1);
+  poly(g, [[fx - 1.4, fy], [fx + 1.4, fy], [fx + 3.4, fy + 4.2], [fx - 3.4, fy + 4.2]], BAND);
+  g.fillStyle(0x7a0f3a); g.fillRect(fx - 3.4, fy + 3.6, 6.8, 1);
+  g.fillStyle(GOLD); g.fillRect(fx - 0.5, fy + 4.6, 1, 1.6);
 }
 
 export function drawWitchTextures(g: Gfx, T: number): void {

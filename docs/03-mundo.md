@@ -14,7 +14,7 @@ Cada personagem e item tem uma ficha curta: o que é, o que faz e um detalhe que
 **Belladona, a alquimista rival** (chefe do duelo na Torre, fase 8)
 - *Quer:* o laboratório e as gemas só para ela. No fim da história passa a cuidar dos pobres, das viúvas e dos órfãos (`12-historia.md`).
 - *Sabe fazer:* arremessar poções, fazer chover gotas e sumir em névoa.
-- *Detalhe:* roupa verde-escura com detalhes verde-limão, chapéu torto com faixa magenta, cabelo carmim, olhos verde-limão.
+- *Detalhe:* roupa verde-escura com detalhes verde-limão, sem chapéu: cabelo carmim preso bem alto, com uma diadema de beladona (três bagas roxas, folhas verde-limão e uma flor-sino magenta), olhos verde-limão.
 - *Vida:* 20 (fogo e ar são a fraqueza; ver `10-equilibrio.md`). *Frase:* "Essas poções são minhas, cachorro!"
 
 ### Habilidades da Belladona
@@ -143,7 +143,7 @@ Os três abaixo são os clássicos; os outros oito (Lanterna viva, Relógio de c
 ## Mandrágora (chefe do jardim, fase 20)
 
 **Mandrágora, a feiticeira do jardim** (28 de vida)
-- *Aparência:* uma raiz de mandrágora viva, como na lenda (a raiz com forma de gente, que grita quando é arrancada): figura baixa e larga, cabeça e corpo num bulbo só, cor de raiz clara, coroa de folhas no topo, pernas de raiz bifurcadas e uma boca grande (o grito). Não usa chapéu nem manto, para não se confundir com a Belladona (alta, de chapéu pontudo e vestido).
+- *Aparência:* uma raiz de mandrágora viva, como na lenda (a raiz com forma de gente, que grita quando é arrancada): figura baixa e larga, cabeça e corpo num bulbo só, cor de raiz clara, coroa de folhas no topo, pernas de raiz bifurcadas e uma boca grande (o grito). Não usa chapéu nem manto, para não se confundir com a Belladona (alta, de vestido e cabelo preso com diadema).
 - *Poder:* terra e água. Resiste às duas (dano baixo, sem cura). O **fogo** é a fraqueza (dano alto); o ar machuca normal.
 - *Raízes:* raízes de terra sobem na linha e na coluna em que você está (na fase 2, em cruz).
 - *Maré:* anéis de água se expandem a partir dela, um depois do outro. Uma faixa fica seca: é o caminho seguro.

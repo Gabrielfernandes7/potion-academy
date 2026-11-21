@@ -36,8 +36,8 @@ function heart(g: Gfx, cx: number, cy: number, s: number, fill: number): void {
 }
 
 export function drawEntities(make: MakeFn): void {
-  // Sapo mago (inimigo da fase 1): corpo verde com contorno escuro, olhos saltados, chapéu roxo
-  // com faixa dourada e estrela, e um cajado com orbe. Desenhado em 40 px (T).
+  // Sapo mago (inimigo da fase 1): corpo verde com contorno escuro, olhos saltados, chapéu de cogumelo
+  // vermelho de pintas brancas, e um cajado com orbe. Desenhado em 40 px (T).
   make('enemy', (g, T) => {
     const c = T / 2;
     const OUT = 0x1b3d1f; // contorno escuro: dá leitura de longe
@@ -61,14 +61,13 @@ export function drawEntities(make: MakeFn): void {
     g.fillStyle(0xffffff); g.fillCircle(12.5, 16.5, 0.9); g.fillCircle(26.5, 16.5, 0.9);
     // boca com sorriso
     g.fillStyle(OUT); g.fillRect(14, c + 9, 12, 2);
-    // chapéu de mago: aba, cone, faixa dourada e estrela
-    g.fillStyle(OUT); g.fillEllipse(c, 13, 26, 6);
-    g.fillStyle(0x4a148c); g.fillEllipse(c, 13, 24, 4);
-    g.fillStyle(0x6a1b9a); g.fillTriangle(c, 0, c - 9, 13, c + 9, 13);
-    g.fillStyle(0x4a148c); g.fillTriangle(c + 3, 0, c + 9, 13, c + 4, 13);
-    g.fillStyle(0xffd54f); g.fillRect(c - 8, 11, 16, 2);
-    g.fillStyle(0xffd54f); g.fillCircle(c + 1, 7, 1.8);
-    g.fillStyle(0xffffff, 0.8); g.fillCircle(c - 3, 4, 0.9);
+    // chapéu de cogumelo (sapo-boi de cartola de toadstool): cúpula vermelha com pintas brancas, sem aba nem ponta
+    g.fillStyle(OUT); g.fillEllipse(c, 9, 28, 16);
+    g.fillStyle(0xc62828); g.fillEllipse(c, 9, 26, 14);
+    g.fillStyle(0xe53935); g.fillEllipse(c - 3, 7, 16, 8);
+    g.fillStyle(0xfff3e0);
+    g.fillCircle(c - 8, 9, 2.4); g.fillCircle(c + 1, 4.2, 2.1); g.fillCircle(c + 8, 10, 2); g.fillCircle(c - 2, 11.2, 1.4);
+    g.fillStyle(0xe8d6b8); g.fillRect(c - 8, 14, 16, 2); // a beira sobre a testa
     // cajado com orbe na mão direita
     g.fillStyle(OUT); g.fillRect(T - 6, 17, 3.5, 20);
     g.fillStyle(0x8d6e63); g.fillRect(T - 5.5, 17, 2.5, 20);

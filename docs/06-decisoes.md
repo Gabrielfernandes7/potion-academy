@@ -359,3 +359,8 @@ Novas decisões entram no fim.
 
 ## Sentinela de cera redesenhada como vela (2026-11-18, issue #32)
 - A sentinela lia como um robô creme (viseira de caixa, cinto, pés quadrados). Agora é uma vela que anda: toco de vela estreito com a cabeça de cera derretida mais larga em cima, de onde a cera escorre pelos lados em gotas de comprimentos diferentes (as gotas descem no segundo quadro), olhos âmbar fundos, pavio aceso, um pires de latão como escudo e os pés derretidos na poça. Chaves (`enemy_sentinel`, `enemy_sentinel_1`) e comportamento iguais.
+
+## O chapéu de bruxo é só da Roo e do mestre (2026-11-21, issue #27)
+- A Roo, o sapo mago, a Belladona, a Mandrágora e o Mestre usavam o mesmo sinal (chapéu de bruxo) e viravam a mesma figura. A Mandrágora já tinha perdido o chapéu (#29). Agora fica **só a Roo e o Mestre**, e isso é de propósito: a Roo herdou o chapéu do mestre, e o sinal comum mostra quem foi aluna de quem.
+- **Belladona:** sem chapéu. Cabelo preso bem alto e diadema de beladona (três bagas roxas, folhas verde-limão, flor-sino magenta que pende quando ela é vencida). A silhueta ficou redonda, não pontuda. As chaves das texturas (`witch_*`) não mudaram.
+- **Sapo mago:** chapéu de cogumelo vermelho com pintas brancas, sem aba nem ponta (uma piada com o sapo e o *toadstool*).

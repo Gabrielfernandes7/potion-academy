@@ -20,7 +20,7 @@ O que já foi feito (e o histórico por rodada) está em `solved.md`. Para o "co
 
 **A lista de pendências vive nas Issues** (`gh issue list`, repositório `Gabrielfernandes7/potion-academy`), não aqui: uma só fonte de verdade. Este arquivo guarda o estado, o que só você pode decidir, as armadilhas e como testar. Ao terminar uma tarefa, feche a Issue com um commit que cite o número; ao achar uma pendência nova, abra uma Issue (simples, em português).
 
-Onde cada assunto está: testes e refatoração (#5, #6, #7), save (#8, #9), projeto (#11 lint, #12 licença, #14 este arquivo, #26 PWA), design do jogo (#15 a #19, #25), acessibilidade e celular (#20, #22), áudio (#23), jogadores de verdade (#24), arte (#27, #32, #33).
+Onde cada assunto está: testes e refatoração (#5, #6, #7), save (#8, #9), projeto (#11 lint, #12 licença, #14 este arquivo, #26 PWA), design do jogo (#15 a #19, #25), acessibilidade e celular (#20, #22), áudio (#23), jogadores de verdade (#24), arte (#32, #33; #27 feita em 2026-11-21: Belladona com diadema e sapo com cogumelo, ver `docs/06-decisoes.md`).
 
 Pendências que ainda **não têm Issue** (abra uma quando for trabalhar nelas):
 - Mostrar a semente (`?seed=`) na tela de pausa e o desafio diário.
