@@ -355,7 +355,8 @@ export class HudScene extends Phaser.Scene {
   private lastKey = ''; // o último estado desenhado: um estado idêntico não precisa redesenhar a faixa inteira
 
   private apply(s: HudState): void {
-    const key = JSON.stringify(s);
+    // o cronômetro entra pelo que aparece (segundos e aviso), não pelos milissegundos: senão a chave muda a cada quadro
+    const key = JSON.stringify({ ...s, timeLeftMs: timerView(s.timeLeftMs) });
     if (key === this.lastKey) return;
     this.lastKey = key;
     const t = this.theme;
