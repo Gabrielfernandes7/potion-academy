@@ -116,7 +116,7 @@ Dois instrumentos que não dependem de jogar a campanha inteira:
 Nenhum duelo chegou ao tempo: todos terminaram em nocaute. Se mudar vida, tempos ou dano de um chefe, rode a simulação de novo (`scripts/` não tem o roteiro; está em `task.md`, "Como testar por script").
 
 ## O bot que joga as fases (issue #5, 2026-11-21)
-`npm run bot` (ou `npm run test`) roda `tests/playthrough.test.ts`: um bot puro (`tests/helpers/playthroughBot.ts`, sem Phaser nem navegador, ~2 s) joga as 16 fases comuns em 30 sementes. Monta a grade como a `MainScene` (`buildTiles`, porta, gemas escondidas), quebra caixotes com a Poção de Fogo, recolhe as 3 gemas e vai à porta.
+`npm run bot` (ou `npm run test`) roda `tests/playthrough.test.ts`: um bot puro (`tests/helpers/playthroughBot.ts`, sem Phaser nem navegador, ~2 s) joga as 15 fases comuns (as 20 menos os 5 chefes) em 30 sementes. Monta a grade como a `MainScene` (`buildTiles`, porta, gemas escondidas), quebra caixotes com a Poção de Fogo, recolhe as 3 gemas e vai à porta.
 - **Garante:** as 3 gemas e a porta são alcançáveis, em toda semente, em toda fase comum (se uma grade cercar a porta, o teste acusa a semente).
 - **Mede o ritmo** de um jogador cuidadoso (sem inimigos, vida nem power-ups): com **um frasco por vez** leva mediana de 75 a 85 s e pior caso de 108 a 126 s; com **dois frascos** (como se joga) o pior caso fica em 68 a 77 s, para fases de 100 a 110 s. O teste exige o caso de dois frascos dentro do tempo da fase.
 - **Leitura:** as fases comuns são apertadas. Sobram 25 a 30 s para inimigos, fuga e erros; isso é a pressão do relógio (issue #17). A fase 1 (70% de caixotes) é a mais lenta.

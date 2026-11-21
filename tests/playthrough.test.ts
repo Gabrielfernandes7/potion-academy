@@ -12,8 +12,8 @@ const SEEDS = Array.from({ length: 30 }, (_, i) => 1000 + i * 7919);
 const COMMON = STAGES.map((def, i) => ({ def, n: i + 1 })).filter(({ def }) => def.door && !def.boss);
 
 describe('o bot joga as fases comuns', () => {
-  it('há 16 fases comuns', () => {
-    expect(COMMON).toHaveLength(16);
+  it('há 15 fases comuns (20 fases menos 5 chefes)', () => {
+    expect(COMMON).toHaveLength(STAGES.length - 5);
   });
 
   for (const { def, n } of COMMON) {
@@ -25,7 +25,6 @@ describe('o bot joga as fases comuns', () => {
 
     it(`fase ${n} (${def.name}): o bot cuidadoso, com dois frascos, termina dentro do tempo`, () => {
       const r = run(n, def);
-      // eslint-disable-next-line no-console
       console.log(`fase ${String(n).padStart(2)} ${def.name.padEnd(24)} 1 frasco: mediana ${(r.medianMs / 1000).toFixed(0)} s, pior ${(r.worstMs / 1000).toFixed(0)} s | 2 frascos: pior ${(r.worstTwoMs / 1000).toFixed(0)} s | tempo da fase ${(def.time / 1000).toFixed(0)} s`);
       expect(r.worstTwoMs).toBeLessThanOrEqual(def.time);
     });
