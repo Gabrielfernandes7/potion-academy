@@ -42,7 +42,9 @@ describe('a gravura que abre cada fase', () => {
         const reg: number[][] = [];
         expect(() => PLACAS[p.placa](contextoFalso(reg), t, {}, p.variante), `${p.placa}/${p.variante} t=${t}`).not.toThrow();
         expect(reg.length).toBeGreaterThan(10);
-        for (const args of reg) for (const n of args) expect(Number.isFinite(n), `${p.placa}/${p.variante}: ${args.join(',')}`).toBe(true);
+        // uma só asserção por gravura: um expect por número (centenas de milhares) custava ~2 s e não o jogo
+        const ruins = reg.filter(args => args.some(n => !Number.isFinite(n))).map(args => args.join(','));
+        expect(ruins, `${p.placa}/${p.variante} t=${t}`).toEqual([]);
       }
     }
   });

@@ -87,7 +87,9 @@ describe('o Livro de Roo: as gravuras', () => {
         const reg: number[][] = [];
         expect(() => CENAS[p.cena](contextoFalso(reg), t, {}), `${p.id} em t=${t}`).not.toThrow();
         expect(reg.length, p.id).toBeGreaterThan(20); // desenhou de fato
-        for (const args of reg) for (const n of args) expect(Number.isFinite(n), `${p.id} t=${t}: ${args.join(',')}`).toBe(true);
+        // uma só asserção por cena: um expect por número (262 mil chamadas) custava ~2 s e não o jogo
+        const ruins = reg.filter(args => args.some(n => !Number.isFinite(n))).map(args => args.join(','));
+        expect(ruins, `${p.id} t=${t}`).toEqual([]);
       }
     }
   });
