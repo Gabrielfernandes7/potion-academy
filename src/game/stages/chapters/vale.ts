@@ -20,14 +20,14 @@ export const VALE: ChapterSpec = {
       kind: 'crypt', name: 'O CAMINHO', place: 'Salão dos Ecos',
       story: 'Ecos de experimentos antigos. Entre as colunas, as páginas do mestre ainda falam.',
       chest: CHEST_RICH, tip: 'Poção de Água apaga poções de Fogo. Fantasmas atravessam paredes.',
-      time: 100000, blockChance: 0.6, door: true, theme: 'crypt', block: 'salt', track: 'ecos',
+      time: 100000, blockChance: 0.6, door: true, theme: 'crypt', block: 'salt', track: 'chapter-vale',
       enemies: [{ kind: 'ghost', start: 2, max: 4, every: 10 }, { kind: 'frog', start: 1, max: 1, chase: true }],
     },
     {
       kind: 'crypt', name: 'A NÉVOA', place: 'Charneca do Vale',
       story: 'Uma névoa baixa cobre a charneca, onde o trigo apodreceu em pé. Nas casas da beira, a febre deixou famílias acamadas e viúvas e órfãos sem ninguém. Só se vê o que está por perto.',
       chest: CHEST_RICH, tip: 'Na névoa só se vê o que está perto. Os fantasmas chegam sem aviso: ande devagar.',
-      time: 110000, blockChance: 0.55, door: true, theme: 'stone', block: 'moss', track: 'ecos', fog: { radius: 3 },
+      time: 110000, blockChance: 0.55, door: true, theme: 'stone', block: 'moss', track: 'chapter-vale', fog: { radius: 3 },
       enemies: [{ kind: 'ghost', start: 2, max: 3, every: 9 }, { kind: 'frog', start: 1, max: 1, every: 12, chase: true }, { kind: 'slime', start: 1, max: 2, every: 14 }],
     },
     {
