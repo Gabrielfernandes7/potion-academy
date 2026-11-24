@@ -265,7 +265,6 @@ class AudioEngine {
         // Sino: parciais inarmônicos dão uma cor metálica sem amostra externa.
         voice(g, freq, time, 1.9, { gain: 0.018, type: 'sine', attack: 0.004, bus: 'music', send: 0.6 });
         voice(g, freq * 2.76, time, 1.25, { gain: 0.005, type: 'sine', attack: 0.004, bus: 'music', send: 0.6 });
-        voice(g, freq * 5.4, time, 0.72, { gain: 0.002, type: 'sine', attack: 0.004, bus: 'music', send: 0.5 });
         break;
       case 'pulse':
         // Acento curto e percussivo para marcar o pulso dos temas de confronto.
