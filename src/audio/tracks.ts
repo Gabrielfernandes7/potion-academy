@@ -1,94 +1,128 @@
-// Músicas procedurais relaxantes (sem Phaser nem WebAudio: lógica pura, testável).
-//
-// Cada faixa define tom, escala, andamento e uma progressão de acordes. A cada compasso o
-// gerador produz notas (pad, baixo, melodia, sinos) a partir de um sorteio com semente.
-// A faixa é fixa por parte do jogo; a semente é nova a cada vez, então ela nunca soa igual.
+// Identidade musical de Potion Academy: temas compostos por capítulo e por chefe.
+// A semente varia a interpretação, não a identidade: harmonia, ritmo e motivo continuam reconhecíveis.
 
-type Voice = 'pad' | 'bass' | 'melody' | 'flute' | 'bell';
-type Style = 'melody' | 'arp' | 'sparse' | 'nocturne';
+type Voice = 'pad' | 'bass' | 'melody' | 'flute' | 'bell' | 'pulse';
+type Style = 'melody' | 'arp' | 'sparse' | 'nocturne' | 'march' | 'clockwork' | 'ritual' | 'organic';
 
 export interface NoteEvent {
-  step: number; // colcheia dentro do compasso (0 a 7)
+  step: number;
   voice: Voice;
   midi: number;
-  steps: number; // duração em colcheias
+  steps: number;
 }
 
 interface Chord {
-  root: number; // semitons acima da tônica
-  tones: number[]; // intervalos a partir da raiz do acorde
+  root: number;
+  tones: number[];
 }
 
 export interface Track {
   id: string;
   name: string;
   bpm: number;
-  tonic: number; // nota MIDI da tônica
-  scale: number[]; // semitons a partir da tônica (pentatônicas: soam bem sobre qualquer acorde da faixa)
-  chords: Chord[]; // um acorde por compasso, em ciclo
+  tonic: number;
+  scale: number[];
+  chords: Chord[];
   style: Style;
-  density: number; // 0 a 1: quantas notas de melodia por compasso
+  density: number;
+  drive?: number;
 }
 
 export const STEPS_PER_BAR = 8;
 
-// Uma faixa para cada parte do jogo (nada de sorteio): o clima muda com a história.
-// Tudo em modos antigos (dórico, mixolídio, eólio) e pentatônicas, com andamento lento:
-// soa como alaúde, harpa e sinos de mosteiro, aconchegante e medieval.
 export const TRACKS: Track[] = [
-  // Menu e carta (intro): nocturno ao estilo de Chopin, com flauta. Mi bemol maior, acordes
-  // arpejados à esquerda, melodia cantada e ornamentada à direita. Inspirado no gênero, sem citar
-  // nenhuma peça: a melodia é gerada pelo código.
   {
-    id: 'nocturno', name: 'Nocturno com Flauta', bpm: 60, tonic: 51, scale: [0, 2, 4, 5, 7, 9, 11], style: 'nocturne', density: 0.55,
+    id: 'nocturno', name: 'Nocturno com Flauta', bpm: 60, tonic: 51,
+    scale: [0, 2, 4, 5, 7, 9, 11], style: 'nocturne', density: 0.55,
     chords: [
       { root: 0, tones: [0, 4, 7] }, { root: 9, tones: [0, 3, 7] },
       { root: 8, tones: [0, 4, 7] }, { root: 7, tones: [0, 4, 7] },
     ],
   },
-  // Fase 1, O Chamado: o laboratório à noite, ré dórico, harpa serena.
   {
-    id: 'alambique', name: 'Noite no Alambique', bpm: 66, tonic: 50, scale: [0, 2, 3, 7, 9], style: 'arp', density: 0.5,
+    id: 'alambique', name: 'Noite no Alambique', bpm: 84, tonic: 50,
+    scale: [0, 2, 3, 7, 9], style: 'arp', density: 0.72,
     chords: [
       { root: 0, tones: [0, 3, 7] }, { root: 5, tones: [0, 4, 7] },
-      { root: 0, tones: [0, 3, 7] }, { root: 7, tones: [0, 3, 7] },
+      { root: 3, tones: [0, 3, 7] }, { root: 7, tones: [0, 3, 7] },
     ],
   },
-  // Fase 2, O Caminho: o salão dos ecos. Sinos esparsos, sem susto.
   {
-    id: 'ecos', name: 'Ecos no Salão', bpm: 54, tonic: 57, scale: [0, 3, 5, 7, 10], style: 'sparse', density: 0.3,
+    id: 'ecos', name: 'Ecos no Salão', bpm: 72, tonic: 57,
+    scale: [0, 3, 5, 7, 10], style: 'sparse', density: 0.34,
     chords: [
       { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
-      { root: 5, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
+      { root: 5, tones: [0, 3, 7] }, { root: 10, tones: [0, 3, 7] },
     ],
   },
-  // Fase 3, O Duelo: a mais tensa, no teto de andamento e com mais notas; o acorde final não resolve.
   {
-    id: 'duelo', name: 'Duelo na Torre', bpm: 80, tonic: 57, scale: [0, 3, 5, 7, 10], style: 'arp', density: 0.7,
+    id: 'duelo', name: 'Duelo na Torre', bpm: 104, tonic: 57,
+    scale: [0, 2, 3, 5, 7, 8, 10], style: 'march', density: 0.72, drive: 0.7,
     chords: [
       { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 4, 7] },
-      { root: 3, tones: [0, 4, 7] }, { root: 10, tones: [0, 4, 7] },
+      { root: 3, tones: [0, 3, 7] }, { root: 10, tones: [0, 4, 7] },
     ],
   },
-  // Fase 4, O Retorno: o jardim do mosteiro ao entardecer, com sinos de longe.
   {
-    id: 'jardim', name: 'Jardim do Mosteiro', bpm: 68, tonic: 53, scale: [0, 2, 4, 7, 9], style: 'melody', density: 0.38,
+    id: 'jardim', name: 'Jardim do Mosteiro', bpm: 92, tonic: 53,
+    scale: [0, 2, 4, 7, 9], style: 'organic', density: 0.58,
     chords: [
       { root: 0, tones: [0, 4, 7] }, { root: 2, tones: [0, 4, 7] },
-      { root: 9, tones: [0, 3, 7] }, { root: 0, tones: [0, 4, 7] },
+      { root: 9, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
     ],
   },
-  // Confissão e final: vésperas, quase só sinos.
   {
-    id: 'vesperas', name: 'Vésperas', bpm: 58, tonic: 62, scale: [0, 2, 4, 7, 9], style: 'sparse', density: 0.28,
+    id: 'vesperas', name: 'Vésperas', bpm: 64, tonic: 62,
+    scale: [0, 2, 4, 7, 9], style: 'sparse', density: 0.28,
     chords: [
       { root: 0, tones: [0, 4, 7] }, { root: 5, tones: [0, 4, 7] },
       { root: 9, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
     ],
   },
+
+  // Temas dos chefes: motivos, centros tonais e padrões rítmicos próprios.
+  {
+    id: 'boss-chimera', name: 'Quimera — Prata que Devora', bpm: 116, tonic: 45,
+    scale: [0, 1, 3, 5, 7, 8, 10], style: 'march', density: 0.8, drive: 0.95,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 1, tones: [0, 3, 7] },
+      { root: 8, tones: [0, 3, 7] }, { root: 3, tones: [0, 4, 7] },
+    ],
+  },
+  {
+    id: 'boss-belladonna', name: 'Belladona — O Duelo das Sombras', bpm: 108, tonic: 54,
+    scale: [0, 2, 3, 6, 7, 8, 11], style: 'arp', density: 0.9, drive: 0.72,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 6, tones: [0, 3, 7] },
+      { root: 3, tones: [0, 4, 7] }, { root: 10, tones: [0, 3, 7] },
+    ],
+  },
+  {
+    id: 'boss-lion', name: 'Leão Verde — Correntes de Ferro', bpm: 120, tonic: 48,
+    scale: [0, 2, 3, 5, 7, 9, 10], style: 'march', density: 0.62, drive: 1,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 5, tones: [0, 3, 7] },
+      { root: 3, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
+    ],
+  },
+  {
+    id: 'boss-ouroboros', name: 'Ouroboros — O Ciclo Eterno', bpm: 96, tonic: 60,
+    scale: [0, 2, 4, 6, 7, 9, 11], style: 'clockwork', density: 0.82, drive: 0.55,
+    chords: [
+      { root: 0, tones: [0, 4, 7] }, { root: 4, tones: [0, 3, 7] },
+      { root: 7, tones: [0, 4, 7] }, { root: 11, tones: [0, 3, 7] },
+    ],
+  },
+  {
+    id: 'boss-mandrake', name: 'Mandrágora — Raízes Despertas', bpm: 112, tonic: 52,
+    scale: [0, 2, 3, 5, 7, 9, 10], style: 'organic', density: 0.78, drive: 0.82,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 5, tones: [0, 4, 7] },
+      { root: 10, tones: [0, 3, 7] }, { root: 3, tones: [0, 4, 7] },
+    ],
+  },
 ];
 
-// Qual faixa toca em cada parte do jogo.
 export const SCENE_TRACKS = {
   menu: 'nocturno',
   letter: 'nocturno',
@@ -99,40 +133,47 @@ export const SCENE_TRACKS = {
   ending: 'vesperas',
 } as const;
 
+export type BossTrackId = 'boss-chimera' | 'boss-belladonna' | 'boss-lion' | 'boss-ouroboros' | 'boss-mandrake';
+
+export function bossTrackId(id: string): BossTrackId {
+  return `boss-${id}` as BossTrackId;
+}
+
 export function trackById(id: string): Track | undefined {
   return TRACKS.find(t => t.id === id);
 }
 
-// Gerador pseudoaleatório com semente: mesma semente, mesma música (a implementação vive em game/rng.ts).
 export { mulberry32 } from '../game/rng';
 
 export function midiToHz(midi: number): number {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
 
-// Estado da melodia entre compassos (para ela andar por graus próximos, sem saltos bruscos).
 export interface MelodyState {
   idx: number;
 }
 
 const pitchClass = (midi: number): number => ((midi % 12) + 12) % 12;
 
-export function generateBar(track: Track, barIndex: number, rng: () => number, state: MelodyState): NoteEvent[] {
+export function generateBar(
+  track: Track,
+  barIndex: number,
+  rng: () => number,
+  state: MelodyState,
+  intensity: 1 | 2 = 1,
+): NoteEvent[] {
   const chord = track.chords[barIndex % track.chords.length];
   const chordMidi = chord.tones.map(t => track.tonic + chord.root + t);
   const chordClasses = new Set(chordMidi.map(pitchClass));
   const events: NoteEvent[] = [];
 
-  // pad: o acorde inteiro, sustentado pelo compasso
   for (const m of chordMidi) events.push({ step: 0, voice: 'pad', midi: m, steps: STEPS_PER_BAR });
 
-  // baixo: raiz no 1º tempo e, às vezes, a quinta no 3º (nunca abaixo de MIDI 36, que some em alto-falantes pequenos)
   const bassBase = chordMidi[0] - 24;
   const bass = bassBase < 36 ? bassBase + 12 : bassBase;
   events.push({ step: 0, voice: 'bass', midi: bass, steps: 4 });
   events.push({ step: 4, voice: 'bass', midi: rng() < 0.5 ? bass : bass + 7, steps: 4 });
 
-  // alturas disponíveis para melodia: escala em duas oitavas acima da tônica
   const pitches = [
     ...track.scale.map(s => track.tonic + 12 + s),
     ...track.scale.map(s => track.tonic + 24 + s),
@@ -140,30 +181,48 @@ export function generateBar(track: Track, barIndex: number, rng: () => number, s
   state.idx = Math.max(0, Math.min(pitches.length - 1, state.idx));
 
   if (track.style === 'arp') {
-    // harpa: sobe e desce pelas notas do acorde em duas oitavas
     const arp = [...chordMidi.map(m => m + 12), ...chordMidi.map(m => m + 24)];
     const order = [0, 1, 2, 3, 4, 5, 4, 3];
     for (let s = 0; s < STEPS_PER_BAR; s++) {
-      if (rng() < track.density) {
-        events.push({ step: s, voice: 'melody', midi: arp[order[s] % arp.length], steps: 2 });
-      }
+      if (rng() < track.density) events.push({ step: s, voice: 'melody', midi: arp[order[s] % arp.length], steps: 1 });
     }
   } else if (track.style === 'sparse') {
-    // sinos esparsos, como gotas
-    for (let s = 0; s < STEPS_PER_BAR; s++) {
+    const sparseSteps = [1, 5, 7];
+    for (const s of sparseSteps) {
       if (rng() < track.density) {
         state.idx = Math.floor(rng() * pitches.length);
         events.push({ step: s, voice: 'bell', midi: pitches[state.idx], steps: 3 });
       }
     }
+  } else if (track.style === 'march' || track.style === 'clockwork' || track.style === 'ritual') {
+    const pattern = track.style === 'march' ? [0, 2, 4, 6] : track.style === 'clockwork' ? [0, 3, 5, 7] : [0, 3, 6];
+    const lead: Voice = track.style === 'clockwork' ? 'bell' : 'melody';
+    for (const s of pattern) {
+      if (rng() > track.density) continue;
+      const candidates = pitches.filter(m => chordClasses.has(pitchClass(m)));
+      const pick = candidates[Math.floor(rng() * candidates.length)] ?? pitches[0];
+      events.push({ step: s, voice: lead, midi: pick, steps: track.style === 'clockwork' ? 2 : 1 });
+    }
+    for (const s of [0, 2, 4, 6]) {
+      if (rng() < (track.drive ?? 0.5)) {
+        events.push({ step: s, voice: 'pulse', midi: bass - 12, steps: 1 });
+      }
+    }
+  } else if (track.style === 'organic') {
+    const pattern = [0, 1, 3, 4, 6, 7];
+    for (const s of pattern) {
+      if (rng() > track.density) continue;
+      const move = [-2, -1, 1, 2][Math.floor(rng() * 4)];
+      state.idx = Math.max(0, Math.min(pitches.length - 1, state.idx + move));
+      events.push({ step: s, voice: s % 3 === 0 ? 'flute' : 'melody', midi: pitches[state.idx], steps: 1 });
+    }
+    for (const s of [0, 4]) events.push({ step: s, voice: 'pulse', midi: bass - 12, steps: 1 });
   } else {
-    // melodia: anda por graus próximos; nos tempos fortes prefere notas do acorde.
-    // No nocturno a melodia é tocada pela flauta.
     const voice: Voice = track.style === 'nocturne' ? 'flute' : 'melody';
     for (let s = 0; s < STEPS_PER_BAR; s++) {
       const strong = s % 4 === 0;
-      const p = strong ? Math.min(0.95, track.density + 0.3) : track.density * 0.7;
-      if (rng() >= p) continue;
+      const probability = strong ? Math.min(0.95, track.density + 0.3) : track.density * 0.7;
+      if (rng() >= probability) continue;
       if (strong) {
         let best = state.idx;
         let bestDist = Infinity;
@@ -181,11 +240,13 @@ export function generateBar(track: Track, barIndex: number, rng: () => number, s
     }
   }
 
-  // brilho ocasional de sino agudo
-  for (let s = 0; s < STEPS_PER_BAR; s++) {
-    if (rng() < 0.06) {
-      const m = track.tonic + 36 + track.scale[Math.floor(rng() * track.scale.length)];
-      events.push({ step: s, voice: 'bell', midi: m, steps: 4 });
+  if (intensity === 2) {
+    for (const s of [2, 6]) {
+      events.push({ step: s, voice: 'pulse', midi: bass - 12, steps: 1 });
+    }
+    if (rng() < 0.7) {
+      const note = chordMidi[1 % chordMidi.length] + 12;
+      events.push({ step: 7, voice: 'bell', midi: note, steps: 1 });
     }
   }
 
