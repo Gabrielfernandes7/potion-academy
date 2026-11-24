@@ -18,14 +18,14 @@ export const BIBLIOTECA: ChapterSpec = {
     {
       kind: 'crypt', name: 'O SCRIPTORIUM', place: 'Mesas dos copistas',
       story: 'Mesas de copistas, tinteiros cheios e páginas secando ao ar. Os monges copiavam aqui à luz de velas, e a cera ainda perfuma a sala.',
-      chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'stone', block: 'scroll', track: 'ecos',
+      chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'stone', block: 'scroll', track: 'chapter-biblioteca',
       objective: { type: 'hunt', kind: 'ghost' }, tip: 'Os espíritos do alambique temem a água e atravessam paredes. Derrote os dois.',
       enemies: [{ kind: 'frog', start: 1, max: 2, every: 9, chase: true }, { kind: 'ghost', start: 2, max: 2 }, { kind: 'owl', start: 1, max: 1 }],
     },
     {
       kind: 'crypt', name: 'O COFRE', place: 'Cofre das Escrituras',
       story: 'Aqui estão as escrituras que Belladona levou, presas a correntes com o selo do mestre. Frei Anselmo quer vê-las nas mãos dos pobres, e não nos cofres. Cada caixote quebrado solta um elo.',
-      chest: CHEST_RICH, time: 110000, blockChance: 0.5, door: true, theme: 'crypt', block: 'books', track: 'ecos',
+      chest: CHEST_RICH, time: 110000, blockChance: 0.5, door: true, theme: 'crypt', block: 'books', track: 'chapter-biblioteca',
       enemies: [{ kind: 'ghost', start: 2, max: 3, every: 9 }, { kind: 'flower', start: 3, max: 3 }],
     },
     {
