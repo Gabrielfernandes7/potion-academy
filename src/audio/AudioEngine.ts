@@ -31,6 +31,7 @@ class AudioEngine {
 
   // música
   private track: Track | null = null;
+  private intensity: 1 | 2 = 1;
   private seed = 1;
   private rng: () => number = Math.random;
   private melody: MelodyState = { idx: 3 };
@@ -167,6 +168,7 @@ class AudioEngine {
 
   private chooseTrack(id: string): void {
     this.track = trackById(id) ?? trackById('nocturno') ?? null;
+    this.intensity = 1;
     this.seed = Math.floor(Math.random() * 0xffffffff);
   }
 
@@ -175,6 +177,11 @@ class AudioEngine {
     const g = this.graph.musicBus.gain;
     g.cancelScheduledValues(this.ctx.currentTime);
     g.setTargetAtTime(Math.max(0.0001, target * this.musicVolume), this.ctx.currentTime, timeConstant);
+  }
+
+  /** Intensidade musical: a segunda fase de um chefe adiciona acentos no próximo compasso. */
+  setIntensity(value: 1 | 2): void {
+    this.intensity = value;
   }
 
   /** Volume da música (0 a 1): vale já, com a música tocando. */
@@ -220,7 +227,7 @@ class AudioEngine {
     while (this.nextTime < ctx.currentTime + LOOKAHEAD_S) {
       const s = this.step % STEPS_PER_BAR;
       if (s === 0) {
-        this.barEvents = generateBar(track, this.bar, this.rng, this.melody);
+        this.barEvents = generateBar(track, this.bar, this.rng, this.melody, this.intensity);
         this.bar++;
       }
       for (const ev of this.barEvents) {
@@ -245,17 +252,23 @@ class AudioEngine {
         voice(g, freq, time, dur * 1.1, { gain: 0.03, type: 'sine', attack: 0.06, bus: 'music', send: 0.1 });
         break;
       case 'melody':
-        voice(g, freq, time, dur * 1.8, { gain: 0.026, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
-        voice(g, freq * 2, time, dur * 0.9, { gain: 0.005, type: 'sine', attack: 0.02, bus: 'music', send: 0.45 });
+        // Lead de cordas: dente-de-serra filtrado pelo barramento, com oitava discreta.
+        voice(g, freq, time, dur * 1.45, { gain: 0.014, type: 'sawtooth', attack: 0.008, bus: 'music', send: 0.3 });
+        voice(g, freq * 2, time, dur * 0.8, { gain: 0.004, type: 'triangle', attack: 0.012, bus: 'music', send: 0.25 });
         break;
       case 'flute':
-        // flauta: tom puro, ataque lento para o sopro entrar, um toque de harmônico e a nota se sustenta
-        voice(g, freq, time, dur * 1.6, { gain: 0.03, type: 'sine', attack: 0.09, bus: 'music', send: 0.35 });
-        voice(g, freq * 2, time, dur * 0.8, { gain: 0.004, type: 'sine', attack: 0.12, bus: 'music', send: 0.3 });
+        // Flauta: fundamental limpa, harmônico suave e ataque respirado.
+        voice(g, freq, time, dur * 1.6, { gain: 0.028, type: 'sine', attack: 0.09, bus: 'music', send: 0.35 });
+        voice(g, freq * 2, time, dur * 0.8, { gain: 0.005, type: 'triangle', attack: 0.12, bus: 'music', send: 0.3 });
         break;
       case 'bell':
-        voice(g, freq, time, 1.9, { gain: 0.02, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
-        voice(g, freq * 2.01, time, 1.0, { gain: 0.006, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
+        // Sino: parciais inarmônicos dão uma cor metálica sem amostra externa.
+        voice(g, freq, time, 1.9, { gain: 0.018, type: 'sine', attack: 0.004, bus: 'music', send: 0.6 });
+        voice(g, freq * 2.76, time, 1.25, { gain: 0.005, type: 'sine', attack: 0.004, bus: 'music', send: 0.6 });
+        break;
+      case 'pulse':
+        // Acento curto e percussivo para marcar o pulso dos temas de confronto.
+        voice(g, freq, time, Math.min(0.16, dur * 0.9), { gain: 0.022, type: 'square', attack: 0.002, bus: 'music', send: 0.06 });
         break;
     }
   }

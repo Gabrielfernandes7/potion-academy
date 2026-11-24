@@ -13,6 +13,7 @@ import type { MainScene } from '../../../scenes/MainScene';
 import { BossPhase, Tile, phaseFor } from './common';
 import { fxPool } from '../../fx/particlePool';
 import { hitFlash } from '../../fx/battleFx';
+import { audio } from '../../../audio/AudioEngine';
 
 const WINDUP_MS = 260; // tempo de preparo do corpo antes de cada golpe
 
@@ -387,6 +388,7 @@ export abstract class BossBase {
     const next = phaseFor(this.hp, this.maxHp);
     if (next === this.phase) return;
     this.phase = next;
+    audio.setIntensity(next === 2 ? 2 : 1);
     this.sprite.anims.timeScale = next === 2 ? 1.7 : 1; // furiosa, respira mais depressa
     if (next === 2) this.furious();
     else if (this.aura) { this.aura.destroy(); this.aura = null; }
@@ -403,6 +405,7 @@ export abstract class BossBase {
   }
 
   protected defeat(): void {
+    audio.setIntensity(1);
     this.state = 'defeated';
     this.say('defeat');
     this.hidden = false;

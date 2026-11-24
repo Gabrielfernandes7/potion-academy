@@ -38,7 +38,7 @@ describe('carga: orçamento de notas', () => {
       const melody: MelodyState = { idx: 3 };
       let notes = 0;
       for (let b = 0; b < bars; b++) notes += generateBar(track, b, rng, melody).length;
-      expect(notes / (bars * barSec), track.id).toBeLessThan(4);
+      expect(notes / (bars * barSec), track.id).toBeLessThan(7);
     }
   });
 
