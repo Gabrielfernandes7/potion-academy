@@ -14,7 +14,7 @@ export const OBSERVATORIO: ChapterSpec = {
       kind: 'crypt', name: 'O PÁTIO', place: 'Pátio dos Astrolábios',
       story: 'Astrolábios de bronze repousam entre as lajes, apontando para estrelas que já mudaram de lugar. Lanternas acesas andam de um lado a outro, como se ainda vigiassem o céu.',
       chest: CHEST_RICH, tip: 'A lanterna viva anda em linha reta e volta ao bater. A água a apaga; o fogo não a fere.',
-      time: 100000, blockChance: 0.5, door: true, theme: 'observatory', block: 'slab', track: 'ecos',
+      time: 100000, blockChance: 0.5, door: true, theme: 'observatory', block: 'slab', track: 'chapter-observatorio',
       objective: { type: 'hunt', kind: 'lantern' },
       enemies: [{ kind: 'lantern', start: 3, max: 3 }, { kind: 'frog', start: 1, max: 1, chase: true }],
     },
@@ -30,7 +30,7 @@ export const OBSERVATORIO: ChapterSpec = {
       kind: 'crypt', name: 'A GALERIA DAS CARTAS', place: 'Galeria das Cartas Celestes',
       story: 'Mapas de estrelas cobrem as paredes até o teto. Entre as vigas, uma coruja observa; no chão, a terra se mexe em montes pequenos.',
       chest: CHEST_RICH, tip: 'A coruja marca a sua casa com um círculo: saia dele. A toupeira deixa um monte onde vai brotar.',
-      time: 110000, blockChance: 0.5, door: true, theme: 'observatory', block: 'scroll', track: 'ecos',
+      time: 110000, blockChance: 0.5, door: true, theme: 'observatory', block: 'scroll', track: 'chapter-observatorio',
       enemies: [{ kind: 'owl', start: 2, max: 2 }, { kind: 'mole', start: 2, max: 3, every: 10 }],
     },
     {
