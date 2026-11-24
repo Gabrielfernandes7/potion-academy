@@ -170,7 +170,9 @@ export function generateBar(
   for (const m of chordMidi) events.push({ step: 0, voice: 'pad', midi: m, steps: STEPS_PER_BAR });
 
   const bassBase = chordMidi[0] - 24;
-  const bass = bassBase < 36 ? bassBase + 12 : bassBase;
+  let bass = bassBase;
+  while (bass < 36) bass += 12;
+  const pulsePitch = Math.max(36, bass - 7);
   events.push({ step: 0, voice: 'bass', midi: bass, steps: 4 });
   events.push({ step: 4, voice: 'bass', midi: rng() < 0.5 ? bass : bass + 7, steps: 4 });
 
@@ -205,7 +207,7 @@ export function generateBar(
     }
     for (const s of [0, 2, 4, 6]) {
       if (rng() < (track.drive ?? 0.5)) {
-        events.push({ step: s, voice: 'pulse', midi: bass - 12, steps: 1 });
+        events.push({ step: s, voice: 'pulse', midi: pulsePitch, steps: 1 });
       }
     }
   } else if (track.style === 'organic') {
