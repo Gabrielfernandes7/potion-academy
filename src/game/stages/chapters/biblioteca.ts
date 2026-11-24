@@ -12,7 +12,7 @@ export const BIBLIOTECA: ChapterSpec = {
     {
       kind: 'crypt', name: 'AS ESTANTES', place: 'Estantes da Biblioteca',
       story: 'Estantes de carvalho sobem até o teto. Os livros estão presos por correntes finas, mas alguém deixou as lâmpadas acesas: aqui ainda se lê.',
-      chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'stone', block: 'books', track: 'alambique',
+      chest: CHEST_RICH, time: 100000, blockChance: 0.5, door: true, theme: 'stone', block: 'books', track: 'chapter-biblioteca',
       enemies: [{ kind: 'frog', start: 1, max: 2, every: 10, chase: true }, { kind: 'lantern', start: 1, max: 2, every: 12 }],
     },
     {
