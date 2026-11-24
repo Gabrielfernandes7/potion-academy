@@ -80,6 +80,48 @@ export const TRACKS: Track[] = [
     ],
   },
 
+  // Temas dos cinco capítulos: uma paleta harmônica e um groove que acompanham cada ambiente.
+  {
+    id: 'chapter-vale', name: 'O Vale — A Primeira Descoberta', bpm: 88, tonic: 50,
+    scale: [0, 2, 3, 7, 9], style: 'arp', density: 0.68,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 5, tones: [0, 4, 7] },
+      { root: 3, tones: [0, 3, 7] }, { root: 7, tones: [0, 3, 7] },
+    ],
+  },
+  {
+    id: 'chapter-torre', name: 'A Torre — Ecos e Ameaças', bpm: 102, tonic: 57,
+    scale: [0, 2, 3, 5, 7, 8, 10], style: 'march', density: 0.62, drive: 0.52,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 8, tones: [0, 3, 7] },
+      { root: 5, tones: [0, 3, 7] }, { root: 10, tones: [0, 4, 7] },
+    ],
+  },
+  {
+    id: 'chapter-biblioteca', name: 'Biblioteca — Segredos nas Páginas', bpm: 78, tonic: 55,
+    scale: [0, 2, 3, 5, 7, 9, 10], style: 'sparse', density: 0.62,
+    chords: [
+      { root: 0, tones: [0, 3, 7] }, { root: 3, tones: [0, 4, 7] },
+      { root: 8, tones: [0, 3, 7] }, { root: 5, tones: [0, 4, 7] },
+    ],
+  },
+  {
+    id: 'chapter-observatorio', name: 'Observatório — Cartas Celestes', bpm: 98, tonic: 60,
+    scale: [0, 2, 4, 6, 7, 9, 11], style: 'clockwork', density: 0.78, drive: 0.38,
+    chords: [
+      { root: 0, tones: [0, 4, 7] }, { root: 6, tones: [0, 4, 7] },
+      { root: 7, tones: [0, 4, 7] }, { root: 11, tones: [0, 3, 7] },
+    ],
+  },
+  {
+    id: 'chapter-retorno', name: 'O Retorno — A Luz do Mosteiro', bpm: 110, tonic: 53,
+    scale: [0, 2, 4, 5, 7, 9, 11], style: 'organic', density: 0.86, drive: 0.7,
+    chords: [
+      { root: 0, tones: [0, 4, 7] }, { root: 5, tones: [0, 4, 7] },
+      { root: 9, tones: [0, 3, 7] }, { root: 7, tones: [0, 4, 7] },
+    ],
+  },
+
   // Temas dos chefes: motivos, centros tonais e padrões rítmicos próprios.
   {
     id: 'boss-chimera', name: 'Quimera — Prata que Devora', bpm: 116, tonic: 45,
