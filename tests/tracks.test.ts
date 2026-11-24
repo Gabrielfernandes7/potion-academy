@@ -8,7 +8,7 @@ const pc = (m: number): number => ((m % 12) + 12) % 12;
 
 describe('identidade musical', () => {
   it('mantém ids únicos e diferencia exploração de temas de chefes', () => {
-    expect(TRACKS).toHaveLength(11);
+    expect(TRACKS).toHaveLength(16);
     expect(new Set(TRACKS.map(t => t.id)).size).toBe(TRACKS.length);
     expect(TRACKS.some(t => t.bpm >= 100)).toBe(true);
     expect(TRACKS.some(t => t.style === 'sparse' && t.bpm < 80)).toBe(true);
@@ -27,11 +27,11 @@ describe('identidade musical', () => {
 
   it('cada fase usa o tema do seu chefe ou o tema de capítulo esperado', () => {
     const chapterTracks = [
-      'alambique', 'ecos', 'ecos', 'boss-chimera',
-      'ecos', 'ecos', 'ecos', 'boss-belladonna',
-      'alambique', 'ecos', 'ecos', 'boss-lion',
-      'ecos', 'alambique', 'ecos', 'boss-ouroboros',
-      'jardim', 'jardim', 'jardim', 'boss-mandrake',
+      'chapter-vale', 'chapter-vale', 'chapter-vale', 'boss-chimera',
+      'chapter-torre', 'chapter-torre', 'chapter-torre', 'boss-belladonna',
+      'chapter-biblioteca', 'chapter-biblioteca', 'chapter-biblioteca', 'boss-lion',
+      'chapter-observatorio', 'chapter-observatorio', 'chapter-observatorio', 'boss-ouroboros',
+      'chapter-retorno', 'chapter-retorno', 'chapter-retorno', 'boss-mandrake',
     ];
     STAGES.forEach((stage, index) => {
       const expected = stage.boss ? bossTrackId(stage.boss) : chapterTracks[index];
