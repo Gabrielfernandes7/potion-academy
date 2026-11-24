@@ -37,7 +37,7 @@ export const OBSERVATORIO: ChapterSpec = {
       kind: 'boss', boss: 'ouroboros', name: 'A CÚPULA', place: 'Cúpula do Observatório',
       story: 'A fenda da cúpula se abre para o céu inteiro. No centro, uma serpente de escamas verdes morde a própria cauda e gira devagar, como o céu em volta dela.',
       chest: CHEST_RICH, tip: 'Ouroboros: a fraqueza gira a cada ciclo. O brilho em volta dele mostra o elemento que o fere agora; o oposto ele devora.',
-      time: 120000, blockChance: 0.4, door: false, theme: 'observatory', block: 'brick', track: 'duelo',
+      time: 120000, blockChance: 0.4, door: false, theme: 'observatory', block: 'brick', track: 'boss-ouroboros',
       enemies: [],
     },
   ],
