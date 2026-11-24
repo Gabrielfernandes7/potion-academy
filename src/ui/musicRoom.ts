@@ -12,6 +12,11 @@ const PARTS: { id: string; part: string }[] = [
   { id: 'duelo', part: 'Fase 3 · O Duelo' },
   { id: 'jardim', part: 'Fase 4 · O Retorno' },
   { id: 'vesperas', part: 'Confissão e final' },
+  { id: 'boss-chimera', part: 'Chefe · Quimera' },
+  { id: 'boss-belladonna', part: 'Chefe · Belladona' },
+  { id: 'boss-lion', part: 'Chefe · Leão Verde' },
+  { id: 'boss-ouroboros', part: 'Chefe · Ouroboros' },
+  { id: 'boss-mandrake', part: 'Chefe · Mandrágora' },
 ];
 const FRAME_MS = 500; // a Roo "rege" trocando de quadro
 
