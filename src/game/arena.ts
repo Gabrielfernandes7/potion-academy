@@ -7,6 +7,7 @@ import type { BossId, StageDef, StageTheme } from './stages/types';
 import { BOSS_DEFS, BOSS_IDS, bossIdleTexture } from './entities/bosses/defs';
 import type { EntityId } from './entities/profiles';
 import { DUEL_MS } from './duel';
+import { bossTrackId } from '../audio/tracks';
 
 export const ARENA_STAGE = 0;
 export const ARENA_TIME_MS = 600000; // 10 min: o treino não tem pressa
@@ -40,7 +41,7 @@ export function arenaStageDef(id: BossId): StageDef {
     kind: 'boss', boss: b.id, name: b.nome.toUpperCase(), place: 'Arena de Treino',
     story: `Treino contra ${b.nome}. Nada aqui conta para a jornada.`, tip: b.dica,
     chest: CHEST_RICH, time: ARENA_TIME_MS, blockChance: 0.4, door: false, enemies: [],
-    theme: b.theme, block: b.block, track: 'duelo', chapter: 'ARENA',
+    theme: b.theme, block: b.block, track: bossTrackId(b.id), chapter: 'ARENA',
   };
 }
 
