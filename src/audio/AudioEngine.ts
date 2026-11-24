@@ -31,6 +31,7 @@ class AudioEngine {
 
   // música
   private track: Track | null = null;
+  private intensity: 1 | 2 = 1;
   private seed = 1;
   private rng: () => number = Math.random;
   private melody: MelodyState = { idx: 3 };
@@ -167,6 +168,7 @@ class AudioEngine {
 
   private chooseTrack(id: string): void {
     this.track = trackById(id) ?? trackById('nocturno') ?? null;
+    this.intensity = 1;
     this.seed = Math.floor(Math.random() * 0xffffffff);
   }
 
@@ -175,6 +177,11 @@ class AudioEngine {
     const g = this.graph.musicBus.gain;
     g.cancelScheduledValues(this.ctx.currentTime);
     g.setTargetAtTime(Math.max(0.0001, target * this.musicVolume), this.ctx.currentTime, timeConstant);
+  }
+
+  /** Intensidade musical: a segunda fase de um chefe adiciona acentos no próximo compasso. */
+  setIntensity(value: 1 | 2): void {
+    this.intensity = value;
   }
 
   /** Volume da música (0 a 1): vale já, com a música tocando. */
@@ -220,7 +227,7 @@ class AudioEngine {
     while (this.nextTime < ctx.currentTime + LOOKAHEAD_S) {
       const s = this.step % STEPS_PER_BAR;
       if (s === 0) {
-        this.barEvents = generateBar(track, this.bar, this.rng, this.melody);
+        this.barEvents = generateBar(track, this.bar, this.rng, this.melody, this.intensity);
         this.bar++;
       }
       for (const ev of this.barEvents) {
@@ -256,6 +263,9 @@ class AudioEngine {
       case 'bell':
         voice(g, freq, time, 1.9, { gain: 0.02, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
         voice(g, freq * 2.01, time, 1.0, { gain: 0.006, type: 'sine', attack: 0.006, bus: 'music', send: 0.6 });
+        break;
+      case 'pulse':
+        voice(g, freq, time, Math.min(0.19, dur * 0.9), { gain: 0.025, type: 'triangle', attack: 0.003, bus: 'music', send: 0.08 });
         break;
     }
   }
