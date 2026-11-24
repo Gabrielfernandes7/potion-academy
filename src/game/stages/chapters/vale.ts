@@ -34,7 +34,7 @@ export const VALE: ChapterSpec = {
       kind: 'boss', boss: 'chimera', name: 'O POÇO', place: 'Poço de Prata',
       story: 'No fim da charneca, uma poça de prata respira. Dizem que o mestre derramou ali o que não soube guardar.',
       chest: CHEST_RICH, tip: 'Quimera: a água escorre por ela; a Poção de Terra a prende.',
-      time: 120000, blockChance: 0.4, door: false, theme: 'stone', block: 'barrel', track: 'duelo',
+      time: 120000, blockChance: 0.4, door: false, theme: 'stone', block: 'barrel', track: 'boss-chimera',
       enemies: [],
     },
   ],
