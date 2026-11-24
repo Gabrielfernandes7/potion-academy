@@ -32,7 +32,7 @@ export const BIBLIOTECA: ChapterSpec = {
       kind: 'boss', boss: 'lion', name: 'O LEÃO VERDE', place: 'Salão dos Acorrentados',
       story: 'O Leão Verde dorme sobre as correntes. Ele dissolve o ouro, por isso guarda o que o ouro não compra. O ácido corre pelas linhas e pelas colunas.',
       chest: CHEST_RICH, tip: 'Leão Verde: o ar o fere muito; a terra não o toca. O ácido dissolve as suas poções.',
-      time: 120000, blockChance: 0.4, door: false, theme: 'crypt', block: 'books', track: 'duelo',
+      time: 120000, blockChance: 0.4, door: false, theme: 'crypt', block: 'books', track: 'boss-lion',
       enemies: [],
     },
   ],
