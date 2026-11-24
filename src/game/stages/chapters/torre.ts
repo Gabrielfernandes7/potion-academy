@@ -32,7 +32,7 @@ export const TORRE: ChapterSpec = {
     {
       kind: 'boss', boss: 'belladonna', name: 'O DUELO', place: 'Torre de Belladona',
       story: 'Belladona tem razão sobre a fome e errou no remédio. Vença-a, sem odiá-la.',
-      chest: CHEST_RICH, time: 120000, blockChance: 0.35, door: false, theme: 'stone', block: 'scroll', track: 'duelo',
+      chest: CHEST_RICH, time: 120000, blockChance: 0.35, door: false, theme: 'stone', block: 'scroll', track: 'boss-belladonna',
       enemies: [],
     },
   ],
