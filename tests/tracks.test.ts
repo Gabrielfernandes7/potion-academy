@@ -1,30 +1,42 @@
 import { describe, expect, it } from 'vitest';
 import {
-  SCENE_TRACKS, STEPS_PER_BAR, TRACKS, generateBar, midiToHz, mulberry32, trackById,
+  bossTrackId, SCENE_TRACKS, STEPS_PER_BAR, TRACKS, generateBar, midiToHz, mulberry32, trackById,
 } from '../src/audio/tracks';
 import { STAGES } from '../src/game/stages/index';
 
 const pc = (m: number): number => ((m % 12) + 12) % 12;
 
-describe('faixas', () => {
-  it('há uma faixa por parte do jogo, com ids únicos e andamento calmo', () => {
-    expect(TRACKS).toHaveLength(6);
+describe('identidade musical', () => {
+  it('mantém ids únicos e diferencia exploração de temas de chefes', () => {
+    expect(TRACKS).toHaveLength(11);
     expect(new Set(TRACKS.map(t => t.id)).size).toBe(TRACKS.length);
+    expect(TRACKS.some(t => t.bpm >= 100)).toBe(true);
+    expect(TRACKS.some(t => t.style === 'sparse' && t.bpm < 80)).toBe(true);
     for (const t of TRACKS) {
       expect(t.bpm).toBeGreaterThanOrEqual(50);
-      expect(t.bpm).toBeLessThanOrEqual(80);
+      expect(t.bpm).toBeLessThanOrEqual(125);
     }
   });
 
-  it('cada cena do jogo aponta para uma faixa que existe', () => {
+  it('cada cena e cada chefe aponta para uma faixa existente', () => {
     for (const id of Object.values(SCENE_TRACKS)) expect(trackById(id), id).toBeDefined();
+    for (const id of ['chimera', 'belladonna', 'lion', 'ouroboros', 'mandrake']) {
+      expect(trackById(bossTrackId(id)), id).toBeDefined();
+    }
   });
 
-  it('cada fase tem a faixa da cena correspondente', () => {
-    // Névoa e Torre (índices 2, 4 a 6) usam a faixa do salão (stage2); os dois chefes sem porta (Poço e Duelo), a do duelo
-    const map: Record<number, keyof typeof SCENE_TRACKS> = { 0: 'stage1', 1: 'stage2', 2: 'stage2', 3: 'stage3', 4: 'stage2', 5: 'stage2', 6: 'stage2', 7: 'stage3', 8: 'stage1', 9: 'stage2', 10: 'stage2', 11: 'stage3', 12: 'stage2', 13: 'stage1', 14: 'stage2', 15: 'stage3', 16: 'stage4', 17: 'stage4', 18: 'stage4', 19: 'stage4' };
-    STAGES.forEach((s, i) => {
-      expect(s.track).toBe(SCENE_TRACKS[map[i]]);
+  it('cada fase usa o tema do seu chefe ou o tema de capítulo esperado', () => {
+    const chapterTracks = [
+      'alambique', 'ecos', 'ecos', 'boss-chimera',
+      'ecos', 'ecos', 'ecos', 'boss-belladonna',
+      'alambique', 'ecos', 'ecos', 'boss-lion',
+      'ecos', 'alambique', 'ecos', 'boss-ouroboros',
+      'jardim', 'jardim', 'jardim', 'boss-mandrake',
+    ];
+    STAGES.forEach((stage, index) => {
+      const expected = stage.boss ? bossTrackId(stage.boss) : chapterTracks[index];
+      expect(stage.track).toBe(expected);
+      expect(trackById(stage.track), `fase ${index + 1}: ${stage.track}`).toBeDefined();
     });
   });
 });
@@ -54,17 +66,31 @@ describe('generateBar', () => {
         for (const ev of generateBar(track, b, rng, state)) {
           expect(ev.step).toBeGreaterThanOrEqual(0);
           expect(ev.step).toBeLessThan(STEPS_PER_BAR);
-          if (ev.voice === 'melody' || ev.voice === 'bell') expect(allowed.has(pc(ev.midi))).toBe(true);
+          if (ev.voice === 'melody' || ev.voice === 'flute' || ev.voice === 'bell') {
+            expect(allowed.has(pc(ev.midi))).toBe(true);
+          }
         }
       }
     }
   });
 
-  it('todo compasso tem pad com o acorde inteiro e baixo audível (MIDI >= 36)', () => {
+  it('a fase de fúria acrescenta acentos rítmicos sem alterar a harmonia', () => {
+    for (const track of TRACKS.filter(t => t.id.startsWith('boss-'))) {
+      const normal = generateBar(track, 0, mulberry32(7), { idx: 3 }, 1);
+      const furious = generateBar(track, 0, mulberry32(7), { idx: 3 }, 2);
+      expect(furious.filter(e => e.voice === 'pulse').length)
+        .toBeGreaterThan(normal.filter(e => e.voice === 'pulse').length);
+      expect(furious.filter(e => e.voice === 'pad')).toEqual(normal.filter(e => e.voice === 'pad'));
+    }
+  });
+
+  it('todo compasso tem acorde sustentado e baixo audível', () => {
     for (const track of TRACKS) {
       const events = generateBar(track, 0, mulberry32(3), { idx: 3 });
       expect(events.filter(e => e.voice === 'pad')).toHaveLength(track.chords[0].tones.length);
-      for (const e of events.filter(e => e.voice === 'bass')) expect(e.midi).toBeGreaterThanOrEqual(36);
+      for (const e of events.filter(e => e.voice === 'bass' || e.voice === 'pulse')) {
+        expect(e.midi).toBeGreaterThanOrEqual(36);
+      }
     }
   });
 });
